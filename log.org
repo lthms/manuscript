@@ -1,0 +1,6 @@
+#+TITLE: PhD Log
+
+* 2018/02/28
+
+- I have found a pretty convincing [[https://www.latextemplates.com/template/masters-doctoral-thesis][template]] for my manuscript.
+- I have written down a first draft for the manuscript structure
