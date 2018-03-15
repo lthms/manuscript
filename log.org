@@ -1,5 +1,9 @@
 #+TITLE: PhD Log
 
+* 2018/03/15
+
+- I have imported the beginning of the SpecCert article.
+
 * 2018/02/28
 
 - I have found a pretty convincing [[https://www.latextemplates.com/template/masters-doctoral-thesis][template]] for my manuscript.

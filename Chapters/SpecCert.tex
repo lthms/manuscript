@@ -622,4 +622,187 @@ and the CPU is in SMM.
 
 \section{System Management Mode HSE} \label{sec:speccert:smm}
 
+In \cite{intel2014manual}, Intel states "the main benefit of SMM is that it
+offers a distinct and easily isolated processor environment that operates
+transparently to the operating system or executive and software
+applications". For the SMM processor environment to be isolated, the code
+executed when the CPU is in SMM needs to implement a HSE mechanism. In this
+section, we formalize and verify this mechanism against the model we have
+previously introduced.
+
+\subsection{Computing Platform and Security Policy}
+
+We consider three software components: the boot sequence code, the SMM code and
+the OS code. During the boot sequence, only the boot sequence code is executed
+and it loads both the OS code and the SMM code into memory. At the end of the
+boot sequence, the OS kernel is executed. This OS kernel will schedule different
+applications. Because applications are less privileged than the OS kernel, we
+will not distinguish them from the kernel code. Thus, in the following, OS code
+refers to both OS kernel and application codes.
+
+At runtime, both the OS code and the SMM code can be executed. Our objective is
+to evaluate the security provided by the hardware to isolate SMM code from OS
+code. Thus, we define \[ \set{S} \triangleq \setshortdef{\val{smm}, \val{os}} \]
+
+We assume the SMM is dedicated to the SMM code.  Let $cpu\_in\_smm :
+\texttt{Archi}_{\set{S}} \rightarrow \setshortdef{\val{true}, \val{false}}$ be
+the function which returns $\val{true}$ if the CPU is in SMM and $\val{false}$
+otherwise.  We define $smm\_context$ a hardware-software mapping such that
+\[ smm\_context(h) \triangleq \begin{cases}
+  \val{smm} & \text{if } cpu\_in\_smm(h) = \val{true} \\
+  \val{os} & \text{otherwise}
+\end{cases} \]
+Let $\formatLTS{Smmx86}$ be the Computing Platform such as \[ \formatLTS{Smmx86}
+\triangleq \formatLTS{Minx86}(smm\_context) \]
+
+We assume that both the OS code and the SMM code have been loaded in distinct
+memory regions. In particular, all the SMM code has been loaded in SMRAM. Our
+objective is to enforce a security policy which prevents the OS code to tamper
+with the SMM code execution. This way, the SMM (which is the most privileged
+execution mode of the CPU) cannot be used to perform an escalation privilege. We
+define $smm\_security$ a predicate to model this security policy such as given
+$\rho \in \formatLTS{Smmx86}$, \[ \begin{array}{l} smm\_security(\rho)
+\triangleq \\ \qquad software\_execution\_isolation(smm\_context,
+minx86\_execute, \rho, \setshortdef{\val{smm}}) \end{array} \]
+
+\subsection{HSE Definition}
+
+We define $\Delta_{Smm}$ to model the HSE mechanism applied by the SMM code such
+that $\Delta_{Smm} = (inv_{Smm}, behavior_{Smm}, \setshortdef{\val{smm}},
+smm\_context)$ (see Definition \ref{def:hse}).
+
+In order to enforce the SMM security policy, we have identified six requirements
+on states.
+\begin{compactitem}
+\item When the CPU executes the SMM code, the program counter register value
+needs to be an address in SMRAM.
+\item The SMBASE register was correctly set during the boot sequence to point to
+  the base of the SMRAM.
+\item The SMRAM contains only SMM code.
+\item For a physical address in SMRAM, in case of cache hit, the related cache
+  line content must be owned by the SMM code.
+\item In order to protect the content of the SMRAM inside the DRAM memory, the
+  boot sequence code has locked the SMRAMC controller. This ensures that an OS
+  cannot set the \texttt{d\_open} bit any longer and only a CPU in SMM can
+  modify the content of the SMRAM.
+\item The range of memory declared with the SMRR needs to overlap with the
+  SMRAM.
+\end{compactitem}
+
+The Appendix~\ref{app:invsmm} gives the formal definitions of each requirements
+and of $inv_{Smm}$.  We now define $\fun{behavior_{Smm}}$. We only define two
+restrictions. First, we force the SMM code execution to remain confined within
+the SMRAM. The reason is simple: the OS code can tamper with the memory outside
+the SMRAM. As a consequence, jumping outside the SMRAM is the best way to fail
+the security policy. Secondly, we prevent the SMM code to update the SMRR
+registers as it is the responsability of the boot sequence code to correctly set
+them.
+
+\[
+  \fun{behavior_{Smm}}(h, ev) \triangleq \begin{array}{l}
+    \fun{smm\_context}(h) = \val{smm} \\
+                                   \quad \Rightarrow ((e = NextInstruction(pa)
+                                   \Rightarrow pa \in \texttt{pSmram}) \\
+                                   \qquad \wedge\,(e \neq UpdateSmrr(smrr))) \\
+                                 \end{array}
+  \]
+
+For $\Delta_{Smm}$ to be a HSE mechanism, we need to prove the two HSE Laws (see
+Definition \ref{def:laws}).  The first law states the state requirements modeled
+with $inv_{Smm}$ are preserved through state-transformations if the
+transformations which do not satisfy $behavior_{Smm}$ are discarded. We prove
+this by enumeration of $ev \in \texttt{Event}$ and $h \in \texttt{Archi}_{Smm}$,
+we check that each requirement described previously is preserved by
+$\Delta_{Smm}$. We use those intermediary results to conclude. The second law
+states that the $behavior_{Smm}$ predicate specifies state-trans\-formation
+requirements for the TCB only. In this use case, it means $behavior_{Smm}$
+should always hold true when the OS code is executed by the hardware
+architecture.  By definition of $behavior_{Smm}$, $smm\_context(h) = \val{smm}$
+is an antecedent of the conditional.
+
+Let $smm\_secure\_transformation$ be a predicate which holds true when a
+state-transformation does not imply the OS code to tamper with the execution of
+SMM code.
+\[ \begin{array}{l}
+    smm\_secure\_transformation(h, ev) \triangleq \\
+    \qquad \neg software\_tampering(smm\_context, minx86\_execute, h, ev,
+                  \val{os}, \val{smm})
+\end{array} \]
+
+We prove that this predicate holds true for a state-transformation with respect
+to the HSE mechanism. With this result, we can prove the HSE mechanism is sound
+(see Definition \ref{def:sound}).
+
+\begin{lemma}[Invariants Enforce Security]
+$\forall \transitionLTS{Smmx86}{h}{ev}{h'}$,
+\[ \begin{array}{l}
+    inv_{Smm}(h) \\
+    \qquad \Rightarrow (ev \in \texttt{Event}_{Soft} \Rightarrow
+    behavior_{Smm}(h,ev) \\
+  \qquad\qquad \Rightarrow smm\_secure\_transformation(h, ev)
+\end{array} \]
+\end{lemma}
+
+\begin{proof}
+  By enumeration of $ev \in \texttt{Event}$ and $h \in
+  \texttt{Archi}_{\set{S}}$.
+\end{proof}
+
+\begin{theorem}[$\Delta_{Smm}$ is Sound]
+\[ sound(\Delta_{Smm}, smm\_security) \]
+\end{theorem}
+
+\begin{proof}
+  The "Invariants Enforce Security" lemma applies for one transition and the
+  first HSE law allows to reason by induction on runs.
+\end{proof}
+
 \section{Discussion} \label{sec:speccert:discuss}
+
+Our effort has been originally motivated by the disclosure of several
+vulnerabilities targeting multiple x86 HSE mechanisms for the past few
+years\,\cite{wojtczuk2009smram,duflot2009smram,rutkowska2008remap,domas2015sinkhole,kallenberg2015racecondition}. These
+attacks do not benefit from a software implementation error but rather from a
+flaw in the hardware specifications themselves. The result of our work is a
+three-steps methodology for formally specifying and verifying HSE mechanisms
+against a hardware architecture model. We believe each aspect is important.
+
+First, the hardware architecture model can be used as a formal specification.
+The main benefit of a formal specification is to avoid any ambiguity such as the
+one we have found in \cite{intel2009mch}. One can read at Section 3.8.3.8,
+page 102 that “the OPEN bit must be reset before the LOCK bit is set”.  At the
+same page, in the description of the LOCK bit, one can also read that “when
+[LOCK] is set to 1 then [OPEN] is reset to 0”. We had modeled the second
+statement as the behavior of the memory controller is not specified if the
+first statement is true\,\footnote{If we had to actually implement the HSE
+mechanism, we would have to assume the first was the correct one.}
+\formatLTS{Minx86} as a formal specification does not suffer from the same flaw.
+
+Secondly, a formal specification of a HSE mechanism will help software
+developers when the time comes to implement it. For instance, the Chapter 34,
+Volume 3C of \cite{intel2014manual} about SMM is about 30 pages long, it gives
+many details on how the SMM actually works, yet no section is actually dedicated
+to security. On the contrary, our HSE mechanism definition gathers six
+requirements on hardware configurations and two requirements on software
+executions to enforce a well-defined security property. Even if the proofs only
+apply to an abstract model, we believe it is a valuable improvement.
+
+Lastly, the verification process of a HSE mechanism specification against a
+hardware architecture model may help to highlight hidden flaws in the hardware
+specifications assumptions. We take the example of the SMRAM cache poisonning
+attack\,\cite{wojtczuk2009smram,duflot2009smram}, which has motivated the
+introduction of the SMRR. If an attacker can set the proper cache strategy (WB)
+for the SMRAM physical addresses, then the code inside the SMRAM is loaded into
+the cache as soon as the CPU in SMM is executing it. From this point forward
+---because the access control is enforced at the memory controller level---
+nothing prevents the attacker to tamper with it. The next time the CPU enters in
+SMM, it executes the code stored in the cache. With a SMRR-less version of
+\formatLTS{Minx86}, we were not able to conclude our HSE mechanism was sound:
+such a scenario draws attention of the SpecCert user who is forced to
+investigate.
+
+From our point of view, the clear separation between the hardware model, the
+security properties and the HSE mechanisms to enforce those properties are the
+main advantage of our approach, as two different use cases can be studied
+against the same hardware model. However, the scalability of SpecCert remains to
+be proven.
