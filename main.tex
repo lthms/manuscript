@@ -43,11 +43,21 @@ headsepline, % Uncomment to get a line under the header
 
 \usepackage{mathpazo} % Use the Palatino font by default
 
-\usepackage[backend=bibtex,style=authoryear,natbib=true]{biblatex} % Use the bibtex backend with the authoryear citation style (which resembles APA)
+\usepackage[backend=bibtex,style=numeric,natbib=true]{biblatex} % Use the bibtex backend with the authoryear citation style (which resembles APA)
 
 \addbibresource{manuscript.bib} % The filename of the bibliography
 
 \usepackage[autostyle=true]{csquotes} % Required to generate language-dependent quotes in the bibliography
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{bussproofs}
+\usepackage{paralist}
+
+\usepackage{bigcenter}
+\usepackage{speccert}
+
+\newtheorem{definition}{Definition}
 
 %----------------------------------------------------------------------------------------
 %	MARGIN SETTINGS
@@ -256,15 +266,7 @@ The acknowledgments and the people to thank go here, don't forget to include you
 
 \section{ISA Modelling}
 
-\chapter{SpecCert}
-
-\section{SpecCert Formalism}
-
-\section{\textsc{MinX86}}
-
-\section{System Management Mode HSE}
-
-\section{Discussion}
+\include{Chapters/SpecCert}
 
 \chapter{FreeSpec}
 

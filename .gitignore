@@ -8,3 +8,5 @@ main-blx.bib
 *.run.xml
 *.toc
 *.pdf
+*.bbl
+*.blg

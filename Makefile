@@ -1,3 +1,7 @@
-main.pdf: main.tex
-	pdflatex $<
-	pdflatex $<
+.PHONY: all
+
+all:
+	pdflatex main.tex
+	bibtex main
+	pdflatex main.tex
+	pdflatex main.tex

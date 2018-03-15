@@ -1,0 +1,64 @@
+\usepackage{xspace}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+
+\newcommand{\newLTS}[4]{%
+  \listadd\defLTS{#1}%
+  \newtoggle{LTS#1hasbeenshown}%
+  \togglefalse{LTS#1hasbeenshown}%
+  \@namedef{cmdgenLTS#1}{%
+    \iftoggle{LTS#1hasbeenshown}{%
+      \ensuremath{#2}%
+    }{%
+    \ensuremath{#2 \in \mathcal{L}_{#3}^{#4}\toggletrue{LTS#1hasbeenshown}\xspace}%
+    }%
+  }%
+  \@namedef{cmdgenshortLTS#1}{\ensuremath{#2}}%
+  \@namedef{cmdgendomLTS#1}{\ensuremath{#3}}%
+  \@namedef{cmdgenlabelLTS#1}{\ensuremath{#4}}%
+  \@namedef{cmdgentransitionLTS#1}##1##2##3{\ensuremath{##1\,\underset{#2}{\xrightarrow{\hskip0.5em\relax##2\hskip0.5em\relax}}\,##3}}%
+  \@namedef{cmdgensetLTS#1}{\ensuremath{\mathcal{L}_{#3}^{#4}}}%
+}%
+
+\newcommand{\newconstLTS}[3]{%
+  \newLTS{#1}{|\shortLTS{#2}|_{#3}}{#3}{\labelLTS{#2}}%
+}%
+
+\newcommand{\resetoneLTS}[1]{\togglefalse{LTS#1hasbeenshown}}
+\newcommand{\resetLTS}{\forlistloop\resetoneLTS{\defLTS}}
+
+\newcommand{\LTS}[1]{\csname cmdgenLTS#1\endcsname}
+\newcommand{\shortLTS}[1]{\csname cmdgenshortLTS#1\endcsname}
+\newcommand{\domLTS}[1]{\csname cmdgendomLTS#1\endcsname}
+\newcommand{\transsetLTS}[1]{\csname cmdgentranssetLTS#1\endcsname}
+\newcommand{\transLTS}[1]{\csname cmdgentransLTS#1\endcsname}
+\newcommand{\labelLTS}[1]{\csname cmdgenlabelLTS#1\endcsname}
+\newcommand{\setLTS}[1]{\csname cmdgensetLTS#1\endcsname}
+\newcommand{\transitionLTS}[4]{\csname cmdgentransitionLTS#1\endcsname{#2}{#3}{#4}}
+\newcommand{\pathesLTS}[1]{\ensuremath{\mathcal{R}(\shortLTS{#1})}}
+
+\newcommand{\setdef}[2]{\ensuremath{\{\,#1\ |\ #2\,\}}}
+\newcommand{\setshortdef}[1]{\ensuremath{\{\,#1\,\}}}
+\newcommand{\set}[1]{\mathcal{#1}}
+\newcommand{\val}[1]{\texttt{#1}}
+\newcommand{\fun}[1]{#1}
+\newcommand{\pred}[1]{\mathpzc{#1}}
+\newcommand{\p}[1]{\textsc{#1}}
+\newcommand{\IO}{I/O\xspace}
+\newcommand{\IOs}{I/O-s\xspace}
+
+\newcommand{\PA}{\set{PhysAddr}}
+\newcommand{\VA}{\set{VirtAddr}}
+\newcommand{\HA}{\set{HardAddr}}
+
+\newcommand{\formatLTS}[1]{\textsc{#1}}
+
+\newLTS{Minx86ctx}{\formatLTS{Minx86}(ctx)}{\texttt{Arch}_{\set{S}}}{\texttt{Event}}
+\newLTS{Smmx86}{\formatLTS{Smmx86}(ctx)}{\texttt{Arch}_{\set{S}}}{\texttt{Event}}
+\newLTS{E}{\formatLTS{E}}{\set{D}}{\set{L}}
+\newLTS{E'}{\formatLTS{E'}}{\set{D'}}{\set{L}}
+
+\newLTS{Ezfull}{\Sigma}{\set{H}_{\set{S}}}{\set{E}}
+\newLTS{Ez}{\Sigma}{\set{H}}{\set{E}}
+\newLTS{EzD}{\Sigma_{\Delta}}{\set{H}_{\Delta}}{\set{E}}
