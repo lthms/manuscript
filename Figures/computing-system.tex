@@ -1,0 +1,104 @@
+\documentclass{standalone}
+
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, positioning, arrows, intersections, fit, matrix}
+
+\begin{document}
+\begin{tikzpicture} [ thick
+                    , font=\sffamily
+                    , attack/.style={right, outer sep=0.2cm, inner sep=2pt}
+                    , tinycomp/.style={text width=2cm, inner sep=3pt, text badly centered}
+                    , smallcomp/.style={text width=3cm, inner sep=5pt, text badly centered}
+                    , bigcomp/.style={text width=6.7cm, inner sep=5pt, text badly centered}
+                    ]
+  \node [ draw
+        , tinycomp
+        ]
+        (OS) {OS};
+
+  \node [ draw
+        , tinycomp
+        , above=0.3cm of OS
+        ]
+        (App) {App};
+
+  \node [ below=0.2cm of OS
+        ]
+        (CPUtxt) {Execution Unit};
+
+  \node [ draw
+        , fit=(CPUtxt.south) (App.north)
+        , bigcomp
+        ]
+        (CPU) {};
+
+  \node [ below=1.2cm of CPU
+        ] (AboveCPU) {};
+
+  \node [ draw
+        , smallcomp
+        , right=0cm of AboveCPU
+        ]
+        (MMU) {MMU};
+
+  \node [ draw
+        , smallcomp
+        , below=0.6cm of MMU
+        ]
+        (Cache) {Cache};
+
+  \node [ draw
+        , smallcomp
+        , left=0.3of MMU
+        ]
+        (APIC) {APIC};
+
+  \node [ draw
+        , left=0.3cm of Cache
+        , smallcomp
+        ]
+        (IOMMU) {IOMMU};
+
+  \node [ below=1.1cmof IOMMU
+        , text width=2cm
+        ]
+        (MCHtxt) {MCH};
+
+  \node [ below=0.9cm of Cache
+        , draw
+        , inner sep=3pt
+        , text width=2cm
+        , text badly centered
+        ]
+        (ME) {Management Engine};
+
+  \node [ draw
+        , fit=(ME) (MCHtxt)
+        , bigcomp
+        ] (MCH)
+        {};
+
+  \node [ below=2.7cm of IOMMU
+        , draw
+        , smallcomp
+        ]
+        (DRAM)
+        {DRAM Controller};
+
+  \node [ below=2.7cm of Cache
+        , draw
+        , smallcomp
+        ]
+        (VGA)
+        {VGA Controller};
+
+  \draw [latex-] (MMU.north) to node [text width=4cm, attack] {SENTER Sandman\,\cite{kovah2015senter}, SpeedRacer\,\cite{kallenberg2015racecondition}} (MMU.north|-CPU.south);
+  \draw [-latex] (MMU) to node [attack] {SMRAM cache poisoning\,\cite{wojtczuk2009smram,duflot2009smram}} (Cache);
+  \draw [-latex] (Cache.south) to (Cache.south|-MCH.north);
+  \draw [-latex] (IOMMU.south) to node [attack, left] {DMA Attacks\,\cite{stewin2012dma}} (IOMMU.south|-MCH.north);
+  \draw [latex-] (DRAM.north) to (DRAM.north|-MCH.south);
+  \draw [latex-] (VGA.north) to (VGA.north|-MCH.south);
+  \draw [-latex] (App) to (OS);
+  \draw [latex-] (APIC.north) to node[attack, left, text width=4cm, align=right] {Sinkhole\,\cite{domas2015sinkhole}} (APIC.north|-CPU.south);
+\end{tikzpicture}
+\end{document}

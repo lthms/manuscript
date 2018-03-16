@@ -5,6 +5,7 @@
 - I have updated the title page of the manuscript.
 - I have started to write the abstract, in order to send it to potential
   reviewers.
+- I have started to import the FreeSpec article.
 
 * 2018/03/15
 
