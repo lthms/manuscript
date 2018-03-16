@@ -1,5 +1,11 @@
 #+TITLE: PhD Log
 
+* 2018/03/16
+
+- I have updated the title page of the manuscript.
+- I have started to write the abstract, in order to send it to potential
+  reviewers.
+
 * 2018/03/15
 
 - I have imported the beginning of the SpecCert article.

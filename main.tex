@@ -80,8 +80,8 @@ headsepline, % Uncomment to get a line under the header
 %	THESIS INFORMATION
 %----------------------------------------------------------------------------------------
 
-\thesistitle{Thesis Title} % Your thesis title, this is used in the title and abstract, print it elsewhere with \ttitle
-\supervisor{Dr. James \textsc{Smith}} % Your supervisor's name, this is used in the title page, print it elsewhere with \supname
+\thesistitle{Specifying and Verifying Hardware-based Security Enforcement Mechanisms}
+\supervisor{Ludovic \textsc{Mé}} % Your supervisor's name, this is used in the title page, print it elsewhere with \supname
 \examiner{} % Your examiner's name, this is not currently used anywhere in the template, print it elsewhere with \examname
 \degree{Doctor of Computer Science} % Your degree name, this is used in the title page and abstract, print it elsewhere with \degreename
 \author{Thomas \textsc{Letan}} % Your name, this is used in the title page and abstract, print it elsewhere with \authorname
@@ -91,8 +91,8 @@ headsepline, % Uncomment to get a line under the header
 \keywords{} % Keywords for your thesis, this is not currently used anywhere in the template, print it elsewhere with \keywordnames
 \university{\href{http://www.centralesupelec.fr}{CentraleSupélec}} % Your university's name and URL, this is used in the title page and abstract, print it elsewhere with \univname
 \department{\href{http://department.university.com}{CentraleSupélec Rennes}} % Your department's name and URL, this is used in the title page and abstract, print it elsewhere with \deptname
-\group{\href{http://researchgroup.university.com}{Research Group Name}} % Your research group's name and URL, this is used in the title page, print it elsewhere with \groupname
-\faculty{\href{http://faculty.university.com}{Faculty Name}} % Your faculty's name and URL, this is used in the title page and abstract, print it elsewhere with \facname
+\group{\href{https://team.inria.fr/cidre/}{CIDRE}} % Your research group's name and URL, this is used in the title page, print it elsewhere with \groupname
+\faculty{\href{http://faculty.university.com}{CentraleSupélec Rennes}} % Your faculty's name and URL, this is used in the title page and abstract, print it elsewhere with \facname
 
 \AtBeginDocument{
 \hypersetup{pdftitle=\ttitle} % Set the PDF's title to your title
@@ -107,106 +107,156 @@ headsepline, % Uncomment to get a line under the header
 
 \pagestyle{plain} % Default to the plain heading style until the thesis style is called for the body content
 
-%----------------------------------------------------------------------------------------
-%	TITLE PAGE
-%----------------------------------------------------------------------------------------
+% ----------------------------------------------------------------------------------------
+% TITLE PAGE
+% ----------------------------------------------------------------------------------------
 
 \begin{titlepage}
-\begin{center}
+  \begin{center}
 
-\vspace*{.06\textheight}
-{\scshape\LARGE \univname\par}\vspace{1.5cm} % University name
-\textsc{\Large Doctoral Thesis}\\[0.5cm] % Thesis type
+    \vspace*{.06\textheight} {\scshape\LARGE
+      \univname\par}\vspace{1.5cm} % University name
+    \textsc{\Large Doctoral Thesis}\\[0.5cm] % Thesis type
 
-\HRule \\[0.4cm] % Horizontal line
-{\huge \bfseries \ttitle\par}\vspace{0.4cm} % Thesis title
-\HRule \\[1.5cm] % Horizontal line
+    \HRule \\[0.4cm] % Horizontal line
+    {\huge \bfseries \ttitle\par}\vspace{0.4cm} % Thesis title
+    \HRule \\[1.5cm] % Horizontal line
 
-\begin{minipage}[t]{0.4\textwidth}
-\begin{flushleft} \large
-\emph{Author:}\\
-\href{http://www.johnsmith.com}{\authorname} % Author name - remove the \href bracket to remove the link
-\end{flushleft}
-\end{minipage}
-\begin{minipage}[t]{0.4\textwidth}
-\begin{flushright} \large
-\emph{Supervisor:} \\
-\href{http://www.jamessmith.com}{\supname} % Supervisor name - remove the \href bracket to remove the link
-\end{flushright}
-\end{minipage}\\[3cm]
+    \begin{minipage}[t]{0.4\textwidth}
+      \begin{flushleft} \large
+	\emph{Author:}\\
+	\href{http://www.johnsmith.com}{\authorname} % Author name - remove the \href bracket to remove the link
+      \end{flushleft}
+    \end{minipage}
+    \begin{minipage}[t]{0.4\textwidth}
+      \begin{flushright} \large
+	\emph{Supervisor:} \\
+	\href{http://www.jamessmith.com}{\supname} % Supervisor name - remove the \href bracket to remove the link
+      \end{flushright}
+    \end{minipage}\\[3cm]
 
-\vfill
+    \vfill
 
-\large \textit{A thesis submitted in fulfillment of the requirements\\ for the degree of \degreename}\\[0.3cm] % University requirement text
-\textit{in the}\\[0.4cm]
-\groupname\\\deptname\\[2cm] % Research group name and department name
+    \large \textit{A thesis submitted in fulfillment of the requirements\\ for
+      the degree of \degreename}\\[0.3cm] % University requirement text
+    \textit{in the}\\[0.4cm]
+    \groupname\\\deptname\\[2cm] % Research group name and department name
 
-\vfill
+    \vfill
 
-{\large \today}\\[4cm] % Date
-%\includegraphics{Logo} % University/department logo - uncomment to place it
+    {\large \today}\\[4cm] % Date
+    % \includegraphics{Logo} % University/department logo - uncomment to place it
 
-\vfill
-\end{center}
+    \vfill
+  \end{center}
 \end{titlepage}
 
-%----------------------------------------------------------------------------------------
-%	DECLARATION PAGE
-%----------------------------------------------------------------------------------------
+% ----------------------------------------------------------------------------------------
+% DECLARATION PAGE
+% ----------------------------------------------------------------------------------------
 
 \begin{declaration}
-\addchaptertocentry{\authorshipname} % Add the declaration to the table of contents
-\noindent I, \authorname, declare that this thesis titled, \enquote{\ttitle} and the work presented in it are my own. I confirm that:
+  \addchaptertocentry{\authorshipname} % Add the declaration to the table of contents
+  \noindent I, \authorname, declare that this thesis titled, \enquote{\ttitle}
+  and the work presented in it are my own. I confirm that:
 
-\begin{itemize}
-\item This work was done wholly or mainly while in candidature for a research degree at this University.
-\item Where any part of this thesis has previously been submitted for a degree or any other qualification at this University or any other institution, this has been clearly stated.
-\item Where I have consulted the published work of others, this is always clearly attributed.
-\item Where I have quoted from the work of others, the source is always given. With the exception of such quotations, this thesis is entirely my own work.
-\item I have acknowledged all main sources of help.
-\item Where the thesis is based on work done by myself jointly with others, I have made clear exactly what was done by others and what I have contributed myself.\\
-\end{itemize}
+  \begin{itemize}
+  \item This work was done wholly or mainly while in candidature for a research
+    degree at this University.
+  \item Where any part of this thesis has previously been submitted for a degree
+    or any other qualification at this University or any other institution, this
+    has been clearly stated.
+  \item Where I have consulted the published work of others, this is always
+    clearly attributed.
+  \item Where I have quoted from the work of others, the source is always
+    given. With the exception of such quotations, this thesis is entirely my own
+    work.
+  \item I have acknowledged all main sources of help.
+  \item Where the thesis is based on work done by myself jointly with others, I have made clear exactly what was done by others and what I have contributed myself.\\
+  \end{itemize}
 
-\noindent Signed:\\
-\rule[0.5em]{25em}{0.5pt} % This prints a line for the signature
+  \noindent Signed:\\
+  \rule[0.5em]{25em}{0.5pt} % This prints a line for the signature
 
-\noindent Date:\\
-\rule[0.5em]{25em}{0.5pt} % This prints a line to write the date
+  \noindent Date:\\
+  \rule[0.5em]{25em}{0.5pt} % This prints a line to write the date
 \end{declaration}
 
 \cleardoublepage
 
-%----------------------------------------------------------------------------------------
-%	QUOTATION PAGE
-%----------------------------------------------------------------------------------------
+% ----------------------------------------------------------------------------------------
+% QUOTATION PAGE
+% ----------------------------------------------------------------------------------------
 
 \vspace*{0.2\textheight}
 
-\noindent\enquote{\itshape Thanks to my solid academic training, today I can write hundreds of words on virtually any topic without possessing a shred of information, which is how I got a good job in journalism.}\bigbreak
+\noindent\enquote{\itshape Thanks to my solid academic training, today I can
+  write hundreds of words on virtually any topic without possessing a shred of
+  information, which is how I got a good job in journalism.}\bigbreak
 
 \hfill Dave Barry
 
-%----------------------------------------------------------------------------------------
-%	ABSTRACT PAGE
-%----------------------------------------------------------------------------------------
+% ----------------------------------------------------------------------------------------
+% ABSTRACT PAGE
+% ----------------------------------------------------------------------------------------
 
 \begin{abstract}
-\addchaptertocentry{\abstractname} % Add the abstract to the table of contents
-The Thesis Abstract is written here (and usually kept to just this page). The page is kept centered vertically so can expand into the blank space above the title too\ldots
+  \addchaptertocentry{\abstractname} % Add the abstract to the table of contents
+  In this thesis, we consider \emph{Hardware-based Security Enforcement} (HSE)
+  mechanisms, a class of security enforcement mechanisms such that trusted
+  software components rely on the underlying hardware architecture to constrain
+  the execution of untrusted software components with respect to targeted
+  security properties.
+
+  HSE mechanisms are particularly used to keep the software components of modern
+  software stacks isolated from each others.
+  %
+  As a consequence, hardware components play an essential role in securing
+  computing platforms.
+  %
+  Yet during the past decades, several critical vulnerability disclosures have
+  show that trust in hardware can be misplaced.
+  %
+  Modern computing platform have grown in complexity, and now involve multiple
+  hardware components executing sophisticated software stacks.
+  %
+  This paves the way for \emph{architectural attacks}, where the attacker is
+  able to leverage one component to threaten the security enforced by another.
+
+  With SpecCert, we have proposed a three-step methodology, supported by a Coq
+  framework, for specifying and verifying HSE mechanisms against hardware
+  architecture models.
+  %
+  We have written a minimal model for single core x86-based computing platforms,
+  and used SpecCert to specify and verify a real HSE mechanism to isolate the
+  code executed while the CPU is in System Management Mode (SMM), a highly
+  privileged execution mode of x86 microprocessors.
+
+  For many years, industrial manufacturers and researchers have aimed to
+  formally specify and verify computing platform.
+  %
+  Defining a comprehensive model in terms of hardware and software components
+  remains challenging, yet such a model is a prerequisite to verify a computing
+  platform in terms of architectural attacks.
+  %
+  We have proposed FreeSpec, a Coq framework built upon a formalism to modularly
+  specify and verify each component independently, then verify their
+  \emph{composition}.
 \end{abstract}
 
-%----------------------------------------------------------------------------------------
-%	ACKNOWLEDGEMENTS
-%----------------------------------------------------------------------------------------
+% ----------------------------------------------------------------------------------------
+% ACKNOWLEDGEMENTS
+% ----------------------------------------------------------------------------------------
 
 \begin{acknowledgements}
-\addchaptertocentry{\acknowledgementname} % Add the acknowledgements to the table of contents
-The acknowledgments and the people to thank go here, don't forget to include your project advisor\ldots
+  \addchaptertocentry{\acknowledgementname} % Add the acknowledgements to the table of contents
+  The acknowledgments and the people to thank go here, don't forget to include
+  your project advisor\ldots
 \end{acknowledgements}
 
-%----------------------------------------------------------------------------------------
-%	LIST OF CONTENTS/FIGURES/TABLES PAGES
-%----------------------------------------------------------------------------------------
+% ----------------------------------------------------------------------------------------
+% LIST OF CONTENTS/FIGURES/TABLES PAGES
+% ----------------------------------------------------------------------------------------
 
 \tableofcontents % Prints the main table of contents
 
@@ -214,26 +264,26 @@ The acknowledgments and the people to thank go here, don't forget to include you
 
 \listoftables % Prints the list of tables
 
-%----------------------------------------------------------------------------------------
-%	ABBREVIATIONS
-%----------------------------------------------------------------------------------------
+% ----------------------------------------------------------------------------------------
+% ABBREVIATIONS
+% ----------------------------------------------------------------------------------------
 
 \begin{abbreviations}{ll} % Include a list of abbreviations (a table of two columns)
 
-\textbf{LAH} & \textbf{L}ist \textbf{A}bbreviations \textbf{H}ere\\
-\textbf{WSF} & \textbf{W}hat (it) \textbf{S}tands \textbf{F}or\\
+  \textbf{LAH} & \textbf{L}ist \textbf{A}bbreviations \textbf{H}ere\\
+  \textbf{WSF} & \textbf{W}hat (it) \textbf{S}tands \textbf{F}or\\
 
 \end{abbreviations}
 
-%----------------------------------------------------------------------------------------
-%	DEDICATION
-%----------------------------------------------------------------------------------------
+% ----------------------------------------------------------------------------------------
+% DEDICATION
+% ----------------------------------------------------------------------------------------
 
 \dedicatory{For/Dedicated to/To my\ldots}
 
-%----------------------------------------------------------------------------------------
-%	THESIS CONTENT - CHAPTERS
-%----------------------------------------------------------------------------------------
+% ----------------------------------------------------------------------------------------
+% THESIS CONTENT - CHAPTERS
+% ----------------------------------------------------------------------------------------
 
 \mainmatter % Begin numeric (1,2,3...) page numbering
 
@@ -244,7 +294,7 @@ The acknowledgments and the people to thank go here, don't forget to include you
 
 \include{Chapters/Introduction}
 
-\chapter{Context}
+\chapter{Hardware-based Security Enforcement}
 
 \section{Hardware Architecture Principles}
 
