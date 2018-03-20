@@ -1,5 +1,13 @@
 #+TITLE: PhD Log
 
+* 2018/03/20
+
+- I have changed the quote introducing the manuscript for the /simple/
+  definition of monad, from a category theory point of view
+- I have imported the rest of FreeSpec FM2018 paper
+- I have started a high-level document to decide the plan to use for the
+  manuscript
+
 * 2018/03/16
 
 - I have updated the title page of the manuscript.
