@@ -1,0 +1,37 @@
+#+TITLE: Specifying and Verifying Hardware-based Security Enforcement
+#+AUTHOR: Thomas Letan
+
+* Hardware-based Security Enforcement
+
+- We want to settle the context of this thesis. Basically, the idea is to show
+  that, from the security point of view, eventually we cannot trust anything,
+  including the hardware.
+- Another important thing to explain is designing a security hardware mechanism
+  is very hard, even if we exclude logical error within the components
+
+* Related Works
+
+- Once we have agreed on the context, we can justify our will to leverage formal
+  methods.
+- We have one main difficulty here: FreeSpec and SpecCert might share the
+  “context” related works, the interested formal works for each are
+  different.
+
+* SpecCert
+
+- Three contributions:
+  + A formalism to specify and verify HSE against a hardware model
+  + A coq framework, including the formalism and a minimal x86 model
+  + A complete example to model the SMM HSE
+
+* FreeSpec
+
+- One motivation: MinX86, as defined in SpecCert, is potentially hard to
+  maintain and incrementally improve.
+- FreeSpec aims to tackle this particular difficulties, by relying on well-known
+  PL approach: Monad (and Free Monad)
+- The Abstract Specification allows for verifying program with effects without
+  any particular handler
+- Two contributions:
+  + Abstract Specification on top of Program Monad
+  + A Coq framework, plus several experiments
