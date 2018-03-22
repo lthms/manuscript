@@ -1,0 +1,40 @@
+In this thesis, we consider \emph{Hardware-based Security Enforcement} (HSE)
+mechanisms, a class of security enforcement mechanisms such that trusted
+software components rely on the underlying hardware architecture to constrain
+the execution of untrusted software components with respect to targeted
+security properties.
+
+HSE mechanisms are particularly used to keep the software components of modern
+software stacks isolated from each others.
+%
+As a consequence, hardware components play an essential role in securing
+computing platforms.
+%
+Yet during the past decades, several critical vulnerability disclosures have
+show that trust in hardware can be misplaced.
+%
+Modern computing platform have grown in complexity, and now involve multiple
+hardware components executing sophisticated software stacks.
+%
+This paves the way for \emph{architectural attacks}, where the attacker is
+able to leverage one component to threaten the security enforced by another.
+
+With SpecCert, we have proposed a three-step methodology, supported by a Coq
+framework, for specifying and verifying HSE mechanisms against hardware
+architecture models.
+%
+We have written a minimal model for single core x86-based computing platforms,
+and used SpecCert to specify and verify a real HSE mechanism to isolate the
+code executed while the CPU is in System Management Mode (SMM), a highly
+privileged execution mode of x86 microprocessors.
+
+For many years, industrial manufacturers and researchers have aimed to
+formally specify and verify computing platform.
+%
+Defining a comprehensive model in terms of hardware and software components
+remains challenging, yet such a model is a prerequisite to verify a computing
+platform in terms of architectural attacks.
+%
+We have proposed FreeSpec, a Coq framework built upon a formalism to modularly
+specify and verify each component independently, then verify their
+\emph{composition}.
