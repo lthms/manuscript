@@ -9,6 +9,14 @@
 - Another important thing to explain is designing a security hardware mechanism
   is very hard, even if we exclude logical error within the components
 
+** Hardware Architecture Principles
+
+** Software Stacks and Software Isolation
+
+** Security Challenges
+
+** Architectural Attacks
+
 * Related Works
 
 - Once we have agreed on the context, we can justify our will to leverage formal
@@ -17,12 +25,28 @@
   “context” related works, the interested formal works for each are
   different.
 
+** Industrial Efforts
+
+** Modelling Existing Architecture
+
+** Secure By Construction Architecture
+
+** ISA Modelling
+
 * SpecCert
 
 - Three contributions:
   + A formalism to specify and verify HSE against a hardware model
   + A coq framework, including the formalism and a minimal x86 model
   + A complete example to model the SMM HSE
+
+** SpecCert Formalism
+
+** Minx86
+
+** System Management Mode HSE
+
+** Discussion
 
 * FreeSpec
 
@@ -35,3 +59,9 @@
 - Two contributions:
   + Abstract Specification on top of Program Monad
   + A Coq framework, plus several experiments
+
+** Modelling Programs with Effects
+
+** Modular Verification of Programs with Effects
+
+** Discussion

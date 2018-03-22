@@ -1,5 +1,9 @@
 #+TITLE: PhD Log
 
+* 2018/03/21
+
+- I have tried very hard to finalize the manuscript plan.
+
 * 2018/03/20
 
 - I have changed the quote introducing the manuscript for the /simple/

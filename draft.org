@@ -1,0 +1,28 @@
+* Summary of Contributions
+
+Two contributions:
+
+- Specifying and Verifying HSE (SpecCert)
+- Modular verification of multi-components system (FreeSpec)
+
+Link between them: SpecCert requires a model of the hardware architecture, but
+the scale of mainstream architectures (x86) remains challenging.
+
+* Manuscript
+
+** Introduction
+
+** Hardware-based Security Enforcement mechanisms
+
+- HSE Definition
+- HSE IRL + Architectural Attacks
+- Thesis Approach: formal approach to specify and verify HSE which benefits to
+  hw and sw people
+
+** Related Works
+
+- Starting point: Industrial Efforts (Intel, ARM)
+
+** SpecCert
+
+** FreeSpec
