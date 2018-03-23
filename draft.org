@@ -8,21 +8,27 @@ Two contributions:
 Link between them: SpecCert requires a model of the hardware architecture, but
 the scale of mainstream architectures (x86) remains challenging.
 
-* Manuscript
+* Manuscript [0/4]
 
-** Introduction
+** TODO Hardware-based Security Enforcement mechanisms [0/3]
 
-** Hardware-based Security Enforcement mechanisms
+*** TODO HSE Definition
 
-- HSE Definition
-- HSE IRL + Architectural Attacks
-- Thesis Approach: formal approach to specify and verify HSE which benefits to
-  hw and sw people
+*** TODO HSE IRL + Architectural Attacks
 
-** Related Works
+- [REMARK] /micro/-architectural attacks are out of scope
 
-- Starting point: Industrial Efforts (Intel, ARM)
+*** TODO Thesis Approach
 
-** SpecCert
+- Formal approach to specify and verify HSE which benefits to hw and sw people.
 
-** FreeSpec
+
+** TODO Related Works
+
+- Not only writing correct HW: ARM, Intel, Kami, Secure Processor (XOM, etc.)
+- But also defining how to use them: RockSalt, Moat
+- [QUESTION] should we leave the “modular” thing in FreeSpec chapter?
+
+** TODO SpecCert
+
+** TODO FreeSpec
