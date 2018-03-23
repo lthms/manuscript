@@ -1,34 +1,47 @@
-* Summary of Contributions
+* TODO Hardware-based Security Enforcement mechanisms [0/4]
 
-Two contributions:
+- [REMARK] Will be in both French and English
 
-- Specifying and Verifying HSE (SpecCert)
-- Modular verification of multi-components system (FreeSpec)
+** TODO HSE Definition
+
+- A /Trusted Software Components/ configure /Hardware Components/ to constrain
+  /Untrusted Software Components/ execution with respect to /Security
+  Properties/.
+- [REMARK] /micro/-architectural attacks are out of scope
+
+** TODO Why Formally Specifying and Verifying
+
+- Formal approach to specify and verify HSE which benefits to hw and sw people.
+
+** TODO Thesis Contributions
+
+One objective: specifying and verifying HSE:
+
+- A formalism to achieve our goal, which leverages hw models (SpecCert)
+- An approach to manage mult-components system (FreeSpec)
+- In both case, (1) Coq developments and (2) SMRAM Cache Poisoning example
 
 Link between them: SpecCert requires a model of the hardware architecture, but
 the scale of mainstream architectures (x86) remains challenging.
 
-* Manuscript [0/4]
+* TODO HSE IRL + Architectural Attacks
 
-** TODO Hardware-based Security Enforcement mechanisms [0/3]
+- Give an overview of a partial (advertise that it is partial) x86 architecture
+  (as in FreeSpec)
+  + hw components
+  + nature of sw stacks
+- Describe several HSE, plus give an example on how they have been attacked:
+  + MMU (and lack of IOMMU)
+  + Flash Lock (and SpeedRacer)
+  + SMRAM Lock (and SMRAM Cache Poisoning in depth + mention Sinkhole)
 
-*** TODO HSE Definition
+* TODO Related Works
 
-*** TODO HSE IRL + Architectural Attacks
+- Not only writing correct hw: ARM, Intel, Kami, Secure Processor (XOM, etc.)
+- But also defining how to use them: RockSalt, Moat, VirtCert
+- Multi-components modelling: share of responsibility and abstraction of
+  underlying layers
 
-- [REMARK] /micro/-architectural attacks are out of scope
+* TODO SpecCert
 
-*** TODO Thesis Approach
-
-- Formal approach to specify and verify HSE which benefits to hw and sw people.
-
-
-** TODO Related Works
-
-- Not only writing correct HW: ARM, Intel, Kami, Secure Processor (XOM, etc.)
-- But also defining how to use them: RockSalt, Moat
-- [QUESTION] should we leave the “modular” thing in FreeSpec chapter?
-
-** TODO SpecCert
-
-** TODO FreeSpec
+* TODO FreeSpec
