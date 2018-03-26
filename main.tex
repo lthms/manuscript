@@ -56,6 +56,10 @@ headsepline, % Uncomment to get a line under the header
 \usepackage{bigcenter}
 \usepackage[mode=buildnew]{standalone}
 
+\usepackage{xargs}
+\usepackage{todonotes}
+\newcommandx{\thomasrk}[2][1=]{\todo[linecolor=Plum,backgroundcolor=Plum!25,bordercolor=Plum,#1]{#2}}
+
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, positioning, arrows, intersections, fit, matrix}
 
@@ -232,22 +236,9 @@ headsepline, % Uncomment to get a line under the header
 
 \input{Chapters/Introduction}
 
-\input{Chapters/HSE}
+%\input{Chapters/ArchitecturalAttack}
 
-\chapter{Related Works}
-
-\section{Industrial Efforts}
-
-\begin{itemize}
-\item Intel
-\item ARM
-\end{itemize}
-
-\section{Modelling Existing Architecture}
-
-\section{Secure by Construction Architecture}
-
-\section{ISA Modelling}
+\input{Chapters/RelatedWorks}
 
 \input{Chapters/SpecCert}
 

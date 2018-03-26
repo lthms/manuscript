@@ -1,1 +1,52 @@
 \chapter{Introduction}
+
+\endquote{``\emph{All problems in computer science can be solved by another
+    level of indirection.}''
+
+  \hfill\footnotesize --- David Wheeler}
+
+\vspace{1cm}\noindent To manage complexity, computing platforms are commonly
+built as succession of abstraction layers, from the hardware architecture up to
+the applications used by end users.
+%
+Each layer leverages the interface of its predecessor to expose a higher-level,
+more constrained set of functionalities for its successors.
+%
+This enables separation of concerns ---each layer encapsulates one dimension of
+the overall complexity--- and modularity ---two layers which expose the same
+interface can be seamlessly interchange---.
+
+From a security perspective, a layer is often \emph{more privileged} than, and
+therefore implicitly trusted by, its successors.
+%
+More precisely, the former constrains the latter, with respect to targeted
+security properties.
+%
+For instance, an operating system shares hardware resources among several
+applications, and therefore is able to enforce availability ---fair share of CPU
+time---, confidentiality and integrity ---exclusive partition of physical
+memories--- properties.
+
+This makes \emph{isolation} a key security property.
+%
+In the context of this thesis, we say one component $A$ is said isolated from a
+second component $B$ when $B$ cannot tamper with $A$'s functioning otherwise
+than through its interface.
+%
+Thus, an operating system should be isolated from end users applications, to
+prevent the latter to grant themselves abusive rights.
+%
+The opposite is not necessarily true, and it is even a common practice for
+operating system to tamper with applications code (\emph{e.g.} address space
+layout randomization, dynamic libraries).
+
+Isolation can be achieved in various ways.
+%
+Yet, concerning the lowest layers of abstraction, the common approach is to rely
+on mechanisms provided by the hardware architecture.
+
+\section{Hardware-based Security Enforcement Mechanisms}
+
+\section{Formal Verification}
+
+\section{Contributions}
