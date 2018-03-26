@@ -37,10 +37,20 @@ the scale of mainstream architectures (x86) remains challenging.
 
 * TODO Related Works
 
-- Not only writing correct hw: ARM, Intel, Kami, Secure Processor (XOM, etc.)
-- But also defining how to use them: RockSalt, Moat, VirtCert
+** HW Functional Correctness
+
+- Writing correct hw: ARM, Intel, Secure Processor (XOM, etc.), Coquet, Kami
+
+** Modelling Complex Systems
+
 - Multi-components modelling: share of responsibility and abstraction of
   underlying layers
+- Kami as a transition?
+- Talk here about contracts?
+
+** Software Specifications
+
+- But also defining how to use them: RockSalt, Moat, VirtCert
 
 * TODO SpecCert
 
