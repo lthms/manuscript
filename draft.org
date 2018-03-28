@@ -1,19 +1,22 @@
-* TODO Introduction [0/3]
+* Manuscrit [0/7]
+
+** TODO Introduction (5 pages)
 
 - [REMARK] Will be in both French and English
 
-** TODO HSE Definition
+*** TODO HSE Definition (2 pages)
 
 - A /Trusted Software Components/ configure /Hardware Components/ to constrain
   /Untrusted Software Components/ execution with respect to /Security
   Properties/.
 - [REMARK] /micro/-architectural attacks are out of scope
 
-** TODO Why Formally Specifying and Verifying
+*** TODO Why Formally Specifying and Verifying (1 page)
 
 - Formal approach to specify and verify HSE which benefits to hw and sw people.
+- Coq provides two useful features: expressiveness and extraction
 
-** TODO Thesis Contributions
+*** TODO Thesis Contributions (2 pages)
 
 One objective: specifying and verifying HSE:
 
@@ -24,7 +27,8 @@ One objective: specifying and verifying HSE:
 Link between them: SpecCert requires a model of the hardware architecture, but
 the scale of mainstream architectures (x86) remains challenging.
 
-* TODO HSE IRL + Architectural Attacks
+
+** TODO Case Study: x86 (10 pages)
 
 - Give an overview of a partial (advertise that it is partial) x86 architecture
   (as in FreeSpec)
@@ -35,23 +39,60 @@ the scale of mainstream architectures (x86) remains challenging.
   + Flash Lock (and SpeedRacer)
   + SMRAM Lock (and SMRAM Cache Poisoning in depth + mention Sinkhole)
 
-* TODO Related Works
 
-** HW Functional Correctness
+** TODO Related Works (20 pages)
 
-- Writing correct hw: ARM, Intel, Secure Processor (XOM, etc.), Coquet, Kami
+- Long term goal: how sw should use hw, from a security perspective?
+- Starting point: critical software component are verified upon very simplified
+  hardware model, while hardware are modeled/verified independently from the
+  software to be executed.
+- Regarding the complexity and the scope, connecting specification (rather than
+  implementation) is a first important step. Project like DeepSpec already
+  explore how to connect abstraction layers, from specs to implementation
 
-** Modelling Complex Systems
+*** HW Functional Correctness
 
+- Industrial efforts: ARM, Intel
+- Secure Architecture with strong isolation property (XOM)
+- Verifying hardware circuits: Coquet, Kami
+
+*** Software Specifications
+
+- Proving one software: VirtCert, MMU, CertikOS
+- Proving more general properties about software: RockSalt, Moat, ProTIP
+
+*** Modelling Complex Systems
+
+- Kami as a transition?
+- ProTIP (PCI)
+- Alloy
 - Multi-components modelling: share of responsibility and abstraction of
   underlying layers
-- Kami as a transition?
-- Talk here about contracts?
 
-** Software Specifications
 
-- But also defining how to use them: RockSalt, Moat, VirtCert
+** TODO Formally Specifying and Verifying HSE (20 pages)
 
-* TODO SpecCert
 
-* TODO FreeSpec
+** TODO SMRAM Isolation HSE (10 pages)
+
+
+** TODO Modularly Specify and Verify Components of a System (20 pages)
+
+
+** TODO FreeSpec Framework (10 pages)
+
+*** Extensible Effects
+
+**** Why?
+**** The `Use` Typeclass
+**** The `Use` Instances
+
+*** Abstract Specification
+
+**** Undefined Behavior
+**** Declarative Policies
+
+*** Extraction (?)
+
+
+** TODO Conclusion (3 pages)
