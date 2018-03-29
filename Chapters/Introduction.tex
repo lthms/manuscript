@@ -6,8 +6,8 @@
   \hfill\footnotesize --- David Wheeler}
 
 \vspace{1cm}\noindent To manage complexity, computing platforms are commonly
-built as succession of abstraction layers, from the hardware architecture up to
-the applications used by end users.
+built as successions of abstraction layers, from the hardware architecture's
+components up to high-level software applications.
 %
 Each layer leverages the interface of its predecessor to expose a higher-level,
 more constrained set of functionalities for its successors.
@@ -16,37 +16,91 @@ This enables separation of concerns ---each layer encapsulates one dimension of
 the overall complexity--- and modularity ---two layers which expose the same
 interface can be seamlessly interchange---.
 
-From a security perspective, a layer is often \emph{more privileged} than, and
-therefore implicitly trusted by, its successors.
+A layer is often \emph{more privileged} than, and therefore implicitly trusted
+by, its successors.
 %
-More precisely, the former constrains the latter, with respect to targeted
-security properties.
+From a security perspective, the former may constrain the latter, with respect
+to targeted security properties.
 %
 For instance, an operating system shares hardware resources among several
 applications, and therefore is able to enforce availability ---fair share of CPU
 time---, confidentiality and integrity ---exclusive partition of physical
 memories--- properties.
-
-This makes \emph{isolation} a key security property.
 %
-In the context of this thesis, we say one component $A$ is said isolated from a
-second component $B$ when $B$ cannot tamper with $A$'s functioning otherwise
-than through its interface.
+Constraining one's execution can be achieved in various way.
 %
-Thus, an operating system should be isolated from end users applications, to
-prevent the latter to grant themselves abusive rights.
+Concerning the lowest layers of a software stack, the common approach is to rely
+on features provided by the hardware architecture.
 %
-The opposite is not necessarily true, and it is even a common practice for
-operating system to tamper with applications code (\emph{e.g.} address space
-layout randomization, dynamic libraries).
+For instance, mainstream operating systems leverage, among others mechanisms, a
+\emph{Memory Management Unit} (MMU) to partition the system memory and a
+hardware timer to schedule arbitrary applications.
 
-Isolation can be achieved in various ways.
+\section{Hardware-based Security Enforcement mechanisms}
+
+We call this class of security enforcement mechanisms, where a trusted software
+component configure the underlying hardware architecture to constrain the
+execution of untrusted and potentially arbitrary software components,
+\emph{Hardware-based Security Enforcement} (HSE).
+
+A HSE mechanism is correct, \emph{i.e.} it enforces the targeted security
+property, when both the hardware features to be correctly implemented and the
+software components to correctly configure them.
 %
-Yet, concerning the lowest layers of abstraction, the common approach is to rely
-on mechanisms provided by the hardware architecture.
+Both remain challenging.
+%
+Over the past decades, vendors have added many security features to their
+products.
+%
+Intel, for instance, have notably introduced hardware-based virtualization
+(VT-x, VT-d), dynamic root of trust (TXT), or applicative enclaves (SGX).
+%
+Most of them have been compromised at least once, which is not surprising
+regarding the complexity of the task.
+%
+In addition, hardware architecture often comprise hundreds of features
+implemented by dozens of interconnected devices.
+%
+This paves the road for a class of security vulnerability we called
+\emph{architectural attacks}, where each component is working as expected, yet
+their composition creates an attack path.
+%
+In the same time, software developers have to deal with thousands of
+specifications (\emph{e.g.} datasheet, developer manuals) written in natural
+language.
+%
+Many security vulnerabilities disclosed over the years have been the result of a
+misconfiguration of hardware features by key software components.
 
-\section{Hardware-based Security Enforcement Mechanisms}
+\section{Towards Formal Verification}
 
-\section{Formal Verification}
+In this thesis, we aim to formally specify HSE mechanisms, for purposes of
+%
+\begin{inparaenum}[(1)]
+\item verifying they indeed enforce the targeted security property, and
+\item providing unambiguous, security-focused guidelines to software developers,
+  which could also be used as verification goals.
+\end{inparaenum}
+
+% \begin{figure}
+%   \centering
+%  %   \includestandalone[width=.8\textwidth]{Figures/intro-computing-platform}
+%   \includegraphics[width=0.8\textwidth]{Figures/intro-computing-platform.jpg}
+%   \caption{Abstraction Layers of a Typical x86 Computing Platform}
+%   \label{fig:intro:computing-platform}
+% \end{figure}
+
+% This makes \emph{isolation} a key security property.
+% %
+% In the context of this thesis, we say one component $A$ is said isolated from
+% a second component $B$ when $B$ cannot tamper with $A$'s functioning otherwise
+% than through its interface.
+% %
+% Thus, an operating system should be isolated from end users applications, to
+% prevent the latter to grant themselves abusive rights.
+% %
+% The opposite is not necessarily true, and it is even a common practice for
+% operating system to tamper with applications code (\emph{e.g.} address space
+% layout randomization, dynamic libraries).
 
 \section{Contributions}
