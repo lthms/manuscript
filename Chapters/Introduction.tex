@@ -16,8 +16,10 @@ This enables separation of concerns ---each layer encapsulates one dimension of
 the overall complexity--- and modularity ---two layers which expose the same
 interface can be seamlessly interchange---.
 
-A layer is often \emph{more privileged} than, and therefore implicitly trusted
-by, its successors.
+\thomasrk[inline]{Describe common layer: HW, FW, OS, Apps}
+
+In this context, each layer is often \emph{more privileged} than, and therefore
+implicitly trusted by, its successors.
 %
 From a security perspective, the former may constrain the latter, with respect
 to targeted security properties.
@@ -42,13 +44,13 @@ We call this class of security enforcement mechanisms, where a trusted software
 component configure the underlying hardware architecture to constrain the
 execution of untrusted and potentially arbitrary software components,
 \emph{Hardware-based Security Enforcement} (HSE).
+%
+A HSE mechanism enforces its targeted security property when both the hardware
+features are correctly implemented and the software components correctly
+configure them.
 
-A HSE mechanism is correct, \emph{i.e.} it enforces the targeted security
-property, when both the hardware features are correctly implemented and the
-software components correctly configure them.
-%
 Both remain challenging.
-%
+
 Over the past decades, vendors have added many security features to their
 products.
 %
@@ -81,39 +83,43 @@ implementations.
 
 In this thesis, our initial objective is to formally specify HSE mechanisms,
 which implies defining both the targeted security property and the required
-configuration steps trusted software components have to performed.
+configuration steps trusted software components have to perform.
 %
-Such unambiguous, security-focused specification can be leverage by software
-developers, as a complement to the existing hardware specifications.
+The expected result is an unambiguous, security-focused specification which can
+be leveraged by software developers.
 %
-Furthermore, this initial specification effort aims to serve as a premise for
-verifying the underlying hardware architecture.
-%
-More precisely, we want to verify if, at least at a specification level, the
-hardware architecture effectively enforce the expected security property.
-%
-Commodity hardware architectures pose several challenge regarding
-this task.
+It would be an advantageous complement to the existing hardware specifications,
+as the latter are often made of many independent, large documents (\emph{e.g.}
+datasheets, developer manuals).
 
-%   \begin{figure}
-%     \centering
-%  %     \includestandalone[width=.8\textwidth]{Figures/intro-computing-platform}
-%     \includegraphics[width=0.8\textwidth]{Figures/intro-computing-platform.jpg}
-%     \caption{Abstraction Layers of a Typical x86 Computing Platform}
-%     \label{fig:intro:computing-platform}
-%   \end{figure}
+This initial specification effort shall serve as a premise for further
+verification work for both the hardware architecture and the trusted software
+components.
+%
+To adopt a verification approach guided by HSE mechanisms specifications could
+help uncover architectural attacks ahead of time.
+%
+This obliges us to consider the hardware architecture as a whole, which poses
+many challenges.
 
-%   This makes \emph{isolation} a key security property.
-% %
-%   In the context of this thesis, we say one component $A$ is said isolated
-%   from a second component $B$ when $B$ cannot tamper with $A$'s functioning
-%   otherwise than through its interface.
-% %
-%   Thus, an operating system should be isolated from end users applications, to
-%   prevent the latter to grant themselves abusive rights.
-% %
-%   The opposite is not necessarily true, and it is even a common practice for
-%   operating system to tamper with applications code (\emph{e.g.} address space
-%   layout randomization, dynamic libraries).
+% \begin{figure}
+%   \centering
+%  %   \includestandalone[width=.8\textwidth]{Figures/intro-computing-platform}
+%   \includegraphics[width=0.8\textwidth]{Figures/intro-computing-platform.jpg}
+%   \caption{Abstraction Layers of a Typical x86 Computing Platform}
+%   \label{fig:intro:computing-platform}
+% \end{figure}
 
 \section{Contributions}
+
+This thesis proceeds as follows. In Chapter\,\ref{chapter:usecase}, we describe
+in more detail HSE mechanisms commonly used in computing platforms, several
+architectural attacks disclosed over the past decode to motivate our interest.
+%
+In particular, we introduce the SMRAM Cache Poisoning, to act afterward as a
+running example for our contributions.
+%
+We first introduce a formalism to specify a HSE mechanism against hardware
+model.
+%
+In Chapter\,\ref{chapter:relatedwork}
