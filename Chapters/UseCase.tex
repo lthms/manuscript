@@ -46,13 +46,83 @@ have been compromised (Section\,\ref{sec:usecase:hse}).
 \section{x86 Architecture Explained}
 \label{sec:usecase:architecture}
 
-\begin{itemize}
-\item Aller de la figure 1, à la figure 3, expliquer ce que chaque vue amène
-  conceptuellement
-\end{itemize}
+Figure\,\ref{fig:usecase:computing-platform-1} pictures the traditional
+abstraction layers of a computing platform.
 
 \begin{description}
-\item [Figure 1] Chaque niveau doit être plus privilégié que le précédent
+\item [Hardware] The physical components that together form the computer, whose
+  purpose is to run software components users can interact with.
+\item [Firmware] In the context of this thesis, we call firmware a software
+  component shipped with a particular hardware component by its vendor to ensure
+  its correct functioning.
+\item [Operating System] A system software whose main purpose is to manage
+  hardware resources among several applications.
+\item [End-user application] One could say the lower layers only exist to allow
+  applications to focus on business logic.
+\end{description}
+
+Each layer leverages the interface of its predecessor to expose a higher-level,
+more constrained set of functionalities for its successors.
+%
+These interfaces are often standardize to some extend, to manage the diversity
+of existing products: UEFI (firmware), POSIX (operating system), etc.
+%
+Each layer is more privileged than its successors:
+%
+the hardware architecture executes the software stack;
+%
+the firmware has the mean to interrupt the execution of the other software
+components;
+%
+the operating system loads in memory and manages the applications the user can
+interact with.
+
+This makes \emph{isolation} a key security property.
+%
+In the context of this thesis, we say one component $A$ is said isolated from
+a second component $B$ when $B$ cannot tamper with $A$'s functioning otherwise
+than through its interface.
+%
+Thus, an operating system should be isolated from end users applications, to
+prevent the latter to grant themselves abusive rights.
+%
+The opposite is not necessarily true, and it is even a common practice for
+operating system to tamper with applications code (\emph{e.g.} address space
+layout randomization, dynamic libraries).
+%
+Many HSE mechanisms implemented by system software target isolation properties.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.3\textwidth]{Figures/computing-platform-1.jpg}
+  \caption{Abstraction Layers of a Typical x86 Computing Platform}
+  \label{fig:usecase:computing-platform-1}
+\end{figure}
+
+If the abstractions pictured in Figure\,\ref{fig:usecase:computing-platform-1}
+are often well understood by software developers, it is less acknowledge that
+there are many software stacks inside one computer.
+%
+Figure\,\ref{fig:usecase:computing-platform-2} gives a glimpse of software stack
+diversity inside a computer.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.8\textwidth]{Figures/intro-computing-platform.jpg}
+  \caption{Multiple Software Stacks in x86 Hardware Architecture}
+  \label{fig:usecase:computing-platform-2}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.3\textwidth]{Figures/computing-platform-3.jpg}
+  \caption{Abstraction Layers of a Typical x86 Computing Platform}
+  \label{fig:usecase:computing-platform-3}
+\end{figure}
+
+\thomasrk[inline]{What we want to write in a glimpse:}
+
+\begin{description}
 \item [Figure 2] Le HW n’est pas un bloc uniforme, et d’autres software stacks
   sont exécutés en même temps (citer Navy/attaque de YAP, pour souligner que
   c’est important)
@@ -61,26 +131,6 @@ have been compromised (Section\,\ref{sec:usecase:hse}).
   c’est gagner la partie
 \end{description}
 
-\begin{figure}
-  \centering
-  \includegraphics[width=0.3\textwidth]{Figures/computing-platform-1.jpg}
-  \caption{Abstraction Layers of a Typical x86 Computing Platform}
-  \label{fig:usecase:computing-platform}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \includegraphics[width=0.8\textwidth]{Figures/intro-computing-platform.jpg}
-  \caption{Multiple Software Stacks in x86 Hardware Architecture}
-  \label{fig:usecase:computing-platform}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \includegraphics[width=0.3\textwidth]{Figures/computing-platform-3.jpg}
-  \caption{Abstraction Layers of a Typical x86 Computing Platform}
-  \label{fig:usecase:computing-platform}
-\end{figure}
 
 \section{Firmware}
 \label{sec:usecase:firmware}
