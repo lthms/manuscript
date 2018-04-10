@@ -1,9 +1,11 @@
 \chapter{x86 Explained}
 \label{chapter:usecase}
 
-\thomasrk[inline]{Mieux faire sentir que x86 est un exemple parmi tant d'autres,
-  mais qu'il est très représentatif des difficultés que l'on peut rencontrer
-  avec les HSE.}
+This Chapter takes the x86 hardware architecture as an example to illustrate the
+challenge related to hardware-based security enforcement.
+%
+While it is true x86 is particularly complex, other mainstream architectures
+(such as ARM, for instance) have suffered similar issues in the past.
 
 At the time of writing this thesis\,\footnote{Spring 2018.}, the \emph{Intel 64
   and IA-32 Architectures Software Developer’s Manual} is 4842 pages long.
@@ -27,14 +29,11 @@ This problematic also exists for hardware designers.
 When they want to add a new feature, or a new component, they have to be certain
 they will not break existing properties of the architecture by doing so.
 
-This Chapter intends to give the readers a general overview of the x86
-architecture, so that they can understand the challenge related to
-hardware-based security enforcement with the x86 hardware architecture.
+This Chapter proceeds as follows:
 %
-It proceeds as follows:
-%
-we describe in more detail how a typical x86 computer works, which kind of
-hardware components are involved and how they interact with each others
+we describe in more detail how a typical x86 computing platform work, that is
+which king of hardware components are involved, which kind of software stack
+they execute, and how they interact with each others
 (Section\,\ref{sec:usecase:architecture});
 %
 we focus on the key role played by the firmware in the platform functioning and
@@ -43,8 +42,17 @@ security (Section\,\ref{sec:usecase:firmware});
 we detail several HSE mechanisms implemented by the firmware, including how they
 have been compromised (Section\,\ref{sec:usecase:hse}).
 
-\section{x86 Architecture Explained}
+\section{x86 Computing Platform Explained}
 \label{sec:usecase:architecture}
+
+Describing a computing platform in depth is challenging, because it is made of
+many interdependent components of various nature.
+%
+As a consequence, we start our explanation from the typical abstraction layers
+which form a computing platform, then deconstruct them in order to detail how
+they are concretely implemented.
+
+\subsection{Typical Software Stack}
 
 Figure\,\ref{fig:usecase:computing-platform-1} pictures the traditional
 abstraction layers of a computing platform.
@@ -52,21 +60,24 @@ abstraction layers of a computing platform.
 \begin{description}
 \item [Hardware] The physical components that together form the computer, whose
   purpose is to run software components users can interact with.
+%
 \item [Firmware] In the context of this thesis, we call firmware a software
   component shipped with a particular hardware component by its vendor to ensure
   its correct functioning.
+%
 \item [Operating System] A system software whose main purpose is to manage
   hardware resources among several applications.
+%
 \item [End-user application] One could say the lower layers only exist to allow
   applications to focus on business logic.
 \end{description}
 
 Each layer leverages the interface of its predecessor to expose a higher-level,
 more constrained set of functionalities for its successors.
-%
+
 These interfaces are often standardize to some extend, to manage the diversity
 of existing products: UEFI (firmware), POSIX (operating system), etc.
-%
+
 Each layer is more privileged than its successors:
 %
 the hardware architecture executes the software stack;
@@ -77,27 +88,14 @@ components;
 the operating system loads in memory and manages the applications the user can
 interact with.
 
-This makes \emph{isolation} a key security property.
-%
-In the context of this thesis, we say one component $A$ is said isolated from
-a second component $B$ when $B$ cannot tamper with $A$'s functioning otherwise
-than through its interface.
-%
-Thus, an operating system should be isolated from end users applications, to
-prevent the latter to grant themselves abusive rights.
-%
-The opposite is not necessarily true, and it is even a common practice for
-operating system to tamper with applications code (\emph{e.g.} address space
-layout randomization, dynamic libraries).
-%
-Many HSE mechanisms implemented by system software target isolation properties.
-
 \begin{figure}
   \centering
   \includegraphics[width=0.3\textwidth]{Figures/computing-platform-1.jpg}
   \caption{Abstraction Layers of a Typical x86 Computing Platform}
   \label{fig:usecase:computing-platform-1}
 \end{figure}
+
+\subsection{Concurrent Software Stacks}
 
 If the abstractions pictured in Figure\,\ref{fig:usecase:computing-platform-1}
 are often well understood by software developers, it is less acknowledge that
@@ -112,6 +110,23 @@ diversity inside a computer.
   \caption{Multiple Software Stacks in x86 Hardware Architecture}
   \label{fig:usecase:computing-platform-2}
 \end{figure}
+
+\subsection{Hardware-Software}
+
+Figure xx
+%
+This makes \emph{isolation} a key security property.
+%
+In the context of this thesis, we say one component $A$ is said isolated from
+a second component $B$ when $B$ cannot tamper with $A$'s functioning otherwise
+than through its interface.
+%
+Thus, an operating system should be isolated from end users applications, to
+prevent the latter to grant themselves abusive rights.
+%
+The opposite is not necessarily true, and it is even a common practice for
+operating system to tamper with applications code (\emph{e.g.} address space
+layout randomization, dynamic libraries).
 
 \begin{figure}
   \centering

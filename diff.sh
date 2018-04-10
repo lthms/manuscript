@@ -18,7 +18,7 @@ function diff () {
     tag="${2}"
     target="diff-${tag}"
 
-    latexdiff --flatten "${dir}/main.tex" "./main.tex" > "${target}.tex"
+    latexdiff --flatten "${dir}/main.tex" "./main.tex"  --exclude-textcmd="section,subsection,chapter" > "${target}.tex"
 
     pdflatex "${target}.tex"
     bibtex "${target}"
