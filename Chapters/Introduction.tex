@@ -6,8 +6,8 @@
   \hfill\footnotesize --- David Wheeler}
 
 \vspace{1cm}\noindent To manage complexity, computing platforms are commonly
-built as successions of abstraction layers, from the hardware architecture's
-components up to high-level software applications.
+built as successions of abstraction layers, from the hardware components which
+form a computer up to high-level software applications.
 %
 Each layer leverages the interface of its predecessor to expose a higher-level,
 more constrained set of functionalities for its successors.
@@ -15,28 +15,95 @@ more constrained set of functionalities for its successors.
 This enables separation of concerns ---each layer encapsulates one dimension of
 the overall complexity--- and modularity ---two layers which expose the same
 interface can be seamlessly interchange---.
-
-In this context, each layer is often \emph{more privileged} than, and therefore
-implicitly trusted by, its successors.
 %
-From a security perspective, the former may constrain the latter, with respect
-to targeted security properties.
+The typical computing platform can be broken down to the following layers:
+%
+\begin{description}
+\item [Hardware Architecture]
+  %
+  A computer is made of physical, inter-connected hardware components. Hardware
+  components take many form and serve as many purpose, from the
+  CPU\,\footnote{\emph{Central Processor Unit}.} which executes the pieces of
+  software which form the upper layers of abstraction, to the various
+  input/output devices which allow a user to interact with the computing
+  platform.
+  %
+\item [Firmware]
+  %
+  Hardware components often require a dedicated piece of software, called its
+  firmware, to be functioning. There are several reasons which explain this
+  conception choice: updating a piece of software is easier than updating a
+  piece of hardware, as the latter often requires a recall.
+  %
+  In addition, the hardware architecture as a whole is almost always provided
+  with a dedicated piece of software which in particular deals with its
+  initialization of the computer.
+  %
+\item [Operating System]
+  %
+  The computing environment provided by the hardware architecture alone is very
+  generic.
+  %
+  As a consequence, it requires a non-trivial amount of configuration.
+  %
+  An operating system leverages this environment to provide high-level
+  interfaces, so that applications can focus on business logic.
+  %
+  In addition, mainstream operating systems deal with the complexity implied by
+  the concurrent execution of several applications.
+\item [Applications]
+  %
+  The previous layers only exist so that application can be executed.
+  %
+  \thomasrk[inline]{Develop}
+\end{description}
+
+Variations of these abstraction layers exist.
+%
+For instance, with the important growth of the cloud computing, hypervisors act
+as an additional layer to share hardware resources among several operating
+systems, and to provide advance features such as migrating them from one
+computer to another. It is also frequent that application internals are
+themselves built as abstraction layers (\emph{e.g.} applicative frawework, core
+logic, plugins).
+
+In these contexts, one layer is often more privileged than, and therefore
+implicitly trusted by, its successors:
+%
+the hardware architecture executes the hardware components' firmware, the
+operating system and the applications;
+%
+the firmware initiates the execution of the operating system, and in many case
+tampers with its execution;
+%
+the operating system does not act otherwise with the applications.
+%
+From a security perspective, one layer may constrain its successors' execution,
+with respect to targeted security properties.
 %
 For instance, an operating system shares hardware resources among several
 applications, and therefore is able to enforce availability ---fair share of CPU
 time---, confidentiality and integrity ---exclusive partition of physical
 memories--- properties.
+
+\section{Hardware-based Security Enforcement mechanisms}
 %
 Constraining one's execution can be achieved in various ways.
 %
 Concerning the lowest layers of a software stack, the common approach is to rely
 on features provided by the hardware architecture.
 %
+In a nutshell, the main idea is to reduce the hardware capabilities one software
+can leverage while it is executed.
+%
 For instance, mainstream operating systems leverage, among others mechanisms, a
-\emph{Memory Management Unit} (MMU) to partition the system memory and a
-hardware timer to schedule arbitrary applications.
-
-\section{Hardware-based Security Enforcement mechanisms}
+\emph{Memory Management Unit} (MMU) to partition the system memory.
+%
+Thus, when an application is executed, it can only access a portion of the
+system memory.
+%
+In addition, the CPU can leverage a hardware timer to stop applications'
+execution, without the need for these applications to cooperate.
 
 We call this class of security enforcement mechanisms, where a trusted software
 component configure the underlying hardware architecture to constrain the
@@ -55,7 +122,10 @@ products.
 Intel, for instance, have notably introduced hardware-based virtualization
 (VT-x, VT-d), dynamic root of trust (TXT), or applicative enclaves (SGX).
 %
-Most of them have been compromised at least once.
+Most of them have been compromised thanks to implementation bugs.
+%
+This is not surprising, as novel hardware features tend to be more and more
+complex.
 %
 At the same time, it has been repeatedly shown that vendors were not always
 correctly taking advantage of important hardware features at their disposal.
@@ -66,16 +136,19 @@ risk.
 Many security vulnerabilities disclosed over the years have been the result of a
 misconfiguration of hardware features by key software components.
 
-In addition, hardware architecture often comprise hundreds of features
-implemented by dozens of interconnected devices.
-%
-This paves the road for a class of security vulnerabilities we call
+In addition to these implementation errors, the fact that hardware architecture
+often comprise hundreds of features implemented by dozens of interconnected
+devices paves the road for a class of security vulnerabilities we call
 \emph{architectural attacks}, where each component is working as expected, yet
 their composition creates an attack path.
 %
-This latter class of security vulnerabilities differs from the two other,
-because it concerns the specifications of the computing platform rather than its
-implementations.
+For instance, the integrity feature of the SPI Flash (where lives the hardware
+architecture firmware) was based on a particular hardware interrupt; from this
+perspective, the Intel TXT feature had the undesirable side-effect of disabling
+this hardware interrupt.
+%
+Architectural attacks differ from implementation errors, because it concerns the
+specifications of the computing platform.
 
 \section{Towards Formal Verification}
 
@@ -92,24 +165,78 @@ datasheets, developer manuals).
 
 This initial specification effort shall serve as a premise for further
 verification work for both the hardware architecture and the trusted software
-components.
+components, and our long term objective is to develop verification approaches
+guided by HSE mechanisms specifications.
 %
-To adopt a verification approach guided by HSE mechanisms specifications could
-help uncover architectural attacks ahead of time.
+We want to be able to prove that a given HSE mechanism is correct, meaning if
+both the hardware components and the trusted software components correctly
+implements their specifications, then the targeted security property is indeed
+enforced.
 %
-This obliges us to consider the hardware architecture as a whole, which poses
-many challenges.
+Because the source of architectural attacks is the great number of concurrent
+hardware features, this second objective obliges us to consider the hardware
+architecture as a whole.
+%
+Several facts encourage us to particularly care about modularity of both
+specifications and proofs:
+%
+the scale of the task for one hardware architecture in particular;
+%
+the frequent releases of new versions of key hardware components;
+%
+the presence of the same hardware components in several different hardware
+architecture families.
+
+In the context of this thesis, our approach has been to propose generic
+formalisms dedicated to tackle a particular class of problem, then to apply
+these proposals to examples coming from real life vulnerabilities of the x86
+hardware architecture.
+%
+Because of its predominant position on the personal computer market, x86-based
+products have been intensively studied from a security standpoint.
+%
+To write our proofs of concepts, we have decided to leverage the Coq proof
+assistant framework.
+%
+Our choice is motivated by the following reasons:
+%
+\begin{itemize}
+\item {\sc Gallina}, the specification of Coq, is an expressive formal language,
+  that combines both a higher-order logic and à powerful dependent type system,
+  while {\sc Ltac}, the proof tactic language of Coq, enables powerful
+  automation features.
+\item The extraction mechanism of Coq allows for transpiling formal
+  specifications written in {\sc Gallina} to {\sc Ocaml}, meaning we can write
+  \emph{executable specifications}. We can leverage this feature in many ways,
+  \emph{e.g.} to validate a hardware component model against a real
+  implementation, or to write a formal specifications of trusted software
+  components to be turned into concrete implementations once verified.
+\item \thomasrk[inline]{EAL7 France? Maybe a bit premature...}
+\end{itemize}
 
 \section{Contributions}
 
-This thesis proceeds as follows. In Chapter\,\ref{chapter:usecase}, we describe
-in more detail HSE mechanisms commonly used in computing platforms, several
-architectural attacks disclosed over the past decode to motivate our interest.
+This thesis proceeds as follows.
 %
-In particular, we introduce the SMRAM Cache Poisoning, to act afterward as a
+We describe in more detail x86-based computing platforms, along with HSE
+mechanisms commonly used in this context and several architectural attacks
+disclosed over the past decade (Chapter\,\ref{chapter:usecase}).
+%
+In particular, we introduce the SMRAM Cache Poisoning, to act afterwards as a
 running example for our contributions.
 %
-We first introduce a formalism to specify a HSE mechanism against hardware
-model.
+Then, we detail how this thesis is in line with an ongoing effort to build more
+reliable hardware components, including from a security standpoint
+(Chapter\,\ref{chapter:relatedwork}).
+
+Once we have established the research context of this thesis, we detail our
+contributions.
 %
-In Chapter\,\ref{chapter:relatedwork}
+We first introduce a formalism to specify a HSE mechanism against hardware model
+(Chapter ???).
+%
+Then, we detail our effort to implement this formalism in Coq, including a
+generic-purpose framework and a proof of concept based on the SMRAM Cache
+Poisoning attack (Chapter ???).
+%
+\thomasrk[inline]{End of chapter to be written.}

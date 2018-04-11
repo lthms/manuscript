@@ -4,8 +4,13 @@
 This Chapter takes the x86 hardware architecture as an example to illustrate the
 challenge related to hardware-based security enforcement.
 %
-While it is true x86 is particularly complex, other mainstream architectures
-(such as ARM, for instance) have suffered similar issues in the past.
+Because of its predominant position, the x86 architectures has been particularly
+studied over the past decade.
+%
+As a consequence, there are a lot of resources on the subject.
+%
+That being said, other mainstream architectures (\emph{e.g.} ARM) work on
+similar basis and suffer similar issues.
 
 At the time of writing this thesis\,\footnote{Spring 2018.}, the \emph{Intel 64
   and IA-32 Architectures Software Developer’s Manual} is 4842 pages long.
@@ -74,9 +79,20 @@ abstraction layers of a computing platform.
 
 Each layer leverages the interface of its predecessor to expose a higher-level,
 more constrained set of functionalities for its successors.
-
-These interfaces are often standardize to some extend, to manage the diversity
-of existing products: UEFI (firmware), POSIX (operating system), etc.
+%
+Thus, software developers who write end-user application do not need to handle
+the complexity of x86, thanks to the principle of separation of concern: while
+the underlying operating system (and the firmware) handles the hardware specific
+tasks, they can focus on application logic.
+%
+These interfaces are often standardize to some extend, which allows
+interoperability.
+%
+This is useful because the market is characterized by a large diversity of
+products.
+%
+%For instance, to abstract away the specificity of each vendors
+%of existing products: UEFI (firmware), POSIX (operating system), etc.
 
 Each layer is more privileged than its successors:
 %
@@ -117,8 +133,8 @@ Figure xx
 %
 This makes \emph{isolation} a key security property.
 %
-In the context of this thesis, we say one component $A$ is said isolated from
-a second component $B$ when $B$ cannot tamper with $A$'s functioning otherwise
+In the context of this thesis, we say one component $A$ is said isolated from a
+second component $B$ when $B$ cannot tamper with $A$'s functioning otherwise
 than through its interface.
 %
 Thus, an operating system should be isolated from end users applications, to
