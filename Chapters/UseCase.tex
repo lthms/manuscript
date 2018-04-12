@@ -1,17 +1,10 @@
 \chapter{x86 Explained}
 \label{chapter:usecase}
 
-This Chapter takes the x86 hardware architecture as an example to illustrate the
-challenge related to hardware-based security enforcement.
+This thesis takes the x86 hardware architecture as an example to illustrate the
+challenge related to Hardware-based Security Enforcement mechanisms, notably
+induced by the scale of the hardware architecture.
 %
-Because of its predominant position, the x86 architectures has been particularly
-studied over the past decade.
-%
-As a consequence, there are a lot of resources on the subject.
-%
-That being said, other mainstream architectures (\emph{e.g.} ARM) work on
-similar basis and suffer similar issues.
-
 At the time of writing this thesis\,\footnote{Spring 2018.}, the \emph{Intel 64
   and IA-32 Architectures Software Developer’s Manual} is 4842 pages long.
 %
@@ -34,6 +27,15 @@ This problematic also exists for hardware designers.
 When they want to add a new feature, or a new component, they have to be certain
 they will not break existing properties of the architecture by doing so.
 
+Because of its predominant position, the x86 architectures have been
+particularly studied over the past decade, which includes many architectural
+attacks disclosures.
+%
+As a consequence, there are a lot of resources on the subject.
+%
+While we focus of x86, other mainstream architectures (\emph{e.g.} ARM) work on
+similar basis and suffer similar issues.
+%
 This Chapter proceeds as follows:
 %
 we describe in more detail how a typical x86 computing platform work, that is
@@ -53,35 +55,23 @@ have been compromised (Section\,\ref{sec:usecase:hse}).
 Describing a computing platform in depth is challenging, because it is made of
 many interdependent components of various nature.
 %
+The x86 hardware architecture is no exception.
+%
 As a consequence, we start our explanation from the typical abstraction layers
-which form a computing platform, then deconstruct them in order to detail how
-they are concretely implemented.
-
-\subsection{Typical Software Stack}
+which form a computing platform, as described in
+Chapter\,\ref{chapter:introduction}.
+%
+We then deconstruct these layers in order to detail how they are concretely
+implemented.
 
 Figure\,\ref{fig:usecase:computing-platform-1} pictures the traditional
 abstraction layers of a computing platform.
-
-\begin{description}
-\item [Hardware] The physical components that together form the computer, whose
-  purpose is to run software components users can interact with.
 %
-\item [Firmware] In the context of this thesis, we call firmware a software
-  component shipped with a particular hardware component by its vendor to ensure
-  its correct functioning.
-%
-\item [Operating System] A system software whose main purpose is to manage
-  hardware resources among several applications.
-%
-\item [End-user application] One could say the lower layers only exist to allow
-  applications to focus on business logic.
-\end{description}
-
 Each layer leverages the interface of its predecessor to expose a higher-level,
 more constrained set of functionalities for its successors.
 %
 Thus, software developers who write end-user application do not need to handle
-the complexity of x86, thanks to the principle of separation of concern: while
+the complexity of x86, thanks to the principle of separation of concerns: while
 the underlying operating system (and the firmware) handles the hardware specific
 tasks, they can focus on application logic.
 %
@@ -89,11 +79,9 @@ These interfaces are often standardize to some extend, which allows
 interoperability.
 %
 This is useful because the market is characterized by a large diversity of
-products.
+products for each layers.
 %
-%For instance, to abstract away the specificity of each vendors
-%of existing products: UEFI (firmware), POSIX (operating system), etc.
-
+%
 Each layer is more privileged than its successors:
 %
 the hardware architecture executes the software stack;
@@ -111,23 +99,60 @@ interact with.
   \label{fig:usecase:computing-platform-1}
 \end{figure}
 
-\subsection{Concurrent Software Stacks}
-
-If the abstractions pictured in Figure\,\ref{fig:usecase:computing-platform-1}
-are often well understood by software developers, it is less acknowledge that
-there are many software stacks inside one computer.
+One drawback of Figure\,\ref{fig:usecase:computing-platform-1} is to hide the
+complexity of the \emph{Hardware} layer.
 %
-Figure\,\ref{fig:usecase:computing-platform-2} gives a glimpse of software stack
-diversity inside a computer.
+Far from a homogeneous block, a typical hardware architecture comprises dozens
+of hardware components whose nature and purpose are very different.
+%
+It is not possible to reason about HSE mechanisms without taking this reality
+into account.
+%
+Figure\,\ref{fig:usecase:computing-platform-2} partially highlights this, by
+making explicit several hardware components involved in memory accesses: the
+cache, the memory controller, a DRAM controller or potentially a graphic card.
+%
+Most of them run dedicated software stacks, concurrently with the ``main''
+software stack pictured in Figure\,\ref{fig:usecase:computing-platform-1}.
+%
+Although these concurrent software stacks are not the main subject of this
+thesis, they are worth mentioning, as they can have dramatic consequences from a
+security perspective.
+%
+We cite two example to motivate this claim.
+%
+First, L. Duflot \emph{et al.} have been able to take control of a network card,
+because the piece of software responsible for processing network packets was
+vulnerable.
+%
+This novel ---at the time--- kind of attacks poses several challenges, from a
+security perspective.
+%
+Indeed, it is very hard, if not impossible, for the ``main'' software stack to
+know whether the network card has been compromised or not.
+%
+The second example we want to detail is the Intel Management Engine, an
+autonomous system which lives inside x86 processors since 2008.
+%
+The Management Engine is used by Intel to provide business services, such as
+out-of-band administration management or trusted computing technologies
+emulation.
+%
+To enable these features, the Management Engine requires very important
+privileges, and is \emph{de facto} the most privileged execution environment of
+a x86 computing platform.
+%
+Recent vulnerabilities have shown this is not without consequences when the
+Management Engine's software stack is compromised.
 
 \begin{figure}
   \centering
   \includegraphics[width=0.8\textwidth]{Figures/intro-computing-platform.jpg}
-  \caption{Multiple Software Stacks in x86 Hardware Architecture}
+  \caption{....}
   \label{fig:usecase:computing-platform-2}
 \end{figure}
 
-\subsection{Hardware-Software}
+\newpage
 
 Figure xx
 %
