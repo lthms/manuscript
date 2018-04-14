@@ -52,6 +52,8 @@ have been compromised (Section\,\ref{sec:usecase:hse}).
 \section{x86 Computing Platform Explained}
 \label{sec:usecase:architecture}
 
+\thomasrk[inline]{Unify the figures, in particular the hardware components.}
+
 Describing a computing platform in depth is challenging, because it is made of
 many interdependent components of various nature.
 %
@@ -155,6 +157,13 @@ a x86 computing platform.
 Recent vulnerabilities have shown this is not without consequences when the
 Management Engine's software stack is compromised.
 
+Apart from these potential software implementation issue within hidden software
+stacks, Figure\,\ref{fig:usecase:computing-platform-2} highlights the complexity
+of a typical hardware architecture.
+%
+This complexity easily explains the architectural attacks that have been
+disclosed during the past decade.
+
 \subsection{Software Isolation}
 
 \begin{figure}
@@ -164,6 +173,30 @@ Management Engine's software stack is compromised.
   \label{fig:usecase:computing-platform-3}
 \end{figure}
 
+Software components mostly manipulate data stored in ``memory'', and they see
+this memory as a continuous array.
+%
+In reality, it is scattered among many different, sometimes redundant locations.
+%
+This is partly because the x86 architecture heavily relies on \emph{memory
+  mapping} mechanisms.
+%
+For each memory access, several hardware components might be involved: the MMU,
+the cache, the memory controller, the DRAM controller, the peripherals, and so
+on.
+
+The code of the software components which form the software stack are also
+stored within the memory, as pictured by
+Figure\,\ref{fig:usecase:computing-platform-3}.
+%
+When the CPU wants to execute the next instruction of a given software
+components code, it fetches it from memory.
+%
+For the result of this memory fetch to be what the software developer is
+expecting, the memory layout has to be carefully configured.
+%
+This is harder than one might expect.
+%
 This makes \emph{isolation} a key security property.
 %
 In the context of this thesis, we say one component $A$ is said isolated from a
@@ -177,19 +210,27 @@ The opposite is not necessarily true, and it is even a common practice for
 operating system to tamper with applications code (\emph{e.g.} address space
 layout randomization, dynamic libraries).
 
-\newpage
-
-\thomasrk[inline]{What we want to write in a glimpse:}
-
-\begin{description}
-\item [Figure 3] Le SW n'existe pas a proprement parlé, il est éclaté entre
-  plusieurs localisations; être en mesure de contrôler ce que l’autre exécute,
-  c’est gagner la partie
-\end{description}
+Isolation should not been confused with code integrity, as it might be possible
+for an attacker to tamper with the execution of a given software component
+without modifying its code in memory.
+%
+To that end, they might for instance rely on a memory mapping mechanism.
 
 
-\section{Firmware}
+\section{Firmware HSE and Vulnerabilities}
 \label{sec:usecase:firmware}
+
+To illustrate these threats, we focus on the \emph{Firmware} layer of the
+computing platform.
+%
+We first explain the role played by the computer firmware at runtime, after the
+boot sequence.
+%
+We then describe which HSE mechanisms it implements to stay isolated from the
+rest of the software stack.
+%
+Finally, we show how these HSE mechanisms have been defeated by attackers over
+time.
 
 \section{Firmware HSE}
 \label{sec:usecase:hse}
