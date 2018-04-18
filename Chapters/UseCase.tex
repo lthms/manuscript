@@ -2,7 +2,7 @@
 \label{chapter:usecase}
 
 This thesis takes the x86 hardware architecture as an example to illustrate the
-challenge related to Hardware-based Security Enforcement mechanisms, notably
+challenges related to Hardware-based Security Enforcement mechanisms, notably
 induced by the scale of the hardware architecture.
 %
 At the time of writing this thesis\,\footnote{Spring 2018.}, the \emph{Intel 64
@@ -217,7 +217,7 @@ without modifying its code in memory.
 To that end, they might for instance rely on a memory mapping mechanism.
 
 
-\section{Firmware HSE and Vulnerabilities}
+\section{BIOS HSE and Vulnerabilities}
 \label{sec:usecase:firmware}
 
 To illustrate these threats, we focus on the \emph{Firmware} layer of the
@@ -232,8 +232,278 @@ rest of the software stack.
 Finally, we show how these HSE mechanisms have been defeated by attackers over
 time.
 
-\section{Firmware HSE}
-\label{sec:usecase:hse}
+\subsection{BIOS Purposes}
+
+In the context of this thesis, we call \emph{Firmware} a piece of software
+provided by a hardware vendor and indispensable to ensure the computer correctly
+works.
+%
+Many hardware components comes with their dedicated firmware, \emph{e.g.} the
+graphic card, the network card, etc.
+%
+In addition, hardware vendors provide a particular form firmware tied to the
+hardware architecture as a whole, better known as the \emph{Basic Input/Output
+  System} (BIOS). % or the \emph{Unified Extensible Firmware Interface} (UEFI).
+
+The main objective of the BIOS is to carry on the initialization of the hardware
+architecture.
+%
+This initialization process is commonly called the boot sequence.
+%
+One the boot sequence is completed, the BIOS selects a system software, like an
+operating system.
+%
+To do so, it loads the system software code into memory, then starts its
+execution.
+%
+Once this is done, the system software controls the main CPU, and the rest of
+the hardware architecture.
+
+The BIOS often exposes a set of so-called runtime services, but nothing obliges
+the system software to use them.
+%
+For this reason, people tend to think BIOS role ends with the boot sequence.
+%
+This is not true.
+%
+Indeed, the BIOS continues to actively participate to the well functioning of a
+computer, even after it gives the control flow to the system software.
+%
+Its main task is to take care of hardware events specific to the particular
+hardware architecture it is tied to.
+%
+Sometimes, it also emulates a hardware feature, in a transparent manner from the
+point of view of the system software.  \thomasrk[inline]{Do we have an example?}
+%
+Last, but not least, it manages its own update.
+%
+That is, the system software is not able to modify the BIOS code, as stored in
+the SPI Flash, by itself.
+%
+Instead, it can only submit an update to the BIOS, and the latter alone decides
+if this update can be applied.
+%
+This prevent the dangerous scenario where an attacker is able to take control of
+the system software, and then modify the BIOS.
+
+Translated in terms of security properties, this means two things:
+%
+\begin{inparaenum}[(1)]
+\item the BIOS shall be properly isolated from the other software components,
+  and
+  %
+\item the Flash SPI which contains the BIOS code shall be integrity-protected,
+  so that only the BIOS can modify it.
+\end{inparaenum}
+%
+This should not be a surprise for the attentive readers: these two security
+properties are enforced by two HSE mechanisms implemented by the BIOS.
+
+\subsection{BIOS Isolation}
+
+The BIOS Isolation at runtime is enforced thanks to the System Management Mode
+(SMM) of x86 CPUs.
+%
+Intel describes it as follows (the emphasis is ours, and does not exist in the
+original document):
+
+\begin{quote}
+  SMM is a special-purpose operating mode provided for handling system-wide
+  functions like power management, system hardware control, or proprietary
+  OEM-designed code.
+  %
+  It is intended for use only by system firmware, not b applications software or
+  general-purpose systems software.
+  %
+  \textbf{The main benefit of SMM is that it offers a distinct and easily
+    isolated processor environment that operates transparently to the operating
+    system or executive and software applications.}
+\end{quote}
+
+To handle several level of privileges, Intel CPU provides several execution
+modes.
+%
+An execution mode can be roughly assimilated to a set of hardware capabilities.
+%
+Hence, in a given execution mode, a CPU may refuse to execute certain assembly
+instructions.
+%
+As a consequence, the software component executed will not be able to leverage
+the side-effects involved by the execution of these instructions, \emph{e.g.}
+access to specific hardware registers (like the one related to paging).
+%
+The execution modes are not ''linear''.
+%
+On the contrary, they can be seen as a composition of several hardware features:
+ring levels, virtualization technology, and finally SMM.
+%
+This means you can be in ring 0, while in hypervisor mode, while in SMM, for
+instance.
+
+\paragraph{System Management Mode}
+%
+The main objective of the SMM, as stated by the Intel Developer Manual, is to
+provide an `isolated processor environment'', dedicated to ``system firmware'',
+and that should ``operate transparently to the operating system''.
+%
+To provide these features, SMM relies on two things: the SMRAM and the System
+Management Interrupt (SMI)
+
+The SMRAM is a special memory region within the DRAM, dedicated to the SMM.
+%
+It is supposed to contain the BIOS code, and its private data;
+%
+as a consequence, it should not be accessible to a CPU which is not in SMM.
+%
+The exact location and size of the SMRAM is architecture dependent.
+%
+To locate it, the CPU has a register named \texttt{SMBASE}, to be configured by
+the BIOS during the boot sequence.
+%
+As its name implies, the \texttt{SMBASE} value should point to the base of the
+SMRAM.
+%
+It is then up to the BIOS developer to appropriately write its so-called SMM
+code (that is, the code supposedly executed in SMM during runtime) knowing the
+limitation of the SMRAM of the targeted architecture.
+
+The SMI is a hardware interrupt which makes the CPU enters SMM.
+%
+More precisely, when a CPU receives a SMI, it saves its current state
+(\emph{e.g.} registers, execution mode, etc.), either in the SMRAM or, for most
+recent versions, in dedicated register of the CPU.
+%
+Once this preliminary step is done, the CPU reconfigures itself;
+%
+in particular, it sets its program counter register, that is, the register which
+indicates from which address to fetch the next instruction it shall execute, to
+$\texttt{SMBASE} + 0x8000$\thomasrk{À vérifier.}.
+%
+From this point, the CPU is in SMM and starts to execute what should be the SMM
+code.
+%
+Once the SMM code has performed the task it has been requested for, the
+\texttt{rsm} instruction can be used.
+%
+The instruction, which can be used only in SMM, tells the CPU to restore its
+previous state.
+%
+This way, the execution of the pieces of software previously halted by the SMI
+can resume.
+%
+From the system point of view, it is like if nothing has happened.
+
+The combination of the SMRAM and the SMI explains why the SMM is often
+introduced as the ``most privileged execution mode'' of a x86 CPU.
+%
+In a nutshell, the SMM code can do all the thing the system software does,
+including arbitrary memory locations which belongs to that system software, but
+the system software cannot modify the SMRAM content.
+%
+In addition, the SMI is not a maskable interrupt, so the system software cannot
+prevent the execution of the SMM code.
+%
+In other words, both the integrity of the SMRAM and the availability of the SMI
+are the foundation of the SMM security.
+%
+Because they have been both defeated at repeated occasions, this makes the SMM
+particularly interesting to illustrate the concept of architectural attacks.
+
+\paragraph{SMRAM Cache Poisoning Attack}
+%
+From the beginning, the integrity of the SMRAM has been enforced by the Memory
+Controller of the x86 architecture, whether it is a dedicated hardware component
+(northbridge), or more recently a part of the CPU.
+%
+The Memory Controller main purpose it to act as a proxy for the CPU memory
+accesses.
+%
+It receives the CPU memory accesses, and dispatches them among the different
+hardware components which expose memory.
+
+The Memory Controller exposes a configuration register called the
+\texttt{SMRAMC}, whose purpose is to configure the access control configuration
+of the SMRAM.
+%
+At the beginning of the boot sequence, the SMRAM is said to be opened, which
+means it can be access by the CPU whether it is in SMM or not.
+%
+This allows the BIOS to load the SMM code inside the SMRAM, as the CPU is not
+itself in SMM at the beginning of the boot sequence.
+%
+Once the loading is done, the BIOS can ``close'' the SMRAM, meaning only a CPU
+in SMM can access to the SMRAM.
+%
+It can also lock the SMRAMC, to prevent further piece of software (say, a
+malicious or exploited system software) to open the SMRAM in order to tamper
+with its content.
+
+Between 1986\thomasrk{Verify the date}, when the SMM has first been introduced,
+and 2009, it was believed that the \texttt{SMRAMC} register enough was
+sufficient to ensure the integrity of the SMRAM.
+%
+Loic Duflot \emph{et al.}\,\cite{duflot2009smram} and Rafal Wojtczuk \emph{et
+  al.}\,\cite{wojtczuk2009smram} have independently shown this belief was
+misplaced, thanks to the so-called \emph{SMRAM Cache Poisoning Attack}.
+%
+In addition to the evocative name, Figure\,\ref{todofig} highlights the
+vulnerability concept.
+%
+To increase performance, the CPU uses a cache of its memory accesses.
+%
+That is, when it reads memory, it stores the result of this access within a
+cache.
+%
+Then, when it has to read at the same location again, it gets the result from
+the cache directly, whose access time is way lower than regular DRAM.
+%
+A similar scheme applies to write accesses.
+
+As a consequence, regarding a CPU configuration, copies of the SMRAM content may
+be found in the cache.
+%
+These copies were not protected by the Memory Controller, meaning the system
+software could tamper with them, even while not in SMM.
+%
+This attack is a perfect illustration of an architectural attack:
+%
+both the Memory Controller and the Cache work as expected.
+%
+The first one prevent an authorized access by a CPU not in SMM;
+%
+The second one keeps copies of successful accesses to decrease latency due to
+memory accesses.
+%
+However, once put together, they paves the road toward a successful tampering of
+the SMRAM by a system software.
+
+The solution implemented by Intel to prevent further exploitation of this
+vulnerability was to modify the behavior of the Cache, when the memory accesses
+target the SMRAM;
+%
+and because the SMRAM size and location remain specific to each architecture,
+this means it requires an additional step of configuration to tell the cache
+where the SMRAM is.
+
+What is interesting about the SMRAM Cache Poisoning is that another x86
+vulnerability\,\cite{domas2015sinkhole} has been since disclosed.
+%
+It also allows to trick a CPU in SMM to execute arbitrary instructions, but
+leaves the content of the SMRAM in DRAM untouched.
+%
+In this case, it leverages the fact that the configuration registers of the
+APIC\,\footnote{\emph{Advanced Programmable Interrupt Controller}.}, a component
+of the CPU, can be mapped in memory.
+%
+An attacker can use them to mask the real content of the SMRAM, even to a CPU in
+SMM.
+%
+Again, the complexity implied by the composition of several hardware components
+can be used in a harmful way.
+
+\paragraph{SENTER Sandman}
+
+\subsection{Flash SPI Integrity}
 
 \section{Conclusion}
 \label{sec:usecase:conclusion}

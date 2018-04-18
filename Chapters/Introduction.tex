@@ -14,69 +14,95 @@ more constrained set of functionalities for its successors.
 %
 This enables separation of concerns ---each layer encapsulates one dimension of
 the overall complexity--- and modularity ---two layers which expose the same
-interface can be seamlessly interchange---.
+interface can be seamlessly interchanged---.
 %
 The typical computing platform can be broken down to the following layers:
 %
 \begin{description}
 \item [Hardware Architecture]
   %
-  A computer is made of physical, inter-connected hardware components. Hardware
-  components take many form and serve as many purpose, from the
+  A computer is made of physical, inter-connected hardware components.
+  %
+  Hardware components take many form and serve as many purposes, from the
   CPU\,\footnote{\emph{Central Processor Unit}.} which executes the pieces of
   software which form the upper layers of abstraction, to the various
   input/output devices which allow a user to interact with the computing
   platform.
   %
-\item [Firmware]
+\item [Firmware/BIOS]
   %
   Hardware components often require a dedicated piece of software, called its
-  firmware, to be functioning. There are several reasons which explain this
-  conception choice: updating a piece of software is easier than updating a
-  piece of hardware, as the latter often requires a recall.
+  firmware, to function.
+  %
+  Updating a piece of software is easier than updating a piece of hardware, as
+  the latter often requires a recall.
+  %
+  Vendors can also implement high-level, business focus features to act as sell
+  arguments.
+  %
+  For instance, Intel has started to provide out-of-band management features to
+  its processors in 2008.
   %
   In addition, the hardware architecture as a whole is almost always provided
   with a dedicated piece of software which in particular deals with its
   initialization of the computer.
   %
-\item [Operating System]
+  Afterwards, when we refer to this ``global'' firmware, we use the term
+  BIOS\,\footnote{\emph{Basic Input/Output System}.}, whereas firmware is used
+  to designate a piece of software tied to a particular hardware component.
+\item [System Software]
   %
   The computing environment provided by the hardware architecture alone is very
   generic.
   %
   As a consequence, it requires a non-trivial amount of configuration.
   %
-  An operating system leverages this environment to provide high-level
-  interfaces, so that applications can focus on business logic.
+  A system software leverages this environment to provide high-level interfaces
+  (\emph{e.g.} system calls), so that applications can focus on business logic,
+  and in many case do not care about which particular hardware architecture they
+  are executed on.
   %
-  In addition, mainstream operating systems deal with the complexity implied by
+  In addition, mainstream system software deal with the complexity implied by
   the concurrent execution of several applications.
 \item [Applications]
   %
   The previous layers only exist so that application can be executed.
   %
-  \thomasrk[inline]{Develop}
+  Thanks to the principle of separation of concerns, they delegate the hardware
+  configuration and management to the lower layers of abstraction.
 \end{description}
 
 Variations of these abstraction layers exist.
 %
-For instance, with the important growth of the cloud computing, hypervisors act
-as an additional layer to share hardware resources among several operating
-systems, and to provide advance features such as migrating them from one
-computer to another. It is also frequent that application internals are
-themselves built as abstraction layers (\emph{e.g.} applicative frawework, core
-logic, plugins).
+For instance, for embedded devices, it is common that the system software and
+the applications form one layer.
+%
+On the contrary, for mainstream computers, the system software can be formed by
+an operating system only, or by the combination of one hypervisor and several
+operating systems.
+%
+The latter case is common in the context of cloud computing, as modern
+hypervisors bring powerful features such as virtual machines snapshots or
+migrations.
+%
+It is also frequent that application internals are themselves built as
+abstraction layers (\emph{e.g.} applicative frawework, core logic, plugins).
 
-In these contexts, one layer is often more privileged than, and therefore
-implicitly trusted by, its successors:
+\section{Hardware-based Security Enforcement mechanisms}
+
+From this perspective, each layer is often more privileged than, and therefore
+implicitly trusted by, its successors.
 %
-the hardware architecture executes the hardware components' firmware, the
-operating system and the applications;
+The hardware architecture executes the hardware components' firmware, the
+software system and the applications.
 %
-the firmware initiates the execution of the operating system, and in many case
-tampers with its execution;
+Hardware implants and backdoors are no fantasy.
 %
-the operating system does not act otherwise with the applications.
+The BIOS initiates the execution of the system software, and has been used as an
+attack vector to tamper with its execution even after a machine restart.
+%
+The operating system manages the applications life cycle, and actively temper
+with their execution (\emph{e.g.} dynamic linking, system calls, etc.).
 %
 From a security perspective, one layer may constrain its successors' execution,
 with respect to targeted security properties.
@@ -86,8 +112,6 @@ applications, and therefore is able to enforce availability ---fair share of CPU
 time---, confidentiality and integrity ---exclusive partition of physical
 memories--- properties.
 
-\section{Hardware-based Security Enforcement mechanisms}
-%
 Constraining one's execution can be achieved in various ways.
 %
 Concerning the lowest layers of a software stack, the common approach is to rely
