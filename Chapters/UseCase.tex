@@ -292,7 +292,7 @@ Translated in terms of security properties, this means two things:
 \item the BIOS shall be properly isolated from the other software components,
   and
   %
-\item the Flash SPI which contains the BIOS code shall be integrity-protected,
+\item the SPI Flash which contains the BIOS code shall be integrity-protected,
   so that only the BIOS can modify it.
 \end{inparaenum}
 %
@@ -501,9 +501,82 @@ SMM.
 Again, the complexity implied by the composition of several hardware components
 can be used in a harmful way.
 
-\paragraph{SENTER Sandman}
 
-\subsection{Flash SPI Integrity}
+\paragraph{SPI Flash Integrity}
+%
+The isolation provided by the SMM is not an end in itself.
+%
+In fact, it has become the basis upon which other HSE mechanisms have been
+implemented.
+%
+One good example is the HSE mechanism responsible for the SPI Flash access
+control.
+%
+In this example, the trusted software component is the SMM code.
+%
+The rest of the software stack, including the system software, is considered
+untrusted.
+%
+The targeted security property is the integrity of the SPI Flash.
+%
+More precisely, only the SMM code should be capable of overwriting the content
+of the SPI Flash, which contains the BIOS code.
+%
+To enforce this security property, the HSE mechanism relies on the
+\texttt{FNCTL} \thomasrk{Trouver le bon nom et mettre une ref.} register, exposed
+by the Platform Controller Hub.
+%
+Once configured correctly, the SPI Flash is considered ``locked'', meaning it is
+not possible even for the SMM code to issue a successful write access which
+targets its content.
+%
+The SPI Flash can be unlocked, but when the system software tries, the PCH fires
+a SMI.
+%
+As a consequence, the CPU saves its current state, and starts executing the SMM
+code.
+
+What comes next depends on the SMM code, and how it is implemented.
+%
+It is executed in a situation where the SPI Flash is unlocked, so it can
+perform, if it makes sense, the write access intended by the system software on
+its behalf.
+%
+On typical workflow is for the system software to load the BIOS update in
+memory, and for the SMM code to verify whether this update is correctly signed
+by the vendor.
+%
+In any case, it is the responsibility of the SMM code to lock again the SPI
+Flash before it uses the \texttt{rsm} instruction to leave SMM.
+%
+Similarly to the \texttt{SMRAMC} register and the isolation it promises, the
+\texttt{FNCTL} register has been defeated at least twice.
+
+\paragraph{SENTER Sandman}
+%
+In 2015, Xeno Kovah \emph{et al.} have shown it was possible to leverage the
+Intel TXT technology to circumvent the SPI Flash write
+protection\,\cite{kovah2015senter}.
+%
+TXT is a feature of some x86 CPU.
+%
+\thomasrk[inline]{Expliquer TXT.}
+
+As a consequence, it was coherent for TXT to mask incoming SMIs, this indeed
+reduce the size of the TCB, by excluding the SMM code.
+%
+Unfortunately, in this case, it has the important consequence of leaving the SPI
+Flash content unprotected.
+
+\paragraph{Speed Racer}
+%
+There is at least another attack that defeated the \texttt{FNCTL} register
+purpose.
+%
+In 2015, Corey Kallenberg \emph{et al.} have shown that the scenario detailed
+previously, where unlocking the SPI Flash fires a SMI which forces the CPU to
+execute the SMM code, suffers from a race condition in presence of a second
+CPU\,\cite{kallenberg2015racecondition}.
 
 \section{Conclusion}
 \label{sec:usecase:conclusion}
