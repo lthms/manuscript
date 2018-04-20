@@ -558,12 +558,22 @@ In 2015, Xeno Kovah \emph{et al.} have shown it was possible to leverage the
 Intel TXT technology to circumvent the SPI Flash write
 protection\,\cite{kovah2015senter}.
 %
-TXT is a feature of some x86 CPU.
+By default, a system software has to trust the BIOS.
 %
-\thomasrk[inline]{Expliquer TXT.}
-
-As a consequence, it was coherent for TXT to mask incoming SMIs, this indeed
-reduce the size of the TCB, by excluding the SMM code.
+Nowadays, most BIOS implementations are made of millions of lines of code, which
+are provided by many different industrial partners of the vendor.
+%
+As a consequence, the attack surface is consequent.
+%
+Intel TXT is a recent feature of some x86 CPU, whose aim is to reduce the
+Trusted Computing Base (TCB) of a system software, by removing most of the BIOS
+from it.
+%
+With Intel TXT, a hypervisor can start its execution in an isolated execution
+environment.
+%
+From this perspective, it was coherent for TXT to mask incoming SMIs, this
+indeed reduce the size of the TCB, by excluding the SMM code.
 %
 Unfortunately, in this case, it has the important consequence of leaving the SPI
 Flash content unprotected.
@@ -577,6 +587,27 @@ In 2015, Corey Kallenberg \emph{et al.} have shown that the scenario detailed
 previously, where unlocking the SPI Flash fires a SMI which forces the CPU to
 execute the SMM code, suffers from a race condition in presence of a second
 CPU\,\cite{kallenberg2015racecondition}.
+%
+When a SMI is fired, all the x86 CPU of the platform will eventually enter in
+SMM.
+%
+On the contrary, the SPI Flash is unlocked as soon as the \texttt{FNCTL}
+register is modified.
+%
+To prevent this race condition, Intel has added a new feature to its PCH, and
+exposed by the \texttt{FNCTL} register.
+%
+Once activated, this new feature ensures the SPI Flash stays locked as long as
+one CPU is not in SMM.
 
 \section{Conclusion}
 \label{sec:usecase:conclusion}
+
+Due to the complexity of computing platform, in particular from a hardware point
+of view, implementing a correct HSE mechanism is challenging.
+%
+We chose to focus on HSE mechanisms implemented by the firmware, because it has
+been well studied and there are several illustrative example of architectural
+attacks.
+%
+In particular, in this chapter, we explained how three of them work.
