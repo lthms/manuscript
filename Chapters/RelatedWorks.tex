@@ -1,44 +1,34 @@
 \chapter{Related Works}
 \label{chapter:relatedwork}
 
-\section{Hardware-based Security Enforcement Mechanisms}
+\section{Hardware Component Verification} % ====================================
+
+\subsection{Industrial Efforts} % ----------------------------------------------
 
 \begin{compactitem}
-  \item The goal of this section is to give an overview of the existing HSE and how
-    they have been defeated
-  \item It is our chance to introduce our running example,
-    that is the SMRAM Cache Poisoning Attack
+\item Intel: core execution cluster\,\cite{kaivola2009formalintel},
+  SGX\,\cite{leslie2015sgx}
+\item ARM\,\cite{fox2010armv7,reid2016armv8}
 \end{compactitem}
 
-Note: ARMLock is an interesting project, maybe to cite here.
-
-\section{Formal Verification of Hardware Components}
-
-\subsection{Industrial Efforts}
+\subsection{Academic Approaches} % ---------------------------------------------
 
 \begin{compactitem}
-\item Intel
-\item ARM
-\end{compactitem}
-
-\subsection{Academic Approaches}
-
-\begin{compactitem}
-\item XOM
+\item XOM\,\cite{lie2003xom}
 \item Coquet
 \item Use Kami as a transition for the next section
 \end{compactitem}
 
-\section{Formal Verification of Inter-connected Components}
-
-\begin{compactitem}
-\item Alloy
-\end{compactitem}
-
-\section{Formal Specifications for Software Developers}
+\section{Software Component Verification} % ------------------------------------
 
 \begin{compactitem}
 \item RockSalt
 \item Moat
 \item VirtCert, Pepin (MMU)
+\end{compactitem}
+
+\section{Formal Verification of Inter-connected Components} % ------------------
+
+\begin{compactitem}
+\item Alloy
 \end{compactitem}

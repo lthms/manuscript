@@ -1,12 +1,65 @@
-\chapter{x86 Explained}
+\chapter{Use Case: BIOS on x86}
 \label{chapter:usecase}
 
-This thesis takes the x86 hardware architecture as an example to illustrate the
-challenges related to Hardware-based Security Enforcement mechanisms, notably
-induced by the scale of the hardware architecture.
+\thomasrk[inline]{Ce chapitre est encore un chantier, mais je vais le laisser
+  comme cela pour le moment. Globalement, je ne suis pas très satisfait par les
+  enchaînement d'idées, mais je ne me fais pas trop de soucis. Le but est de
+  vérifier que les idées s’enchaînent bien. L’annonce du plan, dans l’idée, me
+  semble bonne. Elle annonce bien ce que je voudrais être l'utilité de ce
+  chapitre, mais la façon dont c’est actuellement écrit laisse à désirer.}
+
+For purposes of evaluating our work, we have adopted the systemic approach to
+implement proof of concepts, directly issued from real world examples.
 %
-At the time of writing this thesis\,\footnote{Spring 2018.}, the \emph{Intel 64
-  and IA-32 Architectures Software Developer’s Manual} is 4842 pages long.
+Because of its predominant position, x86-based hardware architectures have been
+particularly studied over the past decades.
+%
+There are a lot of resources available on the topic, including from a security
+perspective.
+%
+In particular, many architectural attacks have been disclosed.
+%
+Together, these factors makes x86-based computing platform very good candidates
+to both illustrate the challenges which make it difficult to implement HSE
+mechanisms, and evaluate our contributions.
+%
+It is important to emphasize that, while we focus on x86, other mainstream
+architectures (\emph{e.g.} ARM) work on similar basis and suffer similar issues.
+
+This Chapter proceeds as follows.
+%
+We describe in more detail how a typical x86 computing platform work, that is
+which king of hardware components are involved, which kind of software stacks
+they execute, and how they interact with each others
+(Section\,\ref{sec:usecase:architecture}).
+%
+We then focus on the key role played by the BIOS.
+%
+The BIOS is the first piece of software executed by the computing platform, is
+responsible for loading in memory the system software and is considered the
+``most privileged piece of software'' of the software stack
+(Section\,\ref{sec:usecase:firmware}).
+%
+Once the role of the BIOS has been established, we detail three HSE mechanisms
+it implements, and as many architectural attacks which have defeated these HSE
+mechanisms in the past (Section\,\ref{sec:usecase:hse}).
+
+\section{x86-based Hardware Architecture Explained}
+\label{sec:usecase:architecture}
+
+% TODO: Unify the figures, because right now, they have different name for the
+% same thing. Use the vocabulary introduced in Introduction.
+
+Describing a computing platform in depth is challenging, because it is made of
+many interdependent components of various nature.
+%
+The x86 hardware architecture is no exception.
+%
+On the contrary, x86 is known for its complexity, probably best illustrated by
+the scale of its documentation.
+%
+At the time of writing this thesis\,\footnote{Spring 2018.}, the \emph{Intel
+64 and IA-32 Architectures Software Developer’s Manual} is 4842 pages long.
 %
 The output of \texttt{lshw -short} on one regular computer lists about 30
 hardware components in addition to the main CPU.
@@ -14,50 +67,21 @@ hardware components in addition to the main CPU.
 Each of them come with its own documentations, often in the form of large
 datasheets.
 %
-This means the information about how the computing platform works are scattered
-throughout many sources.
+This means the information about how the computing platform works are
+scattered throughout many sources.
 %
-This situation inevitably complicates the work of low-level software developers.
+This situation inevitably complicates the work of low-level software
+developers.
 %
 From a security perspective, they need to have a comprehensive view of how the
 computing platform works as a whole.
 %
 This problematic also exists for hardware designers.
 %
-When they want to add a new feature, or a new component, they have to be certain
-they will not break existing properties of the architecture by doing so.
+When they want to add a new feature, or a new component, they have to be
+certain they will not break existing properties of the architecture by doing
+so.
 
-Because of its predominant position, the x86 architectures have been
-particularly studied over the past decade, which includes many architectural
-attacks disclosures.
-%
-As a consequence, there are a lot of resources on the subject.
-%
-While we focus of x86, other mainstream architectures (\emph{e.g.} ARM) work on
-similar basis and suffer similar issues.
-%
-This Chapter proceeds as follows:
-%
-we describe in more detail how a typical x86 computing platform work, that is
-which king of hardware components are involved, which kind of software stack
-they execute, and how they interact with each others
-(Section\,\ref{sec:usecase:architecture});
-%
-we focus on the key role played by the firmware in the platform functioning and
-security (Section\,\ref{sec:usecase:firmware});
-%
-we detail several HSE mechanisms implemented by the firmware, including how they
-have been compromised (Section\,\ref{sec:usecase:hse}).
-
-\section{x86 Computing Platform Explained}
-\label{sec:usecase:architecture}
-
-\thomasrk[inline]{Unify the figures, in particular the hardware components.}
-
-Describing a computing platform in depth is challenging, because it is made of
-many interdependent components of various nature.
-%
-The x86 hardware architecture is no exception.
 %
 As a consequence, we start our explanation from the typical abstraction layers
 which form a computing platform, as described in
@@ -91,7 +115,7 @@ interoperability.
 %
 This is useful because the market is characterized by a large diversity of
 products for each layers.
-%
+
 Each layer is more privileged than its successors:
 %
 the hardware architecture executes the software stack;
@@ -217,7 +241,7 @@ without modifying its code in memory.
 To that end, they might for instance rely on a memory mapping mechanism.
 
 
-\section{BIOS HSE and Vulnerabilities}
+\section{BIOS}
 \label{sec:usecase:firmware}
 
 To illustrate these threats, we focus on the \emph{Firmware} layer of the
@@ -393,6 +417,9 @@ can resume.
 %
 From the system point of view, it is like if nothing has happened.
 
+\section{HSE}
+\label{sec:usecase:hse}
+
 The combination of the SMRAM and the SMI explains why the SMM is often
 introduced as the ``most privileged execution mode'' of a x86 CPU.
 %
@@ -523,8 +550,8 @@ More precisely, only the SMM code should be capable of overwriting the content
 of the SPI Flash, which contains the BIOS code.
 %
 To enforce this security property, the HSE mechanism relies on the
-\texttt{FNCTL} \thomasrk{Trouver le bon nom et mettre une ref.} register, exposed
-by the Platform Controller Hub.
+\texttt{FNCTL} \thomasrk{Trouver le bon nom et mettre une ref.} register,
+exposed by the Platform Controller Hub.
 %
 Once configured correctly, the SPI Flash is considered ``locked'', meaning it is
 not possible even for the SMM code to issue a successful write access which

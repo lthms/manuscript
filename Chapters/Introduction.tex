@@ -90,13 +90,13 @@ abstraction layers (\emph{e.g.} applicative frawework, core logic, plugins).
 
 \section{Hardware-based Security Enforcement mechanisms}
 
-From this perspective, each layer is often more privileged than, and therefore
-implicitly trusted by, its successors.
+Each layer is often more privileged than, and therefore implicitly trusted by,
+its successors.
 %
 The hardware architecture executes the hardware components' firmware, the
 software system and the applications.
 %
-Hardware implants and backdoors are no fantasy.
+Hardware implants and backdoors are no fantasy\,\cite{yang2016a2}.
 %
 The BIOS initiates the execution of the system software, and has been used as an
 attack vector to tamper with its execution even after a machine restart.
@@ -120,7 +120,7 @@ on features provided by the hardware architecture.
 In a nutshell, the main idea is to reduce the hardware capabilities one software
 can leverage while it is executed.
 %
-For instance, mainstream operating systems leverage, among others mechanisms, a
+For instance, mainstream systems software leverage, among others mechanisms, a
 \emph{Memory Management Unit} (MMU) to partition the system memory.
 %
 Thus, when an application is executed, it can only access a portion of the
@@ -146,7 +146,8 @@ products.
 Intel, for instance, have notably introduced hardware-based virtualization
 (VT-x, VT-d), dynamic root of trust (TXT), or applicative enclaves (SGX).
 %
-Most of them have been compromised thanks to implementation bugs.
+Most of them have been compromised thanks to implementation
+bugs\,\cite{wojtczuk2011txtbug,sang2010iommu}.
 %
 This is not surprising, as novel hardware features tend to be more and more
 complex.
@@ -158,7 +159,8 @@ These lacks of hardware configuration put the affected computing platforms at
 risk.
 %
 Many security vulnerabilities disclosed over the years have been the result of a
-misconfiguration of hardware features by key software components.
+misconfiguration of hardware features by key software
+components\,\cite{bulygin2014bios}.
 
 In addition to these implementation errors, the fact that hardware architecture
 often comprise hundreds of features implemented by dozens of interconnected
@@ -166,10 +168,13 @@ devices paves the road for a class of security vulnerabilities we call
 \emph{architectural attacks}, where each component is working as expected, yet
 their composition creates an attack path.
 %
-For instance, the integrity feature of the SPI Flash (where lives the hardware
-architecture firmware) was based on a particular hardware interrupt; from this
-perspective, the Intel TXT feature had the undesirable side-effect of disabling
-this hardware interrupt.
+For instance, the SPI Flash (where lives the BIOS code) is supposedly protected
+against arbitrary write from system software.
+%
+This protection relies on a particular hardware interrupt.
+%
+This did not prevent Intel to introduce TXT, a novel security mechanism which
+had the particular side-effect of disabling this hardware interrupt.
 %
 Architectural attacks differ from implementation errors, because it concerns the
 specifications of the computing platform.
@@ -237,6 +242,12 @@ Our choice is motivated by the following reasons:
   components to be turned into concrete implementations once verified.
 \item \thomasrk[inline]{EAL7 France? Maybe a bit premature...}
 \end{itemize}
+
+In our works, Coq is use to implement proof of concept whose purpose is to
+validate our proposed formalism.
+%
+The use of Coq is therefore not a final choice, and other implementations of our
+proposals are possible.
 
 \section{Contributions}
 
