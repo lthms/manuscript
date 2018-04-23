@@ -1,7 +1,45 @@
 \chapter{Related Works}
 \label{chapter:relatedwork}
 
+\begin{compactitem}
+\item[--] Our objective is to provide HSE formal specifications to software
+  developers
+\item[--] We are in line of an ongoing effort to strengthen the lower levels of
+  abstraction of the computing
+  platforms\,\cite{potlapally2011hardwaresecurity,chong2016report}
+\end{compactitem}
+
+The rest of this Chapter proceeds as follows.
+%
+We first describe the research works whose purpose is to verify system software
+built upon HSE mechanisms (Section\,\ref{sec:relatedwork:software}).
+%
+Then, we focus on research work dedicated to verify that a given piece of
+hardware correctly enforces security properties
+(Section\,\ref{sec:relatedwork:hardware}).
+%
+These projects have in common to model one particular component, and to abstract
+away the rest of the system.
+%
+``Connecting'' these specifications and verification results remains
+challenging.
+%
+Therefore, we finally describe research works focused on modular verification of
+complex systems made of several inter-connected components
+(Section\,\ref{sec:relatedwork:modular}).
+
+\section{Software Component Verification} % ====================================
+\label{sec:relatedwork:software}
+
+\begin{compactitem}
+\item RockSalt\,\cite{morrisett2012rocksalt}
+\item Moat\,\cite{sinha2015moat}
+\item VirtCert, Pepin (MMU), CertikOS + Interrupt
+\end{compactitem}
+
+
 \section{Hardware Component Verification} % ====================================
+\label{sec:relatedwork:hardware}
 
 \subsection{Industrial Efforts} % ----------------------------------------------
 
@@ -15,20 +53,13 @@
 
 \begin{compactitem}
 \item XOM\,\cite{lie2003xom}
-\item Coquet
-\item Use Kami as a transition for the next section
+\item Coquet\,\cite{braibant2011coquet}
+\item Use Kami\,\cite{choi2017kami} as a transition for the next section
 \end{compactitem}
 
-\section{Software Component Verification} % ------------------------------------
+\section{Formal Verification of Inter-connected Components} % ==================
+\label{sec:relatedwork:modular}
 
 \begin{compactitem}
-\item RockSalt
-\item Moat
-\item VirtCert, Pepin (MMU)
-\end{compactitem}
-
-\section{Formal Verification of Inter-connected Components} % ------------------
-
-\begin{compactitem}
-\item Alloy
+\item Alloy\,\cite{jackson2012alloy}
 \end{compactitem}
