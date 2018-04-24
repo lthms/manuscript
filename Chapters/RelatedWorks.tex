@@ -2,11 +2,13 @@
 \label{chapter:relatedwork}
 
 \begin{compactitem}
-\item[--] Our objective is to provide HSE formal specifications to software
-  developers
 \item[--] We are in line of an ongoing effort to strengthen the lower levels of
   abstraction of the computing
   platforms\,\cite{potlapally2011hardwaresecurity,chong2016report}
+\item[--] Our objective is to provide HSE formal specifications to software
+  developers
+\item[--] One primordial aspect of HSE mechanisms is that it is a cooperation
+  between hardware and software components, in presence of untrusted components
 \end{compactitem}
 
 The rest of this Chapter proceeds as follows.
@@ -31,30 +33,120 @@ complex systems made of several inter-connected components
 \section{Software Component Verification} % ====================================
 \label{sec:relatedwork:software}
 
+\subsection{Verified Systems Software} % ---------------------------------------
+
 \begin{compactitem}
-\item RockSalt\,\cite{morrisett2012rocksalt}
-\item Moat\,\cite{sinha2015moat}
-\item VirtCert, Pepin (MMU), CertikOS + Interrupt
+\item[--] Verified Systems Software is a longstanding, active research fields.
+\item[--] In this section, we list three different projects, which adopt three
+  different approach.
+\item[--] Our goal is not to be exhaustive, but rather to give insightful
+  examples.
 \end{compactitem}
 
+\paragraph{VirtCert}
+%
+\begin{compactitem}
+\item[--] Executable specification of a hardware-based hypervisor.
+%
+\item[--] Focus on x86 virtualisation technology features, with a simple memory
+  model.
+\item[--] Iterative works, focus on several security properties:
+  \begin{compactitem}
+  \item Isolation
+  \item Liveness properties
+  \item Constant time cryptography
+  \end{compactitem}
+\item[--] Note: Pip by another team of Inria is similar
+\end{compactitem}
+
+\paragraph{sel4}
+%
+\begin{compactitem}
+\item[--] ``First operating-system kernel with an end-to-end proof of
+  implementation correctness and security enforcement''
+\end{compactitem}
+
+\paragraph{CertiKOS}
+%
+\begin{compactitem}
+\item[--] Implemented in Coq the proof assistant
+\item[--] Target is CompCert AST for proof correspondance
+\item[--] Part of the DeepSpec project, whose purpose is to connect system of
+  proofs, from high level specifications to concrete implementations
+\item[--] Hardware model is relatively simple, but has been completed by XX in
+  order to take interrupt into account
+\end{compactitem}
+
+\subsection{Generic Software Specification Correctness}
+
+\paragraph{RockSalt}\,\cite{morrisett2012rocksalt}
+%
+\begin{compactitem}
+\item[--] Implementing SFI at a software level, that is verifying at load time
+  that a given arbitrary application is correctly sandboxed
+\item[--] Four step contribution
+  \begin{compactenum}
+  \item Modelling of the x86 ISA, model validation
+  \item Definition of software rules/guidelines
+  \item Proof that these rules enforces SFI
+  \item Extraction of the verified verifier
+  \end{compactenum}
+\end{compactitem}
+
+\paragraph{Moat}\,\cite{sinha2015moat}
+%
+\begin{compactitem}
+\item[--] The goal is to verify SGX1 specification, which partly includes
+  specifying software guidelines
+\item[--] Once again, the hardware model is pretty simple, but this can be
+  justified by the fact that the SGX trusted computing base is supposedly very
+  small (CPU only)
+\end{compactitem}
 
 \section{Hardware Component Verification} % ====================================
 \label{sec:relatedwork:hardware}
 
-\subsection{Industrial Efforts} % ----------------------------------------------
-
 \begin{compactitem}
-\item Intel: core execution cluster\,\cite{kaivola2009formalintel},
-  SGX\,\cite{leslie2015sgx}
-\item ARM\,\cite{fox2010armv7,reid2016armv8}
+\item[--] In the previous section, the hardware model are often very simplified.
+\item[--] In the previous Chapter, we have explained in depth why such approach
+  is not enough.
+\item[--] These simplified hardware model are actually as many hypotheses to
+  latter verify.
+\end{compactitem}
+
+\subsection{CPU}
+
+\paragraph{Intel}
+%
+\begin{compactitem}
+\item[--] Core Execution Cluster\,\cite{kaivola2009formalintel}
+\item[--] SGX\,\cite{leslie2015sgx}
+\end{compactitem}
+
+\paragraph{ARM}
+%
+\begin{compactitem}
+\item[--] v7\,\cite{fox2010armv7}
+\item[--] v8\,\cite{reid2016armv8}
+\end{compactitem}
+
+\paragraph{LEON3}
+%
+\begin{compactitem}
+\item[--] Formal Methods 2016
+\end{compactitem}
+
+\paragraph{XOM}
+%
+\begin{compactitem}
+\item[--] XOM\,\cite{lie2003xom}
 \end{compactitem}
 
 \subsection{Academic Approaches} % ---------------------------------------------
 
 \begin{compactitem}
-\item XOM\,\cite{lie2003xom}
-\item Coquet\,\cite{braibant2011coquet}
-\item Use Kami\,\cite{choi2017kami} as a transition for the next section
+\item[--] Coquet\,\cite{braibant2011coquet}
+\item[--] Use Kami\,\cite{choi2017kami} as a transition for the next section
 \end{compactitem}
 
 \section{Formal Verification of Inter-connected Components} % ==================
