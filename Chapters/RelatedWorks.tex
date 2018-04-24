@@ -112,22 +112,37 @@ complex systems made of several inter-connected components
   is not enough.
 \item[--] These simplified hardware model are actually as many hypotheses to
   latter verify.
+\item[--] To the best of our knowledge, there is no comprehensive formal
+  model/specification in terms of hardware components.
 \end{compactitem}
 
-\subsection{CPU}
+\subsection{Formal Specification of CPU Architectures}
+
+\begin{compactitem}
+\item[--] The CPU is the main hardware component of a hardware architecture,
+  because it executes the main software stack
+\item[--] It should not be forgotten that it is not the only ``important'', or
+  ``privileged'' component.
+\end{compactitem}
 
 \paragraph{Intel}
 %
 \begin{compactitem}
 \item[--] Core Execution Cluster\,\cite{kaivola2009formalintel}
 \item[--] SGX\,\cite{leslie2015sgx}
+\item[--] The work seems unrelated, in terms of model, that is Intel is not
+  building a single, unified model for its architecture
 \end{compactitem}
 
 \paragraph{ARM}
 %
 \begin{compactitem}
-\item[--] v7\,\cite{fox2010armv7}
-\item[--] v8\,\cite{reid2016armv8}
+\item Executable specification for ARM ISA
+\item Several research projects for several versions of ARM
+  \begin{compactitem}
+  \item[--] v7\,\cite{fox2010armv7}
+  \item[--] v8\,\cite{reid2016armv8}
+  \end{compactitem}
 \end{compactitem}
 
 \paragraph{LEON3}
@@ -139,10 +154,18 @@ complex systems made of several inter-connected components
 \paragraph{XOM}
 %
 \begin{compactitem}
+\item[--] Security-focused architecture
+\item[--] Contrary to HSE mechanisms, the CPU alone implements a security policy
 \item[--] XOM\,\cite{lie2003xom}
 \end{compactitem}
 
-\subsection{Academic Approaches} % ---------------------------------------------
+
+\subsection{Verified Hardware Components}
+
+\begin{compactitem}
+\item[--] Cite Kami arguments here about use of formal methods in hardware
+  industry in general.
+\end{compactitem}
 
 \begin{compactitem}
 \item[--] Coquet\,\cite{braibant2011coquet}
