@@ -137,8 +137,8 @@ complex systems made of several inter-connected components
 \paragraph{ARM}
 %
 \begin{compactitem}
-\item Executable specification for ARM ISA
-\item Several research projects for several versions of ARM
+\item[--] Executable specification for ARM ISA
+\item[--] Several research projects for several versions of ARM
   \begin{compactitem}
   \item[--] v7\,\cite{fox2010armv7}
   \item[--] v8\,\cite{reid2016armv8}
@@ -157,8 +157,8 @@ complex systems made of several inter-connected components
 \item[--] Security-focused architecture
 \item[--] Contrary to HSE mechanisms, the CPU alone implements a security policy
 \item[--] XOM\,\cite{lie2003xom}
+\item[--] Model checking, simplified ``rest of the system''
 \end{compactitem}
-
 
 \subsection{Verified Hardware Components}
 
@@ -168,7 +168,7 @@ complex systems made of several inter-connected components
 \end{compactitem}
 
 \begin{compactitem}
-\item[--] Coquet\,\cite{braibant2011coquet}
+\item[--] Coquet\,\cite{braibant2011coquet}, is too much ``low-level''
 \item[--] Use Kami\,\cite{choi2017kami} as a transition for the next section
 \end{compactitem}
 
@@ -176,5 +176,32 @@ complex systems made of several inter-connected components
 \label{sec:relatedwork:modular}
 
 \begin{compactitem}
-\item Alloy\,\cite{jackson2012alloy}
+\item[--] Regarding the scale of our self-assigned task, modular verification is
+  a ``must-have'' (probably use the wording of the FreeSpec for introducing
+  here)
+\end{compactitem}
+
+\subsection{Interface Automata}
+
+\begin{compactitem}
+\item[--] Compared to regular automata, interface automata produce a result for
+  each (labeled) transition
+\item[--] The notion of contracts exist in this field
+\item[--] TODO: organize the papers
+\end{compactitem}
+
+\subsection{Program With Effects}
+
+\begin{compactitem}
+\item[--] This is reminiscent to the problematic language of large program with
+  effects
+\item[--] Alloy\,\cite{jackson2012alloy} is a very good example of what we want
+  to achieve
+\item[--] Frama-C and co. allows for modular reasoning, but there is still no
+  mature solution for reasoning for ``external effects'' (from the application
+  point of view), \emph{e.g.} system calls
+\item[--] Ynot suffers the same properties and limitation
+\item[--] Guillaume Claret allows for reasoning about program behaviour
+  according to certain hypothesis about the ``outer environment'', but not to
+  verify the latter
 \end{compactitem}
