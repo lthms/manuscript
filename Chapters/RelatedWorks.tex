@@ -1,6 +1,26 @@
 \chapter{Related Works}
 \label{chapter:relatedwork}
 
+Hardware-based Security Enforcement (HSE) mechanisms are fundamental to enforce
+primordial security properties such as isolation between layers of abstraction.
+%
+Because of the complexity of modern computing platforms, HSE mechanism
+implementations are subject to architectural attacks, where one attacker is able
+to exploit the legitimate use of one hardware component in order to circumvent
+the protection normally implemented by another.
+%
+The important impact of previously disclosed architectural attacks have
+motivated our will to formally specify HSE mechanisms, with two objectives in
+mind:
+%
+\begin{inparaenum}[(1)]
+\item providing unambiguous, security-focused specification to firmware and
+  system software developers, and
+%
+\item verifying these specifications actually provides the targeted security
+  properties.
+\end{inparaenum}
+
 \begin{compactitem}
 \item[--] We are in line of an ongoing effort to strengthen the lower levels of
   abstraction of the computing

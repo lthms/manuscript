@@ -14,7 +14,7 @@ more constrained set of functionalities for its successors.
 %
 This enables separation of concerns ---each layer encapsulates one dimension of
 the overall complexity--- and modularity ---two layers which expose the same
-interface can be seamlessly interchanged---.
+interface can be seamlessly interchanged.
 %
 The typical computing platform can be broken down to the following layers:
 %
@@ -24,10 +24,9 @@ The typical computing platform can be broken down to the following layers:
   A computer is made of physical, inter-connected hardware components.
   %
   Hardware components take many form and serve as many purposes, from the
-  CPU\,\footnote{\emph{Central Processor Unit}.} which executes the pieces of
-  software which form the upper layers of abstraction, to the various
-  input/output devices which allow a user to interact with the computing
-  platform.
+  \ac{cpu} which executes the pieces of software which form the upper layers of
+  abstraction, to the various input/output devices which allow a user to
+  interact with the computing platform.
   %
 \item [Firmware/BIOS]
   %
@@ -48,8 +47,8 @@ The typical computing platform can be broken down to the following layers:
   initialization of the computer.
   %
   Afterwards, when we refer to this ``global'' firmware, we use the term
-  BIOS\,\footnote{\emph{Basic Input/Output System}.}, whereas firmware is used
-  to designate a piece of software tied to a particular hardware component.
+  \ac{bios}, whereas firmware is used to designate a piece of software tied to a
+  particular hardware component.
 \item [System Software]
   %
   The computing environment provided by the hardware architecture alone is very
@@ -98,19 +97,19 @@ software system and the applications.
 %
 Hardware implants and backdoors are no fantasy\,\cite{yang2016a2}.
 %
-The BIOS initiates the execution of the system software, and has been used as an
-attack vector to tamper with its execution even after a machine restart.
+The \ac{bios} initiates the execution of the system software, and has been used
+as an attack vector to tamper with its execution even after a machine restart.
 %
-The operating system manages the applications life cycle, and actively temper
+The operating system manages the applications life cycle, and actively tamper
 with their execution (\emph{e.g.} dynamic linking, system calls, etc.).
 %
 From a security perspective, one layer may constrain its successors' execution,
 with respect to targeted security properties.
 %
 For instance, an operating system shares hardware resources among several
-applications, and therefore is able to enforce availability ---fair share of CPU
-time---, confidentiality and integrity ---exclusive partition of physical
-memories--- properties.
+applications, and therefore is able to enforce availability ---fair share of
+\ac{cpu} time---, confidentiality and integrity ---exclusive partition of
+physical memories--- properties.
 
 Constraining one's execution can be achieved in various ways.
 %
@@ -121,12 +120,12 @@ In a nutshell, the main idea is to reduce the hardware capabilities one software
 can leverage while it is executed.
 %
 For instance, mainstream systems software leverage, among others mechanisms, a
-\emph{Memory Management Unit} (MMU) to partition the system memory.
+\ac{mmu} to partition the system memory.
 %
 Thus, when an application is executed, it can only access a portion of the
 system memory.
 %
-In addition, the CPU can leverage a hardware timer to stop applications'
+In addition, the \ac{cpu} can leverage a hardware timer to stop applications'
 execution, without the need for these applications to cooperate.
 
 We call this class of security enforcement mechanisms, where a trusted software
@@ -137,16 +136,16 @@ execution of untrusted and potentially arbitrary software components,
 A HSE mechanism enforces its targeted security property when both the hardware
 features are correctly implemented and the software components correctly
 configure them.
-
+%
 Both remain challenging.
 
 Over the past decades, vendors have added many security features to their
 products.
 %
-Intel, for instance, have notably introduced hardware-based virtualization
-(VT-x, VT-d), dynamic root of trust (TXT), or applicative enclaves (SGX).
+Intel, for instance, has notably introduced hardware-based virtualization (VT-x,
+VT-d), dynamic root of trust (TXT), or applicative enclaves (SGX).
 %
-Most of them have been compromised thanks to implementation
+Most of them have been compromised due to implementation
 bugs\,\cite{wojtczuk2011txtbug,sang2010iommu}.
 %
 This is not surprising, as novel hardware features tend to be more and more
@@ -165,11 +164,16 @@ components\,\cite{bulygin2014bios}.
 In addition to these implementation errors, the fact that hardware architecture
 often comprise hundreds of features implemented by dozens of interconnected
 devices paves the road for a class of security vulnerabilities we call
-\emph{architectural attacks}, where each component is working as expected, yet
-their composition creates an attack path.
+\emph{architectural attacks},
 %
-For instance, the SPI Flash (where lives the BIOS code) is supposedly protected
-against arbitrary write from system software.
+\thomasrk{Est-ce qu’il existe une classe d'attaque équivalente, dans d'autres
+  domaines?}
+%
+where each component is working as expected, yet their composition creates an
+attack path.
+%
+For instance, the SPI Flash (where lives the \ac{bios} code) is supposedly
+protected against arbitrary write from system software.
 %
 This protection relies on a particular hardware interrupt.
 %
@@ -190,7 +194,7 @@ be leveraged by software developers.
 %
 It would be an advantageous complement to the existing hardware specifications,
 as the latter are often made of many independent, large documents (\emph{e.g.}
-datasheets, developer manuals).
+datasheets, developer manuals), as these documents rarely focus on security.
 
 This initial specification effort shall serve as a premise for further
 verification work for both the hardware architecture and the trusted software
@@ -235,7 +239,7 @@ Our choice is motivated by the following reasons:
   while {\sc Ltac}, the proof tactic language of Coq, enables powerful
   automation features.
 \item The extraction mechanism of Coq allows for transpiling formal
-  specifications written in {\sc Gallina} to {\sc Ocaml}, meaning we can write
+  specifications written in {\sc Gallina} to OCaml, meaning we can write
   \emph{executable specifications}. We can leverage this feature in many ways,
   \emph{e.g.} to validate a hardware component model against a real
   implementation, or to write a formal specifications of trusted software
