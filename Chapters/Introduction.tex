@@ -185,17 +185,23 @@ specifications of the computing platform.
 
 \section{Towards Formal Verification}
 
-In this thesis, our initial objective is to formally specify HSE mechanisms,
-which implies defining both the targeted security property and the required
-configuration steps trusted software components have to perform.
+The important impact of previously disclosed architectural attacks have
+motivated our will to formally specify HSE mechanisms, with two objectives in
+mind:
 %
-The expected result is an unambiguous, security-focused specification which can
-be leveraged by software developers.
+\begin{inparaenum}[(1)]
+\item providing unambiguous, security-focused specification to firmware and
+  system software developers, and
 %
-It would be an advantageous complement to the existing hardware specifications,
-as the latter are often made of many independent, large documents (\emph{e.g.}
-datasheets, developer manuals), as these documents rarely focus on security.
+\item verifying these specifications actually provides the targeted security
+  properties.
+\end{inparaenum}
 
+Formal specifications would be an advantageous complement to the existing
+hardware specifications, as the latter are often made of many independent, large
+documents (\emph{e.g.}  datasheets, developer manuals), as these documents
+rarely focus on security.
+%
 This initial specification effort shall serve as a premise for further
 verification work for both the hardware architecture and the trusted software
 components, and our long term objective is to develop verification approaches
