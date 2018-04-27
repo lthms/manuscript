@@ -20,14 +20,44 @@ mind:
 \item verifying these specifications actually provides the targeted security
   properties.
 \end{inparaenum}
+%
+These objectives are in line with an ongoing effort to strengthen the lower
+layers of abstraction.
+%
+In 2011, Nachiketh Potlapally\,\cite{potlapally2011hardwaresecurity}, who
+was working at Intel at the time, lists the same challenges we have detailed in
+Chapter\,\ref{chapter:usecase}, and suggests that formal methods for security
+validation is one of the possible solutions to these challenges.
+%
+In 2016, Stephen Chong \emph{et al.} cite ``Hardware Architectures'' and
+``Operating Systems'' as areas of interest regarding the use of formal methods
+for security\,\cite{chong2016report}.
 
-\begin{compactitem}
-\item[--] We are in line of an ongoing effort to strengthen the lower levels of
-  abstraction of the computing
-  platforms\,\cite{potlapally2011hardwaresecurity,chong2016report}
-\item[--] One primordial aspect of HSE mechanisms is that it is a cooperation
-  between hardware and software components, in presence of untrusted components
-\end{compactitem}
+The main characteristic of HSE mechanisms is that they are the result of both
+hardware and software components, in presence of a larger system with untrusted
+actors.
+%
+However, hardware and software components are not of the same nature.
+%
+Hardware components are physical devices which accept inputs and computes
+outputs.
+%
+Software components are piece of data scattered into memory spaces, whose
+semantics are determined by the processor unit that executes them.
+%
+While both hardware and software components are been subject to formal
+verification in the past, these verification works tend to rely on different
+representations.
+%
+Florian Lugou \emph{et al.} explain this in depth while they introduce SMASHUP,
+a toolchain for unified verification of Hardware-software
+co-designs\,\cite{lugou2017smashup}.
+%
+It is the main reason why we focus on the specification level in the context of
+this thesis.
+%
+Refine our potential conclusions up to a concrete implementation is necessary in
+the long term.
 
 The rest of this Chapter proceeds as follows.
 %
@@ -48,13 +78,26 @@ Therefore, we finally describe research works focused on modular verification of
 complex systems made of several inter-connected components
 (Section\,\ref{sec:relatedwork:modular}).
 
-\section{Software Component Verification} % ====================================
+\section{Verified Software Component} % ========================================
 \label{sec:relatedwork:software}
+
+Verification of Systems Software is a longstanding, active research fields.
+%
+Even if our end goal is not to prove the correctness of one software component
+implementation, it is interesting to study how they represent the hardware
+architecture.
+%
+By formally specifying HSE mechanisms and verifying they correctly enforce a
+targeted security properties, our objective is to change the nature of proof of
+implementation correctness.
+%
+Rather than proving a given implementation enforce a security property, it
+should be shown that it complies to a verified HSE mechanism specification which
+targets this security property.
 
 \subsection{Verified Systems Software} % ---------------------------------------
 
 \begin{compactitem}
-\item[--] Verified Systems Software is a longstanding, active research fields.
 \item[--] In this section, we list three different projects, which adopt three
   different approach.
 \item[--] Our goal is not to be exhaustive, but rather to give insightful
