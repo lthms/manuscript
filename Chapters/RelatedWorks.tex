@@ -84,9 +84,173 @@ The rest of this Chapter proceeds as follows.
 
 \section{Hoare Logic} % =======================================================
 
-\begin{itemize}
-\item[--] State + command + transition, pre/post condition
+When it comes to formally specify a given system, and latter verify it, the most
+common approach is to define system states, events, and a semantics of events as
+state-transformers, defined in terms of pre and post conditions.
 %
+On the one hand, the pre condition determines whether a given event can occur
+when the system is in a given state.
+%
+On the other hand, the post condition specifies the consequences of that event,
+once occurred, on the system state.
+%
+This approach has been originally introduced by Robert W. Floyd and Tony Hoare
+in the late 60s to reason rigorously about the correctness of computer programs,
+is often referred to as the Floyd-Hoare Logic or the Hoare Logic.
+
+%Hoare Logic can be implemented in many ways.
+%%
+%One possible representation is a \ac{lts}.
+%%
+%In order to illustrate how Hoare Logic can be used in order to specify one
+%system, security properties and to verify the system enforce the targeted
+%security properties, we will use it.
+%%
+%It is important to remember it is not the unique possible representation, nor
+%the most popular.
+%
+%\begin{definition}[Labelled Transition System]
+%  A \ac{lts} is a tuple $(\mathcal{H}, \mathcal{L}, (\rightarrow))$, where
+%  $\mathcal{H}$ is the set of states the system can take, $\mathcal{L}$ is the
+%  set of labelled transitions which can cause the system state to change, and
+%  $(\rightarrow) \subseteq \mathcal{H} \times \mathcal{L} \times \mathcal{H}$ is
+%  the set of state-transformations.
+%\end{definition}
+%
+%\begin{notation}[State-Transformation]
+%  Let $h \in \mathcal{H}$, $h' \in \mathcal{H}$ and $l \in \mathcal{L}$, we
+%  write $h \in \xrightarrow{l} h'$ for $(h, l, h') \in (\rightarrow)$.
+%\end{notation}
+%
+%It is possible to define $(\rightarrow)$ in terms of pre and postcondition.
+%%
+%In this context, a pre condition $P$ will be of the form
+%$P \subseteq \mathcal{H} \times \mathcal{L}$, whereas a post condition $Q$ will
+%be of the form $\mathcal{H} \times \mathcal{L} \times \mathcal{H}$.
+%
+%\begin{notation}[Predicate]
+%  When we define a predicate $P$ over members of the set $\mathcal{A}$ as a
+%  subset of $\mathcal{A}$, that is $P \subseteq \mathcal{A}$, we write $P(x)$
+%  for $x \in P$.
+%\end{notation}
+%
+%We define $(\rightarrow)$ as follows:
+%\[ h \xrightarrow{l} h' \triangleq P(h, l) \wedge Q(h, l, h') \]
+%%
+%In order to define $P$ and $Q$, it is a common practice to rely on a proof tree
+%notation.
+%%
+%Using this notation, we can easily define $(\rightarrow)$ in terms of pre and
+%post condition, one label at a time.
+%
+%\begin{prooftree}
+%  \AxiomC{$P(h, l)$} \AxiomC{$Q(h, l, h')$} \BinaryInfC{$h \xrightarrow{l} h'$}
+%\end{prooftree}
+%
+%\begin{example}[Airlock-like Doors]
+%  A airlock-like doors system is made of two doors and a intermediary
+%  chamber. The user requests the opening of one door, enters inside the chamber,
+%  waits for the first door to close, then requests the opening of the second
+%  door.
+%  %
+%  We can formally specify a airlock-like doors system, as ones used by some
+%  jewellery stores and banks, by defining a dedicated LTS.
+%
+%  Let $\mathcal{D} \triangleq \{\,\mathtt{open}, \mathtt{close}\,\}$ be the set
+%  of states of one door, then we can define
+%  $\mathcal{H} \triangleq \mathcal{D} \times \mathcal{D}$ the set of states of
+%  the system.
+%  %
+%  We consider four events which imply a state-transformation: opening the first
+%  door, closing the first door, opening the second door, closing the second
+%  door.
+%  %
+%  Hence, we define
+%  $\mathcal{L} \triangleq \{\,\mathtt{opening_1}, \mathtt{opening_2},
+%  \mathtt{closing_1}, \mathtt{closing_2}\,\}$.
+%
+%  The set of state-transformations $(\rightarrow)$ specifies the functional
+%  behaviour of the system.
+%  %
+%  We define it with in terms of pre and post condition.
+%
+%  \begin{minipage}[c]{0.5\linewidth}
+%    \begin{prooftree}
+%      \AxiomC{$d_1 = \mathtt{close} \wedge d_2 = \mathtt{close}$}
+%      \AxiomC{$d_1' = \mathtt{open}$}
+%      \BinaryInfC{$(d_1, d_2) \xrightarrow{\mathtt{opening}_1} (d_1', d_2)$}
+%    \end{prooftree}
+%
+%    \begin{prooftree}
+%      \AxiomC{$d_1 = \mathtt{close} \wedge d_2 = \mathtt{close}$}
+%      \AxiomC{$d_2' = \mathtt{open}$}
+%      \BinaryInfC{$(d_1, d_2) \xrightarrow{\mathtt{opening}_1} (d_1, d_2')$}
+%    \end{prooftree}
+%  \end{minipage}
+%  \begin{minipage}[c]{0.5\linewidth}
+%    \begin{prooftree}
+%      \AxiomC{$d_1 = \mathtt{open}$} \AxiomC{$d_1' = \mathtt{close}$}
+%      \BinaryInfC{$(d_1, d_2) \xrightarrow{\mathtt{closing}_1} (d_1', d_2)$}
+%    \end{prooftree}
+%
+%    \begin{prooftree}
+%      \AxiomC{$d_2 = \mathtt{open}$} \AxiomC{$d_2' = \mathtt{close}$}
+%      \BinaryInfC{$(d_1, d_2) \xrightarrow{\mathtt{closing}_2} (d_1, d_2')$}
+%    \end{prooftree}
+%  \end{minipage}
+%\end{example}
+
+Hoare Logic is an effective formalism to reason about system's executions,
+modelled as sequences of state-transformations.
+%
+These sequences, also called traces, can be formally specified as follows:
+%
+%\begin{definition}[Trace]
+%  Let $h \rightarrow^{*} h'$ a trace which modelled a system's execution from an
+%  initial state $h \in \mathcal{H}$ to $h' \in \mathcal{H}$.
+%  %
+%  This trace is either the result of
+%  %
+%  \begin{itemize}
+%  \item[--] One state-transformation from $h$ to $h'$, induced by an labelled
+%    transition $l$
+%  %
+%  \item[--] One trace from $h$ to $h''$, and an additional state-transformation
+%    from $h$ to $h'$, induced by a labelled transition $l$
+%  \end{itemize}
+%
+%  \begin{minipage}[c]{0.5\linewidth}
+%    \begin{prooftree}
+%      \AxiomC{$h \xrightarrow{l} h'$} \RightLabel{\texttt{1-step}}
+%      \UnaryInfC{$h \rightarrow^{*} h'$}
+%    \end{prooftree}
+%  \end{minipage}
+%  \begin{minipage}[c]{0.5\linewidth}
+%    \begin{prooftree}
+%      \AxiomC{$h \rightarrow^{*} h'$} \AxiomC{$h' \xrightarrow{l} h''$}
+%      \RightLabel{\texttt{n-step}} \BinaryInfC{$h \rightarrow^{*} h''$}
+%    \end{prooftree}
+%  \end{minipage}
+%\end{definition}
+%
+These traces can be used to defined various kind of properties of the studied
+systems.
+%
+In the context of this thesis, we focus on security properties.
+%
+From this perspective, we can use Hoare Logic to model \emph{enforceable
+  security properties}, as defined by Fred
+B. Schneider\,\cite{schneider2000enforceable}.
+%
+Enforceable security properties are defined with predicates on sets of
+executions, that is traces.
+%
+The most common scheme, to that regards, is to distinguish between secure state
+and insecure state, secure transition and insecure transition, and to verify
+that, for a given trace, the system never is an insecure state, and no insecure
+transition ever occurres.
+
+\begin{itemize}
 \item[--] Mostly reasoning about trace
   properties\,\cite{schneider2000enforceable}: definition of safe states, safe
   transitions, safe traces and verification that pre/post condition imply safety

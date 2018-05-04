@@ -10,6 +10,7 @@
 
 For purposes of evaluating our work, we have adopted the systemic approach to
 implement proof of concepts, directly issued from real world examples.
+\thomasrk{On applique nos formalismes à des choses réelles.}
 %
 Because of its predominant position, x86-based hardware architectures have been
 particularly studied over the past decades.
@@ -19,7 +20,7 @@ perspective.
 %
 In particular, many architectural attacks have been disclosed.
 %
-Together, these factors makes x86-based computing platform very good candidates
+Together, these factors makes x86-based computing platform very good candidate
 to both illustrate the challenges which make it difficult to implement HSE
 mechanisms, and evaluate our contributions.
 %
@@ -186,7 +187,7 @@ of a typical hardware architecture.
 This complexity easily explains the architectural attacks that have been
 disclosed during the past decade.
 
-\subsection{Software Isolation}
+\subsection{Importance of Software Isolation}
 
 \begin{figure}
   \centering
@@ -417,7 +418,7 @@ This way, the execution of the pieces of software previously halted by the
 %
 From the system point of view, it is like if nothing has happened.
 
-\section{HSE}
+\section{Examples of x86 Architectural Attacks}
 \label{sec:usecase:hse}
 
 The combination of the SMRAM and the \ac{smi} explains why the \ac{smm} is often
@@ -528,7 +529,7 @@ Again, the complexity implied by the composition of several hardware components
 can be used in a harmful way.
 
 
-\paragraph{SPI Flash Integrity}
+\paragraph{}
 %
 The isolation provided by the \ac{smm} is not an end in itself.
 %
