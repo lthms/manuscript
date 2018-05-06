@@ -196,16 +196,61 @@ model, in order to reduce the state combinatory.
 
 \paragraph{VirtCert}
 %
+Between 2011 and 2014, Gilles Barthe \emph{et al.} have worked on a idealized
+model of a hypervisor.
+%
+This model is defined in terms of state, actions and a semantics of actions as
+state-transformers.
+%
+That is, even if the authors are not using the terms \ac{lts}, their model
+follows the same principles.
+%
+In their context, the state mixes information about both hardware components
+(\ac{cpu} execution mode, registers, memory content, etc.) and software
+components (list of guests, current active guest, memory mapping for the
+hypervisor and the guests, etc.).
+%
+The actions are the hypercalls, exposed by the hypervisor for the guests to use.
+%
+The semantics of actions as state-transformers, that is the set of possible
+transitions for the modelled system, is defined in terms of pre and post
+conditions.
+
+First, they have shown that their ideal hypervisor was
+%
+\begin{inparaenum}[(1)]
+\item ensuring strong isolation between guests, and
+%
+\item eventually processing every requests intended by the
+  guests\,\cite{barthe2011virtcert1}.
+\end{inparaenum}
+%
+Then, they have incorporated the \ac{cpu} cache to their
+model\,\cite{barthe2012virtcert2}.
+%
+Cache-based attacks, where attackers are able to infer information they should
+not have access to by leveraging their knowledge of micro-architectural
+implementation specificity, are a very important threat to virtualization
+platforms.
+%
+The authors have show their ideal hypervisor could prevent such attack, at the
+cost of flushing the cache before each context switch.
+%
+They have taken their approach a step further, by focusing on constant-time
+cryptography\,\cite{barthe2014virtcert3}.
+
+The scope of this hypervisor model is large, and cover many security aspects
+primordial for virtualization platforms.
+%
+Moreover, there have been an important specification and formalization effort
+required to take into consideration the different security properties.
+
+\paragraph{}
+%
+TODO: Not a verification of a component as-is, but of a given configuration for
+this component
 
 \begin{itemize}
-\item[--] Mostly reasoning about trace
-  properties\,\cite{schneider2000enforceable}: definition of safe states, safe
-  transitions, safe traces and verification that pre/post condition imply safety
-\item[--] Many tools are possible, from proof assistant to model checking, but
-  the main concept remains unchanged (only the easiness to express/verify one
-  property or another)
-\item[--] XOM\,\cite{lie2003xom} and VirtCert are particularly good example of
-  that
 \item[--] Moat\,\cite{sinha2015moat} is interesting, because it uses a notion of
   policy (how to sign SGX enclave code)
 \item[--] RockSalt\,\cite{morrisett2012rocksalt} does not work in a very
