@@ -86,23 +86,19 @@ The rest of this Chapter proceeds as follows.
 
 When it comes to formally specify a given system, and latter verify it, a common
 approach is to model it as a \ac{lts}.
-
-\begin{definition}[Labelled Transition System]
-  A \ac{lts} is a tuple
-  $\langle \mathcal{S}, \mathcal{L}, (\rightarrow) \rangle$, such that
-
-  \begin{compactitem}
-  \item[--] $\mathcal{S}$ is the set of states the system can take
-  \item[--] $\mathcal{L}$ is a set of labels to describe events which can occur
-    within the system, causing the system state to change
-  \item[--]
-    $(\rightarrow) \subseteq \mathcal{S} \times \mathcal{L} \times \mathcal{S}$
-    is the set of transitions of the system, where
-    $(s, l, s') \in (\rightarrow)$ (denoted by s $\xrightarrow{l} s'$) means it
-    is possible for the system to go from a state $s$ to a state $s'$ after an
-    event labelled $l$
-  \end{compactitem}
-\end{definition}
+%
+A \ac{lts} comprises three components:
+%
+\begin{inparaenum}[(1)]
+%
+\item a set of states the system can take,
+%
+\item a set of labels which describe the events which occur within the system
+  and causing its state to change, and
+%
+\item a set of transitions, from one state to another and caused by one event.
+%
+\end{inparaenum}
 
 Once defined, a \ac{lts} specifies the system functional behaviour.
 %
@@ -136,8 +132,8 @@ expected SMM code, constitutes a secure state.
 
 \paragraph{}
 %
-Hardware and software components alike have been modelled with \ac{lts}, or
-a similar formalism.
+Hardware and software components alike have been modelled with \ac{lts}, or a
+similar formalism.
 
 \paragraph{\ac{xom}.}
 %
@@ -181,8 +177,8 @@ The security properties targeted by the \ac{xom} architecture are enforceable
 security properties, and the authors rely on Mur$\varphi$ to perform the state
 exploration of their model.
 %
-The main advantage of a model checker, in this context, is to be able to print the
-trace it has found not to satisfy the targeted security property.
+The main advantage of a model checker, in this context, is to be able to print
+the trace it has found not to satisfy the targeted security property.
 %
 This trace describes an attack path, that is the execution steps to reproduce in
 order to defeat the security enforcement.
@@ -244,17 +240,78 @@ primordial for virtualization platforms.
 %
 Moreover, there have been an important specification and formalization effort
 required to take into consideration the different security properties.
+%
+Some of them, like constant-time cryptography implementations, are not
+enforceable security properties.
+%
+Indeed, it is not possible, only with the trace of one execution, to know
+whether a given implemantion is constant-time.
+%
+It is required to consider all the possible traces.
 
 \paragraph{}
 %
-TODO: Not a verification of a component as-is, but of a given configuration for
-this component
+Both \ac{xom} model and VirtCert rely on \acp{lts} or similar formalism to
+specify one component in particular and to verify a set of targeted properties.
+%
+However, in their models, all the trusted components are specified and verified
+together.
+%
+From a \ac{xom} architecture perspective, there is no such thing as a
+``trusted'' software component, because the access control mechanism is solely
+implemented by the \ac{xom} \ac{cpu}.
+%
+As for VirtCert, the model purpose is to validate a determined hypervisor model.
+%
+From this thesis perspective, a hypervisor is a trusted software component which
+implements a \ac{hse} mechanism by correctly configuring hardware mechanisms
+such as virtualization technologies.
+%
+\thomasrk[inline]{Dire que le travail de verif de VirtCert pourrait être de se
+  reposer sur des HSE mechanism specification préalablement vérifiée.}
+
+\paragraph{RockSalt}
+%
+Thanks to a Google's service called \ac{nacl}, it is possible for software
+developers to distribute their web applications in the form of native executable
+code.
+%
+These native applications are executed directly in the context of the browser.
+%
+\ac{nacl} uses \ac{sfi} to prevent arbitrary native applications to tamper with
+the code and data of the browser.
+%
+\ac{sfi} comprises a set of rules native applications have to comply with, and
+that together form a sandbox policy.
+%
+In practice, the \ac{nacl} checks that an arbitrary native applications respects
+the \ac{sfi} rules before loading it to the browser context.
+%
+As a consequence, the browser is protected from malicious machine code.
+
+From a security perspective, this means there is two requirements over the
+\ac{nacl}:
+%
+\begin{inparaenum}[(1)]
+\item verify that the rules indeed are sufficient to constrain the untrusted
+  native applications with respect to the sandbox policy, and
+%
+\item the \ac{nacl} checker correctly verify that native applications respect
+  these rules.
+\end{inparaenum}
+%
+This is reminiscent of the challenges faced by \ac{hse} mechanisms.
+%
+Because \ac{nacl} has been shown to have issues regarding these two
+requirements, Greg Morrisett \emph{et al.} have modelled the \ac{sfi} rules in
+Coq, proven their correctness, and extract an executable checker from this
+model\,\cite{morrisett2012rocksalt}.
+%
+By doing so, they have addressed the two requirements listed above.
 
 \begin{itemize}
 \item[--] Moat\,\cite{sinha2015moat} is interesting, because it uses a notion of
   policy (how to sign SGX enclave code)
-\item[--] RockSalt\,\cite{morrisett2012rocksalt} does not work in a very
-  different way, when it speaks about safe state, and sequences of instruction
 \end{itemize}
 
 \section{Modular Hoare Logic} % ===============================================
