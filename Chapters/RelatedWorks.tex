@@ -267,8 +267,18 @@ From this thesis perspective, a hypervisor is a trusted software component which
 implements a \ac{hse} mechanism by correctly configuring hardware mechanisms
 such as virtualization technologies.
 %
-\thomasrk[inline]{Dire que le travail de verif de VirtCert pourrait être de se
-  reposer sur des HSE mechanism specification préalablement vérifiée.}
+If we were eventually able to formally specify a HSE mechanism which was proven
+to correctly implement guests isolation, then we could verify that VirtCert
+hypervisor satisfies the software requirements of the HSE mechanism.
+%
+The main idea is to be able to reuse the same software requirements for a
+totally different system software, which also happens to use the same
+virtualization technologies to enforce guests isolation, but a different
+partition algorithm.
+
+\ac{lts} have also been used to specify requirements over software components,
+and verify these requirements were sufficient the hardware architecture to
+enforce a set of targeted properties.
 
 \paragraph{RockSalt}
 %
@@ -303,18 +313,92 @@ From a security perspective, this means there is two requirements over the
 This is reminiscent of the challenges faced by \ac{hse} mechanisms.
 %
 Because \ac{nacl} has been shown to have issues regarding these two
-requirements, Greg Morrisett \emph{et al.} have modelled the \ac{sfi} rules in
-Coq, proven their correctness, and extract an executable checker from this
-model\,\cite{morrisett2012rocksalt}.
+requirements, Greg Morrisett \emph{et al.} have specified the \ac{nacl} checker
+in Coq, proven the rules it checks are correct and indeed enforce the targeted
+sandbox policy, and then manually translated the checker in
+C\,\cite{morrisett2012rocksalt}.
 %
-By doing so, they have addressed the two requirements listed above.
+By doing so, they have addressed the two requirements listed above, as long as
+their translation is correct.
+%%
+% They proceeded as follows.
+%%
+% First, they modelled the set of states of the CPU.
+%%
+% Then, they defined a translator, from the complex x86 instruction set to a
+% much simpler instructions set, easier to reason with.
+%%
+% They define a semantics for this simpler instructions set.
+%%
 
-\begin{itemize}
-\item[--] Moat\,\cite{sinha2015moat} is interesting, because it uses a notion of
-  policy (how to sign SGX enclave code)
-\end{itemize}
+\paragraph{Moat}
+%
+Intel \ac{sgx} is a recent addition to certain x86 \acp{cpu}, whose purpose is
+to provide so-called enclaves to userland
+applications\,\cite{costan2016sgxexplained}.
+%
+These enclaves supposedly offer an execution environment isolated from the
+system software.
+%
+The functioning of \ac{sgx} can be roughly summarized as follows:
+\ac{sgx}-capable CPU dedicates a special portion of the system memory, called
+the \ac{epc}, to enclaves.
+%
+The system software is responsible for allocating and initializing memory pages
+of the \ac{epc} (thanks to dedicated instructions), but it cannot read or write
+to them once it is done.
+%
+This is enforced by the memory controller, which encrypt the content of the
+\ac{epc} transparently from the \ac{cpu}.
+%
+Hence, the memory controller only decrypts an \ac{epc}'s page if it is accessed
+by the enclave which owns it; it will also discards write accesses performed by
+another software component than the page owner.
 
-\section{Modular Hoare Logic} % ===============================================
+Rohit Sinha \emph{et al.} have modelled SGX instructions semantics, to complete
+an existing model, and have developed an automated information flow analysis
+tool called Moat, to verify whether are not a given application code may leak
+secret or not\,\cite{sinha2015moat}.
+%
+The work proceeds similarly to RockSalt, where instructions are treated as
+labelled transition from one state to another.
+%
+However, Moat also consider an active and passive adversary, with additional
+capabilities (meaning, additional transitions in the system).
+%
+The approach is similar to what David Lie \emph{et al.} have done for the
+\ac{xom} architecture.
+
+\paragraph{}
+%
+Both RockSalt or Moat express requirements software requirements shall comply
+with in order to enable hardware to enforce a targeted security policy.
+%
+Moat, in particular, allows for considering several software components, in the
+form of an active adversary with system software capabilities.
+%
+We are willing to generalize their approach, to specify and verify \ac{hse}
+mechanisms.
+%
+However, because we target a larger scope, we will remain at the specification
+levels, and we do not plan on verifying particular implementations of trusted
+software components.
+
+Each work we have been introducing in this Section relies on a model of a
+hardware architecture.
+%
+This model often comprises the hardware features that are directly required by
+the software component.
+%
+Because we mostly focus on architectural attacks, and because architectural
+attacks leverage unsuspected compositions of hardware features, we cannot adopt
+this approach for the long term.
+%
+Defining a model which is comprehensive in terms of hardware components, and
+usable for verifying relevant properties, imposes several methodological
+requirements, to enable modularity.
+
+\section{Hoare Logic} % ===============================================
 
 \begin{itemize}
 \item[--] Abstract away routines with verified pre/post condition
