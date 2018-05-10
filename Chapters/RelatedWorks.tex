@@ -482,7 +482,44 @@ pointers (and potential memory aliasing, etc.).
 %
 Using a higher-level language can be useful to avoid this problem.
 
+Functional programming languages easily qualify as of ``higher level'' than C.
+%
+In this context, reasoning about state and side-effects is usually achieved
+thanks to monads\,\cite{jones2005io}.
+%
+Monads allow for modelling stateful computations,
+either \begin{inparaenum}[(1)]
+%
+\item from axiomatic operations which locally manipulate the state, or
+%
+\item thanks to a composition operator called \emph{bind}, which creates
+  a new computation by chaining two simpler ones.
+%
+\end{inparaenum}
+
 \paragraph{Ynot}
+%
+Ynot is a Coq framework which applies Hoare Logic to monads, so it becomes
+possible to formally reason with side-effects in Coq\,\cite{chlipala2009ynot}.
+%
+Programs with side-effects are defined in terms of the $\mathtt{Cmd}$ monad,
+where the type of a computation not only tells the returned type, but also a
+couple of pre and post conditions that specifies the effects of the computation
+on the program's heap.
+%
+When a Ynot user uses \emph{bind} to chain two existing computations, it has to
+proves the post condition of the first computation satisfies the pre condition
+of the second one.
+%
+As a consequence, programs defined in terms of the $\mathtt{Cmd}$ monad are
+necessarily correct by construction.
+%
+The authors claim writing a program with Ynot and the $\mathtt{Cmd}$ monad is
+often not much harder that writing that program in Haskell and the $\mathtt{IO}$
+monad.
+%
+This is achieved thanks to specific automation tactics written to ease the
+deductive reasoning required by \emph{bind}.
 
 \paragraph{Pip}
 %
