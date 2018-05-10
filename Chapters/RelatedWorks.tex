@@ -83,6 +83,7 @@ The rest of this Chapter proceeds as follows.
 %(Section\,\ref{sec:relatedwork:modular}).
 
 \section{Labelled Transition System} % ========================================
+\label{sec:usecase:lts}
 
 When it comes to formally specify a given system, and latter verify it, a common
 approach is to model it as a \ac{lts}.
@@ -481,7 +482,7 @@ In C, lists are usually encoded as linked list, which implies reasoning with
 pointers (and potential memory aliasing, etc.).
 %
 Using a higher-level language can be useful to avoid this problem.
-
+%
 Functional programming languages easily qualify as of ``higher level'' than C.
 %
 In this context, reasoning about state and side-effects is usually achieved
@@ -523,7 +524,58 @@ deductive reasoning required by \emph{bind}.
 
 \paragraph{Pip}
 %
-MMU\,\cite{jomaa2016mmu}
+Pip is a minimal kernel whose reference implementation is written in {\sc
+  Gallina}, the specification language of Coq.
+%
+The authors have verified their reference implementation correctly configures a
+\ac{mmu} in order to isolate the applications it manages\,\cite{jomaa2016mmu}.
+%
+The objective is similar to the first iteration of
+VirtCert\,\cite{barthe2011virtcert1}, however their approach to specify the
+system software is closer to what Ynot has proposed.
+%
+The Pip system calls are defined in terms of a dedicated monad, which allows for
+manipulating a mix of hardware state (notably including the \ac{mmu} current
+configuration) and Pip internal state (\emph{e.g.} shadow \ac{mmu} tables with
+additional information).
+%
+The correct isolation of applications is defined as a predicate on this state,
+and they prove this predicate is an invariant during Pip execution:
+%
+from a ``secure'' state, the new state resulting of the execution of any Pip
+system call is ``secure''.
+
+\paragraph{}
+%
+It is possible to ease the reasoning about a complex system, by specifying the
+system transitions as combination of simpler, reusable state updates.
+%
+Thanks to Hoare Logic, it is possible to abstract away these state update with a
+couple of pre and post conditions.
+%
+In addition, compared to other approaches described in
+Section\,\ref{sec:usecase:lts}, the resulting specification is written in an
+imperative style, more familiar for system software developers or hardware
+designers.
+%
+However, the result works presented above all consider the whole system state at
+the same time.
+%
+For instance, both VirtCert and Pip consider a mix of hardware and software
+states.
+%
+In our case, one of our will is to consider the hardware architecture as a
+whole, and to do that we need to use a model which is comprehensive in terms of
+hardware components.
+%
+Hardware architectures are often designed as hierarchy of hardware components.
+%
+Defining a couple of pre and post conditions for a computation which happens
+locally inside one component, but may affect other sub-components in the
+process, becomes challenging.
+%
+To overcome this challenge, we need to be able to abstract totally these
+components.
 
 \section{Interface Automata} % ================================================
 
