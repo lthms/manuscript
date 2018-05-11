@@ -24,8 +24,8 @@ mind:
 These objectives are in line with an ongoing effort to strengthen the lower
 layers of abstraction.
 %
-In 2011, Nachiketh Potlapally\,\cite{potlapally2011hardwaresecurity}, who
-was working at Intel at the time, lists the same challenges we have detailed in
+In 2011, Nachiketh Potlapally\,\cite{potlapally2011hardwaresecurity}, who was
+working at Intel at the time, lists the same challenges we have detailed in
 Chapter\,\ref{chapter:usecase}, and suggests that formal methods for security
 validation is one of the possible solutions to these challenges.
 %
@@ -64,26 +64,41 @@ such as DeepSpec\,\cite{appel2017deepspec}.
 
 The rest of this Chapter proceeds as follows.
 %
-\thomasrk[inline]{Todo again: annonce du plan}
-%We first describe the research works whose purpose is to verify system software
-%built upon HSE mechanisms (Section\,\ref{sec:relatedwork:software}).
-%%
-%Then, we focus on research work dedicated to verify that a given piece of
-%hardware correctly enforces security properties
-%(Section\,\ref{sec:relatedwork:hardware}).
-%%
-%These projects have in common to model one particular component, and to abstract
-%away the rest of the system.
-%%
-%``Connecting'' these specifications and verification results remains
-%challenging.
-%%
-%Therefore, we finally describe research works focused on modular verification of
-%complex systems made of several inter-connected components
-%(Section\,\ref{sec:relatedwork:modular}).
+First, we focus on the general approach to verify targeted properties on a
+system, that is reasoning on traces of a transition system
+(Section\,\ref{sec:related:lts}).
+%
+Then, we focus on the definition of the transition system itself.
+%
+Indeed, in order to be able to uncover potential architectural attacks, we need
+to consider a computing platform which is comprehensive in terms of hardware
+components.
+%
+Hoare Logic is a well established formalism to reason on computer program
+correctness, and its principles apply to other use case, including hardware
+modelling (Section\,\ref{sec:related:hoare}).
+%
+It can be used to enable modularity and code reuse.
+%
+However, as-is, it does not help to reduce the complexity of the computing
+platform state.
+%
+This is way, as a final step, we present how it is possible to break down a
+complex system into interconnected, simpler subsystems, yet being able to reason
+about the sub-systems composition (Section\,\ref{sec:related:interface}).
+%
+This approach sounds very natural in our context of application, as a computing
+platform is often organized as a succession of specialized layers (Separation of
+Concerns).
+
+In each sections, we detail several representative research works which leverage
+the presented approaches.
+%
+We have chosen these examples to illustrate both the verification of hardware
+and software components.
 
 \section{Labelled Transition System} % ========================================
-\label{sec:usecase:lts}
+\label{sec:related:lts}
 
 When it comes to formally specify a given system, and latter verify it, a common
 approach is to model it as a \ac{lts}.
@@ -131,10 +146,17 @@ whether a untrusted software component has been able to tamper with its content.
 In this context, a SMRAM which contains an arbitrary instruction instead of
 expected SMM code, constitutes a secure state.
 
-\paragraph{}
-%
 Hardware and software components alike have been modelled with \ac{lts}, or a
 similar formalism.
+%
+According to the targeted security property, these models have leveraged
+different tools.
+%
+For instance, liveness and availability properties, which can be expressed
+easily with a temporal logic, are often verified using a model checker.
+%
+On the contrary, when the targeted security properties require a more general
+and expressive logic, proof assistant have been used successfully.
 
 \paragraph{\ac{xom}.}
 %
@@ -396,13 +418,13 @@ attacks leverage unsuspected compositions of hardware features, we cannot adopt
 this approach for the long term.
 %
 Defining a model which is comprehensive in terms of hardware components, and
-usable for verifying relevant properties, calls for methodological
-requirements.
+usable for verifying relevant properties, calls for methodological requirements.
 %
 Indeed, the more complex a model becomes, the more challenging it is to reason
 with.
 
 \section{Hoare Logic} % ===============================================
+\label{sec:related:hoare}
 
 Model complexity originates in two situations:
 %
@@ -467,10 +489,11 @@ result.
 
 \paragraph{}
 %
-Using the C language to reason with hardware components is not without precedent.
+Using the C language to reason with hardware components is not without
+precedent.
 %
-For instance, the reference implementation of XXX\thomasrk{Find the correct name
-  + ref}, a cache coherence protocol, is written in C.
+For instance, the reference implementation of Scalable Coherent Interface (SCI)
+Cache Coherence Protocol\,\cite{stern1995cachecoherence} is written in C.
 %
 However, C is a (relatively) low-level language.
 %
@@ -488,13 +511,12 @@ Functional programming languages easily qualify as of ``higher level'' than C.
 In this context, reasoning about state and side-effects is usually achieved
 thanks to monads\,\cite{jones2005io}.
 %
-Monads allow for modelling stateful computations,
-either \begin{inparaenum}[(1)]
+Monads allow for modelling stateful computations, either \begin{inparaenum}[(1)]
 %
 \item from axiomatic operations which locally manipulate the state, or
 %
-\item thanks to a composition operator called \emph{bind}, which creates
-  a new computation by chaining two simpler ones.
+\item thanks to a composition operator called \emph{bind}, which creates a new
+  computation by chaining two simpler ones.
 %
 \end{inparaenum}
 
@@ -554,7 +576,7 @@ Thanks to Hoare Logic, it is possible to abstract away these state update with a
 couple of pre and post conditions.
 %
 In addition, compared to other approaches described in
-Section\,\ref{sec:usecase:lts}, the resulting specification is written in an
+Section\,\ref{sec:related:lts}, the resulting specification is written in an
 imperative style, more familiar for system software developers or hardware
 designers.
 %
@@ -578,6 +600,87 @@ To overcome this challenge, we need to be able to abstract totally these
 components.
 
 \section{Interface Automata} % ================================================
+\label{sec:related:interface}
+
+Previous approaches flatten the state of the system.
+%
+This design choice has two important consequences:
+%
+\begin{inparaenum}[(1)]
+%
+\item It reduces modularity by explicitly coupling all the system components
+  together, and
+%
+\item it encourages to reduce the scope of the model to only take into account
+  the hardware feature which are directly required.
+%
+\end{inparaenum}
+%
+This goes against the Separation of Concerns principle, where the state of a
+given component is less important than its behaviour to requests.
+%
+That is, by focusing on components' interaction, we can specify and verify each
+component individually.
+%
+This forces us to specify requirements over components the target is directly
+connected to.
+%
+We then can reason about components composition, by verifying that the
+components indeed hold the requirements formulated previously.
+%
+Eventually, we will be able to model the complete computing platform.
+%
+One very important advantage of this approach over ``flatten state'' is that it
+structure the reasoning and highlights the share of responsibility of each
+components in the context of enforcing a targeted security property.
+
+\paragraph{Coq.io}
+%
+In 2015, Guillaume Claret \emph{et al.} have released Coq.io, a framework for
+the Coq proof assistant to write programs with side-effects and
+concurrency\,\cite{claret2015coqiowww}
+%
+Similarly to Ynot, the authors model side-effects with axiomatic monadic
+operations.
+%
+However, they do not attempt to model the impacts of these operations over the
+program state, and only the returned type of each operation is specified.
+%
+Their objective is to consider operations which rely on an ``outer'' environment
+to complete.
+%
+For instance, reading the content of the standard input is such an operation, as
+it is implemented with a system call, and therefore implies the operating
+system.
+%
+To reason about the correctness of a program which uses such operations, they
+generalize the concept of use cases of unit testing, in the forms of so-called
+scenarios\,\cite{claret2015coqio}.
+%
+A scenario is the formalization of requirements over the environment responses,
+for a given sequence of operations.
+%
+It becomes possible to verify that the program ``is correct'' under the
+hypotheses modelled with these scenarios.
+%
+Coq.io has been developed with the code extraction feature of Coq in mind.
+%
+The framework introduces several axiomatic operations for Coq, and a OCaml
+library to provide concrete implementations for these operations.
+%
+However, in its current state, Coq.io provides no tool for verifying if the
+scenarios are indeed realistic.
+%
+That is, we cannot verify the composition of a program specified in Coq using
+Coq.io, and then extracted as a OCaml module, with \emph{e.g.} a given operating
+system.
+
+\paragraph{Alloy}
+%
+
+\paragraph{Kami}
+%
+
 
 \begin{itemize}
 \item[--] In previous section, routine impact on state is ''more imporant'' than
@@ -586,196 +689,203 @@ components.
 \item[--] How to deal with ``outer'', distant environment?
 \item[--] Coq.io makes hypothesis on outer environment result, but how to verify
   these hypothesis?
+\item[--] Kami\,\cite{choi2017kami}
 \item[--] Interface Automata provide an interesting formalism
 \item[--] Alloy\,\cite{jackson2012alloy} is a very good example of what we want
   to achieve
 \end{itemize}
 
-%\section{Verified Software Component} % ========================================
-%\label{sec:relatedwork:software}
+% \section{Verified Software
+% Component} % ========================================
+% \label{sec:relatedwork:software}
 %
-%Verification of Systems Software is a longstanding, active research fields.
+% Verification of Systems Software is a longstanding, active research fields.
 %%
-%Even if our end goal is not to prove the correctness of one software component
-%implementation, it is interesting to study how they represent the hardware
-%architecture.
+% Even if our end goal is not to prove the correctness of one software component
+% implementation, it is interesting to study how they represent the hardware
+% architecture.
 %%
-%By formally specifying HSE mechanisms and verifying they correctly enforce a
-%targeted security properties, our objective is to change the nature of proof of
-%implementation correctness.
+% By formally specifying HSE mechanisms and verifying they correctly enforce a
+% targeted security properties, our objective is to change the nature of proof
+% of implementation correctness.
 %%
-%Rather than proving a given implementation enforce a security property, it
-%should be shown that it complies to a verified HSE mechanism specification which
-%targets this security property.
+% Rather than proving a given implementation enforce a security property, it
+% should be shown that it complies to a verified HSE mechanism specification
+% which targets this security property.
 %
-%\subsection{Verified Systems Software} % ---------------------------------------
+% \subsection{Verified Systems
+% Software} % ---------------------------------------
 %
-%\begin{compactitem}
-%\item[--] In this section, we list three different projects, which adopt three
-%  different approach.
-%\item[--] Our goal is not to be exhaustive, but rather to give insightful
-%  examples.
-%\end{compactitem}
+% \begin{compactitem}
+% \item[--] In this section, we list three different projects, which adopt three
+%   different approach.
+% \item[--] Our goal is not to be exhaustive, but rather to give insightful
+%   examples.
+% \end{compactitem}
 %
-%\paragraph{VirtCert}
+% \paragraph{VirtCert}
 %%
-%\begin{compactitem}
-%\item[--] Executable specification of a hardware-based hypervisor.
+% \begin{compactitem}
+% \item[--] Executable specification of a hardware-based hypervisor.
 %%
-%\item[--] Focus on x86 virtualisation technology features, with a simple memory
-%  model.
-%\item[--] Iterative works, focus on several security properties:
-%  \begin{compactitem}
-%  \item Isolation
-%  \item Liveness properties
-%  \item Constant time cryptography
-%  \end{compactitem}
-%\item[--] Note: Pip by another team of Inria is similar
-%\end{compactitem}
+% \item[--] Focus on x86 virtualisation technology features, with a simple
+%   memory model.
+% \item[--] Iterative works, focus on several security properties:
+%   \begin{compactitem}
+%   \item Isolation
+%   \item Liveness properties
+%   \item Constant time cryptography
+%   \end{compactitem}
+% \item[--] Note: Pip by another team of Inria is similar
+% \end{compactitem}
 %
-%\paragraph{sel4}
+% \paragraph{sel4}
 %%
-%\begin{compactitem}
-%\item[--] ``First operating-system kernel with an end-to-end proof of
-%  implementation correctness and security enforcement''
-%\end{compactitem}
+% \begin{compactitem}
+% \item[--] ``First operating-system kernel with an end-to-end proof of
+%   implementation correctness and security enforcement''
+% \end{compactitem}
 %
-%\paragraph{CertiKOS}
+% \paragraph{CertiKOS}
 %%
-%\begin{compactitem}
-%\item[--] Implemented in Coq the proof assistant
-%\item[--] Target is CompCert AST for proof correspondance
-%\item[--] Part of the DeepSpec project, whose purpose is to connect system of
-%  proofs, from high level specifications to concrete implementations
-%\item[--] Hardware model is relatively simple, but has been completed by XX in
-%  order to take interrupt into account
-%\end{compactitem}
+% \begin{compactitem}
+% \item[--] Implemented in Coq the proof assistant
+% \item[--] Target is CompCert AST for proof correspondance
+% \item[--] Part of the DeepSpec project, whose purpose is to connect system of
+%   proofs, from high level specifications to concrete implementations
+% \item[--] Hardware model is relatively simple, but has been completed by XX in
+%   order to take interrupt into account
+% \end{compactitem}
 %
-%\subsection{Generic Software Specification Correctness}
+% \subsection{Generic Software Specification Correctness}
 %
-%\paragraph{RockSalt}\,\cite{morrisett2012rocksalt}
+% \paragraph{RockSalt}\,\cite{morrisett2012rocksalt}
 %%
-%\begin{compactitem}
-%\item[--] Implementing SFI at a software level, that is verifying at load time
-%  that a given arbitrary application is correctly sandboxed
-%\item[--] Four step contribution
-%  \begin{compactenum}
-%  \item Modelling of the x86 ISA, model validation
-%  \item Definition of software rules/guidelines
-%  \item Proof that these rules enforces SFI
-%  \item Extraction of the verified verifier
-%  \end{compactenum}
-%\end{compactitem}
+% \begin{compactitem}
+% \item[--] Implementing SFI at a software level, that is verifying at load time
+%   that a given arbitrary application is correctly sandboxed
+% \item[--] Four step contribution
+%   \begin{compactenum}
+%   \item Modelling of the x86 ISA, model validation
+%   \item Definition of software rules/guidelines
+%   \item Proof that these rules enforces SFI
+%   \item Extraction of the verified verifier
+%   \end{compactenum}
+% \end{compactitem}
 %
-%\paragraph{Moat}\,\cite{sinha2015moat}
+% \paragraph{Moat}\,\cite{sinha2015moat}
 %%
-%\begin{compactitem}
-%\item[--] The goal is to verify SGX1 specification, which partly includes
-%  specifying software guidelines
-%\item[--] Once again, the hardware model is pretty simple, but this can be
-%  justified by the fact that the SGX trusted computing base is supposedly very
-%  small (CPU only)
-%\end{compactitem}
+% \begin{compactitem}
+% \item[--] The goal is to verify SGX1 specification, which partly includes
+%   specifying software guidelines
+% \item[--] Once again, the hardware model is pretty simple, but this can be
+%   justified by the fact that the SGX trusted computing base is supposedly very
+%   small (CPU only)
+% \end{compactitem}
 %
-%\section{Hardware Component Verification} % ====================================
-%\label{sec:relatedwork:hardware}
+% \section{Hardware Component
+% Verification} % ====================================
+% \label{sec:relatedwork:hardware}
 %
-%\begin{compactitem}
-%\item[--] In the previous section, the hardware model are often very simplified.
-%\item[--] In the previous Chapter, we have explained in depth why such approach
-%  is not enough.
-%\item[--] These simplified hardware model are actually as many hypotheses to
-%  latter verify.
-%\item[--] To the best of our knowledge, there is no comprehensive formal
-%  model/specification in terms of hardware components.
-%\end{compactitem}
+% \begin{compactitem}
+% \item[--] In the previous section, the hardware model are often very
+%   simplified.
+% \item[--] In the previous Chapter, we have explained in depth why such
+%   approach is not enough.
+% \item[--] These simplified hardware model are actually as many hypotheses to
+%   latter verify.
+% \item[--] To the best of our knowledge, there is no comprehensive formal
+%   model/specification in terms of hardware components.
+% \end{compactitem}
 %
-%\subsection{Formal Specification of CPU Architectures}
+% \subsection{Formal Specification of CPU Architectures}
 %
-%\begin{compactitem}
-%\item[--] The CPU is the main hardware component of a hardware architecture,
-%  because it executes the main software stack
-%\item[--] It should not be forgotten that it is not the only ``important'', or
-%  ``privileged'' component.
-%\end{compactitem}
+% \begin{compactitem}
+% \item[--] The CPU is the main hardware component of a hardware architecture,
+%   because it executes the main software stack
+% \item[--] It should not be forgotten that it is not the only ``important'', or
+%   ``privileged'' component.
+% \end{compactitem}
 %
-%\paragraph{Intel}
+% \paragraph{Intel}
 %%
-%\begin{compactitem}
-%\item[--] Core Execution Cluster\,\cite{kaivola2009formalintel}
-%\item[--] SGX\,\cite{leslie2015sgx}
-%\item[--] The work seems unrelated, in terms of model, that is Intel is not
-%  building a single, unified model for its architecture
-%\end{compactitem}
+% \begin{compactitem}
+% \item[--] Core Execution Cluster\,\cite{kaivola2009formalintel}
+% \item[--] SGX\,\cite{leslie2015sgx}
+% \item[--] The work seems unrelated, in terms of model, that is Intel is not
+%   building a single, unified model for its architecture
+% \end{compactitem}
 %
-%\paragraph{ARM}
+% \paragraph{ARM}
 %%
-%\begin{compactitem}
-%\item[--] Executable specification for ARM ISA
-%\item[--] Several research projects for several versions of ARM
-%  \begin{compactitem}
-%  \item[--] v7\,\cite{fox2010armv7}
-%  \item[--] v8\,\cite{reid2016armv8}
-%  \end{compactitem}
-%\end{compactitem}
+% \begin{compactitem}
+% \item[--] Executable specification for ARM ISA
+% \item[--] Several research projects for several versions of ARM
+%   \begin{compactitem}
+%   \item[--] v7\,\cite{fox2010armv7}
+%   \item[--] v8\,\cite{reid2016armv8}
+%   \end{compactitem}
+% \end{compactitem}
 %
-%\paragraph{LEON3}
+% \paragraph{LEON3}
 %%
-%\begin{compactitem}
-%\item[--] Formal Methods 2016
-%\end{compactitem}
+% \begin{compactitem}
+% \item[--] Formal Methods 2016
+% \end{compactitem}
 %
-%\paragraph{XOM}
+% \paragraph{XOM}
 %%
-%\begin{compactitem}
-%\item[--] Security-focused architecture
-%\item[--] Contrary to HSE mechanisms, the CPU alone implements a security policy
-%\item[--] XOM\,\cite{lie2003xom}
-%\item[--] Model checking, simplified ``rest of the system''
-%\end{compactitem}
+% \begin{compactitem}
+% \item[--] Security-focused architecture
+% \item[--] Contrary to HSE mechanisms, the CPU alone implements a security
+%   policy
+% \item[--] XOM\,\cite{lie2003xom}
+% \item[--] Model checking, simplified ``rest of the system''
+% \end{compactitem}
 %
-%\subsection{Verified Hardware Components}
+% \subsection{Verified Hardware Components}
 %
-%\begin{compactitem}
-%\item[--] Cite Kami arguments here about use of formal methods in hardware
-%  industry in general.
-%\end{compactitem}
+% \begin{compactitem}
+% \item[--] Cite Kami arguments here about use of formal methods in hardware
+%   industry in general.
+% \end{compactitem}
 %
-%\begin{compactitem}
-%\item[--] Coquet\,\cite{braibant2011coquet}, is too much ``low-level''
-%\item[--] Use Kami\,\cite{choi2017kami} as a transition for the next section
-%\end{compactitem}
+% \begin{compactitem}
+% \item[--] Coquet\,\cite{braibant2011coquet}, is too much ``low-level''
+% \item[--] Use Kami\,\cite{choi2017kami} as a transition for the next section
+% \end{compactitem}
 %
-%\section{Formal Verification of Inter-connected Components} % ==================
-%\label{sec:relatedwork:modular}
+% \section{Formal Verification of Inter-connected
+% Components} % ==================
+% \label{sec:relatedwork:modular}
 %
-%\begin{compactitem}
-%\item[--] Regarding the scale of our self-assigned task, modular verification is
-%  a ``must-have'' (probably use the wording of the FreeSpec for introducing
-%  here)
-%\end{compactitem}
+% \begin{compactitem}
+% \item[--] Regarding the scale of our self-assigned task, modular verification
+%   is a ``must-have'' (probably use the wording of the FreeSpec for introducing
+%   here)
+% \end{compactitem}
 %
-%\subsection{Interface Automata}
+% \subsection{Interface Automata}
 %
-%\begin{compactitem}
-%\item[--] Compared to regular automata, interface automata produce a result for
-%  each (labeled) transition
-%\item[--] The notion of contracts exist in this field
-%\item[--] TODO: organize the papers
-%\end{compactitem}
+% \begin{compactitem}
+% \item[--] Compared to regular automata, interface automata produce a result
+%   for each (labeled) transition
+% \item[--] The notion of contracts exist in this field
+% \item[--] TODO: organize the papers
+% \end{compactitem}
 %
-%\subsection{Program With Effects}
+% \subsection{Program With Effects}
 %
-%\begin{compactitem}
-%\item[--] This is reminiscent to the problematic language of large program with
-%  effects
-%\item[--] Alloy\,\cite{jackson2012alloy} is a very good example of what we want
-%  to achieve
-%\item[--] Frama-C and co. allows for modular reasoning, but there is still no
-%  mature solution for reasoning for ``external effects'' (from the application
-%  point of view), \emph{e.g.} system calls
-%\item[--] Ynot suffers the same properties and limitation
-%\item[--] Guillaume Claret allows for reasoning about program behaviour
-%  according to certain hypothesis about the ``outer environment'', but not to
-%  verify the latter
-%\end{compactitem}
+% \begin{compactitem}
+% \item[--] This is reminiscent to the problematic language of large program
+%   with effects
+% \item[--] Alloy\,\cite{jackson2012alloy} is a very good example of what we
+%   want to achieve
+% \item[--] Frama-C and co. allows for modular reasoning, but there is still no
+%   mature solution for reasoning for ``external effects'' (from the application
+%   point of view), \emph{e.g.} system calls
+% \item[--] Ynot suffers the same properties and limitation
+% \item[--] Guillaume Claret allows for reasoning about program behaviour
+%   according to certain hypothesis about the ``outer environment'', but not to
+%   verify the latter
+% \end{compactitem}
