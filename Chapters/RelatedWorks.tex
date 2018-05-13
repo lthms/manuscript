@@ -634,6 +634,91 @@ One very important advantage of this approach over ``flatten state'' is that it
 structure the reasoning and highlights the share of responsibility of each
 components in the context of enforcing a targeted security property.
 
+\paragraph{Component-based Modelling}
+%
+We have found a very good illustration of this approach in the work of Thomas
+Heyman \emph{et al.}\,\cite{heyman2012securemodel}.
+%
+They have presented a component-based modelling technique for
+Alloy\,\cite{jackson2012alloy}, where components are primarily defined as a
+semantics for a set of operations.
+%
+One component is connected to another when it leverages its operations.
+%
+The goal of the analysis is to reason about component composition, in particular
+with respects with security requirements.
+%
+These requirements are defined in terms of predicates on operation results.
+%
+One very interesting feature of Alloy is that it allows for reasoning about
+partial models.
+%
+This is done by specifying a set of requirements over the operations results, in
+place of a complete implementation.
+%
+From our perspective, this is useful for at least two situations:
+%
+\begin{inparaenum}[(1)]
+\item it enables incremental verification, where the system is specified
+  component by component
+%
+\item it can be leveraged to ``fill the gap'' of a system where certain
+  components are under-specified, or their implementations are proprietary.
+%
+\end{inparaenum}
+%
+Because of the scale of a hardware architecture, incremental modelling and
+verification is a game changer.
+%
+In the same time, being able to model completely and accurately each hardware
+component is unlikely, as proprietary components are the norm, while open
+hardware remains a niche market.
+%
+At least, it becomes possible to clearly define the assumptions that are made
+about these black boxes
+
+Unfortunately, Alloy does not have a mechanism similar to, \emph{e.g.} Coq code
+extraction, that would enable model validation.
+%
+Being able to validate the model of a component, whether it is a hardware or a
+software component, is a desirable feature when the latter exists prior to the
+former.
+
+\paragraph{}
+%
+In Alloy, components' connections are modelled by aggregation.
+%
+
+
+\paragraph{Kami}
+%
+As part of the DeepSpec project\,\cite{appel2017deepspec}, Joonwon Choi \emph{et
+  al.} have released Kami\,\cite{choi2017kami}.
+%
+Kami's main objective is to bring software formal verification technique based
+on proof assistants to hardware conception; a world that is still dominated by
+model checking approaches.
+%
+The result is framework for the Coq proof assistant, to implement and verify
+hardware components.
+%
+Pushing the \texttt{Notation} feature of Coq, which let the developer extends
+the proof assistant parser with its own construction, to its maximum, they offer
+a development environment very close to BlueSpec\,\cite{nikhil2004bluespec}.
+%
+Besides, BlueSpec is a target for Kami's models extraction.
+%
+Therefore, it s possible to generate FPGA bitstream from a Kami module, using
+the BlueSpec compiler.
+
+Although Kami allows for more components’ connection patterns than what we
+eventually propose in the context of this thesis, it is hardware specific, thus
+is not suitable for reasoning about systems which also contains software
+components.
+%
+In addition, its purpose is to verify hardware component implementation, while
+we rather stay at the specification level.
+
 \paragraph{Coq.io}
 %
 In 2015, Guillaume Claret \emph{et al.} have released Coq.io, a framework for
@@ -675,25 +760,9 @@ That is, we cannot verify the composition of a program specified in Coq using
 Coq.io, and then extracted as a OCaml module, with \emph{e.g.} a given operating
 system.
 
-\paragraph{Alloy}
-%
-
-\paragraph{Kami}
-%
-
-
-\begin{itemize}
-\item[--] In previous section, routine impact on state is ''more imporant'' than
-  its result
-\item[--] Same state, no matter how deep we go
-\item[--] How to deal with ``outer'', distant environment?
-\item[--] Coq.io makes hypothesis on outer environment result, but how to verify
-  these hypothesis?
-\item[--] Kami\,\cite{choi2017kami}
-\item[--] Interface Automata provide an interesting formalism
-\item[--] Alloy\,\cite{jackson2012alloy} is a very good example of what we want
-  to achieve
-\end{itemize}
+\begin{itemize}%
+\item[--] Interface Automata provide an interesting formalism%
+\end{itemize}%
 
 % \section{Verified Software
 % Component} % ========================================
