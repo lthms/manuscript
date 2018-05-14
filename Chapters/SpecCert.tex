@@ -506,9 +506,214 @@ $\texttt{PhysAddr} \triangleq \setdef{\val{pa}_i}{i \leq \val{max\_addr}}$ the
 set of physical addresses the CPU uses to perform \IO. The maximal address
 offset (denoted by $\val{max\_addr}$ here) is specific to the CPU and may vary
 in time according to its addressing mode (real mode, long mode, etc.), therefore
-we left its value as a parameter of our model.  An in-depth definition of
-$\texttt{Archi}_{\set{S}}$ is given in appendix~\ref{app:archis}.
-% TODO
+we left its value as a parameter of our model.
+
+%%%%% APPENDIX State %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{table}
+\begin{center}
+  \begin{tabular}{ll}
+    \hline
+    \bf{Notation} & \bf{Description} \\
+    \hline
+    $ A \triangleq \begin{array}{ll}
+                      \{\,field_1 &: T_1 \\
+                      ;\,field_2 &: T_2\,\}
+                    \end{array} $ & Set of records definition \\
+    \hline
+    $field_1(a)$ & Field selection \\
+    \hline
+    %$a\,\{ field_1 \leftarrow t \}$ & Field update \\
+    %\hline
+    $M \triangleq [A \rightarrow B]$ & Set of maps definition \\
+    \hline
+    $m[a]$ & Map application \\
+    %\hline
+    %$m[a \leftarrow b']$ & Map update \\
+    \hline
+  \end{tabular}
+  \caption{List of notations}
+  \label{tab:notation}
+\end{center}
+\end{table}
+
+To describe the hardware architecture state of \formatLTS{Minx86} Computing
+Platforms, we use record types and maps with the notations listed in Table
+\ref{tab:notation}.  Given $\set{S}$ a set of software components, the set of
+states of the hardware architecture is denoted by $\texttt{Archi}_{\set{S}}$.
+\[ \texttt{Archi}_{\set{S}} \triangleq
+  \begin{array}{ll}
+    \,\{proc &: \texttt{Proc}          \\
+    ;\,mc    &: \texttt{MC}            \\
+    ;\,mem   &: \texttt{Mem}_{\set{S}} \\
+    ;\,cache &: \texttt{Cache}_{\set{S}}\,\}
+  \end{array}
+\]
+$\texttt{Proc}$ denotes the CPU set of states, $\texttt{MC}$ the memory
+controller set of states, $\texttt{Mem}_{\set{S}}$ the physical memories set of
+states and $\texttt{Cache}_{\set{S}}$ the cache set of states.
+
+We define $\texttt{CacheStrat} \triangleq \setshortdef{\val{UC}, \val{WB}}$ the
+set of the modeled cache strategies. The set of states of the SMRRs is denoted
+$\texttt{Smrr}$.
+
+\[ \texttt{Smrr} \triangleq \begin{array}{ll}
+                              \{\,range &: \set{P}(\texttt{PhysAddr}) \\
+                               ;\,smram\_strat &: \texttt{CacheStrat} \}
+\end{array} \]
+
+The set of physical addresses $range$ tells the CPU the location of the SMRAM
+and $smram\_strat$ tells which cache strategy has to be used when the CPU is in
+SMM. As we said, the set of states of the CPU is denoted $\texttt{Proc}$.
+
+\[ \texttt{Proc} \triangleq \begin{array}{ll}
+                              \{\,in\_smm &: \setshortdef{\val{true},
+                              \val{false}} \\
+                              ;\,pc &: \texttt{PhysAddr} \\
+                              ;\,smbase &: \texttt{PhysAddr} \\
+                              ;\,smrr &: \texttt{Smrr} \\
+                              ;\,strat &: [ \texttt{PhysAddr} \rightarrow
+                              \texttt{CacheStrat}]\,\}
+                            \end{array} \]
+
+The boolean $in\_smm$ is a boolean set to $\val{true}$ when the CPU is in
+SMM and to $\val{false}$ when it leaves it. The physical address $pc$ models the
+program counter, a register used to store the address of the next instruction to
+be fetched and executed. The physical address $smbase$ models the register of
+the same name. The map $strat$ abstracts away the numerous mechanisms of the x86
+microprocessors to determine which cache strategy to use for a given \IO.
+
+The set of states of the \formatLTS{Minx86} Computing Platforms memory
+controller is denoted by $\val{MC}$.
+
+\[ \texttt{MC} \triangleq \begin{array}{ll}
+                              \{\,d\_open &: \setshortdef{\val{true},
+                              \val{false}} \\
+                              ;\,d\_lock &: \setshortdef{\val{true},
+                          \val{false}}\,\}
+                            \end{array} \]
+The two booleans $d\_open$ and $d\_lock$ model two bits of a configuration
+register named \texttt{smramc}. They are used to determine how the memory
+controller dispatches the \IO which targets a physical address of the SMRAM.
+
+For a memory controller state $mc \in \texttt{MC}$ to be consistent with respect
+to the hardware specifications, it has to to verify that $d\_lock(mc) =
+\val{true} \Rightarrow d\_open(mc) = \val{false}$.
+
+We then define several address spaces:
+\begin{itemize}
+  \item $\texttt{PhysAddr} \triangleq \setdef{\val{pa}_i}{i \leq
+    \val{max\_addr}}$ the set of physical addresses the CPU uses to perform \IO.
+  \item $\texttt{DRAMAddr} \triangleq \setdef{\val{dram}_i}{i \leq
+    \val{max\_addr}}$ the set of addresses of the memory cells exposed by the
+    DRAM controller
+  \item $\texttt{VGAAddr} \triangleq \setdef{\val{vga}_i}{i \leq
+    \val{max\_addr}}$ the set of addresses of the memory cells exposed by the
+    VGA controller
+  \item $\texttt{HardAddr} \triangleq \texttt{DRAMAddr}\,\cup\,\texttt{VGAAddr}$
+\end{itemize}
+
+The maximal address offset (denoted by $\val{max\_addr}$ here) is specific to the
+CPU (for the physical addresses), the DRAM controller and the VGA controller. By
+convenience, we give the same values to each of them in our model.
+
+The memory controller translates physical addresses into hardware addresses and
+forwards the \IO accordingly. We model this translation with the function \[
+phys\_to\_hard : \texttt{MC} \times \setshortdef{\val{true},\,\val{false}}
+\times \texttt{PhysAddr} \rightarrow \texttt{HardAddr} \] which maps a state of
+the memory controller, a boolean which tells if the CPU is in SMM or not and a
+physical address to a hardware address.  It is important to keep in mind that
+the same physical address can be translated into two different hardware
+addresses for two memory controller states $m$ and $m'$, hence it is possible to
+have \[ phys\_to\_hard(m, b, pa) \neq phy\_to\_hard(m', b, pa) \]
+
+We model the SMRAM with two ranges of addresses:
+\begin{itemize}
+  \item $\texttt{hSmram} \triangleq \setdef{\val{dram}_i}{\val{smram\_base} \leq
+    i \le \val{smram\_end}}$ the SMRAM memory range within the DRAM memory
+  \item $\texttt{pSmram} \triangleq \setdef{\val{pa}_i}{\val{smram\_base} \leq i
+    \le \val{smram\_end}}$ the projection of the SMRAM in the memory map
+\end{itemize}
+
+The values of $\val{smram\_base}$ and $\val{smram\_end}$ are specified in the
+memory controller specifications. It is the software responsability to set the
+SMRR accordingly. We assume $\val{smram\_end} - \val{smram\_base} > 0x8000$.
+This way, when the SMBASE contains the address of the beginning of the SMRAM,
+the SMM entry point (that is $SMBASE + 0x8000$) is in SMRAM.
+
+The physical memories state (exposed by the DRAM controller and the
+VGA controller) is modeled with a mapping between the hardware addresses and the
+software component which owns the related memory location. Given $\set{S}$ the
+set of software components, we denote $\texttt{Mem}_{\set{S}}$ the set of states
+of the physical memories. \[ \texttt{Mem}_{\set{S}} \triangleq [
+\texttt{HardAddr} \rightarrow \set{S} ] \]
+
+%which can be available or already
+%used. A cache line already used is tagged with the physical address of its
+%content. For a given physical address, the CPU computes an index to select a
+%cache line and verify its tag.
+%hich contain, in addition to the
+%copy of the cached memory content, a "dirty bit" and a tag. A cache line is
+%marked as dirty when its content is modified
+%which indicates if the cache
+%line content has been modified without propagating the underlying hardware
+%memories and the .
+We assume $\texttt{Index}$ is the set of cache indexes and $index :
+\texttt{PhysAddr} \rightarrow \texttt{Index}$ the function used by the CPU to
+determine which index to use for a given physical address. The cache is divided
+into several cache lines which contain the cached memory content and several
+additional information required by the cache strategy algorithm. The set of
+states of the cache line is denoted by $\texttt{CacheLine}_{\set{S}}$. In
+addition to modeling the hardware specifications, the definition of
+$\texttt{CacheLine}_{\set{S}}$ attaches a software owner to a cache line. We do
+not give more details about the cache line model because the cache behavior is
+out of the scope of this article.
+
+%\[ \texttt{CacheLine}_{\set{S}} \triangleq \begin{array}{ll}
+%    \{\,dirty &: \setshortdef{\val{true},\,\val{false}} \\
+%    ;\,tag &: \texttt{PhysAddr} \\
+%  ;\,owner &: \set{S}\,\}
+%\end{array} \]
+
+\[ \texttt{Cache}_{\set{S}} \triangleq [ \texttt{Index} \rightarrow
+\texttt{CacheLine}_{\set{S}} ] \]
+
+The hardware architecture states are implemented in the
+\emph{SpecCert.x86.Archi\-tecture} module (about 1\,500 lines of code). In
+addition to the state definitions, we have implemented several helper functions
+and predicates. For instance,
+\begin{itemize}
+\item[] $address\_location\_owner : \texttt{Archi}_{\set{S}} \rightarrow
+  \texttt{PhysAddr} \rightarrow \set{S}$
+    \begin{quote}
+      \small Given a hardware architecture state and a physical address,
+      returns the memory content software owner
+    \end{quote}
+\item[] $cache\_hit : \texttt{Archi}_{\set{S}} \rightarrow
+  \texttt{PhysAddr} \rightarrow \texttt{Prop}$
+    \begin{quote}
+      \small Given a hardware architecture state and a physical address,
+      holds true if the memory content is in the cache
+    \end{quote}
+\item[] $cache\_line\_owner : \texttt{Archi}_{\set{S}} \rightarrow
+  \texttt{Index} \rightarrow \set{S}$
+    \begin{quote}
+      \small Given a hardware architecture state and a cache line index,
+      returns the owner of this cache line
+    \end{quote}
+\item[] $resolve\_cache\_strategy : \texttt{Archi}_{\set{S}} \rightarrow
+  \texttt{PhysAddr} \rightarrow \texttt{CacheStrat}$
+    \begin{quote}
+      \small Given a hardware architecture state and a physical address,
+      returns the cache strategy used by the CPU for this address
+    \end{quote}
+\item[] $translate\_physical\_address : \texttt{Archi}_{\set{S}} \rightarrow
+  \texttt{PhysAddr} \rightarrow \texttt{HardAddr}$
+    \begin{quote}
+      \small Given a hardware architecture state and a physical address,
+      returns the result of the memory controller address translation
+    \end{quote}
+\end{itemize}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 We model the projection of the SMRAM in the memory map such that
 $\texttt{pSmram} \triangleq \setdef{\val{pa}_i}{\val{smram\_base} \leq i \le
