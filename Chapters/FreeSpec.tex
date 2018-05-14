@@ -109,7 +109,7 @@ monads can be used to reason about large systems, by modelling their components
 as effect handlers.
 %
 Our contribution is threefold:
-\begin{compactitem}
+\begin{itemize}
 \item We propose an approach which leverages the key concepts of
 algebraic effects and handlers to model and to verify each component of a computing
 system independently, while providing the necessary abstractions to compose
@@ -123,7 +123,7 @@ effects handlers with our approach.
 system with FreeSpec in order to illustrate how our formalism can be leveraged
 to tackle our initial objective, that is modelling and verifying computing
 platforms.
-\end{compactitem}
+\end{itemize}
 
 The rest of the paper proceeds as follows.
 %
@@ -209,14 +209,14 @@ For $\I$ an interface, we denote by $\Interface{\I}{\mathcal{A}}
   the \texttt{void} keyword in an imperative language).
   %
   We define $\I_{\mathrm{DRAM}}$ (respectively $\I_{\mathrm{VGA}}$) with two constructors:
-  \begin{compactitem}
+  \begin{itemize}
   \item
     $\func{Read}_{\mathrm{DRAM}} : \mathpzc{Loc} \rightarrow
     \Interface{\I_{\mathrm{DRAM}}}{\mathpzc{Val}}$
   \item
     $\func{Write}_{\mathrm{DRAM}} : \mathpzc{Loc} \rightarrow \mathpzc{Val}
     \rightarrow \Interface{\I_{\mathrm{DRAM}}}{\{()\}}$
-  \end{compactitem}
+  \end{itemize}
 
   Then, $\I_{\mathrm{DRAM}} =
   \Interface{\I_{\mathrm{DRAM}}}{\{()\}}\,\cup\,\Interface{\I_{\mathrm{DRAM}}}{\mathpzc{Val}}$,
@@ -237,7 +237,7 @@ For $\I$ an interface, we denote by $\Interface{\I}{\mathcal{A}}
   made by a CPU in SMM and unprivileged accesses made the rest of the time.
   %
   The MCH interface, denoted by $\I_{\mathrm{MCH}}$, is defined with three constructors:
-  \begin{compactitem}
+  \begin{itemize}
   \item
     $\func{Read}_{\mathrm{MCH}} : \mathpzc{Loc} \rightarrow \mathpzc{Priv} \rightarrow
     \Interface{\I_{\mathrm{MCH}}}{\mathpzc{Val}}$
@@ -245,7 +245,7 @@ For $\I$ an interface, we denote by $\Interface{\I}{\mathcal{A}}
     $\func{Write}_{\mathrm{MCH}} : \mathpzc{Loc} \rightarrow \mathpzc{Val} \rightarrow
     \mathpzc{Priv} \rightarrow \Interface{\I_{\mathrm{MCH}}}{\{()\}}$
   \item $\func{Lock} : \Interface{\I_{\mathrm{MCH}}}{\{()\}}$
-  \end{compactitem}
+  \end{itemize}
 \end{example}
 
 \subsection{Operational Semantics for Effects}
@@ -294,12 +294,12 @@ ones.
 \begin{definition}[Interfaces Composition]
   Let $\I$ and $\J$ be two interfaces. $\oplus$~is the interface
   composition operator, defined with two constructors:
-  \begin{compactitem}
+  \begin{itemize}
   \item $\func{InL} : \forall \mathcal{A}, \Interface{\I}{\mathcal{A}}
   \rightarrow \Interface{(\I \oplus \J)}{\mathcal{A}}$
   \item $\func{InR} : \forall \mathcal{A}, \Interface{\J}{\mathcal{A}}
   \rightarrow \Interface{(\I \oplus \J)}{\mathcal{A}}$
-  \end{compactitem}
+  \end{itemize}
 \end{definition}
 
 The resulting interface $\I \oplus \J$ contains the effects of both $\I$ and
@@ -386,7 +386,7 @@ to a set $\mathcal{A}$.
 
 \begin{definition}[Program Monad]
   $P_{\I}(\mathcal{A})$ is defined with three constructors:
-  \begin{compactitem}
+  \begin{itemize}
   \item $\func{Pure} : \mathcal{A} \rightarrow P_{\I}(\mathcal{A})$
   \item
     $\func{Bind} : \forall \mathcal{B}, P_{\I}(\mathcal{B}) \rightarrow
@@ -395,7 +395,7 @@ to a set $\mathcal{A}$.
   \item
     $\func{Request} : \Interface{\I}{\mathcal{A}} \rightarrow
     P_{\I}(\mathcal{A})$
-  \end{compactitem}
+  \end{itemize}
 \end{definition}
 %
 These constructors allow for the construction of values which
@@ -611,7 +611,7 @@ step function to update this state after each effect realization.
   We write $A$ for an abstract specification dedicated to an interface $\I$,
   defined as a tuple $\langle \Omega, \func{step}, \func{pre}, \func{post}
   \rangle$ where
-  \begin{compactitem}
+  \begin{itemize}
   \item $\Omega$ is a set of abstract states
   \item $\func{step} : \forall \mathcal{A}, \Interface{\I}{\mathcal{A}}
     \rightarrow \mathcal{A} \rightarrow \Omega \rightarrow \Omega$
@@ -626,7 +626,7 @@ step function to update this state after each effect realization.
     \func{post}$ if and only if the results $x$ computed for the effects $e$
     satisfies the postcondition parameterized with the abstract state $\omega$
     (denoted by $\func{post}(e, x, \omega)$).
-  \end{compactitem}
+  \end{itemize}
 \end{definition}
 
 By defining an abstract specification of an interface $\I$, it becomes possible
@@ -656,7 +656,7 @@ semantics realizes a program with effects.
   $A_{\mathrm{MCH}}$ models the following property: ``\emph{privileged reads
   targeting the SMRAM return the value which has been previously stored
   by a privileged write}’’:
-  \begin{compactitem}
+  \begin{itemize}
   \item Let $\mathpzc{Smram} \subseteq
     \mathpzc{Loc}$ be the set of memory locations which belong to the SMRAM.  We
     define $\Omega_{\mathrm{MCH}} \triangleq \mathpzc{Smram} \rightarrow
@@ -685,7 +685,7 @@ semantics realizes a program with effects.
       = \func{Read}_{\mathrm{MCH}}(l, \val{smm}) \wedge l \in \mathpzc{Smram}
       \Rightarrow x = \omega(l)
     \]
-  \end{compactitem}
+  \end{itemize}
 \end{example}
 
 %With an abstract specification $\langle \Omega, \func{step}, \func{pre},
@@ -904,7 +904,7 @@ invariant for the induction, and a sufficient condition to enforce compliance.
   $\func{sync}(\omega_i, s, \omega_j)$ holds, then $\forall \sigma_j \in
   \Sigma_{\J}$ such that $\sigma_j \models A_{\J}[\omega_j]$
   and $\forall e \in \I$ such that $\func{pre}_{\I}(e, \omega_i)$,
-  \begin{compactenum}
+  \begin{enumerate}
   \item $C$ preserves the synchronization of states, that is
     $\func{sync}(\omega_i', s', \omega_j')$
   \item $C$ is defined in terms of programs with effects which are correct with
@@ -912,7 +912,7 @@ invariant for the induction, and a sufficient condition to enforce compliance.
     $A_{\J}[\omega_j] \modelssym C(e, s)$
   \item $C$ computes a result for $e$ which satisfies $A_{\I}$ postcondition,
      that is $\func{post}_{\I}(e, x, \omega_i)$
-  \end{compactenum}
+  \end{enumerate}
   where
   $((x, s'), \sigma_j', \omega_j') = \func{run}_{\func{step}_{\J}}(\sigma_j,
   C(e, s), \omega_j)$ and

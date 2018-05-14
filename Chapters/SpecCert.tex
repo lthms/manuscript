@@ -5,7 +5,7 @@ Modern hardware architectures have grown in complexity.
 They now are made of numerous devices which expose multiple programmable
 functions.
 %
-In this article, we identify a class of security enforcement mechanisms we call
+In this Chapter, we identify a class of security enforcement mechanisms we call
 Hardware-based Security Enforcement (HSE) such that a set of software components
 configures the hardware in a way which prevents the other software components to
 break a security policy.
@@ -47,7 +47,7 @@ There are many examples of security vulnerabilities which are the consequence of
 an incorrect HSE mechanism
 implementation\,\cite{kallenberg2014failure,bulygin2014bios,intel2014chipsec}.
 
-In this paper, we introduce SpecCert, a framework for specifying and verifying
+In this Chapter, we introduce SpecCert, a framework for specifying and verifying
 HSE mechanisms against hardware architecture models.
 %
 SpecCert relies on a three-steps methodology.
@@ -94,7 +94,7 @@ states $\set{H}$, a set of events $\set{E}$ and a Computing Platform $\Sigma$
 which defines a semantics of events as state-transformers. Hence, the execution
 of a set of software components by a hardware architecture is a sequence of
 state-transformations (denoted $\transitionLTS{Ez}{h}{ev}{h'}$) in this model.
-In this paper, we consider exclusively Execution Monitoring (EM) enforceable
+In this Chapter, we consider exclusively Execution Monitoring (EM) enforceable
 security policies\,\cite{schneider2000enforceable,basin2013enforceable} that are
 security policies which can be enforced by monitoring the software execution. As
 a consequence, we model a security policy with a predicate $P$ on sequences of
@@ -123,13 +123,13 @@ instruction can be broken down into a sequence of software events.
 
 For instance, to execute the x86 instruction\,\footnote{Written in AT\&T syntax
   here.} \texttt{mov (\%ecx),\%eax}, a x86 CPU:
-\begin{compactitem}
+\begin{itemize}
 \item reads the content of the register \texttt{ecx} as an address
 \item reads the main memory at this address
 \item writes this content into the register \text{eax}
 \item updates the register \texttt{eip} with the address of the next instruction
   to execute
-\end{compactitem}
+\end{itemize}
 
 We model this sequence of actions as four software events which trigger four
 state updates. Note that if the content of the \texttt{ecx} register is not a
@@ -149,7 +149,7 @@ of an event on the hardware architecture state.
   $(pre\-condition, post\-condition)$ where $pre\-condition$ is a predicate on
   $\set{H} \times \set{E}$ and $post\-condition$ is a predicate on
   $\set{H} \times \set{E} \times \set{H}$. $\shortLTS{Ez}$ defines a semantics
-  of events as state-transformers such as
+  of events as state-transformers such that
   \begin{prooftree}
     \AxiomC{$precondition(h,ev)$} \AxiomC{$postcondition(h,ev,h')$}
     \BinaryInfC{\transitionLTS{Ez}{h}{ev}{h'}}
@@ -187,7 +187,7 @@ policies\,\cite{schneider2000enforceable,schneider2} specified with predicates
 on runs. A run is said to be secure according to a security policy when it
 satisfies the predicate specifying this policy.
 
-In this paper, we focus on a class of security policies we call software
+In this Chapter, we focus on a class of security policies we call software
 execution isolation policies. Such a policy prevents a set of untrusted software
 components to tamper with the execution of another set of so-called trusted
 software components. We consider that a software component tampers with the
@@ -215,11 +215,8 @@ Dealing with multi-core architectures would require additional efforts and
 notations. One possible solution could be to define an identifier per core and
 to use this identifier in addition to the current hardware state to deduce the
 software component currently executed by the corresponding core. However, this
-is out of the scope of this article.
+is out of the scope of this Chapter.
 
-% okay so know we need to explain the event-software mapping. it is not that
-% hard, but the issue is that it is more or less related to the memory
-% ownership, so maybe i need to introduced it here.
 We now introduce the concept of \textit{memory location ownership}. A memory
 location within a hardware architecture is a container which is able to store
 data used by a software component \emph{e.g.}\,a general-purpose register of a
@@ -297,7 +294,7 @@ definition of a \textit{software execution tampering}.
     of events and $\shortLTS{Ez}$ a Computing Platform, we model a HSE mechanism
     $\Delta$ with a tuple $(\fun{inv}, \fun{behavior}, \set{T}, context)$ such
     as
-    \begin{compactitem}
+    \begin{itemize}
     \item $inv$ is a predicate on $\set{H}$ to distinguish between safe hardware
       configurations and potentially vulnerable ones
     \item $behavior$ is a predicate on $\set{H} \times \set{E}_{Soft}$ to
@@ -307,13 +304,13 @@ definition of a \textit{software execution tampering}.
       the TCB of the HSE mechanism
     \item $context$ is a hardware-software mapping to determine when the TCB is
       executed
-    \end{compactitem}
+    \end{itemize}
   \end{definition}
 
   For instance, in x86-based hardware architectures, the SPI Flash contents (the
   code and configuration of the firmware) is protected as follows:
 
-  \begin{compactenum}
+  \begin{enumerate}
   \item By default, the SPI Flash is locked and its content cannot be overriden
     until it has been unlocked
   \item Some software components can unlock the SPI Flash
@@ -321,7 +318,7 @@ definition of a \textit{software execution tampering}.
     special-purpose software component
   \item This software component has to lock the SPI Flash before the end of its
     execution
-  \end{compactenum}
+  \end{enumerate}
   In this example, the special-purpose software component is the TCB. A safe
   hardware state (modeled with $inv$) is either a state wherein the
   special-purpose software component is executed or a state wherein the SPI
@@ -341,7 +338,7 @@ definition of a \textit{software execution tampering}.
     \label{def:laws}
     A HSE mechanism $\Delta = (inv, behavior, \set{T}, context)$ has to satisfy
     the following properties:
-    \begin{compactenum}
+    \begin{enumerate}
     \item $behavior$ preserves $inv$: $\forall \transitionLTS{Ez}{h}{ev}{h'}$,
       \[ \begin{array}{l} inv(h) \Rightarrow (ev \in \set{E}_{Soft} \Rightarrow
           behavior(h,ev)) \Rightarrow inv(h')
@@ -355,7 +352,7 @@ definition of a \textit{software execution tampering}.
            context(h) = x \Rightarrow behavior(h, ev)
          \end{array}
        \]
-     \end{compactenum}
+     \end{enumerate}
    \end{definition}
 
    A run complies to a HSE mechanism definition if its initial state satisfies
@@ -478,7 +475,7 @@ Definition~\ref{def:hardsoftmap}). The memory locations of \formatLTS{Minx86}
 Computing Platforms are either cache lines or memory cells exposed by the DRAM
 controller or the VGA controller. The memory ownership is updated through
 state-transformations according to three rules:
-\begin{compactenum}
+\begin{enumerate}
 \item When a cache line gets a copy of a DRAM or VGA cell content, the owner of
   this cell becomes the new owner of this cache line.
 \item When the content of this cache line is written back to a memory cell, the
@@ -486,7 +483,7 @@ state-transformations according to three rules:
 \item When a state-transformation implies the content of a memory location to be
   overriden with a new value, the software currently executed becomes its new
   owner.
-\end{compactenum}
+\end{enumerate}
 
 Given $\set{S}$ a set of software components, the set of states of
 \formatLTS{Minx86} Computing Platform hardware architecture is denoted by
@@ -707,7 +704,7 @@ smm\_context)$ (see Definition \ref{def:hse}).
 
 In order to enforce the SMM security policy, we have identified six requirements
 on states.
-\begin{compactitem}
+\begin{itemize}
 \item When the CPU executes the SMM code, the program counter register value
   needs to be an address in SMRAM.
 \item The SMBASE register was correctly set during the boot sequence to point to
@@ -721,10 +718,12 @@ on states.
   modify the content of the SMRAM.
 \item The range of memory declared with the SMRR needs to overlap with the
   SMRAM.
-\end{compactitem}
+\end{itemize}
 
-The Appendix~\ref{app:invsmm} gives the formal definitions of each requirements
-and of $inv_{Smm}$.  We now define $\fun{behavior_{Smm}}$. We only define two
+%%%%%% APPENDIX INV %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+We now define $\fun{behavior_{Smm}}$. We only define two
 restrictions. First, we force the SMM code execution to remain confined within
 the SMRAM. The reason is simple: the OS code can tamper with the memory outside
 the SMRAM. As a consequence, jumping outside the SMRAM is the best way to fail
@@ -811,7 +810,7 @@ them.
   first HSE law allows to reason by induction on runs.
 \end{proof}
 
-\section{Discussion} \label{sec:speccert:discuss}
+\section{Conclusion} \label{sec:speccert:discuss}
 
 Our effort has been originally motivated by the disclosure of several
 vulnerabilities targeting multiple x86 HSE mechanisms for the past few
