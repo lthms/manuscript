@@ -31,7 +31,7 @@ The typical computing platform can be broken down to the following layers:
 \item [Firmware/BIOS]
   %
   Hardware components often require a dedicated piece of software, called its
-  firmware, to function.
+  firmware, to operate.
   %
   Updating a piece of software is easier than updating a piece of hardware, as
   the latter often requires a recall.
@@ -43,12 +43,13 @@ The typical computing platform can be broken down to the following layers:
   its processors in 2008.
   %
   In addition, the hardware architecture as a whole is almost always provided
-  with a dedicated piece of software which in particular deals with its
+  with a dedicated piece of software which in particular deals with the
   initialization of the computer.
   %
   Afterwards, when we refer to this ``global'' firmware, we use the term
   \ac{bios}, whereas firmware is used to designate a piece of software tied to a
   particular hardware component.
+  %
 \item [System Software]
   %
   The computing environment provided by the hardware architecture alone is very
@@ -63,9 +64,10 @@ The typical computing platform can be broken down to the following layers:
   %
   In addition, mainstream system software deal with the complexity implied by
   the concurrent execution of several applications.
+  %
 \item [Applications]
   %
-  The previous layers only exist so that application can be executed.
+  The previous layers only exist so that applications can be executed.
   %
   Thanks to the principle of separation of concerns, they delegate the hardware
   configuration and management to the lower layers of abstraction.
@@ -89,22 +91,22 @@ abstraction layers (\emph{e.g.} applicative frawework, core logic, plugins).
 
 \section{Hardware-based Security Enforcement mechanisms}
 
-Each layer is often more privileged than, and therefore implicitly trusted by,
-its successors.
+From a security perspective, each layer is often more privileged than, and
+therefore implicitly trusted by, its successors:
 %
-The hardware architecture executes the hardware components' firmware, the
-software system and the applications.
+the hardware architecture executes the hardware components' firmware, the
+software system and the applications, and hardware implants and backdoors are no
+fantasy\,\cite{yang2016a2};
 %
-Hardware implants and backdoors are no fantasy\,\cite{yang2016a2}.
+the \ac{bios} initiates the execution of the system software, and has been used
+as an attack vector to tamper with its execution even after a machine
+restart\,\cite{embleton2013smm};
 %
-The \ac{bios} initiates the execution of the system software, and has been used
-as an attack vector to tamper with its execution even after a machine restart.
+the operating system manages the applications life cycle, and actively tamper
+with their execution (\emph{e.g.} dynamic linking, system calls).
 %
-The operating system manages the applications life cycle, and actively tamper
-with their execution (\emph{e.g.} dynamic linking, system calls, etc.).
-%
-From a security perspective, one layer may constrain its successors' execution,
-with respect to targeted security properties.
+One layer may constrain its successors' execution, with respect to targeted
+security properties.
 %
 For instance, an operating system shares hardware resources among several
 applications, and therefore is able to enforce availability ---fair share of
@@ -128,30 +130,23 @@ system memory.
 In addition, the \ac{cpu} can leverage a hardware timer to stop applications'
 execution, without the need for these applications to cooperate.
 
-We call this class of security enforcement mechanisms, where a trusted software
-component configure the underlying hardware architecture to constrain the
-execution of untrusted and potentially arbitrary software components, \ac{hse}.
-%
-A \ac{hse} mechanism enforces its targeted security property when both the
-hardware features are correctly implemented and the software components
-correctly configure them.
+\begin{definition}[Hardware-based Security Enforcement]
+  We call \ac{hse} the class of security enforcement mechanisms where a trusted
+  software component configure the underlying hardware architecture to constrain
+  the execution of untrusted and potentially arbitrary software components.
+\end{definition}
+
+A \ac{hse} mechanism enforces its targeted security property when the trusted
+software components correctly configure the hardware features at their disposal,
+and these features are sufficient to constrain the untrusted software execution
+as expected.
 %
 Both remain challenging.
 
-Over the past decades, vendors have added many security features to their
-products.
+\paragraph{Software Errors.}
 %
-Intel, for instance, has notably introduced hardware-based virtualization (VT-x,
-VT-d), dynamic root of trust (TXT), or applicative enclaves (SGX).
-%
-Most of them have been compromised due to implementation
-bugs\,\cite{wojtczuk2011txtbug,sang2010iommu}.
-%
-This is not surprising, as novel hardware features tend to be more and more
-complex.
-%
-At the same time, it has been repeatedly shown that vendors were not always
-correctly taking advantage of important hardware features at their disposal.
+It has been repeatedly shown that vendors were not always correctly taking
+advantage of important hardware features at their disposal.
 %
 These lacks of hardware configuration put the affected computing platforms at
 risk.
@@ -159,17 +154,48 @@ risk.
 Many security vulnerabilities disclosed over the years have been the result of a
 misconfiguration of hardware features by key software
 components\,\cite{bulygin2014bios}.
+%
+Many facts can explain this state of things.
+%
+In the past, lower-level pieces of software, such as firmware components, may
+not have been conceived and implemented with security as a primary focus.
+%
+The increasing hardware architectures' complexity can also be held partly
+responsible.
+%
+While one computer can be made of dozens of components, software developers have
+to read and understand as many, independent and often large documents of various
+form (\emph{e.g.} datasheets, developer manuals), and they rarely focus on
+security.
+%
+When software developers misunderstand the documentations, as it happened for
+instance for the \texttt{MOV SS} and \texttt{POP SS} x86
+instructions\,\cite{movsspopss}, the impact in terms of security can be
+important.
 
+\paragraph{Hardware Errors.}
+%
+Over the past decades, vendors have added many security features to their
+products.
+%
+Intel, for instance, has notably introduced hardware-based virtualization (VT-x,
+VT-d), dynamic root of trust (TXT), or applicative enclaves (SGX).
+%
+It is important to notice that most of them have been compromised due to
+implementation bugs\,\cite{wojtczuk2011txtbug,sang2010iommu}.
+%
+This is not surprising, as novel hardware features tend to be more and more
+complex.
+%
+Hence, using advanced, novel hardware features, in a security-sensitive context,
+may be counterproductive.
+%
 In addition to these implementation errors, the fact that hardware architecture
 often comprise hundreds of features implemented by dozens of interconnected
-devices paves the road for a class of security vulnerabilities we call
-\emph{architectural attacks},
+devices complicates the conception of new hardware features.
 %
-\thomasrk{Est-ce qu’il existe une classe d'attaque équivalente, dans d'autres
-  domaines?}
-%
-where each component is working as expected, yet their composition creates an
-attack path.
+Indeed, the latter should not interfere with the security properties enforced by
+the features which were present before.
 %
 For instance, the SPI Flash (where lives the \ac{bios} code) is supposedly
 protected against arbitrary write from system software.
@@ -178,63 +204,71 @@ This protection relies on a particular hardware interrupt.
 %
 This did not prevent Intel to introduce TXT, a novel security mechanism which
 had the particular side-effect of disabling this hardware interrupt.
-%
-Architectural attacks differ from implementation errors, because it concerns the
-specifications of the computing platform.
 
-\section{Towards Formal Verification}
+\begin{definition}[Architectural Attack]
+  We call Architectural Attacks the class of security vulnerabilities, where
+  each component is working as expected, yet their composition creates an attack
+  path an untrusted software component can leverage to defeat a \ac{hse}
+  mechanism implemented to constrain its execution.
+\end{definition}
+
+Architectural attacks result in a flaw in the specifications of the computing
+platform.
+%
+As such, they precede implementation errors, and their countermeasure often
+require a change in the hardware interface.
+%
+To prevent them, it is mandatory to reason about the computing platform as a
+whole.
+
+\section{Formal Verification of HSE mechanisms}
 
 The important impact of previously disclosed architectural attacks have
-motivated our will to formally specify HSE mechanisms, with two objectives in
-mind:
+motivated our will to formally specify HSE mechanisms.
 %
-\begin{inparaenum}[(1)]
-\item providing unambiguous, security-focused specification to firmware and
-  system software developers, and
+We believe this would benefit both hardware designers and firmware and system
+software developers.
 %
-\item verifying these specifications actually provides the targeted security
-  properties.
-\end{inparaenum}
+Firstly, a formal specification of HSE mechanisms can be leveraged as a
+foundation for a systemic approach to verify hardware specifications.
+%
+For each novel hardware feature introduced, it would be necessary to check that
+the previous proofs hold, meaning this feature does not introduce an
+architectural attack.
+%
+Secondly, it provides unambiguous specifications to software developers.
+%
+We believe these specifications can be a valuable addition to the existing
+documentations, because they gather at one place information that are normally
+scattered across many documents.
 
-Formal specifications would be an advantageous complement to the existing
-hardware specifications, as the latter are often made of many independent, large
-documents (\emph{e.g.}  datasheets, developer manuals), as these documents
-rarely focus on security.
+To specify a HSE mechanism, we have to model the hardware architecture, and the
+scale of the task represents an important challenge.
 %
-This initial specification effort shall serve as a premise for further
-verification work for both the hardware architecture and the trusted software
-components, and our long term objective is to develop verification approaches
-guided by HSE mechanisms specifications.
+Because architectural attacks often come from unsuspected places, it is
+necessary to consider the whole computing platform; at the same time, many
+components are individually complex.
 %
-We want to be able to prove that a given HSE mechanism is correct, meaning if
-both the hardware components and the trusted software components correctly
-implements their specifications, then the targeted security property is indeed
-enforced.
+In addition, new hardware components are frequently released, and the same
+hardware component can be found in different hardware architecture to play a
+similar role.
 %
-Because the source of architectural attacks is the great number of concurrent
-hardware features, this second objective obliges us to consider the hardware
-architecture as a whole.
-%
-Several facts encourage us to particularly care about modularity of both
-specifications and proofs:
-%
-the scale of the task for one hardware architecture in particular;
-%
-the frequent releases of new versions of key hardware components;
-%
-the presence of the same hardware components in several different hardware
-architecture families.
+As a consequence, the more modular our models and proofs are, the more
+practicable our approach becomes.
 
-In the context of this thesis, our approach has been to propose generic
-formalisms dedicated to tackle a particular class of problem, then to apply
-these proposals to examples coming from real life vulnerabilities of the x86
-hardware architecture.
+\paragraph{}
+%
+While we have tried to propose generic formalisms which can potentially be
+applied to large ranges of problem, we have adopted the systemic approach to
+apply them to the x86 hardware architecture.
 %
 Because of its predominant position on the personal computer market, x86-based
-products have been intensively studied from a security standpoint.
+products have been intensively studied from a security standpoint, and our
+decision to explore this research field was based on our experience with several
+architectural attacks which have affected x86-based computing platform x86
+hardware architecture.
 %
-To write our proofs of concepts, we have decided to leverage the Coq proof
-assistant framework.
+We have implemented our proofs of concept in the Coq proof assistant.
 %
 Our choice is motivated by the following reasons:
 %
@@ -243,44 +277,67 @@ Our choice is motivated by the following reasons:
   that combines both a higher-order logic and à powerful dependent type system,
   while {\sc Ltac}, the proof tactic language of Coq, enables powerful
   automation features.
+  %
+  This suits well for specifying security properties to be enforced by HSE
+  mechanisms, as they can take many form.
 \item The extraction mechanism of Coq allows for transpiling formal
   specifications written in {\sc Gallina} to OCaml, meaning we can write
-  \emph{executable specifications}. We can leverage this feature in many ways,
-  \emph{e.g.} to validate a hardware component model against a real
-  implementation, or to write a formal specifications of trusted software
-  components to be turned into concrete implementations once verified.
-\item \thomasrk[inline]{EAL7 France? Maybe a bit premature...}
+  \emph{executable specifications}.
+  %
+  In theory, we can leverage this feature to validate a model against a real
+  implementation.
+  %
+  Because we focus on already existing product, rather to intervene prior to
+  their implementation, this possibility is worth taking into account.
 \end{itemize}
 
-In our works, Coq is use to implement proof of concept whose purpose is to
-validate our proposed formalism.
-%
-The use of Coq is therefore not a final choice, and other implementations of our
-proposals are possible.
+\section{Contributions and Outline}
 
-\section{Contributions}
+Our works fall within a context where the security of lower levels grows in
+importance.
+%
+In Chapter~\ref{chapter:usecase}, we describe in more detail the x86 hardware
+architecture, and a selection of representative architectural attacks which have
+been disclosed over the past decade.
+%
+In Chapter~\ref{chapter:relatedwork}, we revisit existing works and approaches
+in line with the two challenges we tackle in this thesis, that is:
+%
+\begin{inparaenum}[(1)]
+\item formally specifying and verifying \ac{hse} mechanisms against a hardware
+  model, and
+%
+\item defining hardware models which can remain exploitable in presence of large
+  architecture hardware.
+\end{inparaenum}
 
-This thesis proceeds as follows.
+In Chapter~\ref{chapter:speccert}, we present a generic formalism to specify and
+verify against a hardware model HSE mechanisms whose purpose is to isolate
+trusted software components execution from the rest of the software stack.
 %
-We describe in more detail x86-based computing platforms, along with HSE
-mechanisms commonly used in this context and several architectural attacks
-disclosed over the past decade (Chapter\,\ref{chapter:usecase}).
+We have implemented SpecCert, a framework for the Coq proof assistant based on
+this formalism. In addition, we have implemented {\sc Minx86}, a minimal x86
+model, and we have verified a HSE mechanism implemented by x86 BIOSes.
 %
-In particular, we introduce the SMRAM Cache Poisoning, to act afterwards as a
-running example for our contributions.
-%
-Then, we detail how this thesis is in line with an ongoing effort to build more
-reliable hardware components, including from a security standpoint
-(Chapter\,\ref{chapter:relatedwork}).
+This work has been presented at the $21^{th}$ International Symposium on Formal
+Methods (FM2016)\,\cite{letan2016speccert}.
 
-Once we have established the research context of this thesis, we detail our
-contributions.
+In Chapter~\ref{chapter:freespec}, we present a systemic approach to modularly
+specify and verify large systems, organized as trees of components.
 %
-We first introduce a formalism to specify a HSE mechanism against hardware model
-(Chapter ???).
+We apply ideas from verification of computer programs with side-effects to the
+domain of component-based modelling, and the resulting approach can be used both
+for verifying the composition of hardware components and software components
+alike.
 %
-Then, we detail our effort to implement this formalism in Coq, including a
-generic-purpose framework and a proof of concept based on the SMRAM Cache
-Poisoning attack (Chapter ???).
+In addition, we have developed FreeSpec, a framework for the Coq proof
+assistant.
 %
-\thomasrk[inline]{End of chapter to be written.}
+FreeSpec provides the necessary definitions and theorems to specify components,
+and automation features to guide their verification.
+%
+This work has been presented at the $22^{th}$ International Symposium on Formal
+Methods (FM2018)\,\cite{letan2018freespec}.
+
+Finally, we conclude this thesis in Chapter~\ref{chapter:conclusion}, where we
+suggest some possible directions for future works.

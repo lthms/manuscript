@@ -32,18 +32,18 @@ This Chapter proceeds as follows.
 We describe in more detail how a typical x86 computing platform work, that is
 which king of hardware components are involved, which kind of software stacks
 they execute, and how they interact with each others
-(Section\,\ref{sec:usecase:architecture}).
+(Section~\ref{sec:usecase:architecture}).
 %
 We then focus on the key role played by the \ac{bios}.
 %
 The \ac{bios} is the first piece of software executed by the computing platform,
 is responsible for loading in memory the system software and is considered the
 ``most privileged piece of software'' of the software stack
-(Section\,\ref{sec:usecase:firmware}).
+(Section~\ref{sec:usecase:firmware}).
 %
 Once the role of the \ac{bios} has been established, we detail three HSE
 mechanisms it implements, and as many architectural attacks which have defeated
-these HSE mechanisms in the past (Section\,\ref{sec:usecase:hse}).
+these HSE mechanisms in the past (Section~\ref{sec:usecase:hse}).
 
 \section{x86-based Hardware Architecture Explained}
 \label{sec:usecase:architecture}
@@ -84,7 +84,7 @@ they will not break existing properties of the architecture by doing so.
 %
 As a consequence, we start our explanation from the typical abstraction layers
 which form a computing platform, as described in
-Chapter\,\ref{chapter:introduction}.
+Chapter~\ref{chapter:introduction}.
 %
 We then deconstruct these layers in order to detail how they are concretely
 implemented.
@@ -98,7 +98,7 @@ implemented.
   \label{fig:usecase:computing-platform-1}
 \end{figure}
 
-Figure\,\ref{fig:usecase:computing-platform-1} pictures the traditional
+Figure~\ref{fig:usecase:computing-platform-1} pictures the traditional
 abstraction layers of a computing platform.
 %
 Each layer leverages the interface of its predecessor to expose a higher-level,
@@ -134,7 +134,7 @@ interact with.
   \label{fig:usecase:computing-platform-2}
 \end{figure}
 
-One drawback of Figure\,\ref{fig:usecase:computing-platform-1} is to hide the
+One drawback of Figure~\ref{fig:usecase:computing-platform-1} is to hide the
 complexity of the \emph{Hardware} layer.
 %
 Far from a homogeneous block, a typical hardware architecture comprises dozens
@@ -143,12 +143,12 @@ of hardware components whose nature and purpose are very different.
 It is not possible to reason about HSE mechanisms without taking this reality
 into account.
 
-Figure\,\ref{fig:usecase:computing-platform-2} partially highlights this, by
+Figure~\ref{fig:usecase:computing-platform-2} partially highlights this, by
 making explicit several hardware components involved in memory accesses: the
 cache, the memory controller, a DRAM controller or potentially a graphic card.
 %
 Most of them run dedicated software stacks, concurrently with the ``main''
-software stack pictured in Figure\,\ref{fig:usecase:computing-platform-1}.
+software stack pictured in Figure~\ref{fig:usecase:computing-platform-1}.
 %
 Although these concurrent software stacks are not the main subject of this
 thesis, they are worth mentioning, as they can have dramatic consequences from a
@@ -181,7 +181,7 @@ Recent vulnerabilities have shown this is not without consequences when the
 Management Engine's software stack is compromised.
 
 Apart from these potential software implementation issue within hidden software
-stacks, Figure\,\ref{fig:usecase:computing-platform-2} highlights the complexity
+stacks, Figure~\ref{fig:usecase:computing-platform-2} highlights the complexity
 of a typical hardware architecture.
 %
 This complexity easily explains the architectural attacks that have been
@@ -210,7 +210,7 @@ on.
 
 The code of the software components which form the software stack are also
 stored within the memory, as pictured by
-Figure\,\ref{fig:usecase:computing-platform-3}.
+Figure~\ref{fig:usecase:computing-platform-3}.
 %
 When the \ac{cpu} wants to execute the next instruction of a given software
 components code, it fetches it from memory.
@@ -474,7 +474,7 @@ Loic Duflot \emph{et al.}\,\cite{duflot2009smram} and Rafal Wojtczuk \emph{et
   al.}\,\cite{wojtczuk2009smram} have independently shown this belief was
 misplaced, thanks to the so-called \emph{SMRAM Cache Poisoning Attack}.
 %
-In addition to the evocative name, Figure\,\ref{todofig} highlights the
+In addition to the evocative name, Figure~\ref{todofig} highlights the
 vulnerability concept.
 %
 To increase performance, the \ac{cpu} uses a cache of its memory accesses.

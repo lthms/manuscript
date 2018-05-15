@@ -1,4 +1,5 @@
 \chapter{SpecCert}
+\label{chapter:speccert}
 
 Modern hardware architectures have grown in complexity.
 %
@@ -767,7 +768,7 @@ events denoted by $\texttt{Event}_{Soft}$.
   \label{tab:softev}
 \end{table}
 
-Table\,\ref{tab:softev} lists the software events we consider in the
+Table~\ref{tab:softev} lists the software events we consider in the
 $\formatLTS{Minx86}$ Computing Platforms. We model the CPU \IOs with $Read(pa)$
 and $Write(pa)$, the configuration of the memory controller with $OpenBitFlip$
 and $LockSmramc$, the configuration of the cache strategy with
@@ -999,21 +1000,21 @@ them.
        behavior_{Smm}(h,ev) \\
        \qquad\qquad \Rightarrow smm\_secure\_transformation(h, ev)
      \end{array} \]
- \end{lemma}
 
-\begin{proof}
-  By enumeration of $ev \in \texttt{Event}$ and
-  $h \in \texttt{Archi}_{\set{S}}$.
-\end{proof}
+  \begin{proof}
+    By enumeration of $ev \in \texttt{Event}$ and
+    $h \in \texttt{Archi}_{\set{S}}$.
+  \end{proof}
+ \end{lemma}
 
 \begin{theorem}[$\Delta_{Smm}$ is Sound]
   \[ sound(\Delta_{Smm}, smm\_security) \]
+  \begin{proof}
+    The "Invariants Enforce Security" lemma applies for one transition and the
+    first HSE law allows to reason by induction on runs.
+  \end{proof}
 \end{theorem}
 
-\begin{proof}
-  The "Invariants Enforce Security" lemma applies for one transition and the
-  first HSE law allows to reason by induction on runs.
-\end{proof}
 
 \section{Conclusion} \label{sec:speccert:discuss}
 
