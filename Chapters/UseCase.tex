@@ -1,138 +1,193 @@
-\chapter{Use Case: BIOS on x86}
+\chapter{Hardware and BIOS Background}
 \label{chapter:usecase}
 
-\thomasrk[inline]{Ce chapitre est encore un chantier, mais je vais le laisser
-  comme cela pour le moment. Globalement, je ne suis pas très satisfait par les
-  enchaînement d'idées, mais je ne me fais pas trop de soucis. Le but est de
-  vérifier que les idées s’enchaînent bien. L’annonce du plan, dans l’idée, me
-  semble bonne. Elle annonce bien ce que je voudrais être l'utilité de ce
-  chapitre, mais la façon dont c’est actuellement écrit laisse à désirer.}
+Our motivation to formally specify and verify architectural attacks comes from
+our experience with the x86 hardware architecture.
+%
+Over the past decade, the security of the lower levels of abstraction (hardware,
+firmware, system software) has grown in importance, and several critical
+vulnerabilities which fall in our definition of architectural attacks have been
+disclosed.
+%
+While our contributions are intended to be applicable to other hardware
+architectures, for purposes of evaluating our work, we have adopted the systemic
+approach to apply them to a x86 real example.
+%
+We have chosen to focus on the HSE mechanism implemented by the BIOS at runtime
+to stay isolated from the rest of the software stack, including the system
+software.
+%
+Because the BIOS is the most privileged piece of software executed by the
+hardware architecture, this HSE mechanism is of key importance.
+%
+Despite this fact, it has been defeated several times, and therefore, it
+illustrates perfectly our motivations.
+%
+However, it is important to emphasize that other mainstream architectures
+(\emph{e.g.}  ARM) work on similar basis and suffer similar issues.
 
-For purposes of evaluating our work, we have adopted the systemic approach to
-implement proof of concepts, directly issued from real world examples.
-\thomasrk{On applique nos formalismes à des choses réelles.}
+The rest of this Chapter proceeds as follows.
 %
-Because of its predominant position, x86-based hardware architectures have been
-particularly studied over the past decades.
-%
-There are a lot of resources available on the topic, including from a security
-perspective.
-%
-In particular, many architectural attacks have been disclosed.
-%
-Together, these factors makes x86-based computing platform very good candidate
-to both illustrate the challenges which make it difficult to implement HSE
-mechanisms, and evaluate our contributions.
-%
-It is important to emphasize that, while we focus on x86, other mainstream
-architectures (\emph{e.g.} ARM) work on similar basis and suffer similar issues.
-
-This Chapter proceeds as follows.
-%
-We describe in more detail how a typical x86 computing platform work, that is
-which king of hardware components are involved, which kind of software stacks
-they execute, and how they interact with each others
+We describe how a typical x86 hardware architecture is organized, and the
+consequences of this organization in terms of security
 (Section~\ref{sec:usecase:architecture}).
 %
-We then focus on the key role played by the \ac{bios}.
-%
-The \ac{bios} is the first piece of software executed by the computing platform,
-is responsible for loading in memory the system software and is considered the
-``most privileged piece of software'' of the software stack
+We then focus on the key role played by the \ac{bios}
 (Section~\ref{sec:usecase:firmware}).
 %
-Once the role of the \ac{bios} has been established, we detail three HSE
-mechanisms it implements, and as many architectural attacks which have defeated
-these HSE mechanisms in the past (Section~\ref{sec:usecase:hse}).
+Once the role of the \ac{bios} has been established, we detail HSE mechanisms it
+implements, and several architectural attacks which have defeated these HSE
+mechanisms in the past (Section~\ref{sec:usecase:hse}).
 
-\section{x86-based Hardware Architecture Explained}
+\section{Hardware Architecture Overview}
 \label{sec:usecase:architecture}
 
 % TODO: Unify the figures, because right now, they have different name for the
 % same thing. Use the vocabulary introduced in Introduction.
 
-Describing a computing platform in depth is challenging, because it is made of
-many interdependent components of various nature.
+Describing hardware architectures in depth is challenging, because they tend to
+be made of many inter-connected components of various nature.
 %
-The x86 hardware architecture is no exception.
-%
-On the contrary, x86 is known for its complexity, probably best illustrated by
-the scale of its documentation.
+From this perspective, the x86 hardware architecture is a textbook case, and
+this is probably best illustrated by the scale of its documentation.
 %
 At the time of writing this thesis\,\footnote{Spring 2018.}, the \emph{Intel 64
   and IA-32 Architectures Software Developer’s Manual} is 4842 pages long.
 %
-The output of \texttt{lshw -short} on one regular computer lists about 30
-hardware components in addition to the main \ac{cpu}.
-%
-Each of them come with its own documentations, often in the form of large
-datasheets.
-%
-This means the information about how the computing platform works are scattered
-throughout many sources.
-%
-This situation inevitably complicates the work of low-level software developers.
-%
-From a security perspective, they need to have a comprehensive view of how the
-computing platform works as a whole.
-%
-This problematic also exists for hardware designers.
-%
-When they want to add a new feature, or a new component, they have to be certain
-they will not break existing properties of the architecture by doing so.
+Executed on the computer used to write the present thesis, the GNU/Linux
+command-line application \texttt{lshw} lists about 30 hardware components, which
+come with their own documentations, often in the form of large datasheets.
 
+A x86 computing platform is built upon two key components: \acp{cpu} and memory
+(\ref{subsec:usecase:cpumem}).
 %
-As a consequence, we start our explanation from the typical abstraction layers
-which form a computing platform, as described in
-Chapter~\ref{chapter:introduction}.
-%
-We then deconstruct these layers in order to detail how they are concretely
-implemented.
+The \ac{cpu} communicates with peripherals to interact with the outside world
+(\emph{e.g.} another computing platform, a user) (\ref{subsec:usecase:perif}).
 
-\subsection{Principle of Separation of Concerns}
+\subsection{Processors and Memory}
+\label{subsec:usecase:cpumem}
 
-\begin{figure}
-  \centering
-  \includegraphics[width=0.3\textwidth]{Figures/computing-platform-1.jpg}
-  \caption{Abstraction Layers of a Typical x86 Computing Platform}
-  \label{fig:usecase:computing-platform-1}
-\end{figure}
+A computer platform goal is to execute programs to perform arbitrary tasks.
+%
+To that end, it relies on one or more \ac{cpu}.
+%
+A \ac{cpu} takes so-called ``instructions'' as input, and manipulates its
+internal states and data stored in a memory, as output
+%
+A program is a sequence of instructions, often stored in the same memory as the
+data it manipulates.
+%
+Overall, a \ac{cpu} basically repeats the following task, over and over:
 
-Figure~\ref{fig:usecase:computing-platform-1} pictures the traditional
-abstraction layers of a computing platform.
+\begin{enumerate}
+\item Read the content of its (internal) \emph{program counter} register, and
+  interpret it as the address of the next instruction.
 %
-Each layer leverages the interface of its predecessor to expose a higher-level,
-more constrained set of functionalities for its successors.
+\item Fetch the content of this address from memory.
 %
-Thus, software developers who write end-user application do not need to handle
-the complexity of x86, thanks to the principle of separation of concerns: while
-the underlying operating system (and the firmware) handles the hardware specific
-tasks, they can focus on application logic.
+\item Decode the instruction, that is identified the desired operation to
+  perform
 %
-These interfaces are often standardize to some extend, which allows
-interoperability.
+\item Act accordingly, by modifying its internal state, and interacting with the
+  memory.
 %
-This is useful because the market is characterized by a large diversity of
-products for each layers.
+\item Update the content of its \emph{program counter} register according to the
+  semantics of the instruction it has executed. Most of the time, it increases
+  it to fetch the next instruction, but it can also set it to an arbitrary value
+  (\emph{e.g.} with jump instructions).
+\end{enumerate}
 
-Each layer is more privileged than its successors:
+From the \ac{cpu} perspective, the memory is abstracted into a contiguous array
+of storage cells, identified by an address.
 %
-the hardware architecture executes the software stack;
+A \ac{cpu} can interact with the memory by reading at or writing to a given
+address.
 %
-the firmware has the mean to interrupt the execution of the other software
-components;
+In reality, a hardware architecture contains several memories of various nature.
 %
-the operating system loads in memory and manages the applications the user can
-interact with.
+The \ac{dram} remains the most important, and is often called the \emph{system
+  memory}, but it is not the only memory present in a hardware architecture.
+%
+Peripherals expose memories too; the latter are used as communication channels
+between them and the \acp{cpu}.
+%
+That is, to ``receives a message'' from a peripheral, a \ac{cpu} reads the
+content of the memory it exposed, while it can ``send a message'' by writing to
+the same memory.
+
+% Interacting with the \ac{dram} remains slow, in regard to the speed of a
+% \ac{cpu}
+%%
+% To improve performance, Intel \acp{cpu} come with several (often three) levels
+% of caches, from the smaller and quicker, to the bigger and slower.
+%%
+% For cache-friendly programs, the gain in performance can be huge.
+%%
+% This gain is paid in important increase of complexity.
+%%
+% Enforcing coherence between the different levels of cache and the \ac{dram} is
+% not trivial.
+
+\paragraph{}
+%
+Historically, x86 \acp{cpu} were using two distinct memory spaces to communicate
+either with the \ac{dram} or with the peripherals, along with two families of
+instructions.
+%
+Nowadays, the memories exposed by the peripherals are mapped within the same
+address space, and accessed with the same instructions.
+%
+That is, when a \ac{cpu} read at or write to an address, the access is
+transparently dispatched either to the \ac{dram} or to a peripheral.
+%
+The first component to intervene in the decision process is the Memory
+Controller (formally known as the \emph{northbridge}, and now integrated to the
+\ac{cpu} Die).
+%
+The Memory Controller is connected to the \ac{dram} and to peripherals which
+require small access time, such as a graphic card or a ethernet controller.
+%
+If a given memory access does not target one of its peripherals or the
+\ac{dram}, the Memory Controller forwards the memory access to the Platform
+Controller Hub (PCH) (formally known as the \emph{southbridge}).
+%
+The PCH acts as a proxy for the remaining peripherals.
+
+The memory map, that is the correspondence between the addresses used by the
+\ac{cpu} and the storage cells scattered among the hardware architecture, is
+dynamically configurable.
+%
+As such, determining which hardware component will receive a given memory access
+is far from being trivial.
+%
+From a security perspective, the consequences are important.
+%
+If an untrusted software component is able to modify the \ac{cpu} memory map in
+an unanticipated manner, it may be able to tamper with the execution of a
+trusted software component.
+
+\subsection{Peripherals}
+\label{subsec:usecase:perif}
+
+
+It is worth mentioning that, since 2008, Intel embeds the Management Engine, a
+processor \emph{inside} the memory controller.
+%
+The Management Engine executes a complete software stack, is capable of
+interacting to the \ac{dram} as well as other hardware components.
+%
+Intel leverages the Management Engine to provide out-of-band management
+solution, which means it can interact with the rest of the world without the
+cooperation of the main \ac{cpu}.
+%
+Although the Management Engine supposedly operates in a transparent manner from
+the \ac{cpu} perspective, we emphasize that a Management Engine vulnerability, a
+scenario which is not without precedent, potentially defeats any security
+measures implemented at the \ac{cpu} level.
+
+The security threat posed by the Management Engine is not an isolated case.
 
 \subsection{Hidden Hardware Architecture Complexity}
-
-\begin{figure}
-  \centering
-  \includegraphics[width=0.8\textwidth]{Figures/intro-computing-platform.jpg}
-  \caption{Hidden Hardware Architecture Complexity}
-  \label{fig:usecase:computing-platform-2}
-\end{figure}
 
 One drawback of Figure~\ref{fig:usecase:computing-platform-1} is to hide the
 complexity of the \emph{Hardware} layer.
@@ -188,13 +243,6 @@ This complexity easily explains the architectural attacks that have been
 disclosed during the past decade.
 
 \subsection{Importance of Software Isolation}
-
-\begin{figure}
-  \centering
-  \includegraphics[width=0.3\textwidth]{Figures/computing-platform-3.jpg}
-  \caption{Abstraction Layers of a Typical x86 Computing Platform}
-  \label{fig:usecase:computing-platform-3}
-\end{figure}
 
 Software components mostly manipulate data stored in ``memory'', and they see
 this memory as a continuous array.
@@ -349,8 +397,8 @@ modes.
 %
 An execution mode can be roughly assimilated to a set of hardware capabilities.
 %
-Hence, in a given execution mode, a \ac{cpu} may refuse to execute certain assembly
-instructions.
+Hence, in a given execution mode, a \ac{cpu} may refuse to execute certain
+assembly instructions.
 %
 As a consequence, the software component executed will not be able to leverage
 the side-effects involved by the execution of these instructions, \emph{e.g.}
@@ -361,7 +409,7 @@ The execution modes are not ''linear''.
 On the contrary, they can be seen as a composition of several hardware features:
 ring levels, virtualization technology, and finally \ac{smm}.
 %
-This means you can be in ring 0, while in hypervisor mode, while in \ac{smm},
+This means you can be in ring~0, while in hypervisor mode, while in \ac{smm},
 for instance.
 
 \paragraph{System Management Mode}
@@ -382,8 +430,8 @@ as a consequence, it should not be accessible to a \ac{cpu} which is not in
 %
 The exact location and size of the SMRAM is architecture dependent.
 %
-To locate it, the \ac{cpu} has a register named \texttt{SMBASE}, to be configured by
-the \ac{bios} during the boot sequence.
+To locate it, the \ac{cpu} has a register named \texttt{SMBASE}, to be
+configured by the \ac{bios} during the boot sequence.
 %
 As its name implies, the \texttt{SMBASE} value should point to the base of the
 SMRAM.
@@ -434,8 +482,9 @@ cannot prevent the execution of the \ac{smm} code.
 In other words, both the integrity of the SMRAM and the availability of the
 \ac{smi} are the foundation of the \ac{smm} security.
 %
-Because they have been both defeated at repeated occasions, this makes the \ac{smm}
-particularly interesting to illustrate the concept of architectural attacks.
+Because they have been both defeated at repeated occasions, this makes the
+\ac{smm} particularly interesting to illustrate the concept of architectural
+attacks.
 
 \paragraph{SMRAM Cache Poisoning Attack}
 %
@@ -456,8 +505,8 @@ of the SMRAM.
 At the beginning of the boot sequence, the SMRAM is said to be opened, which
 means it can be access by the \ac{cpu} whether it is in \ac{smm} or not.
 %
-This allows the \ac{bios} to load the \ac{smm} code inside the SMRAM, as the \ac{cpu}
-is not itself in \ac{smm} at the beginning of the boot sequence.
+This allows the \ac{bios} to load the \ac{smm} code inside the SMRAM, as the
+\ac{cpu} is not itself in \ac{smm} at the beginning of the boot sequence.
 %
 Once the loading is done, the \ac{bios} can ``close'' the SMRAM, meaning only a
 \ac{cpu} in \ac{smm} can access to the SMRAM.
@@ -546,8 +595,8 @@ untrusted.
 %
 The targeted security property is the integrity of the SPI Flash.
 %
-More precisely, only the \ac{smm} code should be capable of overwriting the content
-of the SPI Flash, which contains the \ac{bios} code.
+More precisely, only the \ac{smm} code should be capable of overwriting the
+content of the SPI Flash, which contains the \ac{bios} code.
 %
 To enforce this security property, the HSE mechanism relies on the
 \texttt{FNCTL} \thomasrk{Trouver le bon nom et mettre une ref.} register,
@@ -560,8 +609,8 @@ targets its content.
 The SPI Flash can be unlocked, but when the system software tries, the PCH fires
 a \ac{smi}.
 %
-As a consequence, the \ac{cpu} saves its current state, and starts executing the \ac{smm}
-code.
+As a consequence, the \ac{cpu} saves its current state, and starts executing the
+\ac{smm} code.
 
 What comes next depends on the \ac{smm} code, and how it is implemented.
 %
@@ -570,8 +619,8 @@ perform, if it makes sense, the write access intended by the system software on
 its behalf.
 %
 On typical workflow is for the system software to load the \ac{bios} update in
-memory, and for the \ac{smm} code to verify whether this update is correctly signed
-by the vendor.
+memory, and for the \ac{smm} code to verify whether this update is correctly
+signed by the vendor.
 %
 In any case, it is the responsibility of the \ac{smm} code to lock again the SPI
 Flash before it uses the \texttt{rsm} instruction to leave \ac{smm}.
