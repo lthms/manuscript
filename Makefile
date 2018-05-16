@@ -1,17 +1,18 @@
-STY-SRC := freespec.sty speccert.sty
-BIB-SRC := manuscript.bib
-TEX-SRC := Chapters/Introduction.tex \
-           Chapters/UseCase.tex      \
-           Chapters/RelatedWorks.tex \
-           Chapters/SpecCert.tex     \
-           Chapters/FreeSpec.tex
+STY-SRC  := freespec.sty speccert.sty
+BIB-SRC  := manuscript.bib
+TEX-SRC  := Chapters/Introduction.tex \
+            Chapters/UseCase.tex      \
+            Chapters/RelatedWorks.tex \
+            Chapters/SpecCert.tex     \
+            Chapters/FreeSpec.tex
+ABSTRACT := abstract.tex
 
 default: minimal
 
 minimal: main-mini.pdf
 full: main.pdf
 
-%.pdf: %.tex ${STY-SRC} ${BIB-SRC} ${ABBREV} ${TEX-SRC}
+%.pdf: %.tex ${STY-SRC} ${BIB-SRC} ${ABBREV} ${TEX-SRC} ${ABSTRACT}
 	pdflatex $<
 	bibtex $*
 	pdflatex $<

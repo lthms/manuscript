@@ -46,10 +46,10 @@ actors.
 %
 However, hardware and software components are not of the same nature.
 %
-Hardware components are physical devices which accept inputs and computes
+Hardware components are physical devices which accept inputs and compute
 outputs.
 %
-Software components are piece of data scattered into memory spaces, whose
+Software components are pieces of data scattered into memory spaces, whose
 semantics are determined by the processor unit that executes them.
 %
 While both hardware and software components have been subject to formal
@@ -57,7 +57,7 @@ verification in the past, these verification works tend to rely on different
 representations.
 %
 Florian Lugou \emph{et al.} explain this in depth while they introduce SMASHUP,
-a toolchain for unified verification of Hardware-software
+a toolchain for unified verification of hardware-software
 co-designs\,\cite{lugou2017smashup}.
 %
 It is the main reason why we focus on the specification level in the context of
@@ -81,16 +81,16 @@ Indeed, in order to be able to uncover potential architectural attacks, we need
 to consider a computing platform which is comprehensive in terms of hardware
 components.
 %
-Hoare Logic is a well established formalism to reason on computer program
+Hoare Logic is a well-established formalism to reason on computer programs
 correctness, and its principles apply to other use cases, including hardware
 modelling (Section~\ref{sec:related:hoare}).
 %
 It can be used to enable modularity and code reuse.
 %
-However, as-is, it does not help to reduce the complexity of the computing
+However, as is, it does not help to reduce the complexity of the computing
 platform state.
 %
-This is way, as a final step, we present how it is possible to break down a
+This is why, as a final step, we present how it is possible to break down a
 complex system into interconnected, simpler subsystems, yet being able to reason
 about the subsystems composition (Section~\ref{sec:related:interface}).
 %
@@ -98,7 +98,7 @@ This approach sounds very natural in our context of application, as a computing
 platform is often organized as a succession of specialized layers (Separation of
 Concerns).
 
-In each sections, we detail several representative research works which leverage
+In each Section, we detail several representative research works which leverage
 the presented approaches.
 %
 We have chosen these examples to illustrate both the verification of hardware
@@ -107,7 +107,7 @@ and software components.
 \section{Labelled Transition System} % ========================================
 \label{sec:related:lts}
 
-When it comes to formally specify a given system, and latter verify it, a common
+When it comes to formally specify a given system, and later verify it, a common
 approach is to model it as a \ac{lts}.
 %
 A \ac{lts} comprises three components:
@@ -163,7 +163,7 @@ For instance, liveness and availability properties, which can be expressed
 easily with a temporal logic, are often verified using a model checker.
 %
 On the contrary, when the targeted security properties require a more general
-and expressive logic, proof assistant have been used successfully.
+and expressive logic, proof assistants have been used successfully.
 
 \paragraph{\ac{xom}.}
 %
@@ -187,16 +187,16 @@ This model follows the principle of a \ac{lts}: a set of states, a set of
 labelled transitions (called \emph{rules} in the context of this work), and a
 set of transitions.
 %
-There is two kind of rules: the \ac{xom} instructions set, and some additional
+There are two kinds of rules: the \ac{xom} instructions set, and some additional
 capabilities given to the attacker.
 %
-As for the transitions set, it is defined in terms of pre and post conditions.
+As for the transitions set, it is defined in terms of pre and postconditions.
 %
-On the one hand, the pre condition is parameterized by the current state and the
+On the one hand, the precondition is parameterized by the current state and the
 labelled event.
 %
-If the pre condition is satisfied for a given hardware state and labelled event,
-then it means that event can occur from this state.
+If the pre-condition is satisfied for a given hardware state and labelled events,
+then it means that event can occur in this state.
 %
 On the other hand, the post condition is parameterized by the initial state, the
 labelled event and the resulting state.
@@ -222,7 +222,7 @@ model, in order to reduce the state combinatory.
 
 \paragraph{VirtCert}
 %
-Between 2011 and 2014, Gilles Barthe \emph{et al.} have worked on a idealized
+Between 2011 and 2014, Gilles Barthe \emph{et al.} have worked on an idealized
 model of a hypervisor.
 %
 This model is defined in terms of state, actions and a semantics of actions as
@@ -239,15 +239,14 @@ hypervisor and the guests, etc.).
 The actions are the hypercalls, exposed by the hypervisor for the guests to use.
 %
 The semantics of actions as state-transformers, that is the set of possible
-transitions for the modelled system, is defined in terms of pre and post
-conditions.
+transitions for the modelled system, is defined in terms of pre and postconditions.
 
 First, they have shown that their ideal hypervisor was
 %
 \begin{inparaenum}[(1)]
 \item ensuring strong isolation between guests, and
 %
-\item eventually processing every requests intended by the
+\item eventually processing every request performed by the
   guests\,\cite{barthe2011virtcert1}.
 \end{inparaenum}
 %
@@ -259,7 +258,7 @@ not have access to by leveraging their knowledge of micro-architectural
 implementation specificity, are a very important threat to virtualization
 platforms.
 %
-The authors have show their ideal hypervisor could prevent such attack, at the
+The authors have shown their ideal hypervisor could prevent such attack, at the
 cost of flushing the cache before each context switch.
 %
 They have taken their approach a step further, by focusing on constant-time
@@ -275,7 +274,7 @@ Some of them, like constant-time cryptography implementations, are not
 enforceable security properties.
 %
 Indeed, it is not possible, only with the trace of one execution, to know
-whether a given implemantion is constant-time.
+whether a given implemantion is constant time.
 %
 It is required to consider all the possible traces.
 
@@ -307,12 +306,12 @@ virtualization technologies to enforce guests isolation, but a different
 partition algorithm.
 
 \ac{lts} have also been used to specify requirements over software components,
-and verify these requirements were sufficient the hardware architecture to
+and verify these requirements were sufficient for the hardware architecture to
 enforce a set of targeted properties.
 
 \paragraph{RockSalt}
 %
-Thanks to a Google's service called \ac{nacl}, it is possible for software
+Thanks to the Google's service called \ac{nacl}, it is possible for software
 developers to distribute their web applications in the form of native executable
 code.
 %
@@ -324,12 +323,12 @@ the code and data of the browser.
 \ac{sfi} comprises a set of rules native applications have to comply with, and
 that together form a sandbox policy.
 %
-In practice, the \ac{nacl} checks that an arbitrary native applications respects
+In practice, the \ac{nacl} checks that an arbitrary native applications respect
 the \ac{sfi} rules before loading it to the browser context.
 %
 As a consequence, the browser is protected from malicious machine code.
 
-From a security perspective, this means there is two requirements over the
+From a security perspective, this means there are two requirements over the
 \ac{nacl}:
 %
 \begin{inparaenum}[(1)]
@@ -364,7 +363,7 @@ their translation is correct.
 \paragraph{Moat}
 %
 Intel \ac{sgx} is a recent addition to certain x86 \acp{cpu}, whose purpose is
-to provide so-called enclaves to userland
+to provide so-called enclaves to user land
 applications\,\cite{costan2016sgxexplained}.
 %
 These enclaves supposedly offer an execution environment isolated from the
@@ -378,17 +377,17 @@ The system software is responsible for allocating and initializing memory pages
 of the \ac{epc} (thanks to dedicated instructions), but it cannot read or write
 to them once it is done.
 %
-This is enforced by the memory controller, which encrypt the content of the
+This is enforced by the memory controller, which encrypts the content of the
 \ac{epc} transparently from the \ac{cpu}.
 %
 Hence, the memory controller only decrypts an \ac{epc}'s page if it is accessed
-by the enclave which owns it; it will also discards write accesses performed by
+by the enclave which owns it; it will also discard write accesses performed by
 another software component than the page owner.
 
 Rohit Sinha \emph{et al.} have modelled SGX instructions semantics, to complete
 an existing model, and have developed an automated information flow analysis
 tool called Moat, to verify whether are not a given application code may leak
-secret or not\,\cite{sinha2015moat}.
+secrets or not\,\cite{sinha2015moat}.
 %
 The work proceeds similarly to RockSalt, where instructions are treated as
 labelled transition from one state to another.
@@ -453,7 +452,7 @@ Floyd-Hoare Logic (more commonly, Hoare Logic) is a popular formal system for
 reasoning about the correctness of computer programs.
 %
 The system is defined in terms of state and commands, and a semantics of
-commands as state-transformers defined in terms of pre and post conditions.
+commands as state-transformers defined in terms of pre and postconditions.
 %
 A command can be an axiomatic operation (\emph{e.g.} an assignment statement in
 a computer program), or a composition rule (\emph{e.g.} a \emph{if-else}
@@ -461,33 +460,32 @@ statement, a function call, etc.).
 %
 Hoare Logic allows for modular reasoning.
 %
-Once a couple of pre and post conditions is proven for a given command, further
-reasoning wherein this command appears can be based solely on these pre and post
-conditions.
+Once a couple of pre and postconditions is proven for a given command, further
+reasoning wherein this command appears can be based solely on these pre and postconditions.
 %
 As a result, the concrete implementation of the command is abstracted away.
 %
 Defining our hardware model in an imperative style has also the extra benefit of
-making it more closer to what domain experts are familiar to, compared to
+making it closer to what domain experts are familiar to, compared to
 \emph{e.g.} functional programming.
 
 \paragraph{Frama-C}
 %
 The Framework for Modular Analysis for C programs (Frama-C) is a set of C
-programs analyzers.
+programs analysers.
 %
-Several analyzers (\emph{e.g.} WP, Value) are based on Hoare Logic.
+Several analysers (\emph{e.g.} WP, Value) are based on Hoare Logic.
 %
-The program source code is annotated with pre and post conditions, defined in a
+The program source code is annotated with pre and postconditions, defined in a
 dedicated language called \ac{acsl}.
 %
-The goal of a Frama-C analyzer is to conclude whether the post condition of a C
-statement is enforced by the pre condition.
+The goal of a Frama-C analyser is to conclude whether the postcondition of a C
+statement is enforced by the precondition.
 %
 The proof can be computed automatically for simpler problems, or interactively
 \emph{via} external tools.
 %
-For instance, Frama-C's analyzers can be configured so that they formulate the
+For instance, Frama-C's analysers can be configured so that they formulate the
 predicates they are not able to prove themselves in Coq lemmas for the user to
 prove.
 %
@@ -513,9 +511,9 @@ pointers (and potential memory aliasing, etc.).
 %
 Using a higher-level language can be useful to avoid this problem.
 %
-Functional programming languages easily qualify as of ``higher level'' than C.
+Functional programming languages easily qualify as ``higher level'' than C.
 %
-In this context, reasoning about state and side-effects is usually achieved
+In this context, reasoning about state and side effects is usually achieved
 thanks to monads\,\cite{jones2005io}.
 %
 Monads allow for modelling stateful computations, either \begin{inparaenum}[(1)]
@@ -530,22 +528,22 @@ Monads allow for modelling stateful computations, either \begin{inparaenum}[(1)]
 \paragraph{Ynot}
 %
 Ynot is a Coq framework which applies Hoare Logic to monads, so it becomes
-possible to formally reason with side-effects in Coq\,\cite{chlipala2009ynot}.
+possible to formally reason with side effects in Coq\,\cite{chlipala2009ynot}.
 %
-Programs with side-effects are defined in terms of the $\mathtt{Cmd}$ monad,
+Programs with side effects are defined in terms of the $\mathtt{Cmd}$ monad,
 where the type of a computation not only tells the returned type, but also a
-couple of pre and post conditions that specifies the effects of the computation
+couple of pre and postconditions that specifies the effects of the computation
 on the program's heap.
 %
 When a Ynot user uses \emph{bind} to chain two existing computations, it has to
-proves the post condition of the first computation satisfies the pre condition
+prove the post condition of the first computation satisfies the precondition
 of the second one.
 %
 As a consequence, programs defined in terms of the $\mathtt{Cmd}$ monad are
 necessarily correct by construction.
 %
-The authors claim writing a program with Ynot and the $\mathtt{Cmd}$ monad is
-often not much harder that writing that program in Haskell and the $\mathtt{IO}$
+The authors claim that writing a program with Ynot and the $\mathtt{Cmd}$ monad is
+often not much harder than writing that program in Haskell and the $\mathtt{IO}$
 monad.
 %
 This is achieved thanks to specific automation tactics written to ease the
@@ -560,7 +558,7 @@ The authors have verified their reference implementation correctly configures a
 \ac{mmu} in order to isolate the applications it manages\,\cite{jomaa2016mmu}.
 %
 The objective is similar to the first iteration of
-VirtCert\,\cite{barthe2011virtcert1}, however their approach to specify the
+VirtCert\,\cite{barthe2011virtcert1}, However their approach to specify the
 system software is closer to what Ynot has proposed.
 %
 The Pip system calls are defined in terms of a dedicated monad, which allows for
@@ -572,15 +570,15 @@ The correct isolation of applications is defined as a predicate on this state,
 and they prove this predicate is an invariant during Pip execution:
 %
 from a ``secure'' state, the new state resulting of the execution of any Pip
-system call is ``secure''.
+system call is ``secure.’’
 
 \paragraph{}
 %
 It is possible to ease the reasoning about a complex system, by specifying the
-system transitions as combination of simpler, reusable state updates.
+system transitions as compositions of simpler, reusable state updates.
 %
 Thanks to Hoare Logic, it is possible to abstract away these state update with a
-couple of pre and post conditions.
+couple of pre and postconditions.
 %
 In addition, compared to other approaches described in
 Section~\ref{sec:related:lts}, the resulting specification is written in an
@@ -593,11 +591,11 @@ the same time.
 For instance, both VirtCert and Pip consider a mix of hardware and software
 states.
 %
-In our case, one of our will is to consider the hardware architecture as a
+In our case, one of our objectives is to consider the hardware architecture as a
 whole, and to do that we need to use a model which is comprehensive in terms of
 hardware components.
 %
-Hardware architectures are often designed as hierarchy of hardware components.
+Hardware architectures are often designed as a hierarchy of hardware components.
 %
 Defining a couple of pre and post conditions for a computation which happens
 locally inside one component, but may affect other sub-components in the
@@ -618,8 +616,8 @@ This design choice has two important consequences:
 \item it reduces modularity by explicitly coupling all the system components
   together, and
 %
-\item it encourages to reduce the scope of the model to only take into account
-  the hardware feature which are directly required.
+\item it encourages reducing the scope of the model to only take into account
+  the hardware features which are directly required.
 %
 \end{inparaenum}
 %
@@ -629,17 +627,17 @@ given component is less important than its behaviour to requests.
 That is, by focusing on components' interaction, we can specify and verify each
 component individually.
 %
-This forces us to specify requirements over components the target is directly
+This approach forces us to specify requirements over components the target is directly
 connected to.
 %
-We then can reason about components composition, by verifying that the
+We then can reason about components’ composition, by verifying that the
 components indeed hold the requirements formulated previously.
 %
 Eventually, we will be able to model the complete computing platform.
 %
 One very important advantage of this approach over ``flatten state'' is that it
 structure the reasoning and highlights the share of responsibility of each
-components in the context of enforcing a targeted security property.
+component in the context of enforcing a targeted security property.
 
 \paragraph{Component-based Modelling}
 %
@@ -647,8 +645,7 @@ We have found a very good illustration of this approach in the work of Thomas
 Heyman \emph{et al.}\,\cite{heyman2012securemodel}.
 %
 They have presented a component-based modelling technique for
-Alloy\,\cite{jackson2012alloy}, where components are primarily defined as a
-semantics for a set of operations.
+Alloy\,\cite{jackson2012alloy}, where components are primarily defined as semantics for sets of operations.
 %
 One component is connected to another when it leverages its operations.
 %
@@ -677,7 +674,7 @@ From our perspective, this is useful for at least two situations:
 Because of the scale of a hardware architecture, incremental modelling and
 verification is a game changer.
 %
-In the same time, being able to model completely and accurately each hardware
+At the same time, being able to model completely and accurately each hardware
 component is unlikely, as proprietary components are the norm, while open
 hardware remains a niche market.
 %
@@ -700,21 +697,21 @@ Kami's main objective is to bring software formal verification technique based
 on proof assistants to hardware conception; a world that is still dominated by
 model checking approaches.
 %
-The result is framework for the Coq proof assistant, to implement and verify
+The result is a framework for the Coq proof assistant, to implement and verify
 hardware components.
 %
-Pushing the \texttt{Notation} feature of Coq, which let the developer extends
+Pushing the \texttt{Notation} feature of Coq, which let the developer extend
 the proof assistant parser with its own construction, to its maximum, they offer
 a development environment very close to BlueSpec\,\cite{nikhil2004bluespec}.
 %
 Kami's hardware component is specified as labelled transition systems, whose set
-of transition labels form its interface.
+of transition labels forms its interface.
 %
 A transition is defined in terms of actions, which can be local to a component,
-or consists in interacting with another component.
+or consists of interacting with another component.
 %
 Finally, Kami enables modularity, by allowing for substituting one module $m$ by
-another module $m'$, if the latter is proved to be a refinement of the former.
+another module $m'$, if the latter is proven to be a refinement of the former.
 %
 For a given component of the computing platform, it becomes possible to reason
 about the rest of the system in terms of high-level, specification modules.
@@ -728,8 +725,8 @@ Therefore, it s possible to generate FPGA bitstream from a Kami module, using
 the BlueSpec compiler.
 %
 Although Kami allows for more components’ connection patterns than what we
-eventually propose in the context of this thesis, it is hardware specific, thus
-is not suitable for reasoning about systems which also contains software
+eventually propose in the context of this thesis, it is hardware-specific, thus
+is not suitable for reasoning about systems which also contain software
 components.
 %
 In addition, its purpose is to verify hardware component implementation, while
@@ -737,7 +734,7 @@ we rather stay at the specification level.
 
 \paragraph{}
 %
-In a similar manner than for interconnected hardware components, side-effects of
+In a similar manner than for interconnected hardware components, side effects of
 a computer program often rely on an ``outer'', \emph{stateful} environment.
 %
 For instance, when an application reads the content of a file, it does not
@@ -745,7 +742,7 @@ perform most of the work, the system software does.
 %
 Taking this environment into account is challenging.
 %
-For instance, Frama-C does not provide a mature analyzer to that end.
+For instance, Frama-C does not provide a mature analyser to that end.
 %
 In functional programming languages, algebraic effects are a recent and popular
 approach whose purpose is to tackle these
@@ -755,7 +752,7 @@ They allow modelling large classes of effects, and composing these effects
 within purely functional languages, while deferring the realizations of these
 effects to dedicated handlers.
 
-They are several languages with implementation of algebraic effects, including
+They are several languages with an implementation of algebraic effects, including
 Eff, Idris, Haskell, PureScript.
 %
 However, none of them provides a proof environment comparable to what Coq
@@ -767,10 +764,10 @@ programs with effects and effect handlers written for {\sc Gallina}.
 \paragraph{Coq.io}
 %
 In 2015, Guillaume Claret \emph{et al.} have released Coq.io, a framework for
-the Coq proof assistant to write programs with side-effects and
-concurrency\,\cite{claret2015coqiowww}
+the Coq proof assistant to write programs with side effects and
+concurrency\,\cite{claret2015coqiowww}.
 %
-Similarly to Ynot, the authors model side-effects with axiomatic monadic
+Similarly to Ynot, the authors model side effects with axiomatic monadic
 operations.
 %
 However, they do not attempt to model the impacts of these operations over the
@@ -807,7 +804,7 @@ system.
 
 \section{Conclusion} % ========================================================
 
-The common approach to formally specify a system is with a transition system
+The common approach to formally specify a system is by defining transition system
 which describes its behaviour.
 %
 By reasoning about its potential executions, that is the set of traces of its
@@ -825,7 +822,7 @@ HSE mechanisms, which are the result of a hardware-software cooperation.
 In this context, and because of the very nature of the architectural attacks we
 are willing to prevent, we have to consider the computing platform as a whole.
 %
-The scale of the tasks oblige us to take extra care when defining the transition
+The scale of the tasks obliges us to take extra care when defining the transition
 system.
 %
 Modelling the software and hardware components of a computing platform as

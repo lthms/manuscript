@@ -11,7 +11,7 @@
 Our motivation to formally specify and verify architectural attacks comes from
 our experience with the x86 hardware architecture.
 %
-Over the past decade, the security of the lower levels of abstraction (hardware,
+Over the past decade, the security of the lowest levels of abstraction (hardware,
 firmware, system software) has grown in importance, and several critical
 vulnerabilities which fall in our definition of architectural attacks have been
 disclosed.
@@ -30,8 +30,8 @@ hardware architecture, this \ac{hse} mechanism is of key importance.
 Despite this fact, it has been defeated several times, and therefore, it
 illustrates perfectly our motivations.
 %
-However, it is important to emphasize that other mainstream architectures
-(\emph{e.g.}  ARM) work on similar basis and suffer similar issues.
+However, it is important to emphasize that other mainstream architecture
+(\emph{e.g.}  ARM) work on a similar basis and suffer similar issues.
 
 The rest of this Chapter proceeds as follows.
 %
@@ -50,7 +50,7 @@ these \ac{hse} mechanisms in the past (Section~\ref{sec:usecase:hse}).
 \label{sec:usecase:architecture}
 
 Describing hardware architectures in depth is challenging, because they tend to
-be made of many inter-connected components of various nature.
+be made of many interconnected components of various natures.
 %
 From this perspective, the x86 hardware architecture is a textbook case, and
 this is probably best illustrated by the scale of its documentation.
@@ -60,7 +60,7 @@ At the time of writing this thesis\,\footnote{Spring 2018.}, the \emph{Intel 64
 %
 Executed on the computer used to write the present thesis, the GNU/Linux
 command-line application \texttt{lshw} lists about 30 hardware components, which
-come with their own documentations, often in the form of large datasheets.
+come with their own documentation, often in the form of large data sheet.
 
 A x86 computing platform is built upon two key components: \acp{cpu} and memory
 (\ref{subsec:usecase:cpumem}).
@@ -104,10 +104,10 @@ Overall, a \ac{cpu} basically repeats the following task, over and over:
 From the \ac{cpu} perspective, the memory is abstracted into a contiguous array
 of storage cells, identified by an address.
 %
-A \ac{cpu} can interact with the memory by reading at or writing to a given
+A \ac{cpu} can interact with the memory by reading or writing to a given
 address.
 %
-In reality, a hardware architecture contains several memories of various nature.
+In reality, a hardware architecture contains several memories of various natures.
 %
 The \ac{dram} remains the most important, and is often called the \emph{system
   memory}, but it is not the only memory present in a hardware architecture.
@@ -128,7 +128,7 @@ instructions.
 Nowadays, the memories exposed by the peripherals are mapped within the same
 address space, and accessed with the same instructions.
 %
-That is, when a \ac{cpu} read at or write to an address, the access is
+That is, when a \ac{cpu} read or write to an address, the access is
 transparently dispatched either to the \ac{dram} or to a peripheral.
 %
 The first component to intervene in the decision process is the Memory
@@ -160,8 +160,8 @@ is far from being trivial.
 It is worth mentioning that, since 2008, Intel embeds the Management Engine, a
 processor \emph{inside} the memory controller.
 %
-The Management Engine executes a complete software stack, is capable of
-interacting to the \ac{dram} as well as other hardware components.
+The Management Engine executes a complete software stack, and is capable of
+interacting with the \ac{dram} as well as other hardware components.
 %
 Intel leverages the Management Engine to provide out-of-band management
 solution, which means it can interact with the rest of the world without the
@@ -177,7 +177,7 @@ The security threat posed by the Management Engine is not an isolated case.
 On the contrary, x86 hardware architectures contain several \emph{active}
 peripherals.
 %
-We say a peripheral is active if it can autonomously read at and write to the
+We say a peripheral is active if it can autonomously read and write to the
 system memory, using a feature called \ac{dma}.
 %
 This feature brings an important performance improvement, but it also opens an
@@ -219,7 +219,7 @@ the same \acp{cpu}, the instructions which form their programs are stored within
 the same memories, which they also manipulate concurrently \emph{via} a
 configurable memory map.
 %
-In addition, active peripherals can also access the main memory concurrently.
+In addition, active peripherals can also access the main memory concurrently
 with the \ac{cpu}, and they tend to be part of the \ac{tcb}.
 %
 As a consequence, most of the \ac{hse} mechanisms implemented in x86 computing
@@ -239,8 +239,8 @@ These isolation properties can take three forms.
 \begin{definition}[Confidentiality]
   The trusted software component is assigned a portion of the memory map.
   %
-  It can hide its secrete inside this portion, and untrusted software components
-  cannot get these secretes from the result of a read access.
+  It can hide its secrets inside this portion, and untrusted software components
+  cannot get these secrets from the result of a read access.
 \end{definition}
 
 Integrity and confidentiality properties have to be considered from an
@@ -250,7 +250,7 @@ The content of specific storage cells inside the hardware architecture is less
 relevant than the logical view exposed to the \acp{cpu}.
 
 \begin{definition}[Availability]
-  An untrusted software component cannot prevent the execution of a trusted
+Untrusted software components cannot prevent the execution of a trusted
   software component
 \end{definition}
 
@@ -259,7 +259,7 @@ covered by \ac{hse} mechanisms.
 %
 The most famous is probably non-interference properties, notably defeated
 \emph{via} side-channel attacks (\emph{e.g.} cache-timing attacks). Indeed,
-Intel documentations clearly state:
+Intel documentation clearly state:
 
 \begin{quote}
   The Intel architecture aims to provide protection against software
@@ -296,7 +296,7 @@ The \ac{bios} program is stored inside a flash memory, a small memory connected
 to the PCH through the Serial Peripheral Interface (SPI) bus on modern x86
 computing platform.
 %
-When the \ac{cpu} is power up, it is programmed to fetch the code stored at a
+When the \ac{cpu} is powered up, it is programmed to fetch the code stored at a
 hard-coded address within the flash memory.
 %
 The first task of the \ac{bios} is to initiate the hardware architecture,
@@ -324,21 +324,21 @@ The \ac{uefi} standard includes several interesting security mechanisms.
 For instance, it defines a protocol called the Secure Boot, which can be
 leveraged to improve the security of the boot sequence.
 %
-If Secure Boot is enable, the UEFI-compliant \ac{bios} will only execute
+If Secure Boot is enabled, the UEFI-compliant \ac{bios} will only execute
 applications which provide an acceptable cryptographic signature, with respects
 to a key hierarchy configurable by the computing platform owner.
 %
 Ironically, the \ac{uefi} standard makes it easier to write portable piece of
 software which can be executed prior to any system software.
 %
-As a consequence, it increases the attack surface of the computing platform, in
+As a consequence, it increases the attack surface of the computing platform in
 case of bad \ac{bios} configuration (\emph{e.g.} Secure Boot is disabled).
 
 \subsection{At runtime}
 \label{subsec:usecase:firm:runtime}
 
 Once a system software has been selected and loaded into memory (ideally,
-without any tampering from the \ac{bios}), the boot sequence ends, and the
+without any tampering with the \ac{bios}), the boot sequence ends, and the
 runtime begins.
 %
 At runtime, the system software is in charge of the \ac{cpu} control flow,
@@ -358,7 +358,7 @@ hardware components.
 Other runtime services are mandatory gates towards certain computing platform
 features.
 %
-For instance, software update for the \ac{bios} code are performed by the
+For instance, software update for the \ac{bios} code is performed by the
 \ac{bios} itself, so that the latter can validate the validity of the update.
 
 Secondly, the \ac{bios} often needs to operate independently of the system
@@ -373,16 +373,16 @@ from the system software perspective.
 The \ac{bios} autonomy from the system software has important consequences in
 terms of security.
 %
-Software vulnerabilities affecting the \ac{bios} can potentially by used by an
+Software vulnerabilities affecting the \ac{bios} could by used by an
 attacker to take complete control over the software stack executed by the
 \ac{cpu}.
 
 \subsection{Security Model}
 \label{subsec:usecase:firm:sec}
 
-The \ac{bios} is provided by the manufacturer of the hardware architecture.
+The \ac{bios} is provided by the hardware architecture’s manufacturer.
 %
-In most case, it is a proprietary software, and the computer owner has little
+In most cases, it is a proprietary software, and the computer owner has little
 control over it.
 %
 From the manufacturer software stack, the rest of the software stack is
@@ -391,7 +391,7 @@ in a working state.
 %
 Indeed, a malicious or erroneous system software could theoretically.
 %
-The question whether this model benefits the x86 computing platform is outof the
+The question whether this model benefits the x86 computing platform is out of the
 scope of this thesis.
 %
 We rather focus on its implementation, because of the important consequences in
@@ -413,7 +413,7 @@ modify the memory flash content.
 This prevents the scenario where an arbitrary system software rewrite the
 \ac{bios} code inside the flash memory, then provoke a reboot.
 %
-Beside, the flash memory cannot be the only memory dedicated to the \ac{bios}.
+Besides, the flash memory cannot be the only memory dedicated to the \ac{bios}.
 %
 Memory accesses which target the flash memory are slow, as the latter is
 connected to the PCH, behind the Memory Controller.
@@ -434,7 +434,7 @@ We want to avoid a scenario where an arbitrary system software prevent the
 execution of the \ac{bios} at runtime.
 
 \section{BIOS \ac{hse} Mechanism and Architectural Attacks}
-\label{subsec:usecase:hse}
+\label{sec:usecase:hse}
 
 To stay isolated from the rest of the software stack at runtime, the \ac{bios}
 implements a \ac{hse} mechanism whose key hardware feature is the \ac{smm}, a
@@ -460,22 +460,22 @@ An execution mode can be roughly assimilated to a set of hardware capabilities.
 %
 For instance, in a given execution mode, a \ac{cpu} may refuse to execute
 certain assembly instructions, and the software component executed at the time
-will not be able to leverage the side-effects involved by the execution of these
+will not be able to leverage the side effects involved by the execution of these
 instructions.
 %
-Contrary to the common believe, x86 execution modes are not organized in a
+Contrary to a common belief, x86 execution modes are not organized in a
 linear hierarchy, but are rather a matrix of complementary hardware features:
 ring levels, paging configuration, virtualization technologies, etc.
 %
 Intel describes the \ac{smm} as follows:
 
 \begin{quote}
-  \ac{smm} is a special-purpose operating mode provided for handling system-wide
+  \ac{smm} is a special purpose operating mode provided for handling systemwide
   functions like power management, system hardware control, or proprietary
   OEM-designed code.
   %
-  It is intended for use only by system firmware, not by applications software
-  or general-purpose systems software.
+  It is intended for use only by system firmware, not by application software
+  or general-purpose system software.
   %
   \textbf{The main benefit of \ac{smm} is that it offers a distinct and easily
     isolated processor environment that operates transparently to the operating
@@ -498,7 +498,7 @@ The \ac{smm} requires two additional hardware features: the SMRAM and the
 The SMRAM is the name given by Intel to the subset of the system memory
 dedicated to the \ac{smm}.
 %
-The exact location and size of the SMRAM is architecture dependent.
+The exact location and size of the SMRAM are architecture dependent.
 %
 To locate it, the \ac{cpu} has a register named \texttt{SMBASE}, to be
 configured by the \ac{bios} during the boot sequence.
@@ -509,7 +509,7 @@ SMRAM.
 At the beginning of the boot sequence, the SMRAM is left unprotected, meaning
 arbitrary memory accesses targeting the SMRAM are authorized.
 %
-This design has been made to help \ac{bios} initializes the SMRAM content.
+This design has been made to help \ac{bios} initialize the SMRAM content.
 %
 Once the \ac{smm} code ---the \ac{bios} code intended to be executed at runtime
 in \ac{smm}--- has been correctly loaded into the SMRAM, and prior to giving the
@@ -607,7 +607,7 @@ The Flash Memory Lock-down mechanism is often used as a communication channel
 between the system software and the \ac{smm} code, in order to initiate a
 \ac{bios} update.
 %
-The system software sets the \texttt{BIOSWE} bit to notify the \ac{smm} code
+The system software sets the \texttt{BIOSWE} bit in order to notify the \ac{smm} code
 that a \ac{bios} update is available.
 
 \paragraph{}
@@ -616,7 +616,7 @@ The combination of the SMRAM, the \ac{smi} and the Flash Memory Lock-down
 explains why the \ac{smm} is often introduced as the ``most privileged execution
 mode'' of a x86 \ac{cpu}.
 %
-In a nutshell, the \ac{smm} code can do all the thing the system software does,
+In a nutshell, the \ac{smm} code can do all the things the system software does,
 including tampering with memories assigned to the system software.
 %
 On the contrary, the system software cannot modify neither the SMRAM content nor
@@ -632,7 +632,7 @@ Integrity (Definition~\ref{def:usecase:int}) of the SMRAM.
 %
 Loic Duflot \emph{et al.}\,\cite{duflot2009smram} and Rafal Wojtczuk \emph{et
   al.}\,\cite{wojtczuk2009smram} have independently shown that this belief was
-misplaced, when they disclosed the \emph{SMRAM Cache Poisoning Attack}.
+misplaced when they disclosed the \emph{SMRAM Cache Poisoning Attack}.
 
 \paragraph{Cache Memory}
 
@@ -683,7 +683,7 @@ The attack proceeds as follows:
 %
 \item Attackers issue a memory write access targeting the SMRAM, and because of
   the write-back cache strategy, the \ac{cpu} updates the copies within the
-  cache, but does not pass the access on the Memory Controller.
+  cache, but does not pass the access to the Memory Controller.
 %
 \item Attacker trigger another \ac{smi}, and the \ac{cpu} uses the tampered copy
   of the \ac{smm} code inside its cache.
@@ -696,7 +696,7 @@ both the Memory Controller and the \ac{cpu} cache work as expected.
 The former prevents authorized accesses to the SMRAM, that is a subset of the
 \ac{dram}, by a \ac{cpu} not in \ac{smm};
 %
-the former keeps copies of successful accesses to decrease latency due to memory
+the former is keeping copies of successful accesses to decrease latency due to memory
 accesses.
 %
 However, the composition of the cache and the memory controller breaks the BIOS
@@ -705,11 +705,11 @@ Integrity property.
 \paragraph{Countermeasure}
 %
 The solution implemented by Intel to prevent further exploitation of this
-vulnerability was to modify the behavior of the cache, when the memory accesses
+vulnerability was to modify the behaviour of the cache, when the memory accesses
 target the SMRAM.
 %
 Because the SMRAM size and location remain specific to each architecture, this
-means it requires an additional step of configuration to tell the cache where
+means it requires an additional step of configurations to tell the cache where
 the SMRAM is.
 %
 As a consequence, the complexity of the \ac{hse} mechanism implemented by the
@@ -738,7 +738,7 @@ protection\,\cite{kovah2015senter}.
 
 \paragraph{Intel TXT}
 The Intel Trusted eXecution Technology (TXT) is a recent feature of some x86
-\acp{cpu}, whose aim is to reduce the \ac{tcb} of a system software, by removing
+\acp{cpu}, whose aim is to reduce the \ac{tcb} of the system software, by removing
 most of the \ac{bios} from it.
 %
 Using a new family of instructions called \texttt{SENTER}, a system software can
@@ -749,15 +749,15 @@ The motivation behind TXT is to reduce the size of the architecture \ac{tcb}.
 In a regular computing platform, the latter includes most of the hardware
 components and the \ac{bios} code.
 %
-With TXT, the goal was to reduced it to the \ac{cpu} itself, which was acting as
+With TXT, the goal was to reduce it to the \ac{cpu} itself, which was acting as
 a minimal loader for the system software.
 
 \paragraph{Attack Path}
 %
-The \texttt{SENTER} instruction family had the undesirable side-effect of
+The \texttt{SENTER} instruction family had the undesirable side effect of
 disabling \acp{smi}.
 %
-In the context of TXT, this might makes sense, as the \ac{bios} is considerer
+In the context of TXT, this might make sense, as the \ac{bios} is considerered
 untrusted.
 %
 However, this totally contradicts the security model of the \ac{smm} code.
@@ -775,24 +775,24 @@ instructions.
 This leaves the \ac{smm} code inside the TXT \ac{tcb}.
 %
 This is consistent with the security model of the \ac{smm} code, while the first
-version of TXT was clearly misconceived with regards with the existing state of
+version of TXT was clearly misconceived with respect to the existing state of
 the hardware architecture.
 
 \subsection{Speed Racer}
 \label{subsec:usecase:hse:speed}
 
-There is at least another attack which have defeated the Flash Memory Lock-down
+There is at least another attack which has defeated the Flash Memory Lock-down
 protection.
 %
 In 2015, Corey Kallenberg \emph{et al.} have shown that the scenario detailed
-previously, where setting \texttt{BIOSWE} was triggering a \ac{smi} to suspend
-the execution of the system software, suffered from a race condition in presence
+previously, such that setting \texttt{BIOSWE} was triggering a \ac{smi} to suspend
+the execution of the system software, suffered from a race condition in the presence
 of a second \ac{cpu}\,\cite{kallenberg2015racecondition}.
 
 \paragraph{Attack Path}
 %
 On a typical x86 hardware architecture, all the x86 \ac{cpu} of the platform
-will \emph{eventually} enter in \ac{smm} when a \ac{smi} is triggered.
+will \emph{eventually} enter \ac{smm} when a \ac{smi} is triggered.
 %
 On the contrary, the \texttt{BIOSWE} is set as soon as the \texttt{BIOS\_CNTL}
 register is modified.
@@ -805,12 +805,12 @@ The attack proceeds as follows:
 \begin{enumerate}
 \item One \ac{cpu} tries \emph{ad infinitum} to overwrite the content of the
   Flash Memory. Because the \texttt{BIOSWE} bit is initially clear, the PCH
-  discards its attemps, and the Flash Memory content is correctly protected.
+  discards its attempts, and the Flash Memory content is correctly protected.
 %
 \item At the same time, another \ac{cpu} set the \texttt{BIOSWE} bit.
 %
 \item A \ac{smi} is triggered, but by the time it propagates to the first
-  \ac{cpu}, the latter may have successfully tamper with the Flash Memory
+  \ac{cpu}, the latter may have successfully tampered with the Flash Memory
   content.
 %
 \end{enumerate}

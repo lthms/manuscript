@@ -23,9 +23,9 @@ The typical computing platform can be broken down to the following layers:
 \begin{description}
 \item [Hardware Architecture]
   %
-  A computer is made of physical, inter-connected hardware components.
+  A computer is made of interconnected, physical hardware components.
   %
-  Hardware components take many form and serve as many purposes, from the
+  Hardware components take many forms and serve as many purposes, from the
   \ac{cpu} which executes the pieces of software which form the upper layers of
   abstraction, to the various input/output devices which allow a user to
   interact with the computing platform.
@@ -45,7 +45,7 @@ The typical computing platform can be broken down to the following layers:
   its processors in 2008.
   %
   In addition, the hardware architecture as a whole is almost always provided
-  with a dedicated piece of software which in particular deals with the
+  with a dedicated piece of software which deals in particular with the
   initialization of the computer.
   %
   Afterwards, when we refer to this ``global'' firmware, we use the term
@@ -61,7 +61,7 @@ The typical computing platform can be broken down to the following layers:
   %
   A system software leverages this environment to provide high-level interfaces
   (\emph{e.g.} system calls), so that applications can focus on business logic,
-  and in many case do not care about which particular hardware architecture they
+  and in many cases do not care about which particular hardware architecture they
   are executed on.
   %
   In addition, mainstream system software deal with the complexity implied by
@@ -89,7 +89,7 @@ hypervisors bring powerful features such as virtual machines snapshots or
 migrations.
 %
 It is also frequent that application internals are themselves built as
-abstraction layers (\emph{e.g.} applicative frawework, core logic, plugins).
+abstraction layers (\emph{e.g.} applicative framework, core logic, plugins).
 
 \section{Hardware-based Security Enforcement mechanisms}
 
@@ -104,7 +104,7 @@ the \ac{bios} initiates the execution of the system software, and has been used
 as an attack vector to tamper with its execution even after a machine
 restart\,\cite{embleton2013smm};
 %
-the operating system manages the applications life cycle, and actively tamper
+the operating system manages the application life cycle, and actively tamper
 with their execution (\emph{e.g.} dynamic linking, system calls).
 %
 One layer may constrain its successors' execution, with respect to targeted
@@ -123,7 +123,7 @@ on features provided by the hardware architecture.
 In a nutshell, the main idea is to reduce the hardware capabilities one software
 can leverage while it is executed.
 %
-For instance, mainstream systems software leverage, among others mechanisms, a
+For instance, a typical system software leverages among other mechanisms a
 \ac{mmu} to partition the system memory.
 %
 Thus, when an application is executed, it can only access a portion of the
@@ -150,7 +150,7 @@ Both remain challenging.
 It has been repeatedly shown that vendors were not always correctly taking
 advantage of important hardware features at their disposal.
 %
-These lacks of hardware configuration put the affected computing platforms at
+These lacks of hardware configurations put the affected computing platforms at
 risk.
 %
 Many security vulnerabilities disclosed over the years have been the result of a
@@ -167,10 +167,10 @@ responsible.
 %
 While one computer can be made of dozens of components, software developers have
 to read and understand as many, independent and often large documents of various
-form (\emph{e.g.} datasheets, developer manuals), and they rarely focus on
+forms (\emph{e.g.} data sheets, developer manuals), and they rarely focus on
 security.
 %
-When software developers misunderstand the documentations, as it happened for
+When software developers misunderstand the documentation, as it happened for
 instance for the \texttt{MOV SS} and \texttt{POP SS} x86
 instructions\,\cite{movsspopss}, the impact in terms of security can be
 important.
@@ -193,31 +193,31 @@ Hence, using advanced, novel hardware features, in a security-sensitive context,
 may be counterproductive.
 %
 In addition to these implementation errors, the fact that hardware architecture
-often comprise hundreds of features implemented by dozens of interconnected
-devices complicates the conception of new hardware features.
+often comprises hundreds of features implemented by dozens of interconnected
+devices complicate the conception of new hardware features.
 %
 Indeed, the latter should not interfere with the security properties enforced by
 the features which were present before.
 %
-For instance, the SPI Flash (where lives the \ac{bios} code) is supposedly
-protected against arbitrary write from system software.
+For instance, the Flash Memory (where lives the \ac{bios} code) is supposedly
+protected against arbitrary write accesses from system software.
 %
 This protection relies on a particular hardware interrupt.
 %
 This did not prevent Intel to introduce TXT, a novel security mechanism which
-had the particular side-effect of disabling this hardware interrupt.
+had the particular side effect of disabling this hardware interrupt.
 
 \begin{definition}[Architectural Attack]
   We call Architectural Attacks the class of security vulnerabilities, where
   each component is working as expected, yet their composition creates an attack
-  path an untrusted software component can leverage to defeat a \ac{hse}
+  path untrusted software components can leverage to defeat a \ac{hse}
   mechanism implemented to constrain its execution.
 \end{definition}
 
 Architectural attacks result in a flaw in the specifications of the computing
 platform.
 %
-As such, they precede implementation errors, and their countermeasure often
+As such, they precede implementation errors, and their countermeasures often
 require a change in the hardware interface.
 %
 To prevent them, it is mandatory to reason about the computing platform as a
@@ -241,7 +241,7 @@ architectural attack.
 Secondly, it provides unambiguous specifications to software developers.
 %
 We believe these specifications can be a valuable addition to the existing
-documentations, because they gather at one place information that are normally
+documentation, because they gather at one place information that is normally
 scattered across many documents.
 
 To specify a HSE mechanism, we have to model the hardware architecture, and the
@@ -261,17 +261,17 @@ practicable our approach becomes.
 \paragraph{}
 %
 While we have tried to propose generic formalisms which can potentially be
-applied to large ranges of problem, we have adopted the systemic approach to
+applied to large ranges of problems, we have adopted the systemic approach to
 apply them to the x86 hardware architecture.
 %
 Because of its predominant position on the personal computer market, the x86
-hardware architecture have been intensively studied.
+hardware architecture has been intensively studied.
 %
 Our decision to explore this research field was based on our experience with
 several architectural attacks which have affected x86-based computing platform
 x86 hardware architecture.
 %
-We have implemented our proofs of concept in the Coq proof assistant.
+We have implemented our proofs of concepts in the Coq proof assistant.
 %
 Our choice is motivated by the following reasons:
 %
@@ -282,7 +282,7 @@ Our choice is motivated by the following reasons:
   automation features.
   %
   This suits well for specifying security properties to be enforced by HSE
-  mechanisms, as they can take many form.
+  mechanisms, as they can take many forms.
 \item The extraction mechanism of Coq allows for transpiling formal
   specifications written in {\sc Gallina} to OCaml, meaning we can write
   \emph{executable specifications}.
@@ -290,7 +290,7 @@ Our choice is motivated by the following reasons:
   In theory, we can leverage this feature to validate a model against a real
   implementation.
   %
-  Because we focus on already existing product, rather to intervene prior to
+  Because we focus on products which already exist, rather to intervene prior to
   their implementation, this possibility is worth taking into account.
 \end{itemize}
 
@@ -315,20 +315,19 @@ in line with the two challenges we tackle in this thesis, that is:
 \end{inparaenum}
 
 In Chapter~\ref{chapter:speccert}, we present a generic formalism to specify and
-verify against a hardware model HSE mechanisms whose purpose is to isolate
+verify against a hardware model HSE mechanism whose purpose is to isolate
 trusted software components execution from the rest of the software stack.
 %
 We have implemented SpecCert, a framework for the Coq proof assistant based on
 this formalism. In addition, we have implemented {\sc Minx86}, a minimal x86
-model, and we have verified a HSE mechanism implemented by x86 BIOSes.
+model, and we have verified the HSE mechanism implemented by x86 BIOSes.
 %
 This work has been presented at the $21^{th}$ International Symposium on Formal
 Methods (FM2016)\,\cite{letan2016speccert}.
 
-In Chapter~\ref{chapter:freespec}, we present a systemic approach to modularly
-specify and verify large systems, organized as trees of components.
+In Chapter~\ref{chapter:freespec}, we present a systemic approach to specify and verify large systems, organized as trees of components, in a modular way.
 %
-We apply ideas from verification of computer programs with side-effects to the
+We apply ideas from verification of computer programs with side effects to the
 domain of component-based modelling, and the resulting approach can be used both
 for verifying the composition of hardware components and software components
 alike.
