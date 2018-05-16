@@ -1,4 +1,4 @@
-\chapter{Hardware and BIOS Background}
+\chapter{Intel x86 Hardware and BIOS Background}
 \label{chapter:usecase}
 
 Our motivation to formally specify and verify architectural attacks comes from
@@ -66,7 +66,7 @@ The \ac{cpu} communicates with peripherals to interact with the outside world
 
 A computer platform goal is to execute programs to perform arbitrary tasks.
 %
-To that end, it relies on one or more \ac{cpu}.
+To that end, it relies on one or more \acp{cpu}.
 %
 A \ac{cpu} takes so-called ``instructions'' as input, and manipulates its
 internal states and data stored in a memory, as output
@@ -128,7 +128,7 @@ the same memory.
 \paragraph{}
 %
 Historically, x86 \acp{cpu} were using two distinct memory spaces to communicate
-either with the \ac{dram} or with the peripherals, along with two families of
+either with the \ac{dram} or with the peripherals, \emph{via} two families of
 instructions.
 %
 Nowadays, the memories exposed by the peripherals are mapped within the same
@@ -142,7 +142,7 @@ Controller (formally known as the \emph{northbridge}, and now integrated to the
 \ac{cpu} Die).
 %
 The Memory Controller is connected to the \ac{dram} and to peripherals which
-require small access time, such as a graphic card or a ethernet controller.
+require small latency, such as a graphic card or a ethernet controller.
 %
 If a given memory access does not target one of its peripherals or the
 \ac{dram}, the Memory Controller forwards the memory access to the Platform
@@ -206,7 +206,7 @@ could be leveraged to achieve similar goals.
 
 In that respect, the current situation has improved.
 %
-Modern x86 \acs{cpu} provide a feature called I/O MMU, which allows for
+Modern x86 \acp{cpu} provide a feature called I/O MMU, which allows for
 configuring the memory ranges each peripheral can access to.
 %
 In addition, Intel tends to take rogue peripherals into account when it
@@ -222,7 +222,8 @@ large.
 %
 The different software components which form the software stack are executed by
 the same \acp{cpu}, the instructions which form their programs are stored within
-memories, which they also manipulate concurrently.
+the same memories, which they also manipulate concurrently \emph{via} a
+configurable memory map.
 %
 In addition, active peripherals can also access the main memory concurrently.
 with the \ac{cpu}, and they tend to be part of the \ac{tcb}.
@@ -258,91 +259,133 @@ relevant than the logical view exposed to the \acp{cpu}.
   software component
 \end{definition}
 
+On the contrary, there are complete classes of security properties which are not
+covered by HSE mechanisms.
+%
+The most famous is probably non-interference properties, notably defeated
+\emph{via} side-channel attacks (\emph{e.g.} cache-timing attacks). Indeed,
+Intel documentations clearly state:
 
-\section{BIOS}
+\begin{quote}
+  The Intel architecture aims to provide protection against software
+  side-channel attacks at the cache line granularity.
+
+  \hfill\small \emph{Intel Software Guard Extensions, Developer Guide}
+\end{quote}
+
+Because computer programs rarely fit inside a cache line, preventing
+side-channel attacks therefore additional software-based security enforcement
+mechanisms.
+
+\section{BIOS Overview}
 \label{sec:usecase:firmware}
 
-To illustrate these threats, we focus on the \emph{Firmware} layer of the
+The \ac{bios} plays a significant role in Intel x86 computing platform.
+%
+It is the first piece of software executed by the \ac{cpu}, and initiates both
+the hardware architecture and the system software execution during the boot
+sequence (\ref{subsec:usecase:firm:boot}).
+%
+At runtime, it remains active to perform various tasks, including and not
+limited to platform-specific events, device emulation, \ac{bios} update
+management (\ref{subsec:usecase:firm:runtime})
+%
+As such, it is a natural part of the rest of the software stack \ac{tcb}.
+%
+It is kept isolated from the rest of the software stack thanks to several HSE
+mechanisms, whose correctness is essential for the overall security of the
+platform (\ref{subsec:usecase:firm:hse}).
+
+\subsection{During the boot sequence}
+\label{subsec:usecase:firm:boot}
+
+The \ac{bios} program is stored inside a flash memory, a small memory connected
+to the PCH through the Serial Peripheral Interface (SPI) bus on modern x86
 computing platform.
 %
-We first explain the role played by the computer firmware at runtime, after the
-boot sequence.
+When the \ac{cpu} is power up, it is programmed to fetch the code stored at a
+hard-coded address within the flash memory.
 %
-We then describe which HSE mechanisms it implements to stay isolated from the
-rest of the software stack.
+The first task of the \ac{bios} is to initiate the hardware architecture,
+starting with the \ac{dram}.
 %
-Finally, we show how these HSE mechanisms have been defeated by attackers over
-time.
+Once the hardware components of the computing platform have been initiated, the
+\ac{bios} searches for a system software to load into memory.
+%
+Historically, ``legacy'' \acp{bios} were looking for a Master Boot Record (MBR)
+at the beginning of mass storage devices (\emph{e.g.} hard drive, USB stick).
+%
+The MBR, whose size is limited to 512 bytes, contains a small program to
+initiate a loader for the system software.
+%
+Modern \acp{bios} implement the \ac{uefi}, whose purpose is to standardize the
+boot sequence process in order to favour interoperability of \ac{bios}
+implementations.
+%
+In particular, UEFI-compliant \ac{bios} can load so-called UEFI applications of
+arbitrary size, leading modern operating systems to be packaged as UEFI
+applications.
 
-\subsection{BIOS Purposes}
+The \ac{uefi} standard includes several interesting security mechanisms.
+%
+For instance, it defines a protocol called the Secure Boot, which can be
+leveraged to improve the security of the boot sequence.
+%
+If Secure Boot is enable, the UEFI-compliant \ac{bios} will only execute
+applications which provide an acceptable cryptographic signature, with respects
+to a key hierarchy configurable by the computing platform owner.
+%
+Ironically, the \ac{uefi} standard makes it easier to write portable piece of
+software which can be executed prior to any system software.
+%
+As a consequence, it increases the attack surface of the computing platform, in
+case of bad \ac{bios} configuration (\emph{e.g.} Secure Boot is disabled).
 
-In the context of this thesis, we call \emph{Firmware} a piece of software
-provided by a hardware vendor and indispensable to ensure the computer correctly
-works.
-%
-Many hardware components comes with their dedicated firmware, \emph{e.g.} the
-graphic card, the network card, etc.
-%
-In addition, hardware vendors provide a particular form firmware tied to the
-hardware architecture as a whole, better known as the \ac{bios}.
-% or the \emph{Unified Extensible Firmware Interface} (UEFI).
+\subsection{At runtime}
+\label{subsec:usecase:firm:runtime}
 
-The main objective of the \ac{bios} is to carry on the initialization of the
-hardware architecture.
+Once a system software has been selected and loaded into memory (ideally,
+without any tampering from the \ac{bios}), the boot sequence ends, and the
+runtime begins.
 %
-This initialization process is commonly called the boot sequence.
+At runtime, the system software is in charge of the \ac{cpu} control flow,
+meaning it decides which piece of software is executed at a given time.
 %
-One the boot sequence is completed, the \ac{bios} selects a system software,
-like an operating system.
-%
-To do so, it loads the system software code into memory, then starts its
-execution.
-%
-Once this is done, the system software controls the main \ac{cpu}, and the rest
-of the hardware architecture.
+However, the \ac{bios} remains active.
 
-The \ac{bios} often exposes a set of so-called runtime services, but nothing
-obliges the system software to use them.
+Firstly, it provides a software interface to the system software.
 %
-For this reason, people tend to think \ac{bios} role ends with the boot
-sequence.
+Some of these \emph{runtime services}, as they are called by the \ac{uefi}
+standard, can be leveraged by the system software as an intermediary layer to
+interact with the hardware architecture.
 %
-This is not true.
+In doing so, it reduces the coupling between the system software and the
+hardware components.
 %
-Indeed, the \ac{bios} continues to actively participate to the well functioning
-of a computer, even after it gives the control flow to the system software.
+Other runtime services are mandatory gates towards certain computing platform
+features.
 %
-Its main task is to take care of hardware events specific to the particular
-hardware architecture it is tied to.
-%
-Sometimes, it also emulates a hardware feature, in a transparent manner from the
-point of view of the system software.  \thomasrk[inline]{Do we have an example?}
-%
-Last, but not least, it manages its own update.
-%
-That is, the system software is not able to modify the \ac{bios} code, as stored
-in the SPI Flash, by itself.
-%
-Instead, it can only submit an update to the \ac{bios}, and the latter alone
-decides if this update can be applied.
-%
-This prevent the dangerous scenario where an attacker is able to take control of
-the system software, and then modify the \ac{bios}.
+For instance, software update for the \ac{bios} code are performed by the
+\ac{bios} itself, so that the latter can validate the validity of the update.
 
-Translated in terms of security properties, this means two things:
+Secondly, the \ac{bios} often needs to operate independently of the system
+software.
 %
-\begin{inparaenum}[(1)]
-\item the \ac{bios} shall be properly isolated from the other software
-  components, and
-  %
-\item the SPI Flash which contains the \ac{bios} code shall be
-  integrity-protected, so that only the \ac{bios} can modify it.
-\end{inparaenum}
+For instance, it manages platform-specific events whose internals are not
+publicly documented.
 %
-This should not be a surprise for the attentive readers: these two security
-properties are enforced by two HSE mechanisms implemented by the \ac{bios}.
+Some \acp{bios} also emulate complete hardware devices, in a transparent manner
+from the system software perspective.
+%
+The \ac{bios} autonomy from the system software has important consequences in
+terms of security.
+%
+Software vulnerabilities affecting the \ac{bios} can potentially by used by an
+attacker to take complete control over the software stack executed by the
+\ac{cpu}.
 
-\subsection{BIOS Isolation}
+\subsection{Security Properties and HSE Mechanisms}
+\label{subsec:usecase:firm:hse}
 
 The \ac{bios} isolation at runtime is enforced thanks to the \ac{smm} of x86
 \ac{cpu}.
