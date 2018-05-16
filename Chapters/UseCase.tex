@@ -42,9 +42,6 @@ mechanisms in the past (Section~\ref{sec:usecase:hse}).
 \section{Hardware Architecture Overview}
 \label{sec:usecase:architecture}
 
-% TODO: Unify the figures, because right now, they have different name for the
-% same thing. Use the vocabulary introduced in Introduction.
-
 Describing hardware architectures in depth is challenging, because they tend to
 be made of many inter-connected components of various nature.
 %
@@ -153,22 +150,18 @@ Controller Hub (PCH) (formally known as the \emph{southbridge}).
 %
 The PCH acts as a proxy for the remaining peripherals.
 
-The memory map, that is the correspondence between the addresses used by the
-\ac{cpu} and the storage cells scattered among the hardware architecture, is
-dynamically configurable.
+\paragraph{}
+%
+One important property of x86 hardware architecture is that the memory map,
+which is the correspondence between the addresses used by the \ac{cpu} and the
+storage cells scattered among the hardware architecture, is dynamically
+configurable.
 %
 As such, determining which hardware component will receive a given memory access
 is far from being trivial.
-%
-From a security perspective, the consequences are important.
-%
-If an untrusted software component is able to modify the \ac{cpu} memory map in
-an unanticipated manner, it may be able to tamper with the execution of a
-trusted software component.
 
-\subsection{Peripherals}
+\subsection{Active Peripherals}
 \label{subsec:usecase:perif}
-
 
 It is worth mentioning that, since 2008, Intel embeds the Management Engine, a
 processor \emph{inside} the memory controller.
@@ -186,106 +179,84 @@ scenario which is not without precedent, potentially defeats any security
 measures implemented at the \ac{cpu} level.
 
 The security threat posed by the Management Engine is not an isolated case.
+%
+On the contrary, x86 hardware architectures contain several \emph{active}
+peripherals.
+%
+We say a peripheral is active if it can autonomously read at and write to the
+system memory, using a feature called \ac{dma}.
+%
+This feature brings an important performance improvement, but it also opens an
+important surface of attacks.
 
-\subsection{Hidden Hardware Architecture Complexity}
+Historically, peripherals have been part of the \ac{tcb} of every x86 HSE
+mechanisms, with important consequences on the computing platform security.
+%
+For instance, Loic Duflot \emph{et al.} have been able to take control of a
+network card, because the piece of software responsible for processing network
+packets was vulnerable\,\cite{duflot2010network}.
+%
+Because the network card can perform \ac{dma}, they were able to tamper with the
+system software code and data.
+%
+It has also been repeatedly shown that the various physical interface exposed by
+the computer (\emph{e.g.} USB\,\cite{nohl2014badusb},
+Thunderbolt\,\cite{hudson2015thunderstrike}, PCI\,\cite{chifflier2013uefi})
+could be leveraged to achieve similar goals.
 
-One drawback of Figure~\ref{fig:usecase:computing-platform-1} is to hide the
-complexity of the \emph{Hardware} layer.
+In that respect, the current situation has improved.
 %
-Far from a homogeneous block, a typical hardware architecture comprises dozens
-of hardware components whose nature and purpose are very different.
+Modern x86 \acs{cpu} provide a feature called I/O MMU, which allows for
+configuring the memory ranges each peripheral can access to.
 %
-It is not possible to reason about HSE mechanisms without taking this reality
-into account.
+In addition, Intel tends to take rogue peripherals into account when it
+conceives new security features.
+%
+A good example is the \ac{sgx} technology, whose \ac{tcb} is limited to the
+\ac{cpu} and its Memory Controller\,\cite{costan2016sgxexplained}.
 
-Figure~\ref{fig:usecase:computing-platform-2} partially highlights this, by
-making explicit several hardware components involved in memory accesses: the
-cache, the memory controller, a DRAM controller or potentially a graphic card.
-%
-Most of them run dedicated software stacks, concurrently with the ``main''
-software stack pictured in Figure~\ref{fig:usecase:computing-platform-1}.
-%
-Although these concurrent software stacks are not the main subject of this
-thesis, they are worth mentioning, as they can have dramatic consequences from a
-security perspective.
-%
-We cite two example to motivate this claim.
-%
-First, L. Duflot \emph{et al.} have been able to take control of a network card,
-because the piece of software responsible for processing network packets was
-vulnerable.
-%
-This novel ---at the time--- kind of attacks poses several challenges, from a
-security perspective.
-%
-Indeed, it is very hard, if not impossible, for the ``main'' software stack to
-know whether the network card has been compromised or not.
-%
-The second example we want to detail is the Intel Management Engine, an
-autonomous system which lives inside x86 processors since 2008.
-%
-The Management Engine is used by Intel to provide business services, such as
-out-of-band administration management or trusted computing technologies
-emulation.
-%
-To enable these features, the Management Engine requires very important
-privileges, and is \emph{de facto} the most privileged execution environment of
-a x86 computing platform.
-%
-Recent vulnerabilities have shown this is not without consequences when the
-Management Engine's software stack is compromised.
+\subsection{Security Properties}
 
-Apart from these potential software implementation issue within hidden software
-stacks, Figure~\ref{fig:usecase:computing-platform-2} highlights the complexity
-of a typical hardware architecture.
+From a security perspective, the attack surface on x86 computing platform is
+large.
 %
-This complexity easily explains the architectural attacks that have been
-disclosed during the past decade.
+The different software components which form the software stack are executed by
+the same \acp{cpu}, the instructions which form their programs are stored within
+memories, which they also manipulate concurrently.
+%
+In addition, active peripherals can also access the main memory concurrently.
+with the \ac{cpu}, and they tend to be part of the \ac{tcb}.
+%
+As a consequence, most of the HSE mechanisms implemented in x86 computing
+platforms aim to enforce isolation properties, to prevent untrusted software
+components to tamper with the execution of trusted ones.
+%
+These isolation properties can take three forms.
 
-\subsection{Importance of Software Isolation}
+\begin{definition}[Integrity]
+  The trusted software component is assigned a portion of the memory map.
+  %
+  Untrusted software components cannot tamper with the result of read accesses
+  targeting this portion and performed by the trusted software component,
+\end{definition}
 
-Software components mostly manipulate data stored in ``memory'', and they see
-this memory as a continuous array.
-%
-In reality, it is scattered among many different, sometimes redundant locations.
-%
-This is partly because the x86 architecture heavily relies on \emph{memory
-  mapping} mechanisms.
-%
-For each memory access, several hardware components might be involved: the MMU,
-the cache, the memory controller, the DRAM controller, the peripherals, and so
-on.
+\begin{definition}[Confidentiality]
+  The trusted software component is assigned a portion of the memory map.
+  %
+  It can hide its secrete inside this portion, and untrusted software components
+  cannot get these secretes from the result of a read access.
+\end{definition}
 
-The code of the software components which form the software stack are also
-stored within the memory, as pictured by
-Figure~\ref{fig:usecase:computing-platform-3}.
+Integrity and confidentiality properties have to be considered from an
+information flow perspective.
 %
-When the \ac{cpu} wants to execute the next instruction of a given software
-components code, it fetches it from memory.
-%
-For the result of this memory fetch to be what the software developer is
-expecting, the memory layout has to be carefully configured.
-%
-This is harder than one might expect.
-%
-This makes \emph{isolation} a key security property.
-%
-In the context of this thesis, we say one component $A$ is said isolated from a
-second component $B$ when $B$ cannot tamper with $A$'s functioning otherwise
-than through its interface.
-%
-Thus, an operating system should be isolated from end users applications, to
-prevent the latter to grant themselves abusive rights.
-%
-The opposite is not necessarily true, and it is even a common practice for
-operating system to tamper with applications code (\emph{e.g.} address space
-layout randomization, dynamic libraries).
+The content of specific storage cells inside the hardware architecture is less
+relevant than the logical view exposed to the \acp{cpu}.
 
-Isolation should not been confused with code integrity, as it might be possible
-for an attacker to tamper with the execution of a given software component
-without modifying its code in memory.
-%
-To that end, they might for instance rely on a memory mapping mechanism.
+\begin{definition}[Availability]
+  An untrusted software component cannot prevent the execution of a trusted
+  software component
+\end{definition}
 
 
 \section{BIOS}
