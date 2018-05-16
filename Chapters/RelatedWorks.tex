@@ -1,6 +1,13 @@
 \chapter{Related Works}
 \label{chapter:relatedwork}
 
+\endquote{``\emph{Walking on water and developing software from a specification
+    are easy if both are frozen.}''
+
+  \hfill\footnotesize --- Edward V. Berard}
+
+\vspace{1cm}\noindent
+%
 Hardware-based Security Enforcement (HSE) mechanisms are fundamental to enforce
 primordial security properties such as isolation between layers of abstraction.
 %
@@ -45,7 +52,7 @@ outputs.
 Software components are piece of data scattered into memory spaces, whose
 semantics are determined by the processor unit that executes them.
 %
-While both hardware and software components are been subject to formal
+While both hardware and software components have been subject to formal
 verification in the past, these verification works tend to rely on different
 representations.
 %
@@ -56,10 +63,10 @@ co-designs\,\cite{lugou2017smashup}.
 It is the main reason why we focus on the specification level in the context of
 this thesis.
 %
-Refine our potential conclusions up to a concrete implementation is necessary in
-the long term.
+Refining our potential conclusions up to a concrete implementation is necessary
+in the long term.
 %
-Fortunately, it is also a very active fields, with impressive flagship projects
+Fortunately, it is also a very active field, with impressive flagship projects
 such as DeepSpec\,\cite{appel2017deepspec}.
 
 The rest of this Chapter proceeds as follows.
@@ -75,7 +82,7 @@ to consider a computing platform which is comprehensive in terms of hardware
 components.
 %
 Hoare Logic is a well established formalism to reason on computer program
-correctness, and its principles apply to other use case, including hardware
+correctness, and its principles apply to other use cases, including hardware
 modelling (Section~\ref{sec:related:hoare}).
 %
 It can be used to enable modularity and code reuse.
@@ -85,7 +92,7 @@ platform state.
 %
 This is way, as a final step, we present how it is possible to break down a
 complex system into interconnected, simpler subsystems, yet being able to reason
-about the sub-systems composition (Section~\ref{sec:related:interface}).
+about the subsystems composition (Section~\ref{sec:related:interface}).
 %
 This approach sounds very natural in our context of application, as a computing
 platform is often organized as a succession of specialized layers (Separation of
@@ -127,14 +134,14 @@ these sequences.
 This is the case, for instance, for \emph{enforceable security properties}, as
 defined by Fred B. Schneider\,\cite{schneider2000enforceable}.
 %
-An enforceable security property is a security property which only depends the
-execution past, that is the sequence of transitions which led the system from
-its initial state to its current state.
+An enforceable security property is a security property which only depends on
+the execution past, that is the sequence of transitions which led the system
+from its initial state to its current state.
 %
 A common approach is to distinguish between secure states and insecure states,
 secure transitions and insecure transitions, and to verify that, for a subset of
 traces --typically traces which start from a secure state---, the system is
-never an insecure state, and no insecure transition ever occurs.
+never in an insecure state, and no insecure transition ever occurs.
 %
 For instance, the integrity of the SMM code within the SMRAM is an enforceable
 security property.
@@ -185,7 +192,7 @@ capabilities given to the attacker.
 %
 As for the transitions set, it is defined in terms of pre and post conditions.
 %
-On the one hand, the pre condition is parameterized by the initial state and the
+On the one hand, the pre condition is parameterized by the current state and the
 labelled event.
 %
 If the pre condition is satisfied for a given hardware state and labelled event,
@@ -207,7 +214,7 @@ This trace describes an attack path, that is the execution steps to reproduce in
 order to defeat the security enforcement.
 %
 Hence, the authors have been able to show with their model that the \ac{xom}
-architecture was subject to several replay attacks, and they leverage their
+architecture was subject to several replay attacks, and they leveraged their
 model to validate their countermeasures.
 %
 However, the state explosion problem obliges the authors to simplify their
@@ -713,7 +720,7 @@ For a given component of the computing platform, it becomes possible to reason
 about the rest of the system in terms of high-level, specification modules.
 %
 These modules are as many hypotheses which can be confirmed by proving the
-related sub-systems effectively refine them.
+related subsystems effectively refine them.
 
 BlueSpec is a target for Kami's models extraction.
 %

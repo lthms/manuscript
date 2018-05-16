@@ -1,6 +1,13 @@
 \chapter{Intel x86 Hardware and BIOS Background}
 \label{chapter:usecase}
 
+\endquote{``\emph{You’re building your own maze, in a way, and you might just
+    get lost in it.}''
+
+  \hfill\footnotesize --- Marijn Haverbeke}
+
+\vspace{1cm}\noindent
+%
 Our motivation to formally specify and verify architectural attacks comes from
 our experience with the x86 hardware architecture.
 %
@@ -13,12 +20,12 @@ While our contributions are intended to be applicable to other hardware
 architectures, for purposes of evaluating our work, we have adopted the systemic
 approach to apply them to a x86 real example.
 %
-We have chosen to focus on the HSE mechanism implemented by the BIOS at runtime
-to stay isolated from the rest of the software stack, including the system
-software.
+We have chosen to focus on the \ac{hse} mechanism implemented by the BIOS at
+runtime to stay isolated from the rest of the software stack, including the
+system software.
 %
 Because the BIOS is the most privileged piece of software executed by the
-hardware architecture, this HSE mechanism is of key importance.
+hardware architecture, this \ac{hse} mechanism is of key importance.
 %
 Despite this fact, it has been defeated several times, and therefore, it
 illustrates perfectly our motivations.
@@ -32,12 +39,12 @@ We describe how a typical x86 hardware architecture is organized, and the
 consequences of this organization in terms of security
 (Section~\ref{sec:usecase:architecture}).
 %
-We then focus on the key role played by the \ac{bios}
-(Section~\ref{sec:usecase:firmware}).
+We then focus on the key role played by the \ac{bios}, and the security model it
+requires so it can play this role (Section~\ref{sec:usecase:firmware}).
 %
-Once the role of the \ac{bios} has been established, we detail HSE mechanisms it
-implements, and several architectural attacks which have defeated these HSE
-mechanisms in the past (Section~\ref{sec:usecase:hse}).
+Once the role of the \ac{bios} has been established, we detail \ac{hse}
+mechanisms it implements, and several architectural attacks which have defeated
+these \ac{hse} mechanisms in the past (Section~\ref{sec:usecase:hse}).
 
 \section{Hardware Architecture Overview}
 \label{sec:usecase:architecture}
@@ -112,19 +119,6 @@ That is, to ``receives a message'' from a peripheral, a \ac{cpu} reads the
 content of the memory it exposed, while it can ``send a message'' by writing to
 the same memory.
 
-% Interacting with the \ac{dram} remains slow, in regard to the speed of a
-% \ac{cpu}
-%%
-% To improve performance, Intel \acp{cpu} come with several (often three) levels
-% of caches, from the smaller and quicker, to the bigger and slower.
-%%
-% For cache-friendly programs, the gain in performance can be huge.
-%%
-% This gain is paid in important increase of complexity.
-%%
-% Enforcing coherence between the different levels of cache and the \ac{dram} is
-% not trivial.
-
 \paragraph{}
 %
 Historically, x86 \acp{cpu} were using two distinct memory spaces to communicate
@@ -189,7 +183,7 @@ system memory, using a feature called \ac{dma}.
 This feature brings an important performance improvement, but it also opens an
 important surface of attacks.
 
-Historically, peripherals have been part of the \ac{tcb} of every x86 HSE
+Historically, peripherals have been part of the \ac{tcb} of every x86 \ac{hse}
 mechanisms, with important consequences on the computing platform security.
 %
 For instance, Loic Duflot \emph{et al.} have been able to take control of a
@@ -228,13 +222,14 @@ configurable memory map.
 In addition, active peripherals can also access the main memory concurrently.
 with the \ac{cpu}, and they tend to be part of the \ac{tcb}.
 %
-As a consequence, most of the HSE mechanisms implemented in x86 computing
+As a consequence, most of the \ac{hse} mechanisms implemented in x86 computing
 platforms aim to enforce isolation properties, to prevent untrusted software
 components to tamper with the execution of trusted ones.
 %
 These isolation properties can take three forms.
 
 \begin{definition}[Integrity]
+  \label{def:usecase:int}
   The trusted software component is assigned a portion of the memory map.
   %
   Untrusted software components cannot tamper with the result of read accesses
@@ -260,7 +255,7 @@ relevant than the logical view exposed to the \acp{cpu}.
 \end{definition}
 
 On the contrary, there are complete classes of security properties which are not
-covered by HSE mechanisms.
+covered by \ac{hse} mechanisms.
 %
 The most famous is probably non-interference properties, notably defeated
 \emph{via} side-channel attacks (\emph{e.g.} cache-timing attacks). Indeed,
@@ -290,11 +285,9 @@ At runtime, it remains active to perform various tasks, including and not
 limited to platform-specific events, device emulation, \ac{bios} update
 management (\ref{subsec:usecase:firm:runtime})
 %
-As such, it is a natural part of the rest of the software stack \ac{tcb}.
-%
-It is kept isolated from the rest of the software stack thanks to several HSE
-mechanisms, whose correctness is essential for the overall security of the
-platform (\ref{subsec:usecase:firm:hse}).
+As such, it is a natural part of the rest of the software stack \ac{tcb}, and it
+can only operate if certain security requirements are met
+(\ref{subsec:usecase:firm:sec}).
 
 \subsection{During the boot sequence}
 \label{subsec:usecase:firm:boot}
@@ -384,87 +377,175 @@ Software vulnerabilities affecting the \ac{bios} can potentially by used by an
 attacker to take complete control over the software stack executed by the
 \ac{cpu}.
 
-\subsection{Security Properties and HSE Mechanisms}
-\label{subsec:usecase:firm:hse}
+\subsection{Security Model}
+\label{subsec:usecase:firm:sec}
 
-The \ac{bios} isolation at runtime is enforced thanks to the \ac{smm} of x86
-\ac{cpu}.
+The \ac{bios} is provided by the manufacturer of the hardware architecture.
 %
-Intel describes it as follows (the emphasis is ours, and does not exist in the
-original document):
+In most case, it is a proprietary software, and the computer owner has little
+control over it.
+%
+From the manufacturer software stack, the rest of the software stack is
+considered untrusted, and the main goal of the \ac{bios} is to keep the computer
+in a working state.
+%
+Indeed, a malicious or erroneous system software could theoretically.
+%
+The question whether this model benefits the x86 computing platform is outof the
+scope of this thesis.
+%
+We rather focus on its implementation, because of the important consequences in
+terms of security if an attacker succeeds in defeating it.
+
+The security model of a x86 \ac{bios} can be divided into two complementary
+security properties.
+
+\begin{definition}[BIOS Integrity]
+  \label{def:usecase:biosint}
+  The \ac{bios} is assigned two memories: the memory flash and a subset of the
+  \ac{dram}, and the rest of the software stack cannot tamper with the result of
+  read accesses performed by the \ac{bios} which target one of these memories.
+\end{definition}
+
+The \ac{bios} should be the only software component with the capability to
+modify the memory flash content.
+%
+This prevents the scenario where an arbitrary system software rewrite the
+\ac{bios} code inside the flash memory, then provoke a reboot.
+%
+Beside, the flash memory cannot be the only memory dedicated to the \ac{bios}.
+%
+Memory accesses which target the flash memory are slow, as the latter is
+connected to the PCH, behind the Memory Controller.
+%
+This is why Intel dedicates a portion of the system memory to the \ac{bios}
+runtime code, and for understandable reason provides the means to prevent the
+system software to tamper with this portion.
+
+\begin{definition}[BIOS Availability]
+  \label{def:usecase:biosav}
+  If needed, the \ac{bios} can temporarily retrieve the \ac{cpu} control flow,
+  without any cooperation required from the system software.
+\end{definition}
+
+The system software is untrusted, but it controls the \ac{cpu} control flow.
+%
+We want to avoid a scenario where an arbitrary system software prevent the
+execution of the \ac{bios} at runtime.
+
+\section{BIOS \ac{hse} Mechanism and Architectural Attacks}
+\label{subsec:usecase:hse}
+
+To stay isolated from the rest of the software stack at runtime, the \ac{bios}
+implements a \ac{hse} mechanism whose key hardware feature is the \ac{smm}, a
+dedicated execution mode of x86 \acp{cpu} (\ref{subsec:usecase:hse:smm}).
+%
+The \ac{smm} provides the necessary features to enforce both \ac{bios} Integrity
+(Definition~\ref{def:usecase:biosint}) and \ac{bios} Availability
+(Definition~\ref{def:usecase:biosav}).
+%
+Despite the key importance of \ac{smm}, several architectural attacks have been
+disclosed over the past decade, including the SMRAM Cache Poisoning Attack
+(\ref{subsec:usecase:hse:smram}), SENTER Sandman
+(\ref{subsec:usecase:hse:sandman}) and Speed Racer
+(\ref{subsec:usecase:hse:speed}).
+
+\subsection{System Management Mode}
+\label{subsec:usecase:hse:smm}
+
+To handle several software components with different level of privileges, Intel
+\acp{cpu} provide several execution modes.
+%
+An execution mode can be roughly assimilated to a set of hardware capabilities.
+%
+For instance, in a given execution mode, a \ac{cpu} may refuse to execute
+certain assembly instructions, and the software component executed at the time
+will not be able to leverage the side-effects involved by the execution of these
+instructions.
+%
+Contrary to the common believe, x86 execution modes are not organized in a
+linear hierarchy, but are rather a matrix of complementary hardware features:
+ring levels, paging configuration, virtualization technologies, etc.
+%
+Intel describes the \ac{smm} as follows:
 
 \begin{quote}
   \ac{smm} is a special-purpose operating mode provided for handling system-wide
   functions like power management, system hardware control, or proprietary
   OEM-designed code.
   %
-  It is intended for use only by system firmware, not b applications software or
-  general-purpose systems software.
+  It is intended for use only by system firmware, not by applications software
+  or general-purpose systems software.
   %
   \textbf{The main benefit of \ac{smm} is that it offers a distinct and easily
     isolated processor environment that operates transparently to the operating
     system or executive and software applications.}
+
+  \hfill \small \emph{Intel 64 and IA-32 Architectures Software Developer’s
+    Manual}
 \end{quote}
 
-To handle several level of privileges, Intel \ac{cpu} provides several execution
-modes.
+The emphasis is ours, and does not exist in the original document.
 %
-An execution mode can be roughly assimilated to a set of hardware capabilities.
+This sentence roughly corresponds to our definitions of \ac{bios} Integrity and
+\ac{bios} Availability.
 %
-Hence, in a given execution mode, a \ac{cpu} may refuse to execute certain
-assembly instructions.
-%
-As a consequence, the software component executed will not be able to leverage
-the side-effects involved by the execution of these instructions, \emph{e.g.}
-access to specific hardware registers (like the one related to paging).
-%
-The execution modes are not ''linear''.
-%
-On the contrary, they can be seen as a composition of several hardware features:
-ring levels, virtualization technology, and finally \ac{smm}.
-%
-This means you can be in ring~0, while in hypervisor mode, while in \ac{smm},
-for instance.
-
-\paragraph{System Management Mode}
-%
-The main objective of the \ac{smm}, as stated by the Intel Developer Manual, is
-to provide an `isolated processor environment'', dedicated to ``system
-firmware'', and that should ``operate transparently to the operating system''.
-%
-To provide these features, \ac{smm} relies on two things: the SMRAM and the
+The \ac{smm} requires two additional hardware features: the SMRAM and the
 \ac{smi}.
 
-The SMRAM is a special memory region within the DRAM, dedicated to the \ac{smm}.
+\paragraph{System Management RAM}
 %
-It is supposed to contain the \ac{bios} code, and its private data;
-%
-as a consequence, it should not be accessible to a \ac{cpu} which is not in
-\ac{smm}.
+The SMRAM is the name given by Intel to the subset of the system memory
+dedicated to the \ac{smm}.
 %
 The exact location and size of the SMRAM is architecture dependent.
 %
 To locate it, the \ac{cpu} has a register named \texttt{SMBASE}, to be
 configured by the \ac{bios} during the boot sequence.
 %
-As its name implies, the \texttt{SMBASE} value should point to the base of the
+As its name suggests, the \texttt{SMBASE} value should point to the base of the
+SMRAM.
+
+At the beginning of the boot sequence, the SMRAM is left unprotected, meaning
+arbitrary memory accesses targeting the SMRAM are authorized.
+%
+This design has been made to help \ac{bios} initializes the SMRAM content.
+%
+Once the \ac{smm} code ---the \ac{bios} code intended to be executed at runtime
+in \ac{smm}--- has been correctly loaded into the SMRAM, and prior to giving the
+\ac{cpu} control flow to the system software, the \ac{bios} has to lock the
 SMRAM.
 %
-It is then up to the \ac{bios} developer to appropriately write its so-called
-\ac{smm} code (that is, the code supposedly executed in \ac{smm} at runtime)
-knowing the limitation of the SMRAM of the targeted architecture.
+A locked SMRAM can only be accessed by a \ac{cpu} in \ac{smm}, and is invisible
+to a \ac{cpu} not in \ac{smm}.
+%
+This access control mechanism is implemented by the Memory Controller.
+%
+It can be configured by the \ac{bios} during the boot sequence, by setting the
+\texttt{D\_LCK} bit of the \texttt{SMRAMC} configuration register.
+%
+A Memory Controller with the \texttt{D\_LCK} bit set will prevent a \ac{cpu} not
+in \ac{smm} to tamper with the SMRAM content.
+%
+In addition, the \texttt{D\_LCK} cannot be cleared once it has been set, except
+by performing a complete reboot of the platform.
+%
+This leaves no opportunity to the system software to tamper with the SMRAM
+content.
 
-The \ac{smi} is a hardware interrupt which makes the \ac{cpu} enters \ac{smm}.
+\paragraph{System Management Interrupt}
+
+The \ac{smi} is a hardware interrupt which makes the \ac{cpu} ``enters''
+\ac{smm}.
 %
 More precisely, when a \ac{cpu} receives a \ac{smi}, it saves its current state
-(\emph{e.g.} registers, execution mode, etc.), either in the SMRAM or, for most
-recent versions, in dedicated register of the \ac{cpu}.
+(\emph{e.g.} its registers, current execution mode, etc.), either in the SMRAM
+or, for most recent versions, in dedicated internal registers.
 %
 Once this preliminary step is done, the \ac{cpu} reconfigures itself;
 %
-in particular, it sets its program counter register, that is, the register which
-indicates from which address to fetch the next instruction it shall execute, to
-$\texttt{SMBASE} + 0x8000$\thomasrk{À vérifier.}.
+in particular, it sets its program counter register
+$\mathtt{SMBASE} + \mathrm{0x8000}$.
 %
 From this point, the \ac{cpu} is in \ac{smm} and starts to execute what should
 be the \ac{smm} code.
@@ -472,7 +553,7 @@ be the \ac{smm} code.
 Once the \ac{smm} code has performed the task it has been requested for, the
 \texttt{rsm} instruction can be used.
 %
-The instruction, which can be used only in \ac{smm}, tells the \ac{cpu} to
+This instruction, which can be used only in \ac{smm}, tells the \ac{cpu} to
 restore its previous state.
 %
 This way, the execution of the pieces of software previously halted by the
@@ -480,223 +561,280 @@ This way, the execution of the pieces of software previously halted by the
 %
 From the system point of view, it is like if nothing has happened.
 
-\section{Examples of x86 Architectural Attacks}
-\label{sec:usecase:hse}
+\paragraph{Flash Memory Lock-down}
+%
+The content of the flash memory has to be protected from arbitrary tampering,
+similarly to the SMRAM protection.
+%
+That is, only the \ac{smm} code should be capable of overwriting the content of
+the flash memory.
+%
+This second access control mechanism is implemented by the PCH.
+%
+It is configurable \emph{via} the \texttt{BIOS\_CNTL} (\ac{bios} control
+register).
+%
+Two bits of this register are of interest: the \texttt{BIOSWE} (\ac{bios} Write
+Enable) bit, and the \texttt{BLE} (\ac{bios} Lock Enable) bit.
 
-The combination of the SMRAM and the \ac{smi} explains why the \ac{smm} is often
-introduced as the ``most privileged execution mode'' of a x86 \ac{cpu}.
+The semantics of the \texttt{BIOSWE} and \texttt{BLE} bits is as follows.
 %
-In a nutshell, the \ac{smm} code can do all the thing the system software does,
-including arbitrary memory locations which belongs to that system software, but
-the system software cannot modify the SMRAM content.
+When the \texttt{BIOSWE} bit is clear, the PCH only authorizes read accesses to
+the Flash Memory.
 %
-In addition, the \ac{smi} is not a maskable interrupt, so the system software
-cannot prevent the execution of the \ac{smm} code.
+If the \texttt{BIOSWE} bit is set by a \ac{cpu}, the behaviour of the PCH
+depends on the value of the \texttt{BLE} bit.
 %
-In other words, both the integrity of the SMRAM and the availability of the
-\ac{smi} are the foundation of the \ac{smm} security.
+If the \texttt{BLE} bit has been set by the \ac{bios} during the boot sequence,
+then the PCH triggers a \ac{smi}.
 %
-Because they have been both defeated at repeated occasions, this makes the
-\ac{smm} particularly interesting to illustrate the concept of architectural
-attacks.
+As a consequence, the \ac{cpu} stops its current execution and enters in
+\ac{smm}.
+%
+This prevents the system software from tampering with the content of the Flash
+Memory, even if the PCH now authorizes write accesses.
+%
+It is the \ac{smm} code responsibility to clear the \texttt{BIOSWE} bit before
+using the \texttt{rsm} instruction.
+%
+On the contrary, if the \texttt{BLE} bit is not set, setting the \texttt{BIOSWE}
+bit will not cause a \ac{smi}.
+%
+Similarly to the \texttt{D\_LCK} bit of the \texttt{SMRAMC} register, the
+\texttt{BLE} bit cannot be cleared without a reboot.
 
-\paragraph{SMRAM Cache Poisoning Attack}
+The Flash Memory Lock-down mechanism is often used as a communication channel
+between the system software and the \ac{smm} code, in order to initiate a
+\ac{bios} update.
 %
-From the beginning, the integrity of the SMRAM has been enforced by the Memory
-Controller of the x86 architecture, whether it is a dedicated hardware component
-(northbridge), or more recently a part of the \ac{cpu}.
-%
-The Memory Controller main purpose it to act as a proxy for the \ac{cpu} memory
-accesses.
-%
-It receives the \ac{cpu} memory accesses, and dispatches them among the
-different hardware components which expose memory.
-
-The Memory Controller exposes a configuration register called the
-\texttt{SMRAMC}, whose purpose is to configure the access control configuration
-of the SMRAM.
-%
-At the beginning of the boot sequence, the SMRAM is said to be opened, which
-means it can be access by the \ac{cpu} whether it is in \ac{smm} or not.
-%
-This allows the \ac{bios} to load the \ac{smm} code inside the SMRAM, as the
-\ac{cpu} is not itself in \ac{smm} at the beginning of the boot sequence.
-%
-Once the loading is done, the \ac{bios} can ``close'' the SMRAM, meaning only a
-\ac{cpu} in \ac{smm} can access to the SMRAM.
-%
-It can also lock the SMRAMC, to prevent further piece of software (say, a
-malicious or exploited system software) to open the SMRAM in order to tamper
-with its content.
-
-Between 1986\thomasrk{Verify the date}, when the \ac{smm} has first been
-introduced, and 2009, it was believed that the \texttt{SMRAMC} register enough
-was sufficient to ensure the integrity of the SMRAM.
-%
-Loic Duflot \emph{et al.}\,\cite{duflot2009smram} and Rafal Wojtczuk \emph{et
-  al.}\,\cite{wojtczuk2009smram} have independently shown this belief was
-misplaced, thanks to the so-called \emph{SMRAM Cache Poisoning Attack}.
-%
-In addition to the evocative name, Figure~\ref{todofig} highlights the
-vulnerability concept.
-%
-To increase performance, the \ac{cpu} uses a cache of its memory accesses.
-%
-That is, when it reads memory, it stores the result of this access within a
-cache.
-%
-Then, when it has to read at the same location again, it gets the result from
-the cache directly, whose access time is way lower than regular DRAM.
-%
-A similar scheme applies to write accesses.
-
-As a consequence, regarding a \ac{cpu} configuration, copies of the SMRAM
-content may be found in the cache.
-%
-These copies were not protected by the Memory Controller, meaning the system
-software could tamper with them, even while not in \ac{smm}.
-%
-This attack is a perfect illustration of an architectural attack:
-%
-both the Memory Controller and the Cache work as expected.
-%
-The first one prevent an authorized access by a \ac{cpu} not in \ac{smm};
-%
-The second one keeps copies of successful accesses to decrease latency due to
-memory accesses.
-%
-However, once put together, they paves the road toward a successful tampering of
-the SMRAM by a system software.
-
-The solution implemented by Intel to prevent further exploitation of this
-vulnerability was to modify the behavior of the Cache, when the memory accesses
-target the SMRAM;
-%
-and because the SMRAM size and location remain specific to each architecture,
-this means it requires an additional step of configuration to tell the cache
-where the SMRAM is.
-
-What is interesting about the SMRAM Cache Poisoning is that another x86
-vulnerability\,\cite{domas2015sinkhole} has been since disclosed.
-%
-It also allows to trick a \ac{cpu} in \ac{smm} to execute arbitrary
-instructions, but leaves the content of the SMRAM in DRAM untouched.
-%
-In this case, it leverages the fact that the configuration registers of the
-\ac{apic}, a component of the \ac{cpu}, can be mapped in memory.
-%
-An attacker can use them to mask the real content of the SMRAM, even to a
-\ac{cpu} in \ac{smm}.
-%
-Again, the complexity implied by the composition of several hardware components
-can be used in a harmful way.
-
+The system software sets the \texttt{BIOSWE} bit to notify the \ac{smm} code
+that a \ac{bios} update is available.
 
 \paragraph{}
 %
-The isolation provided by the \ac{smm} is not an end in itself.
+The combination of the SMRAM, the \ac{smi} and the Flash Memory Lock-down
+explains why the \ac{smm} is often introduced as the ``most privileged execution
+mode'' of a x86 \ac{cpu}.
 %
-In fact, it has become the basis upon which other HSE mechanisms have been
-implemented.
+In a nutshell, the \ac{smm} code can do all the thing the system software does,
+including tampering with memories assigned to the system software.
 %
-One good example is the HSE mechanism responsible for the SPI Flash access
-control.
+On the contrary, the system software cannot modify neither the SMRAM content nor
+the \ac{smm} code stored in the flash memory, and cannot prevent the \ac{smm}
+code execution.
+
+\subsection{SMRAM and Cache Poisoning Attack} % -------------------------------
+\label{subsec:usecase:hse:smram}
+
+Between 1986, when the \ac{smm} has first been introduced, and 2009, it was
+believed that the \texttt{SMRAMC} register alone was sufficient to enforce the
+Integrity (Definition~\ref{def:usecase:int}) of the SMRAM.
 %
-In this example, the trusted software component is the \ac{smm} code.
+Loic Duflot \emph{et al.}\,\cite{duflot2009smram} and Rafal Wojtczuk \emph{et
+  al.}\,\cite{wojtczuk2009smram} have independently shown that this belief was
+misplaced, when they disclosed the \emph{SMRAM Cache Poisoning Attack}.
+
+\paragraph{Cache Memory}
+
+Interacting with the \ac{dram} remains slow, in regard to the speed of a
+\ac{cpu}.
 %
-The rest of the software stack, including the system software, is considered
+To improve performance, Intel \acp{cpu} come with several (often three) levels
+of caches, from the smaller and quicker, to the bigger and slower.
+%
+When a \ac{cpu} successfully reads the memory at a given address, it keeps a
+copy of the result in its cache.
+%
+Therefore, the next time it needs to read at this address, it just has to read
+its cache.
+%
+For cache-friendly programs, the gain in performance can be huge.
+%
+This gain is paid in important increase of complexity.
+%
+Enforcing coherence between the different levels of cache and the \ac{dram} is
+not trivial.
+
+\paragraph{Attack Path}
+%
+Intel x86 \acp{cpu} provide five different caching strategies (uncacheable,
+write combining, write-through, write-back and write-protected).
+%
+In particular, the write-back strategy aims to reduce the number of write
+accesses to the system memory.
+%
+To that end, \ac{cpu} does not pass write accesses on the system memory if it
+can avoid it.
+%
+The SMRAM Cache Poisoning leverages the write-back strategy of the \ac{cpu}
+cache to circumvent the \texttt{D\_LCK} bit protection.
+%
+The attack proceeds as follows:
+
+\begin{enumerate}
+\item Attackers set the cache strategy to be used for the SMRAM addresses to
+  write-back.
+%
+\item They trigger a \ac{smi}, using the x86 hardware architecture mechanisms at
+  their disposal
+%
+\item The \ac{smm} code is executed in SMM, leading the cache to be filled with
+  copies of that code
+%
+\item Attackers issue a memory write access targeting the SMRAM, and because of
+  the write-back cache strategy, the \ac{cpu} updates the copies within the
+  cache, but does not pass the access on the Memory Controller.
+%
+\item Attacker trigger another \ac{smi}, and the \ac{cpu} uses the tampered copy
+  of the \ac{smm} code inside its cache.
+\end{enumerate}
+%
+This attack is a perfect illustration of an architectural attack:
+%
+both the Memory Controller and the \ac{cpu} cache work as expected.
+%
+The former prevents authorized accesses to the SMRAM, that is a subset of the
+\ac{dram}, by a \ac{cpu} not in \ac{smm};
+%
+the former keeps copies of successful accesses to decrease latency due to memory
+accesses.
+%
+However, the composition of the cache and the memory controller breaks the BIOS
+Integrity property.
+
+\paragraph{Countermeasure}
+%
+The solution implemented by Intel to prevent further exploitation of this
+vulnerability was to modify the behavior of the cache, when the memory accesses
+target the SMRAM.
+%
+Because the SMRAM size and location remain specific to each architecture, this
+means it requires an additional step of configuration to tell the cache where
+the SMRAM is.
+%
+As a consequence, the complexity of the \ac{hse} mechanism implemented by the
+\ac{bios} at runtime, which was already involving three different hardware
+components, has increased.
+
+\paragraph{}
+%
+The SMRAM Cache Poisoning attack is a textbook case of architectural attacks.
+%
+It is interesting to notice that six years later, Christopher Domas has
+disclosed another x86 vulnerability called Sinkhole\,\cite{domas2015sinkhole},
+which relies on a similar approach to trick a \ac{cpu} in \ac{smm} to execute
+arbitrary instructions.
+%
+Both leave the content of the SMRAM in \ac{dram} intact.
+%
+Both leverage legitimate hardware features.
+
+\subsection{SENTER Sandman}
+\label{subsec:usecase:hse:sandman}
+
+In 2015, Xeno Kovah \emph{et al.} have shown it was possible to leverage the
+Intel TXT technology to circumvent the Flash Memory Lock-down
+protection\,\cite{kovah2015senter}.
+
+\paragraph{Intel TXT}
+The Intel Trusted eXecution Technology (TXT) is a recent feature of some x86
+\acp{cpu}, whose aim is to reduce the \ac{tcb} of a system software, by removing
+most of the \ac{bios} from it.
+%
+Using a new family of instructions called \texttt{SENTER}, a system software can
+initiate an isolated execution environment.
+%
+The motivation behind TXT is to reduce the size of the architecture \ac{tcb}.
+%
+In a regular computing platform, the latter includes most of the hardware
+components and the \ac{bios} code.
+%
+With TXT, the goal was to reduced it to the \ac{cpu} itself, which was acting as
+a minimal loader for the system software.
+
+\paragraph{Attack Path}
+%
+The \texttt{SENTER} instruction family had the undesirable side-effect of
+disabling \acp{smi}.
+%
+In the context of TXT, this might makes sense, as the \ac{bios} is considerer
 untrusted.
 %
-The targeted security property is the integrity of the SPI Flash.
+However, this totally contradicts the security model of the \ac{smm} code.
 %
-More precisely, only the \ac{smm} code should be capable of overwriting the
-content of the SPI Flash, which contains the \ac{bios} code.
+Without \ac{smi}, the \ac{bios} Availability property cannot be enforced.
 %
-To enforce this security property, the HSE mechanism relies on the
-\texttt{FNCTL} \thomasrk{Trouver le bon nom et mettre une ref.} register,
-exposed by the Platform Controller Hub.
-%
-Once configured correctly, the SPI Flash is considered ``locked'', meaning it is
-not possible even for the \ac{smm} code to issue a successful write access which
-targets its content.
-%
-The SPI Flash can be unlocked, but when the system software tries, the PCH fires
-a \ac{smi}.
-%
-As a consequence, the \ac{cpu} saves its current state, and starts executing the
-\ac{smm} code.
+In addition, the Flash Memory Lock-down mechanism is deprived of one of its key
+hardware features.
 
-What comes next depends on the \ac{smm} code, and how it is implemented.
+\paragraph{Countermeasure}
 %
-It is executed in a situation where the SPI Flash is unlocked, so it can
-perform, if it makes sense, the write access intended by the system software on
-its behalf.
+Recent x86 \acp{cpu} do not disable \ac{smi} when using the \texttt{SENTER}
+instructions.
 %
-On typical workflow is for the system software to load the \ac{bios} update in
-memory, and for the \ac{smm} code to verify whether this update is correctly
-signed by the vendor.
+This leaves the \ac{smm} code inside the TXT \ac{tcb}.
 %
-In any case, it is the responsibility of the \ac{smm} code to lock again the SPI
-Flash before it uses the \texttt{rsm} instruction to leave \ac{smm}.
-%
-Similarly to the \texttt{SMRAMC} register and the isolation it promises, the
-\texttt{FNCTL} register has been defeated at least twice.
+This is consistent with the security model of the \ac{smm} code, while the first
+version of TXT was clearly misconceived with regards with the existing state of
+the hardware architecture.
 
-\paragraph{SENTER Sandman}
-%
-In 2015, Xeno Kovah \emph{et al.} have shown it was possible to leverage the
-Intel TXT technology to circumvent the SPI Flash write
-protection\,\cite{kovah2015senter}.
-%
-By default, a system software has to trust the \ac{bios}.
-%
-Nowadays, most \ac{bios} implementations are made of millions of lines of code,
-which are provided by many different industrial partners of the vendor.
-%
-As a consequence, the attack surface is consequent.
-%
-Intel TXT is a recent feature of some x86 \ac{cpu}, whose aim is to reduce the
-\ac{tcb} of a system software, by removing most of the \ac{bios} from it.
-%
-With Intel TXT, a hypervisor can start its execution in an isolated execution
-environment.
-%
-From this perspective, it was coherent for TXT to mask incoming \ac{smi}, this
-indeed reduce the size of the \ac{tcb}, by excluding the \ac{smm} code.
-%
-Unfortunately, in this case, it has the important consequence of leaving the SPI
-Flash content unprotected.
+\subsection{Speed Racer}
+\label{subsec:usecase:hse:speed}
 
-\paragraph{Speed Racer}
-%
-There is at least another attack that defeated the \texttt{FNCTL} register
-purpose.
+There is at least another attack which have defeated the Flash Memory Lock-down
+protection.
 %
 In 2015, Corey Kallenberg \emph{et al.} have shown that the scenario detailed
-previously, where unlocking the SPI Flash fires a \ac{smi} which forces the
-\ac{cpu} to execute the \ac{smm} code, suffers from a race condition in presence
+previously, where setting \texttt{BIOSWE} was triggering a \ac{smi} to suspend
+the execution of the system software, suffered from a race condition in presence
 of a second \ac{cpu}\,\cite{kallenberg2015racecondition}.
+
+\paragraph{Attack Path}
 %
-When a \ac{smi} is fired, all the x86 \ac{cpu} of the platform will eventually
-enter in \ac{smm}.
+On a typical x86 hardware architecture, all the x86 \ac{cpu} of the platform
+will \emph{eventually} enter in \ac{smm} when a \ac{smi} is triggered.
 %
-On the contrary, the SPI Flash is unlocked as soon as the \texttt{FNCTL}
+On the contrary, the \texttt{BIOSWE} is set as soon as the \texttt{BIOS\_CNTL}
 register is modified.
 %
-To prevent this race condition, Intel has added a new feature to its PCH, and
-exposed by the \texttt{FNCTL} register.
+If two \acp{cpu} cooperate, they can benefit from a sufficient window for action
+and successfully tamper with the Flash Memory content.
 %
-Once activated, this new feature ensures the SPI Flash stays locked as long as
-one \ac{cpu} is not in \ac{smm}.
+The attack proceeds as follows:
+
+\begin{enumerate}
+\item One \ac{cpu} tries \emph{ad infinitum} to overwrite the content of the
+  Flash Memory. Because the \texttt{BIOSWE} bit is initially clear, the PCH
+  discards its attemps, and the Flash Memory content is correctly protected.
+%
+\item At the same time, another \ac{cpu} set the \texttt{BIOSWE} bit.
+%
+\item A \ac{smi} is triggered, but by the time it propagates to the first
+  \ac{cpu}, the latter may have successfully tamper with the Flash Memory
+  content.
+%
+\end{enumerate}
+
+\paragraph{Countermeasure}
+%
+To prevent this race condition, Intel has introduced a new configuration bit to
+the \texttt{BIOS\_CNTL} register: the \texttt{SMM\_BWP} (\ac{smm} \ac{bios}
+Write Protection).
+%
+If the \texttt{SMM\_BWP} is set, the PCH discards any write access which targets
+the Flash Memory \emph{unless all processors are in \ac{smm}}.
 
 \section{Conclusion}
 \label{sec:usecase:conclusion}
 
-Due to the complexity of computing platform, in particular from a hardware point
-of view, implementing a correct HSE mechanism is challenging.
+In this Chapter, we have detailed in depth the relevant x86 hardware mechanisms
+involved in the \ac{hse} mechanism implemented by the \ac{bios} at runtime to
+stay isolated from the system software.
 %
-We chose to focus on HSE mechanisms implemented by the firmware, because it has
-been well studied and there are several illustrative example of architectural
-attacks.
+In addition, we have presented three architectural attacks, to better illustrate
+the threats they pose.
 %
-In particular, in this chapter, we explained how three of them work.
+We have used the SMRAM Cache Poisoning Attack as a recurring application use
+case for our contributions, because it has motivated our will to formally
+specify and verify \ac{hse} mechanisms, and it is a good illustration of
+architectural attacks.

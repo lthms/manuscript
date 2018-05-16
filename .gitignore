@@ -1,4 +1,4 @@
-
+*.thm
 *.aux
 main-blx.bib
 *.lof
