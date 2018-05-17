@@ -1,90 +1,45 @@
 \chapter{SpecCert}
 \label{chapter:speccert}
 
-Modern hardware architectures have grown in complexity.
+In this Chapter, we introduce a three-step methodology for specifying and
+verifying \ac{hse} mechanisms against hardware architecture models, that is
 %
-They now are made of numerous devices which expose multiple programmable
-functions.
+\begin{inparaenum}[(1)]
+\item specifying the software requirements that must be satisfied by the trusted
+software components which implement the \ac{hse} mechanism,
 %
-In this Chapter, we identify a class of security enforcement mechanisms we call
-Hardware-based Security Enforcement (HSE) such that a set of software components
-configures the hardware in a way which prevents the other software components to
-break a security policy.
+\item specifying the targeted security property the \ac{hse} mechanism supposedly
+  enforces, and
 %
-For instance, when an operating system uses the ring levels and memory paging
-features of x86 microprocessors to isolate the userland applications, it
-implements a HSE mechanism.
+\item verifying that the \ac{hse} mechanism is sound.
+\end{inparaenum}
 %
-A HSE mechanism is sound when it succeeds in enforcing a security policy.
+A \ac{hse} mechanism is sound when untrusted software components' executions are
+constrain with respect to the security property as long as the trusted software
+component correctly implements it.
 %
-It requires (1) the hardware functions to provide the expected properties and
-(2) the software components to make a correct use of these hardware functions.
+As we have already argued in Section~\ref{sec:intro:verif}, we believe this
+approach would benefit to both hardware designers and software developers.
 %
-In practice, both requirements are hard to meet.
-
-First, hardware architectures comprise multiple interconnected devices which
-interact together.
-%
-From a security perspective, it implies considering the devices both
-individually and as a whole.
-%
-Hardware functions are not immune to security vulnerabilities.
-%
-For instance, early versions of the \texttt{sinit} instruction implementation of
-the Intel TXT technology\,\cite{intel2015txt} allowed an attacker to perform a
-privilege escalation\,\cite{wojtczuk2011txtbug}.
-%
-The legitimate use of a hardware mechanism can also break the security promised
-by another.
-%
-For instance, until 2008, the x86 cache allowed to circumvent an access control
-mechanism exposed by the memory
-controller\,\cite{wojtczuk2009smram,duflot2009smram}.
-%
-Secondly, hardware architectures have grown in complexity and, as a consequence,
-HSE mechanisms too.
-%
-There are many examples of security vulnerabilities which are the consequence of
-an incorrect HSE mechanism
-implementation\,\cite{kallenberg2014failure,bulygin2014bios,intel2014chipsec}.
-
-In this Chapter, we introduce SpecCert, a framework for specifying and verifying
-HSE mechanisms against hardware architecture models.
-%
-SpecCert relies on a three-steps methodology.
-%
-First, we model the hardware architecture specifications.
-%
-Then we specify the software requirements that must be satisfied by the trusted
-software components which implement the HSE mechanism.
-%
-Finally, we prove that the HSE mechanism is sound under the assumption that the
-software components complies to the specified requirements.
-%
-This implies the hardware involved in the HSE mechanism indeed provides the
-security properties they promise.
-%
-We believe this approach to be beneficial to both hardware designers and
-software developers.
-%
-The former can verify their hardware mechanism assumptions and the latter can
-get a formal specification to implement the HSE mechanism.
+Formal specifications for \ac{hse} mechanisms can be the foundation of a
+systemic approach to verify hardware specifications, and form a valuable
+addition to the existing documentation.
 
 In Section \ref{sec:speccert:framework}, we give a formal definition of the
 SpecCert formalism.
 %
 In Section \ref{sec:speccert:hardware}, we define a model of x86-based hardware
-architectures to verify HSE mechanisms targeting software isolation policies
+architectures to verify \ac{hse} mechanisms targeting software isolation policies
 using publicly available Intel specifications.
 %
-In Section \ref{sec:speccert:smm}, we verify the soundness of the HSE mechanism
+In Section \ref{sec:speccert:smm}, we verify the soundness of the \ac{hse} mechanism
 implemented in many x86 computer firmware codes to isolate the code executed
 while the CPU is in System Management Mode (SMM), a highly privileged execution
 mode of x86 microprocessors.
 %
 Our model and proofs have been implemented using Coq, a proof assistant system
 and have been released as an open source software\,\footnote{Which can can be
-  found at: \url{https://github.com/lethom/speccert}}.
+  found at: \url{https://github.com/lthms/speccert}}.
 %
 We discuss our results in Section \ref{sec:speccert:discuss}.
 
