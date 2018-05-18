@@ -1,4 +1,4 @@
-\chapter{Related Works}
+\chapter{State of the Art of Formal Verification}
 \label{chapter:relatedwork}
 
 \endquote{``\emph{Walking on water and developing software from a specification
@@ -8,6 +8,157 @@
 
 \vspace{1cm}\noindent
 %
+This is a new version of the chapter.
+
+\section{Formal Verification for Security}
+
+Formal verification consists in rigorously proving the correctness of a system
+with respect to certain properties.
+%
+It is achieved \emph{via} the use of formal methods to exhibit a proof on an
+abstract model and the correspondence between the model and the system
+(\ref{subsec:state:reason}).
+%
+Therefore, the formal definition of targeted security properties against the
+model is therefore an important step of the process (\ref{subsec:state:secu}).
+%
+Many approaches have been proposed for formally verifying systems of varying
+sizes and natures (\ref{subsec:state:approaches}).
+
+\subsection{Reasoning about Systems}
+\label{subsec:state:reason}
+
+We are interested in hardware or software systems primarily identified by their
+mutable state.
+%
+Modelling such a system $C$ is usually done by defining a transition system
+$M = \langle S, (\rightarrow) \rangle$, where $S$ is a set of abstract states
+which describes the concrete states of $C$ and $(\rightarrow)$ is a transition
+relation, such that for $(p, q) \in S^2$, $p \rightarrow q$ means it is possible
+for the system whose state corresponds to $p$ to shift in a new state which
+corresponds to $q$.
+%
+From the definition of $M$, it is possible to derive a set of executions
+$(\rightarrow^{*})$, such that $p \rightarrow^{*} q$ means there is a sequence
+of transitions of $M$ which leads the system from $p$ to $q$.
+%
+The exact definition of $(\rightarrow)$ may vary from one formalism to
+another. For instance, \ac{lts} relies on an additional set $L$ of ``labels'' to
+distinguish between transitions on different nature.
+
+\paragraph{}
+%
+Once a system $C$ is modelled with a transition system $M$, we reason about the
+correctness of $C$ by defining a predicate $P$ on $M$ which models our
+requirements, and exhibiting a proof that the predicate holds true.
+%
+To extend the conclusions made about $M$ to $C$, we prove the correspondence
+between $M$ and $C$. This is usually done \emph{via} an abstraction function
+$\alpha$, or a refinement $\eta$.
+%
+On the one hand, an abstraction function $\alpha$ maps concrete states and
+transitions of $C$ to abstract states and transitions of $M$.
+%
+On the other hand, a refinement $\eta$ maps abstract states and transitions of
+$M$ to concrete states and transitions of $C$.
+%
+Ideally, the correspondence between $C$ and $M$ is both correct and complete.
+
+\begin{definition}[Correctness]
+  An abstract function $\alpha$ or a refinement $\eta$ are said \emph{correct}
+  when any transition in $M$ corresponds to a transition in $C$, that is
+%
+  \begin{align*}
+    \alpha(x) \xrightarrow{M} \alpha(y) \Rightarrow x \xrightarrow{C} y
+    &
+    & p \xrightarrow{M} q \Rightarrow \eta(p) \xrightarrow{C} \eta(q)
+  \end{align*}
+\end{definition}
+
+\begin{definition}[Completeness]
+  An abstract function $\alpha$ or a refinement $\alpha$ and $\eta$ are said
+  \emph{complete} when any transition in $C$ corresponds to a transition in $M$,
+  that is
+%
+  \begin{align*}
+    x \xrightarrow{C} y \Rightarrow \alpha(x) \xrightarrow{M} \alpha(y)
+    &
+    & \eta(p) \xrightarrow{C} \eta(q) \Rightarrow p \xrightarrow{M} q
+  \end{align*}
+\end{definition}
+
+In the context of our thesis, we know that the systems we are
+interested in are not necessarily secure. Hence, the completeness of the
+correspondence between $C$ and an abstracted model $M$ ---which has been proven
+``secure''--- can only be subject to requirements.
+
+% \begin{minipage}[c]{0.45\linewidth}
+%   \hfill
+%   \begin{tikzpicture} [diagnode/.style={minimum width=3em, minimum
+%     height=2em}]
+%     \node [diagnode] (as1) {$\bar{p}$}; \node [diagnode, right=2cm of as1]
+%     (as2) {$\bar{q}$};
+%
+%     \node [diagnode, below=of as1] (s1) {$p$}; \node [diagnode, right=2cm of
+%     s1] (s2) {$q$};
+%
+%     \draw [->] (as1.east) to node [above] {$M$} (as2.west); \draw [->]
+%     (s1.east) to node [above] {$C$} (s2.west);
+%
+%     \draw [->] (s1.north) to node [right] {$\alpha$} (as1.south); \draw [->]
+%     (s2.north) to node [right] {$\alpha$} (as2.south);
+%   \end{tikzpicture}
+% \end{minipage}
+% \hfill
+% \begin{minipage}[c]{0.45\linewidth}
+%   \begin{tikzpicture} [diagnode/.style={minimum width=3em, minimum
+%     height=2em}]
+%     \node [diagnode] (as1) {$\strut\bar{p}$}; \node [diagnode,
+%     baseline=as1.base, right=2cm of as1] (as2) {$\strut\bar{q}$};
+%
+%     \node [diagnode, below=of as1] (s1) {$\strut{p}$}; \node [diagnode,
+%     baseline=s1.base, right=2cm of s1] (s2) {$\strut{q}$};
+%
+%     \draw [->] (as1.east) to node [above] {$M$} (as2.west); \draw [->]
+%     (s1.east) to node [above] {$C$} (s2.west);
+%
+%     \draw [<-] (s1.north) to node [right] {$\eta$} (as1.south); \draw [<-]
+%     (s2.north) to node [right] {$\eta$} (as2.south);
+%   \end{tikzpicture}
+%   \hfill
+% \end{minipage}
+
+\subsection{Specifying Security Properties}
+\label{subsec:state:secu}
+
+\begin{itemize}
+\item traces properties
+\item 2-traces properties
+\end{itemize}
+
+\subsection{Verification Approaches}
+\label{subsec:state:approaches}
+
+\begin{itemize}
+\item Model Checking (ex. XOM)
+\item Deductive Verification (ex. VirtCert)
+\end{itemize}
+
+\section{Design Methods Easing the Verification}
+
+\subsection{Monadic Modelling}
+
+\begin{itemize}
+\item State Monad
+\item Hoare Monad
+\end{itemize}
+
+\subsection{Component-based Modelling}
+
+\section{Conclusion}
+
+\newpage
+
 Hardware-based Security Enforcement (HSE) mechanisms are fundamental to enforce
 primordial security properties such as isolation between layers of abstraction.
 %
