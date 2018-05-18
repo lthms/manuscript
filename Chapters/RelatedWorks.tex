@@ -132,43 +132,54 @@ of transitions of $M$.
 We denote $\Sigma(M)$ the set of all the possible executions of $C$, as modelled
 in $M$.
 
-Blabla enforceable security
+\paragraph{Properties and Hyperproperties}
+%
+Certain security properties can be modelled \emph{via} a predicate $P$ on
+executions.
+%
+In such a condition, the statement describing the security property is of the
+forms
 %
 \[
   \forall \rho \in \Sigma(M), P(\rho)
 \]
 %
-A common approach is to distinguish between secure states and insecure states,
-secure transitions and insecure transitions, and to verify that, for a subset of
-traces ---typically traces which start from a secure state---, the system is
-never in an insecure state, and no insecure transition ever occurs.
+It is the case of safety properties (nothing ``bad'' happens) and liveness
+properties (something ``good'' eventually happens).
 %
-For instance, the integrity of the SMM code within the SMRAM is an enforceable
-security property.
+For safety properties, a common approach is to distinguish between secure states
+and insecure states, secure transitions and insecure transitions, and to require
+that for an execution which starts from a secure state put the system in an
+insecure state and no insecure transition occurs.
 %
-Knowing the state of the CPU ---and, in particular, its execution mode--- each
-time it has issued a successful write access to the SMRAM suffices to determine
-whether a untrusted software component has been able to tamper with its content.
+For instance, the BIOS Integrity security property
+(Definition~\ref{def:usecase:biosint}) is a safety property security property.
 %
-In this context, a SMRAM which contains an arbitrary instruction instead of
-expected SMM code, constitutes a secure state.
+As for liveness properties, they usually require to use a temporal logic which
+provides a modal operator to reason about ``eventually''.
+%
+For instance, the BIOS Availability security property
+(Definition~\ref{def:usecase:biosav}) is a liveness property
 
-Certain security properties cannot be defined using such a predicate, and
-requires to consider two arbitrary executions (ref Hyperproperties), that is
+Other security (hyper)properties cannot be defined using such a predicate, and
+requires to consider two arbitrary
+executions\,\cite{clarkson2010hyperproperties}, that is
 %
 \[
   \forall (\rho, \rho') \in \Sigma(M) \times \Sigma(M), P(\rho, \rho')
 \]
 %
 A notable security property whose definition requires to consider couple of
-executions is non-interference (ref?) of information flow analysis.
+executions is noninterference\,\cite{goguen1982security} of information flow
+analysis.
 %
-A system enforces non-interference if its visible behaviour does not depends on
-secret values.
+A system enforces noninterference if its observable behaviour does not depends
+on secret inputs.
 
-\begin{itemize}
-\item Non-interference
-\end{itemize}
+\paragraph{Modelling for Security}
+%
+The definition of a security property might be based on information that are not
+available to the system $C$.
 
 \subsection{Verification Approaches}
 \label{subsec:state:approaches}
@@ -291,64 +302,6 @@ and software components.
 
 \section{Labelled Transition System} % ========================================
 \label{sec:related:lts}
-
-When it comes to formally specify a given system, and later verify it, a common
-approach is to model it as a \ac{lts}.
-%
-A \ac{lts} comprises three components:
-%
-\begin{inparaenum}[(1)]
-%
-\item a set of states the system can take,
-%
-\item a set of labels which describe the events which occur within the system
-  and causing its state to change, and
-%
-\item a set of transitions, from one state to another and caused by one event.
-%
-\end{inparaenum}
-
-Once defined, a \ac{lts} specifies the system functional behaviour.
-%
-It can also be used to reason about the system's executions, modelled as
-sequences of transitions.
-%
-In this context, security property definitions are predicates which depend on
-these sequences.
-%
-This is the case, for instance, for \emph{enforceable security properties}, as
-defined by Fred B. Schneider\,\cite{schneider2000enforceable}.
-%
-An enforceable security property is a security property which only depends on
-the execution past, that is the sequence of transitions which led the system
-from its initial state to its current state.
-%
-A common approach is to distinguish between secure states and insecure states,
-secure transitions and insecure transitions, and to verify that, for a subset of
-traces --typically traces which start from a secure state---, the system is
-never in an insecure state, and no insecure transition ever occurs.
-%
-For instance, the integrity of the SMM code within the SMRAM is an enforceable
-security property.
-%
-Knowing the state of the CPU ---and, in particular, its execution mode--- each
-time it has issued a successful write access to the SMRAM suffices to determine
-whether a untrusted software component has been able to tamper with its content.
-%
-In this context, a SMRAM which contains an arbitrary instruction instead of
-expected SMM code, constitutes a secure state.
-
-Hardware and software components alike have been modelled with \ac{lts}, or a
-similar formalism.
-%
-According to the targeted security property, these models have leveraged
-different tools.
-%
-For instance, liveness and availability properties, which can be expressed
-easily with a temporal logic, are often verified using a model checker.
-%
-On the contrary, when the targeted security properties require a more general
-and expressive logic, proof assistants have been used successfully.
 
 \paragraph{\ac{xom}.}
 %
