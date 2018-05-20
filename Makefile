@@ -1,22 +1,24 @@
 STY-SRC  := freespec.sty speccert.sty
 BIB-SRC  := manuscript.bib
-TEX-SRC  := Chapters/Introduction.tex \
-            Chapters/UseCase.tex      \
-            Chapters/RelatedWorks.tex \
-            Chapters/SpecCert.tex     \
+TEX-SRC  := Chapters/Introduction.tex     \
+            Chapters/UseCase.tex          \
+            Chapters/RelatedWorks.tex     \
+            Chapters/SpecCert.tex         \
             Chapters/FreeSpec.tex
 ABSTRACT := abstract.tex
+LISTINGS := $(wildcard Listings/*.v)      \
+            $(wildcard Listings/*.nusmv)  \
 
 default: minimal
 
 minimal: main-mini.pdf
 full: main.pdf
 
-%.pdf: %.tex ${STY-SRC} ${BIB-SRC} ${ABBREV} ${TEX-SRC} ${ABSTRACT}
-	pdflatex $<
+%.pdf: %.tex ${STY-SRC} ${BIB-SRC} ${ABBREV} ${TEX-SRC} ${ABSTRACT} ${LISTINGS}
+	pdflatex -shell-escape $<
 	bibtex $*
-	pdflatex $<
-	pdflatex $<
+	pdflatex -shell-escape $<
+	pdflatex -shell-escape $<
 
 clean:
 	rm -f main*.aux

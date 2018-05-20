@@ -1,0 +1,1 @@
+specification G (door1 = close | door2 = close)  is true

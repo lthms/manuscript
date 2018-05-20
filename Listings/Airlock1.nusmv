@@ -1,0 +1,33 @@
+MODULE main
+
+VAR
+  door1:    {open, close};
+  door2:    {open, close};
+
+  action:   {open_1, open_2, close_1, close_2};
+
+ASSIGN
+  init(door1) := close;
+  init(door2) := close;
+
+  next(door1) :=
+    case
+      action = open_1 & door1 = close & door2 = close
+        : open;
+      action = close_1 & door1 = open
+        : close;
+      TRUE
+        : door1;
+    esac;
+
+  next(door2) :=
+    case
+      action = open_2 & door1 = close & door2 = close
+        : open;
+      action = close_2 & door2 = open
+        : close;
+      TRUE
+        : door2;
+    esac;
+
+LTLSPEC G (door1 = close | door2 = close)

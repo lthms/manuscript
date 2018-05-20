@@ -8,9 +8,29 @@
 
 \vspace{1cm}\noindent
 %
-This is a new version of the chapter.
+Our interest in formally verify hardware architecture in order to improve their
+security is in line with an ongoing effort.
+%
+In 2011, Nachiketh Potlapally\,\cite{potlapally2011hardwaresecurity}, who was
+working at Intel at the time, suggested that formal methods for security
+validation is one of the possible solutions to uncover architectural attacks
+ahead of time.
+%
+In 2016, Stephen Chong \emph{et al.} cite ``Hardware Architectures'' as area of
+interest regarding the use of formal methods for
+security\,\cite{chong2016report}.
+
+The rest of this Chapter proceeds as follows.
+%
+First, we give primer on formal verification of hardware or software systems,
+with a focus on security (Section~\ref{sec:related:review}).
+%
+Then, we focus on design methods which can be leveraged to ease the verification
+process, in particular in regards to the model scale
+(Section~\ref{sec:related:ease}).
 
 \section{Formal Verification for Security}
+\label{sec:related:review}
 
 Formal verification consists in rigorously proving the correctness of a system
 with respect to certain properties.
@@ -36,98 +56,27 @@ which describe the concrete states of $C$ and $\rightarrow$ is a transition
 relation, such that for $(p, q) \in S \times S$, $p \rightarrow q$ means it is
 possible for the system whose state corresponds to $p$ to shift in a new state
 which corresponds to $q$.
-%
-The exact definition of $\rightarrow$ may vary from one formalism to
-another. For instance, \ac{lts} relies on an additional set $L$ of ``labels'' to
-distinguish between transitions on different nature.
 
-% To extend the conclusions made about $M$ to $C$, we prove the correspondence
-% between $M$ and $C$. This is usually done \emph{via} an abstraction function
-% $\alpha$, or a refinement $\eta$.
-%%
-% On the one hand, an abstraction function $\alpha$ maps concrete states and
-% transitions of $C$ to abstract states and transitions of $M$.
-%%
-% On the other hand, a refinement $\eta$ maps abstract states and transitions of
-% $M$ to concrete states and transitions of $C$.
-%%
-% Ideally, the correspondence between $C$ and $M$ is both correct and complete.
+The structure of $M$ is given as an example, the definition of the transition
+relation $\rightarrow$ may vary from one formalism to another.
 %
-%\begin{definition}[Correctness]
-%  An abstract function $\alpha$ or a refinement $\eta$ are said \emph{correct}
-%  when any transition in $M$ corresponds to a transition in $C$, that is
-%%
-%  \begin{align*}
-%    \alpha(x) \xrightarrow{M} \alpha(y) \Rightarrow x \xrightarrow{C} y
-%    &
-%    & p \xrightarrow{M} q \Rightarrow \eta(p) \xrightarrow{C} \eta(q)
-%  \end{align*}
-%\end{definition}
+In particular, systems often interact with an environment, and the model
+definition includes a notion of interface, that is a set of operations exposed
+by the system for its environment to use.
 %
-%\begin{definition}[Completeness]
-%  An abstract function $\alpha$ or a refinement $\alpha$ and $\eta$ are said
-%  \emph{complete} when any transition in $C$ corresponds to a transition in
-%  $M$, that is
-%%
-%  \begin{align*}
-%    x \xrightarrow{C} y \Rightarrow \alpha(x) \xrightarrow{M} \alpha(y)
-%    &
-%    & \eta(p) \xrightarrow{C} \eta(q) \Rightarrow p \xrightarrow{M} q
-%  \end{align*}
-%\end{definition}
-
-%In the context of our thesis, we know that the systems we are interested in are
-% not necessarily secure. Hence, the completeness of the correspondence between
-% $C$ and an abstracted model $M$ ---which has been proven ``secure''--- can
-% only be subject to requirements.
-
-% \begin{minipage}[c]{0.45\linewidth}
-%   \hfill
-%   \begin{tikzpicture} [diagnode/.style={minimum width=3em, minimum
-%     height=2em}]
-%     \node [diagnode] (as1) {$\bar{p}$}; \node [diagnode, right=2cm of as1]
-%     (as2) {$\bar{q}$};
-%
-%     \node [diagnode, below=of as1] (s1) {$p$}; \node [diagnode, right=2cm of
-%     s1] (s2) {$q$};
-%
-%     \draw [->] (as1.east) to node [above] {$M$} (as2.west); \draw [->]
-%     (s1.east) to node [above] {$C$} (s2.west);
-%
-%     \draw [->] (s1.north) to node [right] {$\alpha$} (as1.south); \draw [->]
-%     (s2.north) to node [right] {$\alpha$} (as2.south);
-%   \end{tikzpicture}
-% \end{minipage}
-% \hfill
-% \begin{minipage}[c]{0.45\linewidth}
-%   \begin{tikzpicture} [diagnode/.style={minimum width=3em, minimum
-%     height=2em}]
-%     \node [diagnode] (as1) {$\strut\bar{p}$}; \node [diagnode,
-%     baseline=as1.base, right=2cm of as1] (as2) {$\strut\bar{q}$};
-%
-%     \node [diagnode, below=of as1] (s1) {$\strut{p}$}; \node [diagnode,
-%     baseline=s1.base, right=2cm of s1] (s2) {$\strut{q}$};
-%
-%     \draw [->] (as1.east) to node [above] {$M$} (as2.west); \draw [->]
-%     (s1.east) to node [above] {$C$} (s2.west);
-%
-%     \draw [<-] (s1.north) to node [right] {$\eta$} (as1.south); \draw [<-]
-%     (s2.north) to node [right] {$\eta$} (as2.south);
-%   \end{tikzpicture}
-%   \hfill
-% \end{minipage}
+The interface of a \ac{cpu} is its instructions set, the interface of a system
+software is its system calls, etc.
 
 \subsection{Specifying Security Properties}
 \label{subsec:state:secu}
 
-Once a system $C$ is modelled with a transition system $M$, we can reason about
-the correctness of $C$ with respect to certain properties.
+Once a system $C$ is modelled with a model $M$, we can reason about the
+correctness of $C$ with respect to certain properties, by formalizing these
+properties as a statement about $M$, then we exhibit a proof that this statement
+is true.
 %
-To do so, we model these properties as a statement about $M$, then we exhibit a
-proof that this statement is true.
-%
-This statement is usually based on the system execution, modelled as sequences
-of transitions of $M$.
+This statement is based on the system executions, modelled as sequences of
+transitions of $M$.
 %
 We denote $\Sigma(M)$ the set of all the possible executions of $C$, as modelled
 in $M$.
@@ -162,11 +111,12 @@ For instance, the BIOS Availability security property
 (Definition~\ref{def:usecase:biosav}) is a liveness property
 
 Other security (hyper)properties cannot be defined using such a predicate, and
-requires to consider two arbitrary
+requires to consider the set of executions as a whole. As a consequence, the
+security statement is of the form
 executions\,\cite{clarkson2010hyperproperties}, that is
 %
 \[
-  \forall (\rho, \rho') \in \Sigma(M) \times \Sigma(M), P(\rho, \rho')
+  P(\Sigma(M))
 \]
 %
 A notable security property whose definition requires to consider couple of
@@ -174,134 +124,181 @@ executions is noninterference\,\cite{goguen1982security} of information flow
 analysis.
 %
 A system enforces noninterference if its observable behaviour does not depends
-on secret inputs.
+on secret inputs, which informally translates to ``a system enforces
+noninterference if, given two arbitrary executions with the same public inputs,
+the system's observable behaviour remains the same''.
 
 \paragraph{Modelling for Security}
 %
 The definition of a security property might be based on information that are not
 available to the system $C$.
+%
+For instance, a x86 hardware architecture does not track information flows, but
+it is supposed to enforce the BIOS Integrity security property, whose definition
+requires to be able to tell which software components has been the source of the
+result of a read access by the SMM code.
+%
+As a consequence, if we want to verify the x86 hardware architecture correctness
+with respect to the BIOS Integrity security property, we need a ``information
+flow aware'' model.
+
+This raises questions about model reusability.
+%
+The x86 hardware architecture includes many different \ac{hse} mechanisms.
+%
+Defining one model for each is not an option, yet the security properties they
+aim to enforce may heavily differ in terms of model requirements.
 
 \subsection{Verification Approaches}
 \label{subsec:state:approaches}
 
-\begin{itemize}
-\item Model Checking (ex. XOM)
-\item Deductive Verification (ex. VirtCert)
-\end{itemize}
+The last step of the formal verification is exhibiting a proof.
+%
+There are two main approaches to achieve this: model checking and theorem
+proving.
+%
+For each approach, we give a small overview of its core principles.
+%
+In addition, we illustrate their verification process \emph{via} a common,
+minimal example: an airlock system.
+%
+A airlock system is a device made of two doors, and an intermediary chamber.
+%
+To pass through the airlock system, it is necessary to open the first door,
+enter the chamber, wait for the first door to close, then open the second door.
+%
+The security property of a airlock system is a safety property: at any time,
+there is at least one door closed.
 
-\section{Design Methods Easing the Verification}
+\paragraph{Model Checking}
+%
+Model checkers exhaustively and automatically explore a transition system in
+order to verify it satisfies a specified properties.
+%
+These properties are defined it terms of predicate on the system's executions,
+usually thanks to a temporal logic.
+%
+A temporal logic includes a set of modal operators, such as \emph{globally} (the
+property is always true), or \emph{eventually} (the property becomes true in at
+one point in the future).
+%
+The main advantage of model checkers is automation.
+%
+They take a model and a property as input, and output a result: a confirmation
+that the property is verified, or a particular execution which does not satisfy
+the property.
+%
+This execution is called a counterexample.
+%
+From a security perspective, a counterexample is very interesting, because it
+potentially describes an attack path.
 
-\subsection{Monadic Modelling}
+\begin{example}[Airlock System Verification in NuSMV]
+  TODO.
 
-\begin{itemize}
-\item State Monad
-\item Hoare Monad
-\end{itemize}
+  \inputminted[frame=single]{coq}{Listings/Airlock1.nusmv}
+  \inputminted[frame=single]{coq}{Listings/Airlock-out.nusmv}
 
-\subsection{Component-based Modelling}
+  An important feature of model checkers is that they generate a counter-example
+  when they find a sequence of transitions which does not satisfy the
+  specification.
+  %
+  For instance, if we slightly modify the NuSMV model of our airlock system so
+  that it is no longer require for the second door to be close in order to open
+  the first door, then the model checker generates the following
+  counter-example:
 
-\section{Conclusion}
+  \inputminted[frame=single]{coq}{Listings/Airlock-counter.nusmv}
+\end{example}
 
-\newpage
+\paragraph{Theorem Proving}
+%
+A theorem prover is a computer program to write machine-checked proofs in a
+particular formal logic, that is a formal language, to express statement, a set
+of axioms, and a collection of inference rules to derive new formulas from the
+axioms.
+%
+A theorem prover' underlying logic is more expressive than what model checkers
+offer, but they lack automation for nontrivial problems.
+%
+They do not excuse users from \emph{writing proofs}, which can be very important
+in terms of effort for real world systems.
 
-Hardware-based Security Enforcement (HSE) mechanisms are fundamental to enforce
-primordial security properties such as isolation between layers of abstraction.
-%
-Because of the complexity of modern computing platforms, HSE mechanism
-implementations are subject to architectural attacks, where one attacker is able
-to exploit the legitimate use of one hardware component in order to circumvent
-the protection normally implemented by another.
-%
-The important impact of previously disclosed architectural attacks have
-motivated our will to formally specify HSE mechanisms, with two objectives in
-mind:
-%
-\begin{inparaenum}[(1)]
-\item providing unambiguous, security-focused specification to firmware and
-  system software developers, and
-%
-\item verifying these specifications actually provides the targeted security
-  properties.
-\end{inparaenum}
-%
-These objectives are in line with an ongoing effort to strengthen the lower
-layers of abstraction.
-%
-In 2011, Nachiketh Potlapally\,\cite{potlapally2011hardwaresecurity}, who was
-working at Intel at the time, lists the same challenges we have detailed in
-Chapter~\ref{chapter:usecase}, and suggests that formal methods for security
-validation is one of the possible solutions to these challenges.
-%
-In 2016, Stephen Chong \emph{et al.} cite ``Hardware Architectures'' and
-``Operating Systems'' as areas of interest regarding the use of formal methods
-for security\,\cite{chong2016report}.
+\begin{example}[Airlock System Verification in Coq]
+  The Coq theorem prover includes two languages: a rich functional language to
+  write specifications ({\sc Gallina}) and a tactic language to write proofs
+  ({\sc Ltac}).
+  %
+  We can {\sc Gallina} to describe the system in terms of states and actions to
+  update this state.
 
-The main characteristic of HSE mechanisms is that they are the result of both
-hardware and software components, in presence of a larger system with untrusted
-actors.
-%
-However, hardware and software components are not of the same nature.
-%
-Hardware components are physical devices which accept inputs and compute
-outputs.
-%
-Software components are pieces of data scattered into memory spaces, whose
-semantics are determined by the processor unit that executes them.
-%
-While both hardware and software components have been subject to formal
-verification in the past, these verification works tend to rely on different
-representations.
-%
-Florian Lugou \emph{et al.} explain this in depth while they introduce SMASHUP,
-a toolchain for unified verification of hardware-software
-co-designs\,\cite{lugou2017smashup}.
-%
-It is the main reason why we focus on the specification level in the context of
-this thesis.
-%
-Refining our potential conclusions up to a concrete implementation is necessary
-in the long term.
-%
-Fortunately, it is also a very active field, with impressive flagship projects
-such as DeepSpec\,\cite{appel2017deepspec}.
+  \inputminted[frame=single]{coq}{Listings/Airlock1.v}
 
-The rest of this Chapter proceeds as follows.
-%
-First, we focus on the general approach to verify targeted properties on a
-system, that is reasoning on traces of a transition system
-(Section~\ref{sec:related:lts}).
-%
-Then, we focus on the definition of the transition system itself.
-%
-Indeed, in order to be able to uncover potential architectural attacks, we need
-to consider a computing platform which is comprehensive in terms of hardware
-components.
-%
-Hoare Logic is a well-established formalism to reason on computer programs
-correctness, and its principles apply to other use cases, including hardware
-modelling (Section~\ref{sec:related:hoare}).
-%
-It can be used to enable modularity and code reuse.
-%
-However, as is, it does not help to reduce the complexity of the computing
-platform state.
-%
-This is why, as a final step, we present how it is possible to break down a
-complex system into interconnected, simpler subsystems, yet being able to reason
-about the subsystems composition (Section~\ref{sec:related:interface}).
-%
-This approach sounds very natural in our context of application, as a computing
-platform is often organized as a succession of specialized layers (Separation of
-Concerns).
+  This reads as follows: a door is either open or close; a airlock system is
+  made of two doors; we consider four actions which imply an update of the
+  airlock system's state (opening the first or second door, closing the first or
+  second door).
 
-In each Section, we detail several representative research works which leverage
-the presented approaches.
-%
-We have chosen these examples to illustrate both the verification of hardware
-and software components.
+  {\sc Gallina} includes a special type, called \texttt{Prop}, to write logical
+  propositions which can be either true or false.
+  %
+  We can define the transition relation of our airlock system using
+  \texttt{Prop.}
+  %
+  In practice, this is done by enumerating the cases where the statement is
+  true, and the remaining cases are considered false.
 
-\section{Labelled Transition System} % ========================================
-\label{sec:related:lts}
+  \inputminted[frame=single]{coq}{Listings/Airlock2.v}
+
+  This reads as follows: we distinguish between four classes of transitions, one
+  per actions.
+  %
+  On the one hand, a transition which implies to open a door (case one and
+  three) requires the both doors to be closed.
+  %
+  On the other hand, a transition which implies to close a door (case two and
+  four) requires the door to be closed.
+
+  The security property of our airlock system is a safety property: at any time,
+  at least one door is close.
+  %
+  This property is a predicate on the system state, which we can define in {\sc
+    Gallina} \emph{via} the \texttt{Prop} type.
+
+  \inputminted[frame=single]{coq}{Listings/Airlock3.v}
+
+  For the airlock to be secure, this means the \texttt{secure\_airlock}
+  predicate must hold true before and after each transition.
+  %
+  We can express that in the form of a \emph{lemma}, that is a logical statement
+  for each we exhibit a proof.
+  %
+  We write the proof with {\sc Ltac}, and trust Coq to refuse it in case it is
+  incorrect.
+  %
+  The proof is written in terms of {\sc Ltac} tactics.
+  %
+  Each tactic corresponds to a reasoning rule.
+  %
+  For instance, the \texttt{right} tactic refers to the fact that given two
+  statements $P$ and $Q$, then if $Q$ is true, then $P \vee Q$ is also
+  true. Tactics updates the proof obligation (initially the lemma statement),
+  and the goal of a Coq user is to bring back this proof obligation to something
+  that has already been proven.
+
+  \inputminted[frame=single]{coq}{Listings/Airlock4.v}
+
+  This reads as follows: we prove that, given any ``secure state'', that is a
+  airlock for which the \texttt{secure\_airlock} holds true, any action which
+  implies a system's state update, the \texttt{secure\_airlock} also holds true
+  for the system's state after the transition.
+  %
+  The proof is conducted by enumeration of possible actions
+  (\texttt{induction}), and by definition of \texttt{Transition}
+  (\texttt{inversion}).
+\end{example}
+
+\subsection{Examples of Large Systems' Verification}
 
 \paragraph{\ac{xom}.}
 %
@@ -333,8 +330,8 @@ As for the transitions set, it is defined in terms of pre and postconditions.
 On the one hand, the precondition is parameterized by the current state and the
 labelled event.
 %
-If the pre-condition is satisfied for a given hardware state and labelled events,
-then it means that event can occur in this state.
+If the pre-condition is satisfied for a given hardware state and labelled
+events, then it means that event can occur in this state.
 %
 On the other hand, the post condition is parameterized by the initial state, the
 labelled event and the resulting state.
@@ -377,7 +374,8 @@ hypervisor and the guests, etc.).
 The actions are the hypercalls, exposed by the hypervisor for the guests to use.
 %
 The semantics of actions as state-transformers, that is the set of possible
-transitions for the modelled system, is defined in terms of pre and postconditions.
+transitions for the modelled system, is defined in terms of pre and
+postconditions.
 
 First, they have shown that their ideal hypervisor was
 %
@@ -415,6 +413,57 @@ Indeed, it is not possible, only with the trace of one execution, to know
 whether a given implemantion is constant time.
 %
 It is required to consider all the possible traces.
+
+\subsection{Challenges of HSE Mechanisms Verification}
+
+The main characteristic of \ac{hse} mechanisms is that they are the result of
+both hardware and software components, in presence of a larger system with
+untrusted actors.
+%
+Hardware and software components are not of the same nature.
+%
+Hardware components are physical devices which accept inputs and compute
+outputs.
+%
+Software components are pieces of data scattered into memory spaces, whose
+semantics are determined by the processor unit that executes them.
+%
+While both hardware and software components have been subject to formal
+verification in the past, these verification works tend to rely on different
+representations.
+%
+Florian Lugou \emph{et al.} explain this in depth while they introduce SMASHUP,
+a toolchain for unified verification of hardware-software
+co-designs\,\cite{lugou2017smashup}.
+%
+This is why we have decided to focus on the specification level in the context
+of this thesis.
+%
+Refining our potential conclusions up to a concrete implementation is necessary
+in the long term.
+%
+Fortunately, it is also a very active field, with impressive flagship projects
+such as DeepSpec\,\cite{appel2017deepspec}.
+
+\section{Design Methods Easing the Verification}
+\label{sec:related:ease}
+
+\subsection{Monadic Modelling}
+
+\begin{itemize}
+\item State Monad
+\item Hoare Monad
+\end{itemize}
+
+\subsection{Component-based Modelling}
+
+\section{Conclusion}
+
+\newpage
+
+\section{Labelled Transition System} % ========================================
+\label{sec:related:lts}
+
 
 \paragraph{}
 %
@@ -599,13 +648,14 @@ statement, a function call, etc.).
 Hoare Logic allows for modular reasoning.
 %
 Once a couple of pre and postconditions is proven for a given command, further
-reasoning wherein this command appears can be based solely on these pre and postconditions.
+reasoning wherein this command appears can be based solely on these pre and
+postconditions.
 %
 As a result, the concrete implementation of the command is abstracted away.
 %
 Defining our hardware model in an imperative style has also the extra benefit of
-making it closer to what domain experts are familiar to, compared to
-\emph{e.g.} functional programming.
+making it closer to what domain experts are familiar to, compared to \emph{e.g.}
+functional programming.
 
 \paragraph{Frama-C}
 %
@@ -674,15 +724,15 @@ couple of pre and postconditions that specifies the effects of the computation
 on the program's heap.
 %
 When a Ynot user uses \emph{bind} to chain two existing computations, it has to
-prove the post condition of the first computation satisfies the precondition
-of the second one.
+prove the post condition of the first computation satisfies the precondition of
+the second one.
 %
 As a consequence, programs defined in terms of the $\mathtt{Cmd}$ monad are
 necessarily correct by construction.
 %
-The authors claim that writing a program with Ynot and the $\mathtt{Cmd}$ monad is
-often not much harder than writing that program in Haskell and the $\mathtt{IO}$
-monad.
+The authors claim that writing a program with Ynot and the $\mathtt{Cmd}$ monad
+is often not much harder than writing that program in Haskell and the
+$\mathtt{IO}$ monad.
 %
 This is achieved thanks to specific automation tactics written to ease the
 deductive reasoning required by \emph{bind}.
@@ -765,8 +815,8 @@ given component is less important than its behaviour to requests.
 That is, by focusing on components' interaction, we can specify and verify each
 component individually.
 %
-This approach forces us to specify requirements over components the target is directly
-connected to.
+This approach forces us to specify requirements over components the target is
+directly connected to.
 %
 We then can reason about components’ composition, by verifying that the
 components indeed hold the requirements formulated previously.
@@ -783,7 +833,8 @@ We have found a very good illustration of this approach in the work of Thomas
 Heyman \emph{et al.}\,\cite{heyman2012securemodel}.
 %
 They have presented a component-based modelling technique for
-Alloy\,\cite{jackson2012alloy}, where components are primarily defined as semantics for sets of operations.
+Alloy\,\cite{jackson2012alloy}, where components are primarily defined as
+semantics for sets of operations.
 %
 One component is connected to another when it leverages its operations.
 %
@@ -838,9 +889,9 @@ model checking approaches.
 The result is a framework for the Coq proof assistant, to implement and verify
 hardware components.
 %
-Pushing the \texttt{Notation} feature of Coq, which let the developer extend
-the proof assistant parser with its own construction, to its maximum, they offer
-a development environment very close to BlueSpec\,\cite{nikhil2004bluespec}.
+Pushing the \texttt{Notation} feature of Coq, which let the developer extend the
+proof assistant parser with its own construction, to its maximum, they offer a
+development environment very close to BlueSpec\,\cite{nikhil2004bluespec}.
 %
 Kami's hardware component is specified as labelled transition systems, whose set
 of transition labels forms its interface.
@@ -890,8 +941,8 @@ They allow modelling large classes of effects, and composing these effects
 within purely functional languages, while deferring the realizations of these
 effects to dedicated handlers.
 
-They are several languages with an implementation of algebraic effects, including
-Eff, Idris, Haskell, PureScript.
+They are several languages with an implementation of algebraic effects,
+including Eff, Idris, Haskell, PureScript.
 %
 However, none of them provides a proof environment comparable to what Coq
 proposes.
@@ -942,8 +993,8 @@ system.
 
 \section{Conclusion} % ========================================================
 
-The common approach to formally specify a system is by defining transition system
-which describes its behaviour.
+The common approach to formally specify a system is by defining transition
+system which describes its behaviour.
 %
 By reasoning about its potential executions, that is the set of traces of its
 transition system, it becomes possible to verify targeted security properties.
@@ -960,8 +1011,8 @@ HSE mechanisms, which are the result of a hardware-software cooperation.
 In this context, and because of the very nature of the architectural attacks we
 are willing to prevent, we have to consider the computing platform as a whole.
 %
-The scale of the tasks obliges us to take extra care when defining the transition
-system.
+The scale of the tasks obliges us to take extra care when defining the
+transition system.
 %
 Modelling the software and hardware components of a computing platform as
 programs with effects and effect handlers appears as a promising solution to

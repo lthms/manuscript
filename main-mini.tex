@@ -5,6 +5,8 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[english]{babel}
+\usepackage{minted}
+\usemintedstyle{bw}
 
 % Use -- instead of bullet for itemize
 \renewcommand{\labelitemi}{\normalfont\textendash}
@@ -58,6 +60,8 @@
 
 \usepackage{mdframed} % or, "mdframed"
 \usepackage[amsthm,framed]{ntheorem}
+
+\theoremstyle{definition}
 
 \newmdtheoremenv{definition}{Definition}[chapter]
 \newmdtheoremenv{notation}{Notation}[chapter]

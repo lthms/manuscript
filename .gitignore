@@ -11,3 +11,4 @@ main-blx.bib
 *.bbl
 *.blg
 plan.tex
+_minted*/
