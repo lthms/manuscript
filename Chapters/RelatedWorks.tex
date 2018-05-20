@@ -316,10 +316,128 @@ in terms of effort for real world systems.
 
 \subsection{Monads and Model Readability}
 
-\begin{itemize}
-\item State Monad
-\item Hoare Monad
-\end{itemize}
+When the system becomes more complex, so does the model.
+%
+In particular, the use of a theorem prover requires to define the model in a
+pure functional language.
+%
+Contrary to imperative programming, where the program is written as a sequences
+of steps which manipulate an underlying state, ``pure'' functions are stateless.
+%
+As a consequences, functions used to construct the model a system are often of
+the form $S \rightarrow (A \times S)$, where $S$ is the type which describes the
+state, and $A$ the actual result of the function.
+%
+Manipulating such a function manually is error-prone and hard to read for those
+more familiar with imperative programming.
+%
+For instance, if we consider a simple bytecode interpreter manipulating a stack
+of natural numbers, then the semantics of a \texttt{ADD} instruction could be
+specified as follows:
+%
+\[\begin{array}{rcl}
+    \mathrm{add}(s) &\triangleq& \mathrm{let\ }(x, s') = pop(s) \mathrm{\ in} \\
+                    &          & \mathrm{let\ }(y, s'') = pop(s) \mathrm{\ in} \\
+                    &          & push(x + y)(s'')
+  \end{array}\]
+
+The sharp-eyes reader will have noticed the error in the definition of
+\texttt{add}, that is the second call to \texttt{pop} is using the initial state
+\texttt{s}, rather than \texttt{s'}.
+%
+However, we can agree that it is subtle, and easy to miss even in a three-lines
+function.
+
+\paragraph{Monads}
+%
+The usual approach to ease the definition of computations which manipulate a
+mutable state in addition to return a result in functional programming language
+is to use a monadic programming
+style\,\cite{wadler1990comprehending,jones2005io}.
+%
+Monads are a convenient formalism to model computations of all sorts \emph{via}
+a similar interface.
+%
+Let $M$ be a monad, we denote $M(A)$ the type of computations ``within the
+monad'' whose result is of type $A$.
+%
+The two fundamental monadic operations (which every monads share) are
+%
+\begin{align*}
+  \mathrm{pure} : A \rightarrow M(A)
+  &
+  & \mathrm{bind} : M(A) \rightarrow (A \rightarrow M(B)) \rightarrow M(B)
+\end{align*}
+%
+On the one hand, $\mathrm{pure}$ represents the simplest computation possible,
+whose consists solely into returning a given value.
+%
+On the other hand, $\mathrm{bind}$ (denoted $\bind$ by convention) composes
+computations: it takes the result of a first monadic computation and passes it
+to another.
+
+\paragraph{State Monad}
+%
+Functions of the form $S \rightarrow (A \times S)$ form the state monad, whose
+main benefit is to allow for writing pure functions in an imperative style.
+%
+The $\mathrm{pure}$ is defined as follows:
+%
+\[
+  \mathrm{pure}(x) \triangleq \lambda s. (x, s)
+\]
+%
+That is, $\mathrm{pure}(x)$, where $x$ is of type $A$, is a function of type
+$S \rightarrow (A \times S)$ which does not modify the computation state, and
+just returns $x$ as a result.
+%
+In addition, the $\mathrm{bind}$ function is defined as follows:
+\[
+  p \bind f \triangleq \lambda s. \mathrm{let\ } (x, s') = p(s) \mathrm{\ in\ }
+  f(x)(s')
+\]
+%
+That is, the $\mathrm{bind}$ function of the state monad deals with passing the
+computation state around from one computation to another.
+%
+Contrary to a tired programmers, $\mathrm{bind}$ does not mix intermediary
+states.
+
+As a consequence, it is possible to rewrite the semantics of a \texttt{ADD}
+instruction as follows
+%
+\[
+  \mathrm{add} \triangleq \mathrm{pop}
+  \bind (\lambda x. \mathrm{pop}
+  \bind (\lambda y. \mathrm{push}(x + y)))
+\]
+%
+which is arguably not really readable.
+%
+To ease the definition of monadic function, it is possible to leverage the
+\textbf{do} notably used by the Haskell language.
+%
+The \textbf{do} notation allows for completely hiding the $\mathrm{bind}$
+functions, as follows
+%
+\[
+  \begin{array}{rcl}
+    \mathrm{add} &\triangleq& x \leftarrow \mathrm{pop} \\
+                 &          & y \leftarrow \mathrm{pop} \\
+                 &          & \mathrm{push}(x + y)
+  \end{array}
+\]
+%
+The state monad has been leveraged to model several \ac{cpu}'s instruction sets,
+including Intel x86\,\cite{morrisett2012rocksalt} and
+ARMv7\,\cite{fox2010armv7}.
+%
+As it stands, it does not ease the verification process, but reduces the
+potential of errors arising from the use of a too cumbersome style.
+
+\paragraph{Hoare Monad}
+%
+TODO
 
 \subsection{Component-based Modelling}
 
