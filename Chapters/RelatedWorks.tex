@@ -290,9 +290,9 @@ They do not excuse users from \emph{writing proofs}, which can be very important
 in terms of effort for real world systems.
 
 \begin{example}[Airlock System Verification in Coq]
-  The Coq theorem prover includes two languages: a rich functional language to
-  write specifications ({\sc Gallina}) and a tactic language to write proofs
-  ({\sc Ltac}).
+  The Coq theorem prover\,\cite{coq} includes two languages: a rich functional
+  language to write specifications ({\sc Gallina}) and a tactic language to
+  write proofs ({\sc Ltac}).
   %
   We can {\sc Gallina} to describe the system in terms of states and actions to
   update this state.
@@ -366,7 +366,22 @@ in terms of effort for real world systems.
 \section{Design Methods Easing the Verification}
 \label{sec:related:ease}
 
-\subsection{Monads and Model Readability}
+At some point, the line between a large model and a software program becomes
+very thin.
+%
+We have identified three complementary approaches which can help writing large
+models.
+%
+First, we advocate for the use of a monadic programming style to define a model
+(\ref{subsec:related:ease:monad}).
+%
+Then, we discuss how component-based modelling allows for a modular reasoning
+essential to deal with large systems (\ref{subsec:related:ease:component}).
+%
+Finally, we detail the advantages of executable models (\ref{subsec:related:ease:exec})
+
+\subsection{Monadic Modelling}
+\label{subsec:related:ease:monad}
 
 When the system becomes more complex, so does the model.
 %
@@ -466,8 +481,7 @@ instruction as follows
 which is arguably not really readable.
 %
 Fortunately, the \textbf{do} notation, notably used in Haskell, completely hides
-the $\mathrm{bind}$
-functions.
+the $\mathrm{bind}$ functions.
 %
 Monadic functions written with the \textbf{do} notation furiously look like
 imperative code.
@@ -489,9 +503,41 @@ potential of errors arising from the use of a too cumbersome style.
 
 \paragraph{Hoare Monad}
 %
-TODO
+Hoare logic (also known as the Floyd-Hoare logic) is a popular formal system for
+reasoning about the correctness of imperative computer programs.
+%
+Using Hoare logic, it becomes possible to formally determine the consequences of
+a code snippet on the program state, using a so-called Hoare triple of the form
+%
+\[ \{P\}\ C\ \{Q\} \]
+%
+where $P$ and $Q$ are two predicates (a pre and a postcondition) on the program
+state, and $C$ is the code snippet.
+%
+Hoare logic allows for modular reasoning.
+%
+Once a couple of pre and postconditions is proven for a given code snippet,
+further reasoning wherein this code appears can be based solely on its pre and
+postcondition.
+%
+For instance, Hoare logic has a rule of composition to sequentially execute two
+code snippets $C$ and $C'$, that is
+
+\begin{prooftree}
+  \AxiomC{$\{P\}\ C\ \{Q\}$} \AxiomC{$\{Q\}\ C'\ \{R\}$}
+  \BinaryInfC{$\{P\}\ C\mathrm{;\ }C'\ \{R\}$}
+\end{prooftree}
+
+It has been shown in various occasions that the state monad not only allow for
+writing a system's model in an imperative style, but it can also be leveraged to
+enable a Hoare-like reasoning\,\cite{chlipala2009ynot,jomaa2016mmu}.
+%
+As a consequence, a model written with a so-called Hoare monad is potentially
+easier to read (\emph{e.g.} for people not familiar with functional
+programming), closer to the actual implementation, and easier to reason with.
 
 \subsection{Component-based Modelling}
+\label{subsec:related:ease:component}
 
 Real world systems tend to be made of many components.
 %
@@ -550,6 +596,35 @@ interface used by $M$.
 Reasoning about $M + M'$ can be done using a two-steps methodology, where $M$ is
 firstly verified under hypotheses about operations' results of $M'$, then these
 hypotheses are proven to be true.
+
+\subsection{Executable Models}
+\label{subsec:related:ease:exec}
+%
+Over the years, \emph{executable} models have gained in popularity, and
+verification approaches which were previously specific to software program
+verification have been applied to them.
+%
+For instance, the ARM v8 specifications have been written in a dedicated
+language called the ARM Specification Language (ASL)\,\cite{reid2016armv8},
+whose semantics was formally established.
+%
+These executable specifications have been notably leveraged in order to perform
+an information flow analysis for v8-M, a novel ARM feature to ``enable secure
+Internet of Things applications.''
+
+Executable models have another advantage in comparison to, for instance, what
+the two models we have defined in~\ref{subsec:state:approaches} enable: they can
+potentially be leveraged in a validation process.
+%
+Comparing the execution of a model against the real system may help uncovering
+inconsistencies which otherwise could damage the value of the verification
+process.
+
+From this perspective, it is interesting to emphasis that, if not all model
+defined in {\sc Gallina} within the Coq proof assistant are executable, it is
+possible to leverage the extraction mechanism to that end.
+%
+That is, a model which can be extracted can also be executed.
 
 \section{A Tour of Large Verified Systems}
 
