@@ -1,0 +1,46 @@
+\chapter{FreeSpec Tutorial}
+
+FreeSpec includes about 8,000 lines of code: 6,000 for its core, 2,000 for the
+experiments.
+%
+It has been built upon three objectives: readability of models, automation of
+proofs, opportunity to extract these models for experimental validation.
+
+To achieve readability, FreeSpec borrows several popular concepts to modern
+functional programming language, such as Haskell.
+%
+We have used the \texttt{Notation} feature of Coq to add the do-notation of
+Haskell to {\sc Gallina}.
+%
+This allows for writing monadic functions that can be read as if it were
+pseudo-code.
+%
+The readers familiar with the monad transformers mechanism\,\cite{liang1995mtl}
+may also have recognized the definition of the transformer variant of the State
+monad in the Definition~\ref{def:component-model}.
+%
+FreeSpec takes advantage of the State monad mechanism to seamlessly handle the
+local state of the component.
+%
+%We consider using other popular monads to handle other local challenges of the
+%definition of a component model; for instance, to allow for a component to fail.
+%\guillaumerk{Que veut dire "local challenges" et "to allow for a component to fail"?}
+
+To achieve automation of proofs, we have developed specific Coq tactics.
+%
+Some definitions of FreeSpec can be pretty verbose, and the proofs quickly
+become difficult to manage as the program grows in complexity.
+%
+FreeSpec provides two tactics to explore the control flow of programs with
+effects.
+
+Finally, to achieve model extraction, we have defined the key concepts of
+FreeSpec so that they remain compatible with the extraction mechanism of Coq.
+%
+As a consequence, component models can be derived into executable programs.
+%
+For a hardware component, it means we could, for instance, compare its behaviour
+with its concrete counterpart.
+%
+For a software component, it means we can fill the gap between the model and the
+implementation.
