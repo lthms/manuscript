@@ -1,39 +1,59 @@
-In this thesis, we consider \emph{Hardware-based Security Enforcement} (HSE)
-mechanisms, a class of security enforcement mechanisms such that trusted
-software components rely on the underlying hardware architecture to constrain
-the execution of untrusted software components with respect to targeted
-security properties.
+In this thesis, we consider a class of security enforcement mechanisms we called
+\emph{Hardware-based Security Enforcement} (HSE), such that trusted software
+components rely on the underlying hardware architecture to constrain the
+execution of untrusted software components with respect to targeted security
+properties.
+%
+For instance, a system software which sets up a page table to isolate
+applications implements a HSE mechanism.
+%
+More generally, HSE mechanisms are particularly used to keep the software
+components of modern software stacks isolated from each other.
 
-HSE mechanisms are particularly used to keep the software components of modern
-software stacks isolated from each other.
+For a HSE mechanism to correctly enforce a targeted security property, it
+requires both hardware components and trusted software components to play their
+parts.
 %
-As a consequence, hardware components play an essential role in securing
-computing platforms.
+During the past decades, several vulnerability disclosures have defeated such
+HSE mechanisms.
 %
-Yet during the past decades, several critical vulnerability disclosures have
-shown that trust in hardware can be misplaced.
+We focus on vulnerabilities which are the result of errors at a specification
+level, rather than implementation errors.
 %
-Modern computing platforms have grown in complexity, and now involve multiple
-hardware components executing sophisticated software stacks.
+Several critical vulnerabilities are the result of a legitimate use by an
+attacker to one hardware component in order to circumvent the security
+enforcement of another.
 %
-This paves the way for \emph{architectural attacks}, where the attacker is
-able to leverage one component to threaten the security enforced by another.
+We call this class of security vulnerabilities \emph{architectural attacks}.
+%
+Our objective is to explore systemic approaches to specify and verify HSE
+mechanisms using formal methods, in the hope of uncovering potential
+architectural attacks ahead of time.
+%
+This is in line with an ongoing effort, for many years and by industrial
+manufacturers and researchers alike, to formally verify computing platforms.
+%
+Unfortunately, defining a comprehensive model in terms of hardware and software
+components remains challenging, yet such a model is a prerequisite to verify a
+computing platform in terms of HSE mechanisms.
 
-With SpecCert, we have proposed a three-step methodology, supported by a Coq
-framework, for specifying and verifying HSE mechanisms against hardware
-architecture models.
+Our contribution is two-side:
 %
-We have written a minimal model for a single core x86-based computing platform,
-and used SpecCert to specify and verify a real HSE mechanism to isolate the
-code executed while the CPU is in System Management Mode (SMM), a highly
-privileged execution mode of x86 microprocessors.
-
-For many years, industrial manufacturers and researchers have aimed to
-formally specify and verify computing platform.
+\begin{itemize}
+\item We have proposed a three-step methodology for specifying and verifying HSE
+  mechanisms against hardware architecture models.
+  %
+  We have written a minimal model for a single core x86-based computing
+  platform, and used it to specify and verify a real HSE mechanism to
+  isolate the code executed while the CPU is in System Management Mode (SMM), a
+  highly privileged execution mode of x86 microprocessors.
+\item We have proposed a novel approach to verify compositions of
+  components, to enable modular verification of a complex hardware architecture.
+  %
+  This approach is not specific to hardware models, and could also be leveraged
+  to reason about software applications as well.
+\end{itemize}
 %
-Defining a comprehensive model in terms of hardware and software components
-remains challenging, yet such a model is a prerequisite to verify a computing
-platform in terms of architectural attacks.
-%
-We have proposed FreeSpec, a Coq framework built upon a formalism to specify and verify each component independently, then verify their
-\emph{composition}.
+We have implemented proofs of concepts of our approaches using the proof
+assistant Coq in two projects called SpecCert and FreeSpec. Both have been
+released as Free Software.
