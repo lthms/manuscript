@@ -102,12 +102,12 @@ of an event on the hardware architecture state.
 \begin{definition}[Computing System]
   Given $\set{H}$ a set of hardware architecture states and $\set{E}$ a set of
   events, a Computing Platform $\shortLTS{Ez}$ is a pair of
-  $(pre\-condition, post\-condition)$ where $pre\-condition$ is a predicate on
-  $\set{H} \times \set{E}$ and $post\-condition$ is a predicate on
+  $(\func{pre\-condition}, \func{post\-condition})$ where $\func{pre\-condition}$ is a predicate on
+  $\set{H} \times \set{E}$ and $\func{post\-condition}$ is a predicate on
   $\set{H} \times \set{E} \times \set{H}$. $\shortLTS{Ez}$ defines a semantics
   of events as state-transformers such that
   \begin{prooftree}
-    \AxiomC{$precondition(h,ev)$} \AxiomC{$postcondition(h,ev,h')$}
+    \AxiomC{$\func{precondition}(h,ev)$} \AxiomC{$\func{postcondition}(h,ev,h')$}
     \BinaryInfC{\transitionLTS{Ez}{h}{ev}{h'}}
   \end{prooftree}
 
@@ -135,7 +135,7 @@ state-transformations we call a run of $\shortLTS{Ez}$.
   state-transformations of\, $\shortLTS{Ez}$ such that for two consecutive
   transformations, the resulting state of the first is the initial state of the
   next. We denote $\pathesLTS{Ez}$ the set of runs of the Computing Platform
-  $\shortLTS{Ez}$ and $init(\rho)$ the initial state of a run $\rho$.
+  $\shortLTS{Ez}$ and $\func{init}(\rho)$ the initial state of a run $\rho$.
 \end{definition}
 
 We consider EM-enforceable security
@@ -162,7 +162,7 @@ CPU.
 
 \begin{definition}[Hardware-Software Mapping]
   \label{def:hardsoftmap}
-  A hardware-software mapping $con\-text : \set{H} \rightarrow \set{S}$ is a
+  A hardware-software mapping $\func{con\-text} : \set{H} \rightarrow \set{S}$ is a
   function which takes a hardware state and returns the software component
   currently executed.
 \end{definition}
@@ -190,12 +190,12 @@ fetched by the CPU in order to be decoded and executed.
 \begin{definition}[Event-Software Mapping]
   \label{def:evsoft}
   An event-software mapping
-  $fet\-ched: \set{H} \times \set{E} \rightarrow \mathcal{P}(\set{S})$ is a
+  $\func{fet\-ched}: \set{H} \times \set{E} \rightarrow \mathcal{P}(\set{S})$ is a
   function which takes an initial hardware state and an event and returns the
   set of the fetched instructions owners during this state-transformation.
 \end{definition}
 
-Hence, $s \in fetched(h, ev)$ means that an instruction owned by $s$ was fetched
+Hence, $s \in \func{fetched}(h, ev)$ means that an instruction owned by $s$ was fetched
 during a state-transformation triggered by an event $ev$ from a state $h$. With
 a hardware-software mapping and an event-software mapping, we give a formal
 definition of a \textit{software execution tampering}.
@@ -203,13 +203,13 @@ definition of a \textit{software execution tampering}.
 \begin{definition}[Software Execution Tampering]
   \label{def:codeinjection}
   Given $h$ the initial state of a state-transformation triggered by an event
-  $ev$, $context$ a hardware-software mapping, $fetched$ an event-software
+  $ev$, $\func{context}$ a hardware-software mapping, $\func{fetched}$ an event-software
   mapping and $x, y \in \set{S}$ two software components, the software component
   $y$ tampers with the execution of another software component $x$ if the CPU
   fetches an instruction owned by $y$ in a state dedicated to $x$.
-  \[ \begin{array}{l} software\_tampering(context, fetched, h, ev, x, y)
+  \[ \begin{array}{l} \func{software\_tampering}(\func{context}, \func{fetched}, h, ev, x, y)
        \triangleq \\
-       \qquad\qquad\qquad\qquad context(h) = x\,\wedge\,y \in fetched(h,ev)
+       \qquad\qquad\qquad\qquad \func{context}(h) = x\,\wedge\,y \in \func{fetched}(h,ev)
      \end{array}
    \]
  \end{definition}
@@ -222,14 +222,14 @@ definition of a \textit{software execution tampering}.
 
  \begin{definition}[Software Execution Isolation]
    \label{def:softwareisolation}
-   Given $context$ a hardware-software mapping, $fetched$ an event-software
+   Given $\func{context}$ a hardware-software mapping, $\func{fetched}$ an event-software
    mapping and $\rho$ a run of $\shortLTS{Ez}$,
    \[ \begin{array}{l}
-        software\_execution\_isolation(context, fetched, \rho, \set{T}) \triangleq \\
+        \func{software\_execution\_isolation}(\func{context}, \func{fetched}, \rho, \set{T}) \triangleq \\
         \qquad\forall \transitionLTS{Ez}{h}{ev}{h'} \in \rho, \forall t \in
         \set{T}, \forall
         u \not\in \set{T}, \\
-        \qquad\qquad \neg software\_tampering(context, fetched, h, ev, t, u)
+        \qquad\qquad \neg \func{software\_tampering}(\func{context}, \func{fetched}, h, ev, t, u)
       \end{array} \]
   \end{definition}
 
@@ -248,17 +248,17 @@ definition of a \textit{software execution tampering}.
     \label{def:hse}
     Given $\set{H} $ a set of states of a hardware architecture, $\set{E}$ a set
     of events and $\shortLTS{Ez}$ a Computing Platform, we model a HSE mechanism
-    $\Delta$ with a tuple $(\fun{inv}, \fun{behavior}, \set{T}, context)$ such
+    $\Delta$ with a tuple $(\func{inv}, \func{behavior}, \set{T}, \func{context})$ such
     as
     \begin{itemize}
-    \item $inv$ is a predicate on $\set{H}$ to distinguish between safe hardware
+    \item $\func{inv}$ is a predicate on $\set{H}$ to distinguish between safe hardware
       configurations and potentially vulnerable ones
-    \item $behavior$ is a predicate on $\set{H} \times \set{E}_{Soft}$ to
+    \item $\func{behavior}$ is a predicate on $\set{H} \times \set{E}_{Soft}$ to
       distinguish between safe software state-transformations and potentially
       harmful ones
     \item $\set{T} \subseteq{S}$ is the set of software components which form
       the TCB of the HSE mechanism
-    \item $context$ is a hardware-software mapping to determine when the TCB is
+    \item $\func{context}$ is a hardware-software mapping to determine when the TCB is
       executed
     \end{itemize}
   \end{definition}
@@ -292,20 +292,20 @@ definition of a \textit{software execution tampering}.
 
   \begin{definition}[HSE Laws]
     \label{def:laws}
-    A HSE mechanism $\Delta = (inv, behavior, \set{T}, context)$ has to satisfy
+    A HSE mechanism $\Delta = (\func{inv}, \func{behavior}, \set{T}, \func{context})$ has to satisfy
     the following properties:
     \begin{enumerate}
-    \item $behavior$ preserves $inv$: $\forall \transitionLTS{Ez}{h}{ev}{h'}$,
-      \[ \begin{array}{l} inv(h) \Rightarrow (ev \in \set{E}_{Soft} \Rightarrow
-          behavior(h,ev)) \Rightarrow inv(h')
+    \item \func{behavior} preserves \func{inv}: $\forall \transitionLTS{Ez}{h}{ev}{h'}$,
+      \[ \begin{array}{l} \func{inv}(h) \Rightarrow (ev \in \set{E}_{Soft} \Rightarrow
+          \func{behavior}(h,ev)) \Rightarrow \func{inv}(h')
          \end{array}
        \]
-     \item $behavior$ only restricts the TCB:
+     \item $\func{behavior}$ only restricts the TCB:
        $\forall x \not\in \set{T}, \forall h \in \set{H}, \forall ev \in
        \set{E}_{Soft}$,
        \[
          \begin{array}{l}
-           context(h) = x \Rightarrow behavior(h, ev)
+           \func{context}(h) = x \Rightarrow \func{behavior}(h, ev)
          \end{array}
        \]
      \end{enumerate}
@@ -318,9 +318,9 @@ definition of a \textit{software execution tampering}.
 
 \begin{definition}[Compliant Runs]
   Given $\rho \in \pathesLTS{Ez}$,
-  \[ \rho \in \mathcal{C}(\Delta) \triangleq inv(init(\rho))\,\wedge\,\forall
+  \[ \rho \in \mathcal{C}(\Delta) \triangleq \func{inv}(\func{init}(\rho))\,\wedge\,\forall
     \transitionLTS{Ez}{h}{ev}{h'}, ev \in \set{E}_{Soft} \Rightarrow
-    behavior(h,ev) \]
+    \func{behavior}(h,ev) \]
 \end{definition}
 
 Eventually, we aim to prove that a HSE mechanism is sound \mbox{---it} succeeds
@@ -333,7 +333,7 @@ definition.
   A HSE mechanism $\Delta$ succeeds in enforcing a security policy $P$ when each
   compliant run of $\Delta$ is secure. In such a case, $\Delta$ is said to be
   sound.
-  \[ sound(\Delta, P) \triangleq \forall \rho \in \set{C}(\Delta), P(\rho)
+  \[ \func{sound}(\Delta, P) \triangleq \forall \rho \in \set{C}(\Delta), P(\rho)
   \]
 \end{definition}
 
@@ -884,7 +884,7 @@ on states.
 %%%%%% APPENDIX INV %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-We now define $\fun{behavior_{Smm}}$. We only define two
+We now define $\func{behavior_{Smm}}$. We only define two
 restrictions. First, we force the SMM code execution to remain confined within
 the SMRAM. The reason is simple: the OS code can tamper with the memory outside
 the SMRAM. As a consequence, jumping outside the SMRAM is the best way to fail
@@ -893,8 +893,8 @@ registers as it is the responsability of the boot sequence code to correctly set
 them.
 
 \[
-  \fun{behavior_{Smm}}(h, ev) \triangleq \begin{array}{l}
-                                           \fun{smm\_context}(h) = \val{smm} \\
+  \func{behavior_{Smm}}(h, ev) \triangleq \begin{array}{l}
+                                           \func{smm\_context}(h) = \val{smm} \\
                                            \quad \Rightarrow ((e =
                                            NextInstruction(pa)
                                            \Rightarrow pa \in \texttt{pSmram}) \\

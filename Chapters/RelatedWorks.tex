@@ -212,7 +212,7 @@ potentially describes an attack path.
   We define a single module (called \texttt{main} according to the NuSMV
   convention).
 
-  \inputminted[frame=single,firstline=1,lastline=1]{coq}{Listings/Airlock1.nusmv}
+  \inputminted[firstline=1,lastline=1]{coq}{Listings/Airlock1.nusmv}
 
   This module will contains three sections: \texttt{VAR} to define the state of
   the transition system, \texttt{ASSIGN} to define the transition relation, and
@@ -221,7 +221,7 @@ potentially describes an attack path.
 
   We begin with the \texttt{VAR} section.
 
-  \inputminted[frame=single,firstline=3,lastline=7]{coq}{Listings/Airlock1.nusmv}
+  \inputminted[firstline=3,lastline=7]{coq}{Listings/Airlock1.nusmv}
 
   The state of our airlock system comprises two variables, \texttt{door1} and
   \texttt{door2}, which can be either \texttt{open} or \texttt{close}.
@@ -235,7 +235,7 @@ potentially describes an attack path.
 
   We now continue with the \texttt{ASSIGN} section.
 
-  \inputminted[frame=single,firstline=9,lastline=31]{coq}{Listings/Airlock1.nusmv}
+  \inputminted[firstline=9,lastline=31]{coq}{Listings/Airlock1.nusmv}
 
   This section can be broken down into two parts: the \texttt{init} statements,
   and the \texttt{next} statements.
@@ -254,7 +254,7 @@ potentially describes an attack path.
   We can specify the safety property we are interested in using the
   \emph{globally} modal operator, denoted \texttt{G} in NuSMV.
 
-  \inputminted[frame=single,firstline=33,lastline=33]{coq}{Listings/Airlock1.nusmv}
+  \inputminted[firstline=33,lastline=33]{coq}{Listings/Airlock1.nusmv}
 
   The task to exhibit a proof that the model satisfies the linear temporal logic
   formula lies with the model checker, so the user only needs to wait its
@@ -262,7 +262,7 @@ potentially describes an attack path.
   %
   Unsurprisingly, the computation is favourable in our case.
 
-  \inputminted[frame=single]{coq}{Listings/Airlock-out.nusmv}
+  \inputminted[linenos=false]{coq}{Listings/Airlock-out.nusmv}
 
   An important feature of model checkers is that they generate a counter-example
   when they find a sequence of transitions which does not satisfy the
@@ -273,7 +273,7 @@ potentially describes an attack path.
   the first door, then the model checker generates the following
   counter-example:
 
-  \inputminted[frame=single]{coq}{Listings/Airlock-counter.nusmv}
+  \inputminted[linenos=false]{coq}{Listings/Airlock-counter.nusmv}
 \end{example}
 
 \paragraph{Theorem Proving}
@@ -297,7 +297,7 @@ in terms of effort for real world systems.
   We can {\sc Gallina} to describe the system in terms of states and actions to
   update this state.
 
-  \inputminted[frame=single]{coq}{Listings/Airlock1.v}
+  \inputminted[firstline=1,lastline=14]{coq}{Listings/Airlock.v}
 
   This reads as follows: a door is either open or close; a airlock system is
   made of two doors; we consider four actions which imply an update of the
@@ -313,7 +313,7 @@ in terms of effort for real world systems.
   In practice, this is done by enumerating the cases where the statement is
   true, and the remaining cases are considered false.
 
-  \inputminted[frame=single]{coq}{Listings/Airlock2.v}
+  \inputminted[firstline=16,lastline=33]{coq}{Listings/Airlock.v}
 
   This reads as follows: we distinguish between four classes of transitions, one
   per actions.
@@ -330,7 +330,7 @@ in terms of effort for real world systems.
   This property is a predicate on the system state, which we can define in {\sc
     Gallina} \emph{via} the \texttt{Prop} type.
 
-  \inputminted[frame=single]{coq}{Listings/Airlock3.v}
+  \inputminted[firstline=35,lastline=38]{coq}{Listings/Airlock.v}
 
   For the airlock to be secure, this means the \texttt{secure\_airlock}
   predicate must hold true before and after each transition.
@@ -351,7 +351,7 @@ in terms of effort for real world systems.
   and the goal of a Coq user is to bring back this proof obligation to something
   that has already been proven.
 
-  \inputminted[frame=single]{coq}{Listings/Airlock4.v}
+  \inputminted[firstline=40,lastline=57]{coq}{Listings/Airlock.v}
 
   This reads as follows: we prove that, given any ``secure state'', that is a
   airlock for which the \texttt{secure\_airlock} holds true, any action which
@@ -378,7 +378,8 @@ First, we advocate for the use of a monadic programming style to define a model
 Then, we discuss how component-based modelling allows for a modular reasoning
 essential to deal with large systems (\ref{subsec:related:ease:component}).
 %
-Finally, we detail the advantages of executable models (\ref{subsec:related:ease:exec})
+Finally, we detail the advantages of executable models
+(\ref{subsec:related:ease:exec}).
 
 \subsection{Monadic Modelling}
 \label{subsec:related:ease:monad}
@@ -403,14 +404,14 @@ of natural numbers, then the semantics of a \texttt{ADD} instruction could be
 specified as follows:
 %
 \[\begin{array}{rcl}
-    \mathrm{add}(s) &\triangleq& \mathrm{let\ }(x, s') = \mathrm{pop}(s) \mathrm{\ in} \\
-                    &          & \mathrm{let\ }(y, s'') = \mathrm{pop}(s) \mathrm{\ in} \\
-                    &          & \mathrm{push}(x + y)(s'')
+    \func{add}(s) &\triangleq& \mathrm{let\ }(x, s') = \func{pop}(s) \mathrm{\ in} \\
+                  &          & \mathrm{let\ }(y, s'') = \func{pop}(s) \mathrm{\ in} \\
+                  &          & \func{push}(x + y)(s'')
   \end{array}\]
 
 The sharp-eyes reader will have noticed the error in the definition of
-$\mathrm{add}$, that is the second call to $\mathrm{pop}$ is using the initial
-state $s$, rather than $s'$.
+$\func{add}$, that is the second call to $\func{pop}$ is using the initial state
+$s$, rather than $s'$.
 %
 However, we can agree that it is subtle, and easy to miss even in a three-lines
 function.
@@ -431,15 +432,15 @@ monad'' whose result is of type $A$.
 The two fundamental monadic operations (which every monads share) are
 %
 \begin{align*}
-  \mathrm{pure} : A \rightarrow M(A)
+  \func{pure} : A \rightarrow M(A)
   &
-  & \mathrm{bind} : M(A) \rightarrow (A \rightarrow M(B)) \rightarrow M(B)
+  & \func{bind} : M(A) \rightarrow (A \rightarrow M(B)) \rightarrow M(B)
 \end{align*}
 %
-On the one hand, $\mathrm{pure}$ represents the simplest computation possible,
+On the one hand, $\func{pure}$ represents the simplest computation possible,
 whose consists solely into returning a given value.
 %
-On the other hand, $\mathrm{bind}$ (denoted $\bind$ by convention) composes
+On the other hand, $\func{bind}$ (denoted $\bind$ by convention) composes
 computations: it takes the result of a first monadic computation and passes it
 to another.
 
@@ -448,34 +449,33 @@ to another.
 Functions of the form $S \rightarrow (A \times S)$ form the state monad, whose
 main benefit is to allow for writing pure functions in an imperative style.
 %
-The $\mathrm{pure}$ is defined as follows:
+The $\func{pure}$ is defined as follows:
 %
 \[
-  \mathrm{pure}(x) \triangleq \lambda s. (x, s)
+  \func{pure}(x) \triangleq \lambda s. (x, s)
 \]
 %
-That is, $\mathrm{pure}(x)$, where $x$ is of type $A$, is a function of type
+That is, $\func{pure}(x)$, where $x$ is of type $A$, is a function of type
 $S \rightarrow (A \times S)$ which does not modify the computation state, and
 just returns $x$ as a result.
 %
-In addition, the $\mathrm{bind}$ function is defined as follows:
+In addition, the $\func{bind}$ function is defined as follows:
 \[
   p \bind f \triangleq \lambda s. \mathrm{let\ } (x, s') = p(s) \mathrm{\ in\ }
   f(x)(s')
 \]
 %
-That is, the $\mathrm{bind}$ function of the state monad deals with passing the
+That is, the $\func{bind}$ function of the state monad deals with passing the
 computation state around from one computation to another.
 %
-Contrary to a tired programmers, $\mathrm{bind}$ does not mix intermediary
-states.
+Contrary to a tired programmers, $\func{bind}$ does not mix intermediary states.
 
 As a consequence, it is possible to rewrite the semantics of a \texttt{ADD}
 instruction as follows
 %
 \[
-  \mathrm{add} \triangleq \mathrm{pop} \bind (\lambda x. \mathrm{pop} \bind
-  (\lambda y. \mathrm{push}(x + y)))
+  \func{add} \triangleq \func{pop} \bind (\lambda x. \func{pop} \bind (\lambda
+  y. \func{push}(x + y)))
 \]
 %
 which is arguably not really readable.
@@ -488,9 +488,9 @@ imperative code.
 %
 \[
   \begin{array}{rcl}
-    \mathrm{add} &\triangleq& x \leftarrow \mathrm{pop} \\
-                 &          & y \leftarrow \mathrm{pop} \\
-                 &          & \mathrm{push}(x + y)
+    \mathrm{add} &\triangleq& x \leftarrow \func{pop} \\
+                 &          & y \leftarrow \func{pop} \\
+                 &          & \func{push}(x + y)
   \end{array}
 \]
 

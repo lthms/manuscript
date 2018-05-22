@@ -5,9 +5,15 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[english]{babel}
-\usepackage{minted}
+\usepackage[chapter]{minted}
 \usemintedstyle{bw}
 \usepackage{tocbibind}
+\usepackage[babel=true,kerning=true,spacing=true,auto=true]{microtype}
+\usepackage[babel=true]{csquotes}
+\usepackage{newpxtext,newpxmath}
+\let\openbox\undefined
+
+\setminted{framesep=10pt,xleftmargin=18pt,frame=leftline,linenos=true}
 
 % Use -- instead of bullet for itemize
 \renewcommand{\labelitemi}{\normalfont\textendash}
@@ -25,10 +31,17 @@
 \usepackage{hyperref}
 \hypersetup{
   colorlinks=true,
-  allcolors=Plum
+  allcolors=Violet
 }
 
-\usepackage[Rejne]{fncychap}
+\usepackage[explicit]{titlesec}
+\usepackage{type1cm}
+\titleformat{\chapter}[display]
+  {\normalfont\Large}
+  {\flushright\fontsize{90}{0}\textbf{\textcolor{Violet!20}{\thechapter}}}{10pt}
+  {\flushright\fontsize{30}{0}\textbf{#1}\vskip80pt}
+\titlespacing*{\chapter}
+  {0pt}{-40pt}{0pt}
 
 \newcommand\abstractname{Abstract}  %%% here
 \makeatletter
@@ -62,13 +75,37 @@
 \usepackage{mdframed} % or, "mdframed"
 \usepackage[amsthm,framed]{ntheorem}
 
-\theoremstyle{definition}
+\definecolor{statementline}{HTML}{b7e2d6}
 
-\newmdtheoremenv{definition}{Definition}[chapter]
+\theoremstyle{break}
+\theorembodyfont{\normalfont}
+
+\mdfdefinestyle{quoted}{
+hidealllines=true,
+leftmargin=-15pt,
+leftline=true,
+innertopmargin=5pt,
+innerbottommargin=5pt,
+linewidth=5pt,
+linecolor=gray!40,
+%backgroundcolor=gray!5,
+innerrightmargin=0pt,
+skipabove=\topsep,
+skipbelow=\topsep}
+
+\mdfdefinestyle{definition}{
+style=quoted,
+linecolor=Violet!20}
+
+\mdfdefinestyle{statement}{
+style=quoted,
+linecolor=statementline}
+
+\newmdtheoremenv[style=definition]{definition}{Definition}[chapter]
 \newmdtheoremenv{notation}{Notation}[chapter]
-\newmdtheoremenv{example}{Example}[chapter]
-\newmdtheoremenv{lemma}{Lemma}[chapter]
-\newmdtheoremenv{theorem}{Theorem}[chapter]
+\newmdtheoremenv[style=quoted]{example}{Example}[chapter]
+\newmdtheoremenv[style=statement]{lemma}{Lemma}[chapter]
+\newmdtheoremenv[style=statement]{theorem}{Theorem}[chapter]
 
 % A command I use to leave myself notes
 \newcommandx{\thomasrk}[2][1=]{\todo[linecolor=Plum,backgroundcolor=Plum!25,bordercolor=Plum,#1]{#2}}
@@ -76,6 +113,7 @@
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, positioning, arrows, intersections, fit, matrix}
 
+\usepackage{phdcmd}
 \usepackage{speccert}
 \usepackage{freespec}
 
