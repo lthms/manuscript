@@ -12,6 +12,7 @@
 \usepackage[babel=true]{csquotes}
 \usepackage{newpxtext,newpxmath}
 \let\openbox\undefined
+\usepackage{makeidx}
 
 \setminted{framesep=10pt,xleftmargin=18pt,frame=leftline,linenos=true}
 
@@ -25,7 +26,7 @@
 \usepackage{paralist}
 \usepackage{bigcenter}
 \usepackage[mode=buildnew]{standalone}
-\usepackage{acro}
+\usepackage[index=true]{acro}
 \usepackage{xargs}
 \usepackage{todonotes}
 \usepackage{hyperref}
@@ -118,38 +119,44 @@ linecolor=statementline}
 \usepackage{freespec}
 
 \input{abbrev}
+\input{nomencl}
 
 \title{Specifying and Verifying Hardware-based Security Enforcement Mechanisms}
 \author{Thomas Letan}
 \date{2015 -- 2018}
 
 \pagestyle{plain}
+\makeindex
 
 \begin{document}
+  \frontmatter
 
-\frontmatter
+  \maketitle
 
-\maketitle
+  \begin{abstract}
+    \input{abstract}
+  \end{abstract}
 
-\begin{abstract}
-  \input{abstract}
-\end{abstract}
+  \tableofcontents
+  \listoffigures
+  \listoftables
+  \printacronyms[include-classes={abbrev},heading={chapter},name=Acronyms]
+  \printacronyms[include-classes={nomencl},heading={chapter},name=Notations]
 
-\tableofcontents
+  \mainmatter
 
-\mainmatter
+  \input{Chapters/Introduction}
+  \input{Chapters/UseCase}
+  \input{Chapters/RelatedWorks}
+  \input{Chapters/SpecCert}
+  \input{Chapters/FreeSpec}
+  \input{Chapters/Conclusion}
 
-\input{Chapters/Introduction}
-\input{Chapters/UseCase}
-\input{Chapters/RelatedWorks}
-\input{Chapters/SpecCert}
-\input{Chapters/FreeSpec}
-\input{Chapters/Conclusion}
+  \appendix
 
-\appendix
+  \input{Appendices/FreeSpecTutorial}
 
-\input{Appendices/FreeSpecTutorial}
-
-\bibliographystyle{unsrt}
-\bibliography{manuscript}
+  \bibliographystyle{unsrt}
+  \bibliography{manuscript}
+  \printindex
 \end{document}

@@ -290,9 +290,9 @@ They do not excuse users from \emph{writing proofs}, which can be very important
 in terms of effort for real world systems.
 
 \begin{example}[Airlock System Verification in Coq]
-  The Coq theorem prover\,\cite{coq} includes two languages: a rich functional
-  language to write specifications ({\sc Gallina}) and a tactic language to
-  write proofs ({\sc Ltac}).
+  The \index{Coq} theorem prover\,\cite{coq} includes two languages: a rich
+  functional language to write specifications ({\sc Gallina}) and a tactic
+  language to write proofs ({\sc Ltac}).
   %
   We can {\sc Gallina} to describe the system in terms of states and actions to
   update this state.
@@ -338,8 +338,8 @@ in terms of effort for real world systems.
   We can express that in the form of a \emph{lemma}, that is a logical statement
   for each we exhibit a proof.
   %
-  We write the proof with {\sc Ltac}, and trust Coq to refuse it in case it is
-  incorrect.
+  We write the proof with {\sc Ltac}, and trust \index{Coq} to refuse it in case
+  it is incorrect.
   %
   The proof is written in terms of {\sc Ltac} tactics.
   %
@@ -348,8 +348,8 @@ in terms of effort for real world systems.
   For instance, the \texttt{right} tactic refers to the fact that given two
   statements $P$ and $Q$, then if $Q$ is true, then $P \vee Q$ is also
   true. Tactics updates the proof obligation (initially the lemma statement),
-  and the goal of a Coq user is to bring back this proof obligation to something
-  that has already been proven.
+  and the goal of a \index{Coq} user is to bring back this proof obligation to
+  something that has already been proven.
 
   \inputminted[firstline=40,lastline=57]{coq}{Listings/Airlock.v}
 
@@ -404,8 +404,8 @@ of natural numbers, then the semantics of a \texttt{ADD} instruction could be
 specified as follows:
 %
 \[\begin{array}{rcl}
-    \func{add}(s) &\triangleq& \mathrm{let\ }(x, s') = \func{pop}(s) \mathrm{\ in} \\
-                  &          & \mathrm{let\ }(y, s'') = \func{pop}(s) \mathrm{\ in} \\
+    \func{add}(s) &\triangleq& \text{let }(x, s') = \func{pop}(s) \text{ in} \\
+                  &          & \text{let }(y, s'') = \func{pop}(s) \text{ in} \\
                   &          & \func{push}(x + y)(s'')
   \end{array}\]
 
@@ -461,7 +461,7 @@ just returns $x$ as a result.
 %
 In addition, the $\func{bind}$ function is defined as follows:
 \[
-  p \bind f \triangleq \lambda s. \mathrm{let\ } (x, s') = p(s) \mathrm{\ in\ }
+  p \bind f \triangleq \lambda s. \text{let } (x, s') = p(s) \text{ in }
   f(x)(s')
 \]
 %
@@ -481,16 +481,16 @@ instruction as follows
 which is arguably not really readable.
 %
 Fortunately, the \textbf{do} notation, notably used in Haskell, completely hides
-the $\mathrm{bind}$ functions.
+the $\func{bind}$ functions.
 %
 Monadic functions written with the \textbf{do} notation furiously look like
 imperative code.
 %
 \[
   \begin{array}{rcl}
-    \mathrm{add} &\triangleq& x \leftarrow \func{pop} \\
-                 &          & y \leftarrow \func{pop} \\
-                 &          & \func{push}(x + y)
+    \func{add} &\triangleq& x \leftarrow \func{pop} \\
+               &          & y \leftarrow \func{pop} \\
+               &          & \func{push}(x + y)
   \end{array}
 \]
 
@@ -525,7 +525,7 @@ code snippets $C$ and $C'$, that is
 
 \begin{prooftree}
   \AxiomC{$\{P\}\ C\ \{Q\}$} \AxiomC{$\{Q\}\ C'\ \{R\}$}
-  \BinaryInfC{$\{P\}\ C\mathrm{;\ }C'\ \{R\}$}
+  \BinaryInfC{$\{P\}\ C\text{; }C'\ \{R\}$}
 \end{prooftree}
 
 It has been shown in various occasions that the state monad not only allow for
@@ -666,7 +666,7 @@ inconsistencies which otherwise could damage the value of the verification
 process.
 
 From this perspective, it is interesting to emphasis that, if not all model
-defined in {\sc Gallina} within the Coq proof assistant are executable, it is
+defined in {\sc Gallina} within the \index{Coq} proof assistant are executable, it is
 possible to leverage the extraction mechanism to that end.
 %
 That is, a model which can be extracted can also be executed.
@@ -745,10 +745,10 @@ model, in order to reduce the state combinatory.
 %on proof assistants to hardware conception; a world that is still dominated by
 %model checking approaches.
 %%
-%The result is a framework for the Coq proof assistant, to implement and verify
+%The result is a framework for the \index{Coq} proof assistant, to implement and verify
 %hardware components.
 %%
-%Pushing the \texttt{Notation} feature of Coq, which let the developer extend the
+%Pushing the \texttt{Notation} feature of \index{Coq}, which let the developer extend the
 %proof assistant parser with its own construction, to its maximum, they offer a
 %development environment very close to BlueSpec\,\cite{nikhil2004bluespec}.
 %%
@@ -848,7 +848,7 @@ It is required to consider all the possible traces.
 \paragraph{Pip}
 %
 Pip is a minimal kernel whose reference implementation is written in {\sc
-  Gallina}, the specification language of Coq.
+  Gallina}, the specification language of \index{Coq}.
 %
 The authors have verified their reference implementation correctly configures a
 \ac{mmu} in order to isolate the applications it manages\,\cite{jomaa2016mmu}.

@@ -1,6 +1,13 @@
 \chapter{FreeSpec}
 \label{chapter:freespec}
 
+\endquote{``\emph{Give someone a program, you frustrate them for a day; teach
+    them how to program, you frustrate them for a lifetime.}''
+
+  \hfill\footnotesize --- David Leinweber}
+
+\vspace{1cm}\noindent
+%
 A typical computing platform is made of dozens of hardware components, and some
 of them execute complex software stacks.
 %
@@ -8,14 +15,12 @@ In this context, building a secure computing system with respect to a given
 security policy remains challenging, because attackers will leverage any
 vulnerability they can find.
 %
-Both local component flaws and components composition inconsistencies,
-that is, a mismatch between requirements assumed by some client
-components and the actual guarantees provided by others, can be
-used by attackers.
+Both local component flaws and components composition inconsistencies, that is,
+a mismatch between requirements assumed by some client components and the actual
+guarantees provided by others, can be used by attackers.
 
-The latter scenario may lead to a situation where every component
-seems to be working as expected, but their composition creates an
-attack path.
+The latter scenario may lead to a situation where every component seems to be
+working as expected, but their composition creates an attack path.
 %
 We name this class of security vulnerabilities ``architectural
 attacks''\,\cite{letan2016speccert} afterwards.
@@ -57,8 +62,8 @@ In particular, the Memory Controller Hub (MCH)\,\cite{intel2009mch} provides a
 security mechanism to that end.
 %
 In 2009, Duflot \emph{et al.}\,\cite{duflot2009smram} and Wojtczuk \emph{et
-al.}\,\cite{wojtczuk2009smram} have independently shown that the cache could be
-used to circumvent this protection.
+  al.}\,\cite{wojtczuk2009smram} have independently shown that the cache could
+be used to circumvent this protection.
 %
 The countermeasure required to add a new security mechanism to the CPU, meaning
 only computers produced after 2009 are protected against this particular
@@ -94,9 +99,9 @@ and verify large programs with side effects.
 %
 Reasoning about side effects in purely functional languages such as {\sc
   Gallina}, the Coq specification language, is difficult, firstly because they
-  imply to somehow take into account an outer \emph{stateful} environment and
-  secondly, because the composition of stateful computations is not well-handled
-  by traditional (monadic) approaches.
+imply to somehow take into account an outer \emph{stateful} environment and
+secondly, because the composition of stateful computations is not well-handled
+by traditional (monadic) approaches.
 %
 Algebraic effects and handlers\,\cite{bauer2015effects} are a generic approach
 to overcome this double challenge.
@@ -111,26 +116,26 @@ as effect handlers.
 %
 Our contribution is threefold:
 \begin{itemize}
-\item We propose an approach which leverages the key concepts of
-algebraic effects and handlers to model and to verify each component of a computing
-system independently, while providing the necessary abstractions to compose
-these components in order to verify the properties of the resulting system.
+\item We propose an approach which leverages the key concepts of algebraic
+  effects and handlers to model and to verify each component of a computing
+  system independently, while providing the necessary abstractions to compose
+  these components in order to verify the properties of the resulting system.
 \item We have implemented FreeSpec\,\footnote{FreeSpec has been released as a
-free software, under the terms of the GPLv3.
-\url{https://github.com/ANSSI-FR/FreeSpec}}, a framework for the Coq proof
-assistant to \emph{modularly} verify programs with effects and
-effects handlers with our approach.
+    free software, under the terms of the GPLv3.
+    \url{https://github.com/ANSSI-FR/FreeSpec}}, a framework for the Coq proof
+  assistant to \emph{modularly} verify programs with effects and effects
+  handlers with our approach.
 \item We have modelled and verified a simplified subset of an x86 computing
-system with FreeSpec in order to illustrate how our formalism can be leveraged
-to tackle our initial objective, that is modelling and verifying computing
-platforms.
+  system with FreeSpec in order to illustrate how our formalism can be leveraged
+  to tackle our initial objective, that is modelling and verifying computing
+  platforms.
 \end{itemize}
 
 The rest of the paper proceeds as follows.
 %
 We describe how we model components in terms of programs with effects and effect
-handlers (Section~\ref{sec:freespec:specifying}) and we introduce so-called abstract
-specifications to verify their respective properties
+handlers (Section~\ref{sec:freespec:specifying}) and we introduce so-called
+abstract specifications to verify their respective properties
 (Section~\ref{sec:freespec:verifying}).
 %
 To illustrate our definitions, we use a running example in the form of the
@@ -144,8 +149,8 @@ leveraged to scale the modelling and verification work for larger systems
 % ==============================================================================
 \label{sec:freespec:specifying}
 
-The first objective of FreeSpec is to incrementally model a complex system,
-one component at a time.
+The first objective of FreeSpec is to incrementally model a complex system, one
+component at a time.
 %
 To do so, we use the key concepts of algebraic effects and effect handlers,
 implemented with a variant of the Free monad called the Program monad as defined
@@ -164,13 +169,13 @@ If correctly configured, the MCH will reroute any memory access which targets
 the SMRAM to the VGA controlled, if this access is done by a CPU in another
 execution mode than SMM.
 
-%pictured in the Figure~\ref{fig:mch-running-example}.
-%\begin{figure}
-%  \centering \includestandalone[width=.5\textwidth]{running-example}
+% pictured in the Figure~\ref{fig:mch-running-example}.
+% \begin{figure}
+%   \centering \includestandalone[width=.5\textwidth]{running-example}
 %
-%  \caption{Idealised Memory Controller Hub}
-%  \label{fig:mch-running-example}
-%\end{figure}
+%   \caption{Idealised Memory Controller Hub}
+%   \label{fig:mch-running-example}
+% \end{figure}
 
 \subsection{Interface of Effects}
 % ------------------------------------------------------------------------------
@@ -189,12 +194,12 @@ Thereafter, we often define sets of values, and interfaces in particular, in
 terms of functions to construct these values.
 %
 These functions are called ``constructors''\,\footnote{In this article,
-functions are written in bold. In addition, constructors begin with a capital
-letter.}, and they have mutually exclusive images, i.e. it is not possible to
+  functions are written in bold. In addition, constructors begin with a capital
+  letter.}, and they have mutually exclusive images, i.e. it is not possible to
 construct the same value with two different constructors.
 %
-For $\I$ an interface, we denote by $\Interface{\I}{\mathcal{A}}
-\subseteq \I$ the subset of effects whose results belong to a set~$\mathcal{A}$.
+For $\I$ an interface, we denote by $\Interface{\I}{\mathcal{A}} \subseteq \I$
+the subset of effects whose results belong to a set~$\mathcal{A}$.
 
 \begin{example}[MCH Interfaces]
   The VGA and the DRAM controllers exhibit a similar interface which allows for
@@ -203,13 +208,14 @@ For $\I$ an interface, we denote by $\Interface{\I}{\mathcal{A}}
   Their interfaces are denoted by $\I_{\mathrm{VGA}}$ and $\I_{\mathrm{DRAM}}$
   respectively.
   %
-  Let $\mathpzc{Loc}$ be the set of memory locations and $\mathpzc{Val}$ the
-  set of values stored inside the memory region.
+  Let $\mathpzc{Loc}$ be the set of memory locations and $\mathpzc{Val}$ the set
+  of values stored inside the memory region.
   %
-  We use the value~$()$ to model effects without results (similarly to
+  We use the unit type \ac{unit} to model effects without results (similarly to
   the \texttt{void} keyword in an imperative language).
   %
-  We define $\I_{\mathrm{DRAM}}$ (respectively $\I_{\mathrm{VGA}}$) with two constructors:
+  We define $\I_{\mathrm{DRAM}}$ (respectively $\I_{\mathrm{VGA}}$) with two
+  constructors:
   \begin{itemize}
   \item
     $\func{Read}_{\mathrm{DRAM}} : \mathpzc{Loc} \rightarrow
@@ -219,7 +225,8 @@ For $\I$ an interface, we denote by $\Interface{\I}{\mathcal{A}}
     \rightarrow \Interface{\I_{\mathrm{DRAM}}}{\{()\}}$
   \end{itemize}
 
-  Then, $\I_{\mathrm{DRAM}} =
+  Then,
+  $\I_{\mathrm{DRAM}} =
   \Interface{\I_{\mathrm{DRAM}}}{\{()\}}\,\cup\,\Interface{\I_{\mathrm{DRAM}}}{\mathpzc{Val}}$,
   and
   $\func{Read}_{\mathrm{DRAM}}(l) \in
@@ -233,18 +240,21 @@ For $\I$ an interface, we denote by $\Interface{\I}{\mathcal{A}}
   It also provides one effect to lock the SMRAM protection mechanism, i.e. it
   enables the SMRAM isolation until the next hardware reset.
   %
-  We define the set $\mathpzc{Priv}~\triangleq~\{\,\val{smm},
-  \val{unprivileged}\,\}$ to distinguish between privileged memory accesses
-  made by a CPU in SMM and unprivileged accesses made the rest of the time.
+  We define the set
+  $\mathpzc{Priv}~\triangleq~\{\,\val{smm}, \val{unprivileged}\,\}$ to
+  distinguish between privileged memory accesses made by a CPU in SMM and
+  unprivileged accesses made the rest of the time.
   %
-  The MCH interface, denoted by $\I_{\mathrm{MCH}}$, is defined with three constructors:
+  The MCH interface, denoted by $\I_{\mathrm{MCH}}$, is defined with three
+  constructors:
   \begin{itemize}
   \item
-    $\func{Read}_{\mathrm{MCH}} : \mathpzc{Loc} \rightarrow \mathpzc{Priv} \rightarrow
-    \Interface{\I_{\mathrm{MCH}}}{\mathpzc{Val}}$
+    $\func{Read}_{\mathrm{MCH}} : \mathpzc{Loc} \rightarrow \mathpzc{Priv}
+    \rightarrow \Interface{\I_{\mathrm{MCH}}}{\mathpzc{Val}}$
   \item
-    $\func{Write}_{\mathrm{MCH}} : \mathpzc{Loc} \rightarrow \mathpzc{Val} \rightarrow
-    \mathpzc{Priv} \rightarrow \Interface{\I_{\mathrm{MCH}}}{\{()\}}$
+    $\func{Write}_{\mathrm{MCH}} : \mathpzc{Loc} \rightarrow \mathpzc{Val}
+    \rightarrow \mathpzc{Priv} \rightarrow
+    \Interface{\I_{\mathrm{MCH}}}{\{()\}}$
   \item $\func{Lock} : \Interface{\I_{\mathrm{MCH}}}{\{()\}}$
   \end{itemize}
 \end{example}
@@ -269,8 +279,8 @@ Thus, an operational semantics produces not only a result, but also a new
 operational semantics, which encapsulates the new state of the component.
 
 \begin{definition}[Operational Semantics]
-  We write $\Sigma_{\I}$ for the set of operational semantics for a
-  given interface $\I$, defined co-inductively as
+  We write $\Sigma_{\I}$ for the set of operational semantics for a given
+  interface $\I$, defined co-inductively as
   %
   \[
     \Sigma_{\I} \triangleq \{\,\sigma\,|\,\sigma : \forall \mathcal{A},
@@ -278,8 +288,8 @@ operational semantics, which encapsulates the new state of the component.
   \]
   %
   An operational semantics~$\sigma \in \Sigma_{\I}$ is a function which, given
-  any effect of $\I$, produces both a result which belongs to the expected
-  set and a new operational semantics to use afterwards.
+  any effect of $\I$, produces both a result which belongs to the expected set
+  and a new operational semantics to use afterwards.
 \end{definition}
 
 A component may use more than one interface.
@@ -293,13 +303,15 @@ In FreeSpec, we solve this issue by composing interfaces together to create new
 ones.
 
 \begin{definition}[Interfaces Composition]
-  Let $\I$ and $\J$ be two interfaces. $\oplus$~is the interface
-  composition operator, defined with two constructors:
+  Let $\I$ and $\J$ be two interfaces. $\oplus$~is the interface composition
+  operator, defined with two constructors:
   \begin{itemize}
-  \item $\func{InL} : \forall \mathcal{A}, \Interface{\I}{\mathcal{A}}
-  \rightarrow \Interface{(\I \oplus \J)}{\mathcal{A}}$
-  \item $\func{InR} : \forall \mathcal{A}, \Interface{\J}{\mathcal{A}}
-  \rightarrow \Interface{(\I \oplus \J)}{\mathcal{A}}$
+  \item
+    $\func{InL} : \forall \mathcal{A}, \Interface{\I}{\mathcal{A}} \rightarrow
+    \Interface{(\I \oplus \J)}{\mathcal{A}}$
+  \item
+    $\func{InR} : \forall \mathcal{A}, \Interface{\J}{\mathcal{A}} \rightarrow
+    \Interface{(\I \oplus \J)}{\mathcal{A}}$
   \end{itemize}
 \end{definition}
 
@@ -307,18 +319,18 @@ The resulting interface $\I \oplus \J$ contains the effects of both $\I$ and
 $\J$, wrapped into either $\func{InL}$ or $\func{InR}$ constructors, defined to
 preserve the effects results sets.
 %
-%Notice that this usage of a tagged union allows for composing the
-%same interface twice, so a component can use two components which exhibit the
-%same interface.
+% Notice that this usage of a tagged union allows for composing the same
+% interface twice, so a component can use two components which exhibit the same
+% interface.
 
 \begin{example}[VGA and DRAM Composition]
-We consider $\I_{\mathrm{DRAM}} \oplus \I_{\mathrm{VGA}}$. Then,
-$\func{InL}(\func{Read}_{\mathrm{DRAM}}(l)) \in \Interface{(\I_{\mathrm{DRAM}}
-\oplus \I_{\mathrm{VGA}})}{\mathpzc{Val}}$ is an effect that describes a
-read access targeting the DRAM controller, whereas
-$\func{InR}(\func{Write}_{\mathrm{VGA}}(l, c)) \in \Interface{(\I_{\mathrm{DRAM}}
-\oplus \I_{\mathrm{VGA}})}{\{()\}}$ is an effect that describes a
-write access targeting the VGA controller.
+  We consider $\I_{\mathrm{DRAM}} \oplus \I_{\mathrm{VGA}}$. Then,
+  $\func{InL}(\func{Read}_{\mathrm{DRAM}}(l)) \in \Interface{(\I_{\mathrm{DRAM}}
+    \oplus \I_{\mathrm{VGA}})}{\mathpzc{Val}}$ is an effect that describes a
+  read access targeting the DRAM controller, whereas
+  $\func{InR}(\func{Write}_{\mathrm{VGA}}(l, c)) \in
+  \Interface{(\I_{\mathrm{DRAM}} \oplus \I_{\mathrm{VGA}})}{\{()\}}$ is an
+  effect that describes a write access targeting the VGA controller.
 \end{example}
 
 Using $\oplus$, we can compose several interfaces together.
@@ -328,10 +340,10 @@ We then need another composition operator, this time for operational semantics.
 We compose operational semantics together to construct a new operational
 semantics for the composed interface.
 
-\begin{definition}[Operational Semantics Composition] \label{def:freespec:semantics-composition}
-  Let $\I$ and $\J$ be two interfaces,
-  $\sigma_i \in \Sigma_{\I}$ and $\sigma_j \in \Sigma_{\J}$ be two
-  operational semantics dedicated to these interfaces.
+\begin{definition}[Operational Semantics
+  Composition] \label{def:freespec:semantics-composition} Let $\I$ and $\J$ be
+  two interfaces, $\sigma_i \in \Sigma_{\I}$ and $\sigma_j \in \Sigma_{\J}$ be
+  two operational semantics dedicated to these interfaces.
   %
   In this article, we use the $\lambda$-calculus abstraction notation for
   functions.
@@ -340,16 +352,16 @@ semantics for the composed interface.
   \[ \sigma_i \otimes \sigma_j \triangleq \lambda e. \left \{
       \begin{array}{lcl}
         (x, \sigma_i' \otimes \sigma_j) & \text{when} & e =
-                                                         \func{InL}(e_i)
-                                                         \text{ and }
-                                                         \sigma_i(e_i)
-                                                         = (x,
-                                                         \sigma_i') \\
+                                                        \func{InL}(e_i)
+                                                        \text{ and }
+                                                        \sigma_i(e_i)
+                                                        = (x,
+                                                        \sigma_i') \\
         (x, \sigma_i \otimes \sigma_j') & \text{when} & e =
-                                                         \func{InR}(e_j)
-                                                         \text{ and }
-                                                         \sigma_j(e_j)
-                                                         = (x, \sigma_j')
+                                                        \func{InR}(e_j)
+                                                        \text{ and }
+                                                        \sigma_j(e_j)
+                                                        = (x, \sigma_j')
       \end{array}
     \right.
   \]
@@ -358,14 +370,14 @@ semantics for the composed interface.
 The definition of $\otimes$ has an important impact over what we can specify in
 FreeSpec.
 %
-%When $\sigma_i \otimes \sigma_j$ handles an effect of $\I$, only $\sigma_i$
-%``changes.''
+% When $\sigma_i \otimes \sigma_j$ handles an effect of $\I$, only $\sigma_i$
+% ``changes.''
 %
 Handling an effect of $\I$ (respectively $\J$) does not interfere with
 $\sigma_j$ (respectively $\sigma_i$).
 %
 As a consequence, \emph{we cannot specify as-is a graph of components which
-contains a cycle or a diamond}.
+  contains a cycle or a diamond}.
 %
 This is the main limitation of FreeSpec, but its incidence is abated because
 computing platforms are often designed as a hierarchical succession of layers.
@@ -374,8 +386,8 @@ computing platforms are often designed as a hierarchical succession of layers.
 % -----------------------------------------------------------------------------
 
 Modelling programs with side effects in purely functional languages such as {\sc
-Gallina} (the Coq specification language) or Haskell is usually achieved thanks
-to monads\,\cite{hoareetal2001monad}.
+  Gallina} (the Coq specification language) or Haskell is usually achieved
+thanks to monads\,\cite{hoareetal2001monad}.
 %
 FreeSpec leverages a variant of the Free monad called the Program
 monad\,\cite{operational} to model programs with effects. Operational semantics
@@ -399,13 +411,13 @@ to a set $\mathcal{A}$.
   \end{itemize}
 \end{definition}
 %
-These constructors allow for the construction of values which
-act similarly to abstract syntax trees to model programs with effects.
+These constructors allow for the construction of values which act similarly to
+abstract syntax trees to model programs with effects.
 %
-On the one hand, $\func{Pure}$ and $\func{Request}$ are comparable to the
-leaves of a syntax tree and model atomic computations; $\func{Pure}$ models
-local computations, whereas $\func{Request}$ models deferring a computational
-request to a handler and waiting for its result.
+On the one hand, $\func{Pure}$ and $\func{Request}$ are comparable to the leaves
+of a syntax tree and model atomic computations; $\func{Pure}$ models local
+computations, whereas $\func{Request}$ models deferring a computational request
+to a handler and waiting for its result.
 %
 On the other hand, $\func{Bind}$ (usually written thanks to the infix operator
 $\bind$) models the control flow of a program with effects, like the abstract
@@ -414,13 +426,15 @@ syntax tree nodes would.
 It defines how the result of one computation determines the following ones.
 
 \begin{example}[Copy]
-  We define $\func{copy} : \mathpzc{Loc} \rightarrow \mathpzc{Loc} \rightarrow
+  We define
+  $\func{copy} : \mathpzc{Loc} \rightarrow \mathpzc{Loc} \rightarrow
   P_{\I_{\mathrm{DRAM}}}(\{()\})$ such that $\func{copy}(l, l')$ models a
   program with effects that returns no result, but copies the value $v$ stored
   at the memory location $l$ inside the memory location $l'$.
   %
-  \[ \func{copy}(l, l') \triangleq \func{Request}(\func{Read}_{\mathrm{DRAM}}(l))
-    \bind \lambda v. \func{Request}(\func{Write}_{\mathrm{DRAM}}(l', v))
+  \[ \func{copy}(l, l') \triangleq
+    \func{Request}(\func{Read}_{\mathrm{DRAM}}(l)) \bind \lambda
+    v. \func{Request}(\func{Write}_{\mathrm{DRAM}}(l', v))
   \]
 \end{example}
 
@@ -428,12 +442,14 @@ Given $l \in \mathpzc{Loc}$ and $l' \in \mathpzc{Loc}$, $\func{copy}(l, l')$
 symbolically models a program with effects.
 %
 To assign an interpretation of this program, it must be completed with an
-operational semantics which realizes the interface $\mathcal{I}_{\mathrm{DRAM}}$.
+operational semantics which realizes the interface
+$\mathcal{I}_{\mathrm{DRAM}}$.
 
-\begin{definition}[Program With Effects Realization] \label{def:freespec:realisation}
-  Let $\I$ be an interface, $\sigma \in \Sigma_{\I}$ an operational
-  semantics for this interface and $\rho \in P_{\I}(\mathcal{A})$ a program with
-  effects which belong to this interface.
+\begin{definition}[Program With Effects
+  Realization] \label{def:freespec:realisation} Let $\I$ be an interface,
+  $\sigma \in \Sigma_{\I}$ an operational semantics for this interface and
+  $\rho \in P_{\I}(\mathcal{A})$ a program with effects which belong to this
+  interface.
   %
   $\sigma[\rho] \in \mathcal{A} \times \Sigma_{\I}$ denotes the realization of
   this program by $\sigma$, defined as:
@@ -455,8 +471,7 @@ operational semantics which realizes the interface $\mathcal{I}_{\mathrm{DRAM}}$
 With the interfaces, their operational semantics, the $\oplus$ and $\otimes$
 operators to compose them and the Program monad to model programs with effects
 which belong to these interfaces, we now have all we need to model a given
-component which exposes an interface $\I$ and uses another interface
-$\J$.
+component which exposes an interface $\I$ and uses another interface $\J$.
 %
 We proceed with the following steps: modelling the component in terms of
 programs with effects, then deriving one operational semantics for $\I$ from
@@ -477,39 +492,39 @@ effects of $\J$.
 These programs must compute the effect result and the new state of the
 component.
 
-\begin{definition}[Component] \label{def:freespec:component-model}
-  Let $\I$ be the interface exhibited by a component and $\J$ the
-  interface it uses.
+\begin{definition}[Component] \label{def:freespec:component-model} Let $\I$ be
+  the interface exhibited by a component and $\J$ the interface it uses.
   %
   Let $\mathcal{S}$ be the set of its states.
   %
   The component $C$, defined in terms of programs with effects of $\J$, is of
-    the form \[ \forall \mathcal{A}, \Interface{\I}{\mathcal{A}} \rightarrow
-    \mathcal{S} \rightarrow P_{\J}(\mathcal{A} \times \mathcal{S}) \]
+  the form
+  \[ \forall \mathcal{A}, \Interface{\I}{\mathcal{A}} \rightarrow \mathcal{S}
+    \rightarrow P_{\J}(\mathcal{A} \times \mathcal{S}) \]
 \end{definition}
 
 Hence, $C$ specifies how the component handles computational requests, both in
 terms of computation results and state changes.
 
-\begin{example}[Minimal MCH Model] \label{ex:mch-specs}
-  Let $C_{\mathrm{MCH}}$ be the MCH defined in terms of programs with effects of
+\begin{example}[Minimal MCH Model] \label{ex:mch-specs} Let $C_{\mathrm{MCH}}$
+  be the MCH defined in terms of programs with effects of
   $\I_{\mathrm{DRAM}} \oplus \I_{\mathrm{VGA}}$, then $C_{\mathrm{MCH}}$ is of
   the form
   \[
     \forall \mathcal{A}, \Interface{\I_{\mathrm{MCH}}}{\mathcal{A}} \rightarrow
-    \mathcal{S}_{\mathrm{MCH}} \rightarrow P_{\I_{\mathrm{DRAM}} \oplus \I_{\mathrm{VGA}}}(\mathcal{A}
-    \times \mathcal{S}_{\mathrm{MCH}})
-  \] where $\mathcal{S}_{\mathrm{MCH}} \triangleq \{ \val{on}, \val{off} \}$ means
-  the SMRAM protection is either activated ($\val{on}$) or deactivated
+    \mathcal{S}_{\mathrm{MCH}} \rightarrow P_{\I_{\mathrm{DRAM}} \oplus
+      \I_{\mathrm{VGA}}}(\mathcal{A} \times \mathcal{S}_{\mathrm{MCH}})
+  \] where $\mathcal{S}_{\mathrm{MCH}} \triangleq \{ \val{on}, \val{off} \}$
+  means the SMRAM protection is either activated ($\val{on}$) or deactivated
   ($\val{off}$).
 
-  One the one hand, the \func{Lock} effect will activate the isolation
-  mechanism of the MCH, setting its state to $\val{on}$.
+  One the one hand, the \func{Lock} effect will activate the isolation mechanism
+  of the MCH, setting its state to $\val{on}$.
   %
-  On the other hand, the effects constructed with $\func{Read}_{\mathrm{MCH}}$ and $\func{Write}_{\mathrm{MCH}}$
-  will use the current state of the MCH, the privileged parameter of the
-  effect and the memory location to lookup to determine if it uses the DRAM
-  or the VGA controller.
+  On the other hand, the effects constructed with $\func{Read}_{\mathrm{MCH}}$
+  and $\func{Write}_{\mathrm{MCH}}$ will use the current state of the MCH, the
+  privileged parameter of the effect and the memory location to lookup to
+  determine if it uses the DRAM or the VGA controller.
   %
   By default, it fetches the memory of the DRAM controller, except if the
   isolation mechanism is activated, the access is unprivileged and the targeted
@@ -523,39 +538,40 @@ to compute the result of a given effect.
 %
 To do that, we need to derive an operational semantics for~$\I$ from $C$.
 
-\begin{definition}[Deriving Operational Semantics] \label{def:freespec:derivation}
-  Let $C$ be a component which exhibits an interface $\I$, uses an
-  interface~$\J$ and whose states belong to $\mathcal{S}$.
+\begin{definition}[Deriving Operational
+  Semantics] \label{def:freespec:derivation} Let $C$ be a component which
+  exhibits an interface $\I$, uses an interface~$\J$ and whose states belong to
+  $\mathcal{S}$.
   %
-  Let $s \in \mathcal{S}$ be the current state of the component and $\sigma_j
-  \in \Sigma_{\J}$ be an operational semantics for~$\J$.
+  Let $s \in \mathcal{S}$ be the current state of the component and
+  $\sigma_j \in \Sigma_{\J}$ be an operational semantics for~$\J$.
   %
-  We can derive an operational semantics for $\mathcal{I}$, denoted by $\langle
-  C, s, \sigma_j \rangle$, defined as
+  We can derive an operational semantics for $\mathcal{I}$, denoted by
+  $\langle C, s, \sigma_j \rangle$, defined as
   \[ \langle C, s, \sigma_j \rangle \triangleq \lambda i. (x, \langle C, s',
     \sigma_j' \rangle) \text{ where } ((x, s'), \sigma_j') = \sigma_j[C (i, s)]
   \]
 \end{definition}
 
-%On the one hand, components are defined in terms of programs with
-%effects, meaning each component can be modelled independently from the rest of
-%the system.
+% On the one hand, components are defined in terms of programs with effects,
+% meaning each component can be modelled independently from the rest of the
+% system.
 %%
-%On the other hand, FreeSpec introduces the mechanism of derivation to aggregate
-%these models together.
+% On the other hand, FreeSpec introduces the mechanism of derivation to
+% aggregate these models together.
 %
-The resulting operational semantics models a system made of
-interconnected components, and can then be used to derive another
-component model into an operational semantics which models a larger system.
+The resulting operational semantics models a system made of interconnected
+components, and can then be used to derive another component model into an
+operational semantics which models a larger system.
 %
 For instance, we can proceed with the following steps to comprehensively model
 our running example: (i) defining the operational semantics for the DRAM and VGA
 controllers; (ii) using these operational semantics to derive an operational
 semantics from $C_{\mathrm{MCH}}$.
 %
-The resulting operational semantics can take part in the derivation of a
-cache defined in terms of programs with effects of $\I_{\mathrm{MCH}}$, to
-model a larger part of the system pictured in the
+The resulting operational semantics can take part in the derivation of a cache
+defined in terms of programs with effects of $\I_{\mathrm{MCH}}$, to model a
+larger part of the system pictured in the
 Figure~\ref{fig:freespec:computing-platform}.
 
 \section{Modular Verification of Programs with Effects}
@@ -573,9 +589,8 @@ To achieve that, we introduce the so-called abstract specifications, which
 allows for specifying, for each interface, expected properties for the effect
 results, independently of any underlying handler.
 %
-Abstract specifications can be used to emphasize the responsibility
-of each component of a system regarding the enforcement of a given security
-policy.
+Abstract specifications can be used to emphasize the responsibility of each
+component of a system regarding the enforcement of a given security policy.
 %
 Verifying a component is done against abstract specifications of the interfaces
 it directly uses, even if it relies on a security property enforced by a deeper
@@ -591,8 +606,8 @@ correctly isolates the SMRAM.
 %
 In order to do that, we define an abstract specification which states that
 privileged reads targeting the SMRAM returns the value which has previously been
-stored by a privileged write. It models the SMRAM isolation: unprivileged writes cannot
-tamper with the content of the SMRAM, as read by a privileged CPU.
+stored by a privileged write. It models the SMRAM isolation: unprivileged writes
+cannot tamper with the content of the SMRAM, as read by a privileged CPU.
 
 \subsection{Definition}
 % -----------------------------------------------------------------------------
@@ -600,33 +615,35 @@ tamper with the content of the SMRAM, as read by a privileged CPU.
 In FreeSpec, an abstract specification dedicated to an interface $\I$ is
 twofold.
 %
-It defines a precondition over the effects that a caller must satisfy;
-and, in return, it specifies a postcondition over the effects results that an
+It defines a precondition over the effects that a caller must satisfy; and, in
+return, it specifies a postcondition over the effects results that an
 operational semantics must enforce.
 %
-Since both the precondition and the postcondition may vary in
-time, we parameterize an abstraction specification with an abstract state and a
-step function to update this state after each effect realization.
+Since both the precondition and the postcondition may vary in time, we
+parameterize an abstraction specification with an abstract state and a step
+function to update this state after each effect realization.
 
 \begin{definition}[Abstract Specification] \label{def:freespec:abstract-specs}
   We write $A$ for an abstract specification dedicated to an interface $\I$,
-  defined as a tuple $\langle \Omega, \func{step}, \func{pre}, \func{post}
-  \rangle$ where
+  defined as a tuple
+  $\langle \Omega, \func{step}, \func{pre}, \func{post} \rangle$ where
   \begin{itemize}
   \item $\Omega$ is a set of abstract states
-  \item $\func{step} : \forall \mathcal{A}, \Interface{\I}{\mathcal{A}}
-    \rightarrow \mathcal{A} \rightarrow \Omega \rightarrow \Omega$
-  is a transition function for the abstract state.
+  \item
+    $\func{step} : \forall \mathcal{A}, \Interface{\I}{\mathcal{A}} \rightarrow
+    \mathcal{A} \rightarrow \Omega \rightarrow \Omega$ is a transition function
+    for the abstract state.
   \item $\func{pre} \subseteq \I \times \Omega$ is the precondition over
-  effects, such that $(e, \omega) \in \func{pre}$ if and only if the effect $e$
-  satisfies the precondition parameterized with the abstract state $\omega$
-  (denoted by $\func{pre}(e, \omega)$).
-  \item $\func{post} \subseteq \bigcup_{\mathcal{A}}
-    (\Interface{\I}{\mathcal{A}} \times \mathcal{A} \times \Omega)$ is the
-    postcondition over effects results, such that $(e, x, \omega) \in
-    \func{post}$ if and only if the results $x$ computed for the effects $e$
-    satisfies the postcondition parameterized with the abstract state $\omega$
-    (denoted by $\func{post}(e, x, \omega)$).
+    effects, such that $(e, \omega) \in \func{pre}$ if and only if the effect
+    $e$ satisfies the precondition parameterized with the abstract state
+    $\omega$ (denoted by $\func{pre}(e, \omega)$).
+  \item
+    $\func{post} \subseteq \bigcup_{\mathcal{A}} (\Interface{\I}{\mathcal{A}}
+    \times \mathcal{A} \times \Omega)$ is the postcondition over effects
+    results, such that $(e, x, \omega) \in \func{post}$ if and only if the
+    results $x$ computed for the effects $e$ satisfies the postcondition
+    parameterized with the abstract state $\omega$ (denoted by
+    $\func{post}(e, x, \omega)$).
   \end{itemize}
 \end{definition}
 
@@ -640,58 +657,59 @@ An abstract specification is dedicated to one verification problem (in our
 context, one security property), and it is possible to define as many
 abstraction specifications as required.
 
-We write $\func{run}_{\func{step}} : \forall \mathcal{A}, \Sigma_{\I}
-\rightarrow P_{\I}(\mathcal{A}) \rightarrow \Omega \rightarrow (\mathcal{A}
-\times \Sigma_{\I} \times \Omega)$ for the function which, in addition to
-realize a program with effects, updates an abstract state after each effect.
+We write
+$\func{run}_{\func{step}} : \forall \mathcal{A}, \Sigma_{\I} \rightarrow
+P_{\I}(\mathcal{A}) \rightarrow \Omega \rightarrow (\mathcal{A} \times
+\Sigma_{\I} \times \Omega)$ for the function which, in addition to realize a
+program with effects, updates an abstract state after each effect.
 %
 Using $\func{run}_{\func{step}}$, we can determine both the precondition over
 effects and the postcondition over effects results while an operational
 semantics realizes a program with effects.
 
 \begin{example}[MCH Abstract Specification] \label{ex:mch-abs-specs} Let
-  $A_{\mathrm{MCH}}$ be the abstract specification such that $A_{\mathrm{MCH}} = \langle
-    \Omega_{\mathrm{MCH}}, \func{step}_{\mathrm{MCH}}, \func{pre}_{\mathrm{MCH}}, \func{post}_{\mathrm{MCH}}
-    \rangle$.
+  $A_{\mathrm{MCH}}$ be the abstract specification such that
+  $A_{\mathrm{MCH}} = \langle \Omega_{\mathrm{MCH}}, \func{step}_{\mathrm{MCH}},
+  \func{pre}_{\mathrm{MCH}}, \func{post}_{\mathrm{MCH}} \rangle$.
   %
   $A_{\mathrm{MCH}}$ models the following property: ``\emph{privileged reads
-  targeting the SMRAM return the value which has been previously stored
-  by a privileged write}’’:
+    targeting the SMRAM return the value which has been previously stored by a
+    privileged write}’’:
   \begin{itemize}
-  \item Let $\mathpzc{Smram} \subseteq
-    \mathpzc{Loc}$ be the set of memory locations which belong to the SMRAM.  We
-    define $\Omega_{\mathrm{MCH}} \triangleq \mathpzc{Smram} \rightarrow
-    \mathpzc{Val}$, such that $\omega \in \Omega_{\mathrm{MCH}}$ models a
-    view of the SMRAM as exposed by the MCH for privileged reads.
+  \item Let $\mathpzc{Smram} \subseteq \mathpzc{Loc}$ be the set of memory
+    locations which belong to the SMRAM.  We define
+    $\Omega_{\mathrm{MCH}} \triangleq \mathpzc{Smram} \rightarrow
+    \mathpzc{Val}$, such that $\omega \in \Omega_{\mathrm{MCH}}$ models a view
+    of the SMRAM as exposed by the MCH for privileged reads.
   \item We define $\func{step}_{\mathrm{MCH}}$ which updates the view of the MCH
-  (modelled as a function) after each privileged
-  write access targeting any SMRAM location $l$, that is
+    (modelled as a function) after each privileged write access targeting any
+    SMRAM location $l$, that is
     \[ \func{step}_{\mathrm{MCH}}(e, x, \omega) \triangleq \left\{
         \begin{array}{l}
           \lambda l'.  \text{ (if } l = l' \text{ then } v \text{ else } \omega(l')) \\
-            \qquad\ \ \text{ if } e = \func{Write}_{\mathrm{MCH}}(l, v, \val{smm})
-            \text{ and } l \in \mathpzc{Smram} \\
+          \qquad\ \ \text{ if } e = \func{Write}_{\mathrm{MCH}}(l, v, \val{smm})
+          \text{ and } l \in \mathpzc{Smram} \\
           \omega \qquad \text{ otherwise}
         \end{array}
       \right.
     \]
-  \item There is no precondition to the use of the MCH effects, so \[ \forall e
-  \in \I,\forall \omega \in \Omega_{\mathrm{MCH}}, \func{pre}_{\mathrm{MCH}}(e,
-  \omega) \]
+  \item There is no precondition to the use of the MCH effects, so
+    \[ \forall e \in \I,\forall \omega \in \Omega_{\mathrm{MCH}},
+      \func{pre}_{\mathrm{MCH}}(e, \omega) \]
   \item The postcondition enforces that the result $x$ of a privileged read
-  targeting the SMRAM ($\func{Read}(l, \val{smm})$) has to match the value
-  stored in $A_{\mathrm{MCH}}$ abstract state, i.e. the expected content for
-  this memory location $\omega(l)$.
-    \[ \func{post}_{\mathrm{MCH}}(e, x, \omega) \triangleq \forall l \in \mathpzc{Loc}, e
-      = \func{Read}_{\mathrm{MCH}}(l, \val{smm}) \wedge l \in \mathpzc{Smram}
-      \Rightarrow x = \omega(l)
+    targeting the SMRAM ($\func{Read}(l, \val{smm})$) has to match the value
+    stored in $A_{\mathrm{MCH}}$ abstract state, i.e. the expected content for
+    this memory location $\omega(l)$.
+    \[ \func{post}_{\mathrm{MCH}}(e, x, \omega) \triangleq \forall l \in
+      \mathpzc{Loc}, e = \func{Read}_{\mathrm{MCH}}(l, \val{smm}) \wedge l \in
+      \mathpzc{Smram} \Rightarrow x = \omega(l)
     \]
   \end{itemize}
 \end{example}
 
-%With an abstract specification $\langle \Omega, \func{step}, \func{pre},
-%\func{post} \rangle$, we can transparently update a given abstract state while
-%realizing programs.
+% With an abstract specification
+% $\langle \Omega, \func{step}, \func{pre}, \func{post} \rangle$, we can
+% transparently update a given abstract state while realizing programs.
 
 \subsection{Compliance and Correctness}
 % -----------------------------------------------------------------------------
@@ -703,27 +721,27 @@ operational semantics $\sigma_j$ for $\J$.
 This semantics $\sigma_i$ enforces the postcondition of an abstract
 specification $A_{\I}$ dedicated to $\I$ (compliance).
 %
-As $C$ is defined in terms of programs with effects of $\J$, the latter
-needs to make a licit usage of $\J$ with respect to an abstract
-specification $A_{\J}$ dedicated to $\J$ (correctness).
+As $C$ is defined in terms of programs with effects of $\J$, the latter needs to
+make a licit usage of $\J$ with respect to an abstract specification $A_{\J}$
+dedicated to $\J$ (correctness).
 
-First, $\sigma_i$ complies with $A_{\I}$ if, (1) given any effect which satisfies
-$A_{\I}$ precondition, $\sigma_i$ produces a result which satisfies its
-postcondition, and if (2) the new operational semantics $\sigma_i'$ also complies
-with $A_{\I}$.
+First, $\sigma_i$ complies with $A_{\I}$ if, (1) given any effect which
+satisfies $A_{\I}$ precondition, $\sigma_i$ produces a result which satisfies
+its postcondition, and if (2) the new operational semantics $\sigma_i'$ also
+complies with $A_{\I}$.
 %
 The precondition and the postcondition are parameterized by an abstract state,
 so is the compliance property.
 
-\begin{definition}[Operational Semantics Compliance] \label{def:freespec:compliance}
-  Let $A$ be an abstract specification for an interface $\I$, defined as
-  $\langle \Omega, \func{step}, \func{pre}, \func{post} \rangle$, $\omega \in
-  \Omega$, then $\sigma \in \Sigma_{\I}$ complies with $A$ in accordance with
-  $\omega$ (denoted by $\sigma \models A[\omega]$) iff. \[
-    \forall e \in \I,
-    \func{pre}(e, \omega) \Rightarrow \func{post}(e, x,
-    \omega) \wedge \sigma' \models A[\func{step}(e, x, \omega)]
-    \text{ where }(x, \sigma') = \sigma(e)
+\begin{definition}[Operational Semantics
+  Compliance] \label{def:freespec:compliance} Let $A$ be an abstract
+  specification for an interface $\I$, defined as
+  $\langle \Omega, \func{step}, \func{pre}, \func{post} \rangle$,
+  $\omega \in \Omega$, then $\sigma \in \Sigma_{\I}$ complies with $A$ in
+  accordance with $\omega$ (denoted by $\sigma \models A[\omega]$) iff.
+  \[ \forall e \in \I, \func{pre}(e, \omega) \Rightarrow \func{post}(e, x,
+    \omega) \wedge \sigma' \models A[\func{step}(e, x, \omega)] \text{ where
+    }(x, \sigma') = \sigma(e)
   \]
 \end{definition}
 
@@ -734,12 +752,13 @@ use effects which satisfy $A_{\J}$ precondition.
 As for the compliance property, correctness is parameterized with an abstract
 state.
 
-\begin{definition}[Program With Effects Correctness] \label{def:freespec:correctness}
-  Let $A$ be an abstract specification for an interface $\I$, defined as
-  $\langle \Omega, \func{step}, \func{pre}, \func{post} \rangle$, $\omega \in
-  \Omega$, and $\rho \in P_{\I}(\mathcal{A})$, then $\rho$ is correct
-  with respect to $A$ in accordance with $\omega$ (denoted by $A[\omega]
-  \modelssym \rho$), iff.
+\begin{definition}[Program With Effects
+  Correctness] \label{def:freespec:correctness} Let $A$ be an abstract
+  specification for an interface $\I$, defined as
+  $\langle \Omega, \func{step}, \func{pre}, \func{post} \rangle$,
+  $\omega \in \Omega$, and $\rho \in P_{\I}(\mathcal{A})$, then $\rho$ is
+  correct with respect to $A$ in accordance with $\omega$ (denoted by
+  $A[\omega] \modelssym \rho$), iff.
   \[
     A[\omega] \mathrel{\reflectbox{$\models$}} \rho \triangleq \left\{
       \begin{array}{lcl}
@@ -754,24 +773,22 @@ state.
       \end{array}
     \right.
   \]
-  %\guillaumerk{franchement, le symbole \protect\reflectbox{$\models$} est
-  %vraiment trop proche de $\models$. Je comprends l'idée mais c'est source de
-  %confusion. Je choisirai un symbol bien discinct.}
+  % \guillaumerk{franchement, le symbole \protect\reflectbox{$\models$} est
+  % vraiment trop proche de $\models$. Je comprends l'idée mais c'est source de
+  % confusion. Je choisirai un symbol bien discinct.}
 \end{definition}
 
-Every local computation ($\func{Pure}$) is correct with respect to
-$A$ in accordance with~$\omega$.
+Every local computation ($\func{Pure}$) is correct with respect to $A$ in
+accordance with~$\omega$.
 %
-A computation which uses an effect $e \in \I$ ($\func{Request}$) is
-correct with respect to $A$ in accordance with~$\omega$ if and
-only if $e$ satisfies the precondition of $A$ for the abstract
-state $\omega$.
+A computation which uses an effect $e \in \I$ ($\func{Request}$) is correct with
+respect to $A$ in accordance with~$\omega$ if and only if $e$ satisfies the
+precondition of $A$ for the abstract state $\omega$.
 %
 Finally, the chaining of two programs with effects ($\func{Bind}$) is correct
-with $A$ in accordance with~$\omega$ if the first program is
-correct with $A$ in accordance with~$\omega$, and the second
-program is correct in accordance with the abstract state reached after the
-realization of the first program.
+with $A$ in accordance with~$\omega$ if the first program is correct with $A$ in
+accordance with~$\omega$, and the second program is correct in accordance with
+the abstract state reached after the realization of the first program.
 
 Properties, inferred from an abstract specification, of a correct program with
 effects only hold if it is realized by a compliant operational semantics.
@@ -786,8 +803,8 @@ compliance.
   that is
   \[
     \sigma \models A[\omega] \wedge A[\omega] \modelssym \rho \Rightarrow
-    \sigma' \models A[\omega'] \text{ where
-    }\func{run}_{\func{step}}(\sigma, \rho, \omega) = (x, \sigma', \omega')
+    \sigma' \models A[\omega'] \text{ where }\func{run}_{\func{step}}(\sigma,
+    \rho, \omega) = (x, \sigma', \omega')
   \]
 \end{theorem}
 
@@ -801,29 +818,27 @@ composition of operational semantics.
 \begin{theorem}[Congruent Composition]
   Let $\I$ (respectively $\J$) be an interface.
   %
-  Let $A_{\I}$
-  (respectively $A_{\J}$) be an abstract specification and $\sigma_i
-  \in \Sigma_{\I}$ (respectively $\sigma_j \in \Sigma_{\J}$) be an
+  Let $A_{\I}$ (respectively $A_{\J}$) be an abstract specification and
+  $\sigma_i \in \Sigma_{\I}$ (respectively $\sigma_j \in \Sigma_{\J}$) be an
   operational semantics for this interface.
   \[ \sigma_i \models A_{\I}[\omega_i] \wedge \sigma_j \models A_{\J}[\omega_j]
-    \Rightarrow \sigma_i \otimes \sigma_j \models
-    (A_{\I} \odot A_{\J})[\omega_i, \omega_j]
+    \Rightarrow \sigma_i \otimes \sigma_j \models (A_{\I} \odot
+    A_{\J})[\omega_i, \omega_j]
   \]
 \end{theorem}
 
-%\begin{theorem}[Congruent Lifting]
-%  Let $\I$ (respectively $\J$) be an interface. Let $A_I$
-%  (respectively $A_J$) be an abstract specification and
-%  $\rho_i \in P_{\I}(\mathcal{A})$ (respectively
-%  $\rho_j \in P_{\J}(\mathcal{A})$) be an effectful computation which
-%  uses this interface.
-%  \[ A_I[\omega_i] \modelssym \rho_i \Rightarrow A_I \odot A_J [\omega_i,
-%    \omega_j] \modelssym \func{liftl}(\rho_i)
-%  \]
-%  \[ A_J[\omega_j] \modelssym \rho_j \Rightarrow A_I \odot A_J [\omega_i,
-%    \omega_j] \modelssym \func{liftr}(\rho_j)
-%  \]
-%\end{theorem}
+% \begin{theorem}[Congruent Lifting]
+%   Let $\I$ (respectively $\J$) be an interface. Let $A_I$ (respectively $A_J$)
+%   be an abstract specification and $\rho_i \in P_{\I}(\mathcal{A})$
+%   (respectively $\rho_j \in P_{\J}(\mathcal{A})$) be an effectful computation
+%   which uses this interface.
+%   \[ A_I[\omega_i] \modelssym \rho_i \Rightarrow A_I \odot A_J [\omega_i,
+%     \omega_j] \modelssym \func{liftl}(\rho_i)
+%   \]
+%   \[ A_J[\omega_j] \modelssym \rho_j \Rightarrow A_I \odot A_J [\omega_i,
+%     \omega_j] \modelssym \func{liftr}(\rho_j)
+%   \]
+% \end{theorem}
 
 With the Compliance Preservation, we know that as long as we follow the abstract
 specification precondition related to the effects we use, compliant operational
@@ -840,14 +855,16 @@ operational semantics, but little has been said about how to prove the
 compliance property to begin with.
 %
 In a typical FreeSpec use case, operational semantics are not built as-is, but
-rather derived from a component model (Definition~\ref{def:freespec:derivation}).
+rather derived from a component model
+(Definition~\ref{def:freespec:derivation}).
 %
 How to prove the resulting operational semantics complies with an abstract
 specification depends on how the component is connected to the rest of the
 system.
 %
 We have already discussed the consequences of the operational semantics
-composition operator $\otimes$ (Definition~\ref{def:freespec:semantics-composition}).
+composition operator $\otimes$
+(Definition~\ref{def:freespec:semantics-composition}).
 %
 Notably, a graph of components which contains a cycle, a diamond or a forward
 edge cannot be easily modelled and verified in FreeSpec.
@@ -865,29 +882,28 @@ possible states $\mathcal{S}$, which exhibits $\I$ and uses $\J$.
 Let $A_{\I}$ be an abstract specification dedicated to $\I$.
 %
 Deriving an operational semantics from $C$ which complies with $A_{\I}$ in
-accordance with $\omega_i \in \Omega_I$ requires to show the existence of $s \in
-\mathcal{S} \text{ and }\sigma_j \in \Sigma_{\J}$ such that \[ \langle
-C, s, \sigma_j \rangle \models A_{\I}[\omega_i]. \]
+accordance with $\omega_i \in \Omega_I$ requires to show the existence of
+$s \in \mathcal{S} \text{ and }\sigma_j \in \Sigma_{\J}$ such that
+\[ \langle C, s, \sigma_j \rangle \models A_{\I}[\omega_i]. \]
 %
 However, proving this statement would not be very satisfying, as it ties our
 verification results to one specific operational semantics $\sigma_j$, and by
 extension one specific component.
 %
-As a consequence, we define an abstract specification $A_{\J}$ to
-generalize our statement and abstracting away $\sigma_j$.
+As a consequence, we define an abstract specification $A_{\J}$ to generalize our
+statement and abstracting away $\sigma_j$.
 %
-We now need to prove it exists $\omega_j \in \Omega_{\J}$ such that
-given an operational semantics $\sigma_j$ which complies with $A_{\J}$
-in accordance with $\omega_j$, the operational semantics derived from $C$, $s$
-and $\sigma_j$ complies with $A_{\I}$ in accordance with $\omega_i$, that is \[
-  \forall \sigma_j \in \Sigma_{\J}\text{, }\sigma_j \models
-  A_{\J}[\omega_j] \Rightarrow \langle C, s, \sigma_j \rangle \models
-  A_{\I}[\omega_i]
+We now need to prove it exists $\omega_j \in \Omega_{\J}$ such that given an
+operational semantics $\sigma_j$ which complies with $A_{\J}$ in accordance with
+$\omega_j$, the operational semantics derived from $C$, $s$ and $\sigma_j$
+complies with $A_{\I}$ in accordance with $\omega_i$, that is
+\[ \forall \sigma_j \in \Sigma_{\J}\text{, }\sigma_j \models A_{\J}[\omega_j]
+  \Rightarrow \langle C, s, \sigma_j \rangle \models A_{\I}[\omega_i]
 \]
 
 The combinatorial explosion of cases introduced by $\omega_i$, $s$ and
-$\omega_j$, modified as the component handles effects, makes inductive
-reasoning challenging.
+$\omega_j$, modified as the component handles effects, makes inductive reasoning
+challenging.
 %
 The FreeSpec framework provides a useful theorem to address these challenges,
 which leverages a so-called predicate of synchronization.
@@ -895,16 +911,16 @@ which leverages a so-called predicate of synchronization.
 The latter is defined by the user on a case-by-case basis, to act as an
 invariant for the induction, and a sufficient condition to enforce compliance.
 
-\begin{theorem}[Derivation Compliance] \label{theorem:der-compliance}
-  Let $\func{sync}$, a relation between abstract states of $\Omega_{\I}$ and
-  $\Omega_\J$, states of $\mathcal{S}$, be a predicate of
-  synchronization.
+\begin{theorem}[Derivation Compliance] \label{theorem:der-compliance} Let
+  $\func{sync}$, a relation between abstract states of $\Omega_{\I}$ and
+  $\Omega_\J$, states of $\mathcal{S}$, be a predicate of synchronization.
   %
-  Then, it is expected that, $\forall \omega_i \in \Omega_{\I}$, $s \in
-  \mathcal{S}$ and $\omega_j \in \Omega_{\J}$ such that
-  $\func{sync}(\omega_i, s, \omega_j)$ holds, then $\forall \sigma_j \in
-  \Sigma_{\J}$ such that $\sigma_j \models A_{\J}[\omega_j]$
-  and $\forall e \in \I$ such that $\func{pre}_{\I}(e, \omega_i)$,
+  Then, it is expected that, $\forall \omega_i \in \Omega_{\I}$,
+  $s \in \mathcal{S}$ and $\omega_j \in \Omega_{\J}$ such that
+  $\func{sync}(\omega_i, s, \omega_j)$ holds, then
+  $\forall \sigma_j \in \Sigma_{\J}$ such that
+  $\sigma_j \models A_{\J}[\omega_j]$ and $\forall e \in \I$ such that
+  $\func{pre}_{\I}(e, \omega_i)$,
   \begin{enumerate}
   \item $C$ preserves the synchronization of states, that is
     $\func{sync}(\omega_i', s', \omega_j')$
@@ -912,31 +928,30 @@ invariant for the induction, and a sufficient condition to enforce compliance.
     respect to $A_{\J}$ in accordance with $\omega_j$, that is
     $A_{\J}[\omega_j] \modelssym C(e, s)$
   \item $C$ computes a result for $e$ which satisfies $A_{\I}$ postcondition,
-     that is $\func{post}_{\I}(e, x, \omega_i)$
+    that is $\func{post}_{\I}(e, x, \omega_i)$
   \end{enumerate}
   where
   $((x, s'), \sigma_j', \omega_j') = \func{run}_{\func{step}_{\J}}(\sigma_j,
-  C(e, s), \omega_j)$ and
-  $\omega_i' = \func{step}_{\I}(e, x, \omega_i)$.
+  C(e, s), \omega_j)$ and $\omega_i' = \func{step}_{\I}(e, x, \omega_i)$.
   %
   Should these three properties be verified, then we show that
-  \[ \func{sync}(\omega_i, s, \omega_j) \wedge \sigma_j \models
-    A_{\J}[\omega_j] \Rightarrow \langle C, s, \sigma_j \rangle \models
-    A_{\I}[\omega_i].
+  \[ \func{sync}(\omega_i, s, \omega_j) \wedge \sigma_j \models A_{\J}[\omega_j]
+    \Rightarrow \langle C, s, \sigma_j \rangle \models A_{\I}[\omega_i].
   \]
 \end{theorem}
 
 \begin{example}[MCH Compliance]
-  We want to prove we can derive an operational semantics from $C_{\mathrm{MCH}}$
-  (Example~\ref{ex:mch-specs}) which complies with $A_{\mathrm{MCH}}$
-  (Example~\ref{ex:mch-abs-specs}).
+  We want to prove we can derive an operational semantics from
+  $C_{\mathrm{MCH}}$ (Example~\ref{ex:mch-specs}) which complies with
+  $A_{\mathrm{MCH}}$ (Example~\ref{ex:mch-abs-specs}).
 
   We define
-  $A_{\mathrm{DRAM}} \triangleq \langle \Omega_{\mathrm{DRAM}}, \func{step}_{\mathrm{DRAM}},
-  \func{pre}_{\mathrm{DRAM}}, \func{post}_{\mathrm{DRAM}} \rangle$ an abstract specification
-  dedicated to $\I_{\mathrm{DRAM}}$ to express the following property: ``\emph{a
-  read access to a memory location which belongs to the SMRAM return the value
-  which have been previously written at this memory location}.'' In particular,
+  $A_{\mathrm{DRAM}} \triangleq \langle \Omega_{\mathrm{DRAM}},
+  \func{step}_{\mathrm{DRAM}}, \func{pre}_{\mathrm{DRAM}},
+  \func{post}_{\mathrm{DRAM}} \rangle$ an abstract specification dedicated to
+  $\I_{\mathrm{DRAM}}$ to express the following property: ``\emph{a read access
+    to a memory location which belongs to the SMRAM return the value which have
+    been previously written at this memory location}.'' In particular,
   $\Omega_{\mathrm{DRAM}} = \Omega_{\mathrm{MCH}}$, i.e. they are two views of
   the SMRAM, as exposed by the DRAM controller or by the MCH.
   %
@@ -946,20 +961,22 @@ invariant for the induction, and a sufficient condition to enforce compliance.
   complies with it).
   %
   Therefore, the abstract specifications dedicated to the interface used by
-  $C_{\mathrm{MCH}}$, that is $\I_{\mathrm{DRAM}} \oplus \I_{\mathrm{VGA}}$, is $A_{\mathrm{DRAM}} \odot \top$ whose
-  abstract state is $\Omega_{\mathrm{DRAM}}$.
+  $C_{\mathrm{MCH}}$, that is $\I_{\mathrm{DRAM}} \oplus \I_{\mathrm{VGA}}$, is
+  $A_{\mathrm{DRAM}} \odot \top$ whose abstract state is
+  $\Omega_{\mathrm{DRAM}}$.
 
-  We define the predicate of synchronization $\func{sync}_{\mathrm{MCH}}$ such that
+  We define the predicate of synchronization $\func{sync}_{\mathrm{MCH}}$ such
+  that
   \[ \func{sync}_{\mathrm{MCH}}(\omega_i, s, \omega_j) \triangleq s = \val{on}
     \wedge \forall l \in \mathpzc{Smram}, \omega_i(l) = \omega_j(l)
-  \] Hence, we start our reasoning from a situation where the SMRAM
-  isolation is already activated and the states of the two abstract
-  specifications are the same, meaning the two views of the SMRAM (as stored in
-  the DRAM, and as exposed by the MCH) coincide.
+  \] Hence, we start our reasoning from a situation where the SMRAM isolation is
+  already activated and the states of the two abstract specifications are the
+  same, meaning the two views of the SMRAM (as stored in the DRAM, and as
+  exposed by the MCH) coincide.
   %
   We prove $\func{sync}_{\mathrm{MCH}}$ satisfies the three premises of the
-  Theorem~\ref{theorem:der-compliance}. We conclude we can derive
-  an operational semantics from $C_{\mathrm{MCH}}$ which complies with $A_{\mathrm{MCH}}$.
+  Theorem~\ref{theorem:der-compliance}. We conclude we can derive an operational
+  semantics from $C_{\mathrm{MCH}}$ which complies with $A_{\mathrm{MCH}}$.
 \end{example}
 
 \paragraph{}
@@ -1005,11 +1022,11 @@ This property is not necessarily symmetric.
 
 \begin{definition}[Predicate of Non-Interference]
   Let $\I$ be an interface and
-  $A \triangleq \langle \Omega, \func{step}, \mathbb{P}, \mathbb{Q} \rangle$
-  be an abstract specification dedicated to $\I$. Let
+  $A \triangleq \langle \Omega, \func{step}, \mathbb{P}, \mathbb{Q} \rangle$ be
+  an abstract specification dedicated to $\I$. Let
   $\func{pnf} : \I \rightarrow \texttt{Prop}$ be a subset of
-  effects. $\func{pnf}$ is said to be a predicate of non-interference of
-  $A$ (denoted $A \| \func{pnf}$) if and only if \[
+  effects. $\func{pnf}$ is said to be a predicate of non-interference of $A$
+  (denoted $A \| \func{pnf}$) if and only if \[
     \begin{array}{l}
       \forall \mathcal{A}\text{, } \omega \in \Omega\text{, } i \in
       \Interface{\I}{\mathcal{A}}\text{, }x \in \mathcal{A}\text{, } \\ \qquad
@@ -1025,11 +1042,10 @@ theorem to help and guide the verification work of its users.
 
 \begin{theorem}[Non-Interference and Concurrency]
   Let $\sigma \in \Sigma_{\I}$ be an operational semantics dedicated to
-  $\mathcal{I}$. Let $\func{pnf} : \I \rightarrow \texttt{Prop}$ be a subset
-  of effects. Let $\sigma\!\!\downarrow\!\!\func{pnf}$ be the operational
-  semantics built upon $\sigma$ which executes arbitrary sequences of
-  effects satisfying $\func{pnf}$ between two effects.  We prove
-  that
+  $\mathcal{I}$. Let $\func{pnf} : \I \rightarrow \texttt{Prop}$ be a subset of
+  effects. Let $\sigma\!\!\downarrow\!\!\func{pnf}$ be the operational semantics
+  built upon $\sigma$ which executes arbitrary sequences of effects satisfying
+  $\func{pnf}$ between two effects.  We prove that
   \[ A \| \func{pnf} \wedge \sigma \models A[\omega] \Rightarrow
     \sigma\!\!\downarrow\!\!\func{pnf} \models A[\omega]
   \]
@@ -1061,7 +1077,7 @@ This example has been driven by a real mechanism commonly found inside x86-based
 computing platforms.
 %
 We now discuss how FreeSpec can be leveraged to model and verify larger systems.
-%and limitations we anticipate.
+% and limitations we anticipate.
 
 The typical workflow of FreeSpec can be summarized as follows: specifying the
 interfaces of a system; modelling the components of the system in terms of

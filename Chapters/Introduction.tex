@@ -272,19 +272,19 @@ Our decision to explore this research field was based on our experience with
 several architectural attacks which have affected x86-based computing platform
 x86 hardware architecture.
 %
-We have implemented our proofs of concepts in the Coq proof assistant.
+We have implemented our proofs of concepts in the \index{Coq} proof assistant.
 %
 Our choice is motivated by the following reasons:
 %
 \begin{itemize}
-\item {\sc Gallina}, the specification of Coq, is an expressive formal language,
+\item {\sc Gallina}, the specification of \index{Coq}, is an expressive formal language,
   that combines both a higher-order logic and à powerful dependent type system,
-  while {\sc Ltac}, the proof tactic language of Coq, enables powerful
+  while {\sc Ltac}, the proof tactic language of \index{Coq}, enables powerful
   automation features.
   %
   This suits well for specifying security properties to be enforced by HSE
   mechanisms, as they can take many forms.
-\item The extraction mechanism of Coq allows for transpiling formal
+\item The extraction mechanism of \index{Coq} allows for transpiling formal
   specifications written in {\sc Gallina} to OCaml, meaning we can write
   \emph{executable specifications}.
   %
@@ -319,9 +319,10 @@ In Chapter~\ref{chapter:speccert}, we present a generic formalism to specify and
 verify against a hardware model HSE mechanism whose purpose is to isolate
 trusted software components execution from the rest of the software stack.
 %
-We have implemented SpecCert, a framework for the Coq proof assistant based on
-this formalism. In addition, we have implemented {\sc Minx86}, a minimal x86
-model, and we have verified the HSE mechanism implemented by x86 BIOSes.
+We have implemented SpecCert, a framework for the \index{Coq} proof assistant
+based on this formalism. In addition, we have implemented {\sc Minx86}, a
+minimal x86 model, and we have verified the HSE mechanism implemented by x86
+BIOSes.
 %
 This work has been presented at the $21^{th}$ International Symposium on Formal
 Methods (FM2016)\,\cite{letan2016speccert}.
@@ -334,7 +335,7 @@ domain of component-based modelling, and the resulting approach can be used both
 for verifying the composition of hardware components and software components
 alike.
 %
-In addition, we have developed FreeSpec, a framework for the Coq proof
+In addition, we have developed FreeSpec, a framework for the \index{Coq} proof
 assistant.
 %
 FreeSpec provides the necessary definitions and theorems to specify components,
