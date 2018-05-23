@@ -338,6 +338,7 @@ definition.
 \end{definition}
 
 \begin{table}[h]
+  \centerline{%
   \begin{tabular}{clc}
     \hline
     \bf Notation  & \multicolumn{1}{c}{\bf Description} \\
@@ -363,6 +364,7 @@ definition.
     \\
     \hline
   \end{tabular}
+  }
   \caption{SpecCert CheatSheet}
 \end{table}
 
@@ -466,7 +468,7 @@ we left its value as a parameter of our model.
 
 %%%%% APPENDIX State %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{table}
-\begin{center}
+  \centerline{%
   \begin{tabular}{ll}
     \hline
     \bf{Notation} & \bf{Description} \\
@@ -487,9 +489,9 @@ we left its value as a parameter of our model.
     %$m[a \leftarrow b']$ & Map update \\
     \hline
   \end{tabular}
+  }
   \caption{List of notations}
   \label{tab:notation}
-\end{center}
 \end{table}
 
 To describe the hardware architecture state of \formatLTS{Minx86} Computing
@@ -691,7 +693,7 @@ distinguish hardware events denoted by $\texttt{Event}_{Hard}$ and software
 events denoted by $\texttt{Event}_{Soft}$.
 
 \begin{table}
-  \bigcentering
+  \centerline{%
   \begin{tabular}{lp{3cm}p{6cm}}
     \hline
     \textbf{Event} & \textbf{Paramters} & \textbf{Description} \\
@@ -719,6 +721,7 @@ events denoted by $\texttt{Event}_{Soft}$.
                                                           of the CPU is set to $pa$ \\
     \hline
   \end{tabular}
+  }
   \caption{List of software events}
   \label{tab:softev}
 \end{table}

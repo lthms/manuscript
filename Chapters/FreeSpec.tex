@@ -962,12 +962,92 @@ invariant for the induction, and a sufficient condition to enforce compliance.
   an operational semantics from $C_{\mathrm{MCH}}$ which complies with $A_{\mathrm{MCH}}$.
 \end{example}
 
+\paragraph{}
+%
 Another common composition pattern consists of a component which is used by more
 than one other component.
 %
 FreeSpec provides a theorem which allows for extending the result obtained with
 the Theorem~\ref{theorem:der-compliance}, in the specific case where concurrent
 accesses do not lead to any change of the abstract state.
+%
+In FreeSpec, two interfaces are assumed to be independent, which means
+the use of one does not interfere with the use of the other.
+%
+This key property allows a FreeSpec user to compose interfaces and operational
+semantics together and abstract them away with abstract specifications.
+%
+With the operational semantics composition
+(Definition\,\ref{def:freespec:semantics-composition}), we can specify a tree of
+components, where each node, from the root to the leaves, exhibits one interface
+and uses as many independent interfaces as it needs.
+%
+With the abstract specifications
+(Definition\,\ref{def:freespec:abstract-specs}), we can abstract away the upper
+and lower layers of the tree for each node.
+%
+This leaves one common pattern we have not covered yet: the concurrent use of
+one interface by several components.
+
+Dealing with concurrency in FreeSpec is a challenge in the general case.
+%
+If two components are using the same functionalities of an interface, there is a
+great chance they both have an influence on its abstraction.
+%
+As a consequence, this scenario implies verifying all the possible effects
+interlacing their concurrent uses may induce. It can quickly become unbearable.
+
+Nevertheless, if the use of one component does not interfere with the
+abstraction used by another, then from the point of view of the latter, the
+verification work is dramatically simplified.
+%
+This property is not necessarily symmetric.
+
+\begin{definition}[Predicate of Non-Interference]
+  Let $\I$ be an interface and
+  $A \triangleq \langle \Omega, \textbf{step}, \mathbb{P}, \mathbb{Q} \rangle$
+  be an abstract specification dedicated to $\I$. Let
+  $\func{pnf} : \I \rightarrow \texttt{Prop}$ be a subset of
+  effects. $\func{pnf}$ is said to be a predicate of non-interference of
+  $A$ (denoted $A \| \func{pnf}$) if and only if \[
+    \begin{array}{l}
+      \forall \mathcal{A}\text{, } \omega \in \Omega\text{, } i \in
+      \Interface{\I}{\mathcal{A}}\text{, }x \in \mathcal{A}\text{, } \\ \qquad
+      (\func{pnf}(i) \Rightarrow \mathbb{P}(i, \omega)) \wedge (\func{pnf}(i)
+      \wedge \mathbb{Q}(i, x, \omega) \Rightarrow \omega = \func{step}(i, x,
+      \omega))
+    \end{array}
+  \]
+\end{definition}
+
+In a similar manner to the predicate of synchronisation, FreeSpec provides a
+theorem to help and guide the verification work of its users.
+
+\begin{theorem}[Non-Interference and Concurrency]
+  Let $\sigma \in \Sigma_{\I}$ be an operational semantics dedicated to
+  $\mathcal{I}$. Let $\func{pnf} : \I \rightarrow \texttt{Prop}$ be a subset
+  of effects. Let $\sigma\!\!\downarrow\!\!\func{pnf}$ be the operational
+  semantics built upon $\sigma$ which executes arbitrary sequences of
+  effects satisfying $\func{pnf}$ between two effects.  We prove
+  that
+  \[ A \| \func{pnf} \wedge \sigma \models A[\omega] \Rightarrow
+    \sigma\!\!\downarrow\!\!\func{pnf} \models A[\omega]
+  \]
+\end{theorem}
+
+In other words, a second component which only uses the effects that
+satisfies $\textbf{pnf}$ can use the interface concurrently to a component that
+abstracts it away with $A$.
+
+\begin{example}[MCH and IOMMU]
+  As pictured in Figure\,\ref{fig:freespec:computing-platform}, the Memory controller
+  not only arbitrates the memory accesses of the CPU, but also to other hardware
+  components (mostly PCI and PCIe devices).
+  %
+  One possible predicate of non-interference for $A_{MCH}$ is to deny the IOMMU
+  the possibility to perform privileged write, so that only the main CPU could
+  do it.
+\end{example}
 
 \section{Conclusion}
 % =============================================================================
