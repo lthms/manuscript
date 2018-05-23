@@ -211,7 +211,7 @@ the subset of effects whose results belong to a set~$\mathcal{A}$.
   Let $\mathpzc{Loc}$ be the set of memory locations and $\mathpzc{Val}$ the set
   of values stored inside the memory region.
   %
-  We use the unit type \ac{unit} to model effects without results (similarly to
+  We use the unit value \ac{unit} to model effects without results (similarly to
   the \texttt{void} keyword in an imperative language).
   %
   We define $\I_{\mathrm{DRAM}}$ (respectively $\I_{\mathrm{VGA}}$) with two
@@ -222,12 +222,12 @@ the subset of effects whose results belong to a set~$\mathcal{A}$.
     \Interface{\I_{\mathrm{DRAM}}}{\mathpzc{Val}}$
   \item
     $\func{Write}_{\mathrm{DRAM}} : \mathpzc{Loc} \rightarrow \mathpzc{Val}
-    \rightarrow \Interface{\I_{\mathrm{DRAM}}}{\{()\}}$
+    \rightarrow \Interface{\I_{\mathrm{DRAM}}}{\{\ac{unit}\}}$
   \end{itemize}
 
   Then,
   $\I_{\mathrm{DRAM}} =
-  \Interface{\I_{\mathrm{DRAM}}}{\{()\}}\,\cup\,\Interface{\I_{\mathrm{DRAM}}}{\mathpzc{Val}}$,
+  \Interface{\I_{\mathrm{DRAM}}}{\{\ac{unit}\}}\,\cup\,\Interface{\I_{\mathrm{DRAM}}}{\mathpzc{Val}}$,
   and
   $\func{Read}_{\mathrm{DRAM}}(l) \in
   \Interface{\I_{\mathrm{DRAM}}}{\mathpzc{Val}}$ is an effect that describes a
@@ -254,8 +254,8 @@ the subset of effects whose results belong to a set~$\mathcal{A}$.
   \item
     $\func{Write}_{\mathrm{MCH}} : \mathpzc{Loc} \rightarrow \mathpzc{Val}
     \rightarrow \mathpzc{Priv} \rightarrow
-    \Interface{\I_{\mathrm{MCH}}}{\{()\}}$
-  \item $\func{Lock} : \Interface{\I_{\mathrm{MCH}}}{\{()\}}$
+    \Interface{\I_{\mathrm{MCH}}}{\{\ac{unit}\}}$
+  \item $\func{Lock} : \Interface{\I_{\mathrm{MCH}}}{\{\ac{unit}\}}$
   \end{itemize}
 \end{example}
 
@@ -329,7 +329,7 @@ preserve the effects results sets.
     \oplus \I_{\mathrm{VGA}})}{\mathpzc{Val}}$ is an effect that describes a
   read access targeting the DRAM controller, whereas
   $\func{InR}(\func{Write}_{\mathrm{VGA}}(l, c)) \in
-  \Interface{(\I_{\mathrm{DRAM}} \oplus \I_{\mathrm{VGA}})}{\{()\}}$ is an
+  \Interface{(\I_{\mathrm{DRAM}} \oplus \I_{\mathrm{VGA}})}{\{\ac{unit}\}}$ is an
   effect that describes a write access targeting the VGA controller.
 \end{example}
 
@@ -428,7 +428,7 @@ It defines how the result of one computation determines the following ones.
 \begin{example}[Copy]
   We define
   $\func{copy} : \mathpzc{Loc} \rightarrow \mathpzc{Loc} \rightarrow
-  P_{\I_{\mathrm{DRAM}}}(\{()\})$ such that $\func{copy}(l, l')$ models a
+  P_{\I_{\mathrm{DRAM}}}(\{\ac{unit}\})$ such that $\func{copy}(l, l')$ models a
   program with effects that returns no result, but copies the value $v$ stored
   at the memory location $l$ inside the memory location $l'$.
   %
