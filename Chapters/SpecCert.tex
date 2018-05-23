@@ -6,17 +6,17 @@ verifying \ac{hse} mechanisms against hardware architecture models, that is
 %
 \begin{inparaenum}[(1)]
 \item specifying the software requirements that must be satisfied by the trusted
-software components which implement the \ac{hse} mechanism,
+  software components which implement the \ac{hse} mechanism,
 %
-\item specifying the targeted security property the \ac{hse} mechanism supposedly
-  enforces, and
+\item specifying the targeted security property the \ac{hse} mechanism
+  supposedly enforces, and
 %
 \item verifying that the \ac{hse} mechanism is sound.
 \end{inparaenum}
 %
-A \ac{hse} mechanism is sound when untrusted software components' executions are
-constrain with respect to the security property as long as the trusted software
-component correctly implements it.
+A \ac{hse} mechanism specification is sound when untrusted software components'
+executions are constrain with respect to the security property as long as the
+trusted software component correctly implements it.
 %
 As we have already argued in Section~\ref{sec:intro:verif}, we believe this
 approach would benefit to both hardware designers and software developers.
@@ -29,13 +29,13 @@ In Section \ref{sec:speccert:framework}, we give a formal definition of the
 SpecCert formalism.
 %
 In Section \ref{sec:speccert:hardware}, we define a model of x86-based hardware
-architectures to verify \ac{hse} mechanisms targeting software isolation policies
-using publicly available Intel specifications.
+architectures to verify \ac{hse} mechanisms targeting software isolation
+policies using publicly available Intel specifications.
 %
-In Section \ref{sec:speccert:smm}, we verify the soundness of the \ac{hse} mechanism
-implemented in many x86 computer firmware codes to isolate the code executed
-while the CPU is in System Management Mode (SMM), a highly privileged execution
-mode of x86 microprocessors.
+In Section \ref{sec:speccert:smm}, we verify the soundness of the \ac{hse}
+mechanism implemented in many x86 computer firmware codes to isolate the code
+executed while the CPU is in System Management Mode (SMM), a highly privileged
+execution mode of x86 microprocessors.
 %
 Our model and proofs have been implemented using Coq, a proof assistant system
 and have been released as an open source software\,\footnote{Which can can be
@@ -47,72 +47,104 @@ We discuss our results in Section \ref{sec:speccert:discuss}.
 
 In SpecCert, we model the hardware architecture and its features with a set of
 states $\set{H}$, a set of events $\set{E}$ and a Computing Platform $\Sigma$
-which defines a semantics of events as state-transformers. Hence, the execution
-of a set of software components by a hardware architecture is a sequence of
-state-transformations (denoted $\transitionLTS{Ez}{h}{ev}{h'}$) in this model.
+which defines a semantics of events as state-transformers.
+%
+Hence, the execution of a set of software components by a hardware architecture
+is a sequence of state-transformations (denoted $\transitionLTS{Ez}{h}{ev}{h'}$)
+in this model.
+%
 In this Chapter, we consider exclusively Execution Monitoring (EM) enforceable
 security policies\,\cite{schneider2000enforceable,basin2013enforceable} that are
-security policies which can be enforced by monitoring the software execution. As
-a consequence, we model a security policy with a predicate $P$ on sequences of
-state-transformations.  Finally, we model a HSE mechanism $\Delta$ with a set of
-requirements on states to characterize safe hardware configurations and a set of
-requirements on state-transformations for trusted software components to
-preserve the state requirements through software execution. A HSE mechanism is
-sound when every sequence of state transformations which satisfies these
-requirements also satisfies the security policy predicate.
+security policies which can be enforced by monitoring the software execution.
+%
+As a consequence, we model a security policy with a predicate $P$ on sequences
+of state-transformations.
+%
+Finally, we model a HSE mechanism $\Delta$ with a set of requirements on states
+to characterize safe hardware configurations and a set of requirements on
+state-transformations for trusted software components to preserve the state
+requirements through software execution.
+%
+A \ac{hse} mechanism is sound when every sequence of state transformations which
+satisfies these requirements also satisfies the security policy predicate.
 
 \subsection{Computing Platforms} \label{subsec:speccert:computing}
 
 We now dive more deeply into the SpecCert formalism and give a formal definition
-of the Computing Platform. We model a hardware architecture which executes
-several software components using states, events and a semantics of events as
-states-transformers.
+of the Computing Platform.
+%
+We model a hardware architecture which executes several software components
+using states, events and a semantics of events as states-transformers.
 
 The state of a hardware architecture models the configuration of its devices at
-a given time. This configuration may change over time with respect to the
-hardware specifications and comprises any relevant data such as registers
-values, inner memory contents, etc. A hardware architecture state update is
-triggered by some events. We distinguish two classes of events: the software
-events which are direct and forseeable side-effects of the execution of an
-instruction and the hardware events which are not. The execution of an
-instruction can be broken down into a sequence of software events.
-
+a given time.
+%
+This configuration may change over time with respect to the hardware
+specifications and comprises any relevant data such as registers values, inner
+memory contents, etc.
+%
+A hardware architecture state update is triggered by some events. We distinguish
+two classes of events: the software events which are direct and forseeable
+side-effects of the execution of an instruction and the hardware events which
+are not.
+%
+The execution of an instruction can be broken down into a sequence of software
+events.
+%
 For instance, to execute the x86 instruction\,\footnote{Written in AT\&T syntax
   here.} \texttt{mov (\%ecx),\%eax}, a x86 CPU:
+%
 \begin{itemize}
 \item reads the content of the register \texttt{ecx} as an address
+%
 \item reads the main memory at this address
+%
 \item writes this content into the register \text{eax}
+%
 \item updates the register \texttt{eip} with the address of the next instruction
   to execute
 \end{itemize}
 
 We model this sequence of actions as four software events which trigger four
-state updates. Note that if the content of the \texttt{ecx} register is not a
-valid address, the scenario is different. In such a case, the read access to the
-main memory fails and an interrupt is raised. This second scenario is modeled
-with another sequence of events which involved a hardware event \emph{i.e.} the
-interrupt.
+state updates.
+%
+Note that if the content of the \texttt{ecx} register is not a valid address,
+the scenario is different.
+%
+In such a case, the read access to the main memory fails and an interrupt is
+raised.
+%
+This second scenario is modelled with another sequence of events which involved a
+hardware event \emph{i.e.} the interrupt.
 
 The semantics of events as state-transformers is specified using preconditions
-and postconditions. Preconditions specify the state requirements which are
-necessary for an event to be observed. Postconditions specify the consequences
-of an event on the hardware architecture state.
+and postconditions.
+%
+Preconditions specify the state requirements which are necessary for an event to
+be observed.
+%
+Postconditions specify the consequences of an event on the hardware architecture
+state.
 
 \begin{definition}[Computing System]
   Given $\set{H}$ a set of hardware architecture states and $\set{E}$ a set of
   events, a Computing Platform $\shortLTS{Ez}$ is a pair of
-  $(\func{pre\-condition}, \func{post\-condition})$ where $\func{pre\-condition}$ is a predicate on
-  $\set{H} \times \set{E}$ and $\func{post\-condition}$ is a predicate on
-  $\set{H} \times \set{E} \times \set{H}$. $\shortLTS{Ez}$ defines a semantics
-  of events as state-transformers such that
+  $(\func{pre\-condition}, \func{post\-condition})$ where
+  $\func{pre\-condition}$ is a predicate on $\set{H} \times \set{E}$ and
+  $\func{post\-condition}$ is a predicate on
+  $\set{H} \times \set{E} \times \set{H}$.
+  %
+  $\shortLTS{Ez}$ defines a semantics of events as state-transformers such that
+  %
   \begin{prooftree}
-    \AxiomC{$\func{precondition}(h,ev)$} \AxiomC{$\func{postcondition}(h,ev,h')$}
+    \AxiomC{$\func{precondition}(h,ev)$}
+    \AxiomC{$\func{postcondition}(h,ev,h')$}
+    %
     \BinaryInfC{\transitionLTS{Ez}{h}{ev}{h'}}
   \end{prooftree}
 
-  \transitionLTS{Ez}{h}{ev}{h'} is called a state-transformation of\,
-  $\shortLTS{Ez}$.
+  \transitionLTS{Ez}{h}{ev}{h'} is called a state-transformation
+  of~$\shortLTS{Ez}$.
 \end{definition}
 
 % \begin{definition}[Software Stack]
@@ -127,62 +159,82 @@ of an event on the hardware architecture state.
 Given $\set{H}$ a set of states of a hardware architecture, $\set{E}$ a set of
 events, $\shortLTS{Ez}$ a Computing Platform and $\set{S}$ a set of software
 components being executed by the hardware architecture, a particular execution
-of a set of software components is modeled with a sequence of
+of a set of software components is modelled with a sequence of
 state-transformations we call a run of $\shortLTS{Ez}$.
 
 \begin{definition}[Run]
   A run of the Computing Platform $\shortLTS{Ez}$ is a sequence of
   state-transformations of\, $\shortLTS{Ez}$ such that for two consecutive
   transformations, the resulting state of the first is the initial state of the
-  next. We denote $\pathesLTS{Ez}$ the set of runs of the Computing Platform
+  next.
+  %
+  We denote $\pathesLTS{Ez}$ the set of runs of the Computing Platform
   $\shortLTS{Ez}$ and $\func{init}(\rho)$ the initial state of a run $\rho$.
 \end{definition}
 
 We consider EM-enforceable security
 policies\,\cite{schneider2000enforceable,schneider2} specified with predicates
-on runs. A run is said to be secure according to a security policy when it
-satisfies the predicate specifying this policy.
+on runs.
+%
+A run is said to be secure according to a security policy when it satisfies the
+predicate specifying this policy.
 
 In this Chapter, we focus on a class of security policies we call software
-execution isolation policies. Such a policy prevents a set of untrusted software
-components to tamper with the execution of another set of so-called trusted
-software components. We consider that a software component tampers with the
-execution of another when it is able to make the latter execute an instruction
-of its choice.
+execution isolation policies.
+%
+Such a policy prevents a set of untrusted software components to tamper with the
+execution of another set of so-called trusted software components.
+%
+We consider that a software component tampers with the execution of another when
+it is able to make the latter execute an instruction of its choice.
 
 In practice, a subset of states of the hardware architecture is dedicated to
-each software component. For instance, the x86 CPU has a feature called
-protection rings where each ring can be seen as an execution mode dedicated to a
-software component. Hence, the ring 0 is dedicated to the operating system
-whereas the userland applications are executed when the CPU is in ring 3. In
-SpecCert, we take advantage of this CPU state sharing to infer which software
-component is currently executed from a hardware architecture state. For the
-following definitions, we assume the hardware architecture contains only one
-CPU.
+each software component.
+%
+For instance, the x86 CPU has a feature called protection rings where each ring
+can be seen as an execution mode dedicated to a software component.
+%
+Hence, the ring 0 is dedicated to the operating system whereas the userland
+applications are executed when the CPU is in ring 3.
+%
+In SpecCert, we take advantage of this CPU state sharing to infer which software
+component is currently executed from a hardware architecture state.
+%
+For the following definitions, we assume the hardware architecture contains only
+one CPU.
 
 \begin{definition}[Hardware-Software Mapping]
   \label{def:hardsoftmap}
-  A hardware-software mapping $\func{con\-text} : \set{H} \rightarrow \set{S}$ is a
-  function which takes a hardware state and returns the software component
+  A hardware-software mapping $\func{con\-text} : \set{H} \rightarrow \set{S}$
+  is a function which takes a hardware state and returns the software component
   currently executed.
 \end{definition}
 
 Dealing with multi-core architectures would require additional efforts and
-notations. One possible solution could be to define an identifier per core and
-to use this identifier in addition to the current hardware state to deduce the
-software component currently executed by the corresponding core. However, this
-is out of the scope of this Chapter.
+notations.
+%
+One possible solution could be to define an identifier per core and to use this
+identifier in addition to the current hardware state to deduce the software
+component currently executed by the corresponding core.
+%
+However, this is out of the scope of this Chapter.
 
-We now introduce the concept of \textit{memory location ownership}. A memory
-location within a hardware architecture is a container which is able to store
-data used by a software component \emph{e.g.}\,a general-purpose register of a
-CPU, a DRAM memory cell, etc. We say that a Computing Platform tracks the memory
-location ownership if the hardware architecture states maps each memory location
-with a software component called its \emph{owner}, and the Computing Platform
-semantics updates this mapping through state-transformations. A software
-component becomes the new owner of a memory location when it overrides its
-content during a state-transformation. By extension, we say a software component
-owns some data when it owns the memory location in which these data are stored.
+We now introduce the concept of \textit{memory location ownership}.
+%
+A memory location within a hardware architecture is a container which is able to
+store data used by a software component \emph{e.g.}~a general-purpose register
+of a CPU, a DRAM memory cell, etc.
+%
+We say that a Computing Platform tracks the memory location ownership if the
+hardware architecture states maps each memory location with a software component
+called its \emph{owner}, and the Computing Platform semantics updates this
+mapping through state-transformations.
+%
+A software component becomes the new owner of a memory location when it
+overrides its content during a state-transformation.
+%
+By extension, we say a software component owns some data when it owns the memory
+location in which these data are stored.
 
 With this mapping, it becomes possible to determine the owner of an instruction
 fetched by the CPU in order to be decoded and executed.
@@ -190,46 +242,55 @@ fetched by the CPU in order to be decoded and executed.
 \begin{definition}[Event-Software Mapping]
   \label{def:evsoft}
   An event-software mapping
-  $\func{fet\-ched}: \set{H} \times \set{E} \rightarrow \mathcal{P}(\set{S})$ is a
-  function which takes an initial hardware state and an event and returns the
+  $\func{fet\-ched}: \set{H} \times \set{E} \rightarrow \mathcal{P}(\set{S})$ is
+  a function which takes an initial hardware state and an event and returns the
   set of the fetched instructions owners during this state-transformation.
 \end{definition}
 
-Hence, $s \in \func{fetched}(h, ev)$ means that an instruction owned by $s$ was fetched
-during a state-transformation triggered by an event $ev$ from a state $h$. With
-a hardware-software mapping and an event-software mapping, we give a formal
+Hence, $s \in \func{fetched}(h, ev)$ means that an instruction owned by $s$ was
+fetched during a state-transformation triggered by an event $ev$ from a state
+$h$.
+%
+With a hardware-software mapping and an event-software mapping, we give a formal
 definition of a \textit{software execution tampering}.
 
 \begin{definition}[Software Execution Tampering]
   \label{def:codeinjection}
   Given $h$ the initial state of a state-transformation triggered by an event
-  $ev$, $\func{context}$ a hardware-software mapping, $\func{fetched}$ an event-software
-  mapping and $x, y \in \set{S}$ two software components, the software component
-  $y$ tampers with the execution of another software component $x$ if the CPU
-  fetches an instruction owned by $y$ in a state dedicated to $x$.
-  \[ \begin{array}{l} \func{software\_tampering}(\func{context}, \func{fetched}, h, ev, x, y)
+  $ev$, $\func{context}$ a hardware-software mapping, $\func{fetched}$ an
+  event-software mapping and $x, y \in \set{S}$ two software components, the
+  software component $y$ tampers with the execution of another software
+  component $x$ if the CPU fetches an instruction owned by $y$ in a state
+  dedicated to $x$.
+  %
+  \[ \begin{array}{l} \func{software\_tampering}(\func{context}, \func{fetched},
+      h, ev, x, y)
        \triangleq \\
-       \qquad\qquad\qquad\qquad \func{context}(h) = x\,\wedge\,y \in \func{fetched}(h,ev)
+       \qquad\qquad\qquad\qquad \func{context}(h) = x\,\wedge\,y \in
+       \func{fetched}(h,ev)
      \end{array}
    \]
  \end{definition}
 
  Given $\set{T} \subseteq \set{S}$ a set of trusted software components, the
  software execution isolation policy prevents the untrusted components from
- tampering with the execution of the trusted components. Such a policy is
- enforced during a run if no untrusted component is able to tamper with the
- execution of a trusted component.
+ tampering with the execution of the trusted components.
+ %
+ Such a policy is enforced during a run if no untrusted component is able to
+ tamper with the execution of a trusted component.
 
  \begin{definition}[Software Execution Isolation]
    \label{def:softwareisolation}
-   Given $\func{context}$ a hardware-software mapping, $\func{fetched}$ an event-software
-   mapping and $\rho$ a run of $\shortLTS{Ez}$,
+   Given $\func{context}$ a hardware-software mapping, $\func{fetched}$ an
+   event-software mapping and $\rho$ a run of $\shortLTS{Ez}$,
+   %
    \[ \begin{array}{l}
         \func{software\_execution\_isolation}(\func{context}, \func{fetched}, \rho, \set{T}) \triangleq \\
         \qquad\forall \transitionLTS{Ez}{h}{ev}{h'} \in \rho, \forall t \in
         \set{T}, \forall
         u \not\in \set{T}, \\
-        \qquad\qquad \neg \func{software\_tampering}(\func{context}, \func{fetched}, h, ev, t, u)
+        \qquad\qquad \neg \func{software\_tampering}(\func{context},
+        \func{fetched}, h, ev, t, u)
       \end{array} \]
   \end{definition}
 
@@ -240,26 +301,31 @@ definition of a \textit{software execution tampering}.
 
   A HSE mechanism is a set of requirements on states to characterize safe
   hardware configurations and a set of requirements on state-transformations to
-  preserve the state requirements through software execution. The software
-  components which implement a HSE mechanism form the Trusted Computing Base
-  (TCB).
+  preserve the state requirements through software execution.
+  %
+  The software components which implement a HSE mechanism form the Trusted
+  Computing Base (TCB).
 
   \begin{definition}[HSE Mechanism]
     \label{def:hse}
     Given $\set{H} $ a set of states of a hardware architecture, $\set{E}$ a set
     of events and $\shortLTS{Ez}$ a Computing Platform, we model a HSE mechanism
-    $\Delta$ with a tuple $(\func{inv}, \func{behavior}, \set{T}, \func{context})$ such
-    as
+    $\Delta$ with a tuple
+    $(\func{inv}, \func{behavior}, \set{T}, \func{context})$ such as
+    %
     \begin{itemize}
-    \item $\func{inv}$ is a predicate on $\set{H}$ to distinguish between safe hardware
-      configurations and potentially vulnerable ones
+    \item $\func{inv}$ is a predicate on $\set{H}$ to distinguish between safe
+      hardware configurations and potentially vulnerable ones
+    %
     \item $\func{behavior}$ is a predicate on $\set{H} \times \set{E}_{Soft}$ to
       distinguish between safe software state-transformations and potentially
       harmful ones
+    %
     \item $\set{T} \subseteq{S}$ is the set of software components which form
       the TCB of the HSE mechanism
-    \item $\func{context}$ is a hardware-software mapping to determine when the TCB is
-      executed
+    %
+    \item $\func{context}$ is a hardware-software mapping to determine when the
+      TCB is executed
     \end{itemize}
   \end{definition}
 
@@ -269,37 +335,53 @@ definition of a \textit{software execution tampering}.
   \begin{enumerate}
   \item By default, the SPI Flash is locked and its content cannot be overriden
     until it has been unlocked
+  %
   \item Some software components can unlock the SPI Flash
+  %
   \item When they do so, the CPU is forced to start the execution of a
     special-purpose software component
+  %
   \item This software component has to lock the SPI Flash before the end of its
     execution
   \end{enumerate}
-  In this example, the special-purpose software component is the TCB. A safe
-  hardware state (modeled with $inv$) is either a state wherein the
+  %
+  In this example, the special-purpose software component is the TCB.
+  %
+  A safe hardware state (modelled with $inv$) is either a state wherein the
   special-purpose software component is executed or a state wherein the SPI
-  Flash is locked. This requirement on hardware architecture states is preserved
-  by preventing the special-purpose software component to end its execution
-  before it has locked the SPI Flash (modeled with $behavior$).
+  Flash is locked.
+  %
+  This requirement on hardware architecture states is preserved by preventing
+  the special-purpose software component to end its execution before it has
+  locked the SPI Flash (modelled with $behavior$).
 
   For a HSE mechanism to be correctly defined, it must obey a few axioms,
-  together called the HSE Laws. The first law says that the state requirements
-  specified by $inv$ are preserved through state-transformations if the software
-  transformations which do not satisfy $behavior$ are discarded. The second law
-  says that the $behavior$ predicate specifies state-transformations
-  restrictions for the TCB only. The software components which are not part of
-  the TCB are considered untrusted and we make no assumption on their behavior.
+  together called the HSE Laws.
+  %
+  The first law says that the state requirements specified by $inv$ are
+  preserved through state-transformations if the software transformations which
+  do not satisfy $behavior$ are discarded.
+  %
+  The second law says that the $behavior$ predicate specifies
+  state-transformations restrictions for the TCB only.
+  %
+  The software components which are not part of the TCB are considered untrusted
+  and we make no assumption on their behavior.
 
   \begin{definition}[HSE Laws]
     \label{def:laws}
-    A HSE mechanism $\Delta = (\func{inv}, \func{behavior}, \set{T}, \func{context})$ has to satisfy
-    the following properties:
+    A HSE mechanism
+    $\Delta = (\func{inv}, \func{behavior}, \set{T}, \func{context})$ has to
+    satisfy the following properties:
+    %
     \begin{enumerate}
-    \item \func{behavior} preserves \func{inv}: $\forall \transitionLTS{Ez}{h}{ev}{h'}$,
-      \[ \begin{array}{l} \func{inv}(h) \Rightarrow (ev \in \set{E}_{Soft} \Rightarrow
-          \func{behavior}(h,ev)) \Rightarrow \func{inv}(h')
+    \item \func{behavior} preserves \func{inv}:
+      $\forall \transitionLTS{Ez}{h}{ev}{h'}$,
+      \[ \begin{array}{l} \func{inv}(h) \Rightarrow (ev \in \set{E}_{Soft}
+          \Rightarrow \func{behavior}(h,ev)) \Rightarrow \func{inv}(h')
          \end{array}
        \]
+     %
      \item $\func{behavior}$ only restricts the TCB:
        $\forall x \not\in \set{T}, \forall h \in \set{H}, \forall ev \in
        \set{E}_{Soft}$,
@@ -313,12 +395,15 @@ definition of a \textit{software execution tampering}.
 
    A run complies to a HSE mechanism definition if its initial state satisfies
    the state requirements and each state-transformation of the run satisfies the
-   state-transformations requirements. The set of the runs which comply with
-   $\Delta$ is denoted by $\mathcal{C}(\Delta)$.
+   state-transformations requirements.
+   %
+   The set of the runs which comply with $\Delta$ is denoted by
+   $\mathcal{C}(\Delta)$.
 
 \begin{definition}[Compliant Runs]
   Given $\rho \in \pathesLTS{Ez}$,
-  \[ \rho \in \mathcal{C}(\Delta) \triangleq \func{inv}(\func{init}(\rho))\,\wedge\,\forall
+  \[ \rho \in \mathcal{C}(\Delta) \triangleq
+    \func{inv}(\func{init}(\rho))\,\wedge\,\forall
     \transitionLTS{Ez}{h}{ev}{h'}, ev \in \set{E}_{Soft} \Rightarrow
     \func{behavior}(h,ev) \]
 \end{definition}
@@ -333,50 +418,54 @@ definition.
   A HSE mechanism $\Delta$ succeeds in enforcing a security policy $P$ when each
   compliant run of $\Delta$ is secure. In such a case, $\Delta$ is said to be
   sound.
-  \[ \func{sound}(\Delta, P) \triangleq \forall \rho \in \set{C}(\Delta), P(\rho)
+  %
+  \[
+    \func{sound}(\Delta, P) \triangleq \forall \rho \in \set{C}(\Delta), P(\rho)
   \]
 \end{definition}
 
 \begin{table}[h]
   \centerline{%
-  \begin{tabular}{clc}
-    \hline
-    \bf Notation  & \multicolumn{1}{c}{\bf Description} \\
-    \hline
-    $\set{S}$ & Set of software components \\
-    \hline
-    $\set{H}$ & Set of states of the hardware architecture \\
-    \hline
-    $\set{E}$ & Set of states of events of the hardware architecture \\
-    \hline
-    $\shortLTS{Ez}$ & Semantic of events as state-transformers (Computing
-                      Platform) \\
-    \hline
-    $\transitionLTS{Ez}{h}{ev}{h'}$ & State-transformation according to
-                                      $\shortLTS{Ez}$ \\
-    \hline
-    $\pathesLTS{Ez}$ & Set of sequences of $\shortLTS{Ez}$ state-transformations
-                       (Runs) \\
-    \hline
-    $P$ & Predicate on run to model a EM-enforceable security policy \\
-    \hline
-    $\Delta$ & Requirements on states and state-transformation (HSE mechanism)
-    \\
-    \hline
-  \end{tabular}
+    \begin{tabular}{clc}
+      \hline
+      \bf Notation  & \multicolumn{1}{c}{\bf Description} \\
+      \hline
+      $\set{S}$ & Set of software components \\
+      \hline
+      $\set{H}$ & Set of states of the hardware architecture \\
+      \hline
+      $\set{E}$ & Set of states of events of the hardware architecture \\
+      \hline
+      $\shortLTS{Ez}$ & Semantic of events as state-transformers (Computing
+                        Platform) \\
+      \hline
+      $\transitionLTS{Ez}{h}{ev}{h'}$ & State-transformation according to
+                                        $\shortLTS{Ez}$ \\
+      \hline
+      $\pathesLTS{Ez}$ & Set of sequences of $\shortLTS{Ez}$ state-transformations
+                         (Runs) \\
+      \hline
+      $P$ & Predicate on run to model a EM-enforceable security policy \\
+      \hline
+      $\Delta$ & Requirements on states and state-transformation (HSE mechanism)
+      \\
+      \hline
+    \end{tabular}
   }
   \caption{SpecCert CheatSheet}
 \end{table}
 
 \section{\textsc{MinX86}} \label{sec:speccert:hardware}
 
-The SpecCert formalism is the foundation of the SpecCert framework. It comprises
-a set of high-level definitions to specify a HSE mechanism against a hardware
-architecture model. In its current state, the SpecCert framework contains a
-model of x86 called $\formatLTS{Minx86}$. $\formatLTS{Minx86}$ is intended to be
-a minimal model for single core x86-based machines and we have used publicly
-available Intel documents\,\cite{intel2013celeron,intel2009mch,intel2014manual}
-to define it.
+The SpecCert formalism is the foundation of the SpecCert framework.
+%
+It comprises a set of high-level definitions to specify a HSE mechanism against
+a hardware architecture model.
+%
+In its current state, the SpecCert framework contains a model of x86 called
+$\formatLTS{Minx86}$. $\formatLTS{Minx86}$ is intended to be a minimal model for
+single core x86-based machines and we have used publicly available Intel
+documents\,\cite{intel2013celeron,intel2009mch,intel2014manual} to define it.
 
 \subsection{Model Scope}
 
@@ -384,111 +473,154 @@ The hardware architecture we are modeling with $\formatLTS{Minx86}$ contains a
 CPU, a cache, a memory controller, a DRAM controller and a VGA
 controller\,\footnote{A VGA controller is a hardware device which on we can
   connect a screen. It exposes some memory to the CPU for communication
-  purposes.}  which both expose some memory to the CPU.
+  purposes.} which both expose some memory to the CPU.
 
 $\formatLTS{Minx86}$ is meant to be a proof of concept of the SpecCert formalism
-and thus is not exhaustive. In its current state of implementation, its scope
+and thus is not exhaustive.
+%
+In its current state of implementation, its scope
 focuses on the System Management Mode (SMM) feature of x86 microprocessors.
 
 \paragraph{Hardware Specifications}
+%
 We consider the CPU can be either in System Management Mode (SMM) or in an
-unprivileged mode. The SMM is "a special-purpose operating mode provided for
-handling system-wide functions like power management, system hardware control,
-or proprietary OEM-designed code"\,\cite{intel2014manual}. It is the most
-privileged execution mode of x86 processors.  When a CPU receives a special
-hardware interrupt called System Management Interrupt (SMI), it halts its
-current execution and reconfigures itself to a specified state from which it
-executes the code stored in memory at the address $SMBASE + \texttt{0x8000}$. In
-practice, the SMBASE value points to the base of a memory region called the
-SMRAM. Leaving the SMM is done by executing a special purpose instruction called
+unprivileged mode.
+%
+The SMM is ``a special-purpose operating mode provided for handling system-wide
+functions like power management, system hardware control, or proprietary
+OEM-designed code''\,\cite{intel2014manual}.
+%
+It is the most privileged execution mode of x86 processors.
+%
+When a CPU receives a special hardware interrupt called System Management
+Interrupt (SMI), it halts its current execution and reconfigures itself to a
+specified state from which it executes the code stored in memory at the address
+$SMBASE + \texttt{0x8000}$.
+%
+In practice, the SMBASE value points to the base of a memory region called the
+SMRAM.
+%
+Leaving the SMM is done by executing a special purpose instruction called
 \texttt{rsm} (for \emph{resume}).
 
 The CPU relies on a cache to reduce the Input/Output (\IO, that is a read or
-write access to the memory) latency. We model one level of cache which stores
-both data and instructions and we consider two cache strategies: uncacheable
-(UC) and writeback (WB). With the UC cache strategy, the cache is not used and
-all \IOs are forwarded to the memory controller, whereas with the WB strategy,
-the cache is used as much as possible\,\footnote{These cache strategies are
-  explained in \cite{intel2014manual}, Volume 3A, Chapter 11, Section 11.3 (page
-  2316 -- 2317)}. To determine which cache strategy to use, the CPU relies on
-several configuration registers and mechanisms. One of them is a pair of
-registers called the System Management Range Registers (SMRR) which can only be
-configured when the CPU is in SMM. They are used to tell the CPU where the SMRAM
-is and which cache strategy to use for \IO targeting the SMRAM when the CPU is
-in SMM.  When it is not in SMM, the CPU always uses the UC strategy for \IO
-targeting the SMRAM. SMRR have been introduced as a countermeasure of the SMRAM
-cache poisoning attack\,\cite{wojtczuk2009smram,duflot2009smram} which allowed
-an untrusted code to tamper with the copy of the SMRAM stored in the cache.  The
-memory controller\,\cite{intel2009mch} receives all the CPU \IOs which are not
-handled by the cache and dispatches them to the DRAM controller or to the VGA
-controller. It exposes a unified view (the memory map) of the system memory to
-the CPU. The CPU manipulates this memory map with a set of addresses called the
-physical addresses. The memory controller dedicates a special range of physical
-addresses to form the SMRAM. The SMRAM is dedicated to store the code intended
-to be executed when the CPU is in SMM.
+write access to the memory) latency.
+%
+We model one level of cache which stores both data and instructions and we
+consider two cache strategies: uncacheable (UC) and writeback (WB).
+%
+With the UC cache strategy, the cache is not used and all \IOs are forwarded to
+the memory controller, whereas with the WB strategy, the cache is used as much
+as possible\,\footnote{These cache strategies are explained in
+  \cite{intel2014manual}, Volume 3A, Chapter 11, Section 11.3 (page 2316 --
+  2317)}.
+%
+To determine which cache strategy to use, the CPU relies on several
+configuration registers and mechanisms.
+%
+One of them is a pair of registers called the System Management Range Registers
+(SMRR) which can only be configured when the CPU is in SMM.
+%
+They are used to tell the CPU where the SMRAM is and which cache strategy to use
+for \IO targeting the SMRAM when the CPU is in SMM.  When it is not in SMM, the
+CPU always uses the UC strategy for \IO targeting the SMRAM.
+%
+SMRR have been introduced as a countermeasure of the SMRAM cache poisoning
+attack\,\cite{wojtczuk2009smram,duflot2009smram} which allowed an untrusted code
+to tamper with the copy of the SMRAM stored in the cache.
+%
+The memory controller\,\cite{intel2009mch} receives all the CPU \IOs which are
+not handled by the cache and dispatches them to the DRAM controller or to the
+VGA controller. It exposes a unified view (the memory map) of the system memory
+to the CPU.
+%
+The CPU manipulates this memory map with a set of addresses called the physical
+addresses.
+%
+The memory controller dedicates a special range of physical addresses to form
+the SMRAM.
+%
+The SMRAM is dedicated to store the code intended to be executed when the CPU is
+in SMM.
 
-\paragraph{Tracking the Memory Ownership} The \formatLTS{Minx86} definition is
-parameterized with an hardware-software mapping (see
-Definition~\ref{def:hardsoftmap}). The memory locations of \formatLTS{Minx86}
-Computing Platforms are either cache lines or memory cells exposed by the DRAM
-controller or the VGA controller. The memory ownership is updated through
-state-transformations according to three rules:
+\paragraph{Tracking the Memory Ownership}
+%
+The \formatLTS{Minx86} definition is parameterized with an hardware-software
+mapping (see Definition~\ref{def:hardsoftmap}).
+%
+The memory locations of \formatLTS{Minx86} Computing Platforms are either cache
+lines or memory cells exposed by the DRAM controller or the VGA controller.
+%
+The memory ownership is updated through state-transformations according to three
+rules:
+%
 \begin{enumerate}
 \item When a cache line gets a copy of a DRAM or VGA cell content, the owner of
   this cell becomes the new owner of this cache line.
+%
 \item When the content of this cache line is written back to a memory cell, the
   new owner of this memory cell is the owner of this cache line.
+%
 \item When a state-transformation implies the content of a memory location to be
   overriden with a new value, the software currently executed becomes its new
   owner.
+%
 \end{enumerate}
 
 Given $\set{S}$ a set of software components, the set of states of
 \formatLTS{Minx86} Computing Platform hardware architecture is denoted by
 $\texttt{Archi}_{\set{S}}$ and the set of \formatLTS{Minx86} Computing Platform
-events is denoted by $\texttt{Event}$. Given $context$ a hardware-software
-mapping, we denote the Computing Platform $\formatLTS{Minx86}$ parameterized
-with $context$\,\footnote{The related definitions and explanations are given on
-  page \pageref{page:minx86def}.} such that
-\[ \formatLTS{Minx86}(context) \triangleq (minx86\_pre,
-  minx86\_post(context)) \]
+events is denoted by $\texttt{Event}$.
+%
+Given $context$ a hardware-software mapping, we denote the Computing Platform
+$\formatLTS{Minx86}$ parameterized with $context$\,\footnote{The related
+  definitions and explanations are given on page \pageref{page:minx86def}.} such
+that
+%
+\[
+  \formatLTS{Minx86}(context) \triangleq (minx86\_pre, minx86\_post(context))
+\]
 
 \subsection{Hardware Architecture State}
 
 $\texttt{Archi}_{\set{S}}$ is defined as the Cartesian product of the set of
 states of the CPU, the CPU's cache, the memory controller and the hardware
-memories exposed by both the DRAM controller and the VGA controller. Each of
-these sets is defined in order to model the hardware features we have previously
-described. We define
+memories exposed by both the DRAM controller and the VGA controller.
+%
+Each of these sets is defined in order to model the hardware features we have
+previously described.
+%
+We define
 $\texttt{PhysAddr} \triangleq \setdef{\val{pa}_i}{i \leq \val{max\_addr}}$ the
-set of physical addresses the CPU uses to perform \IO. The maximal address
-offset (denoted by $\val{max\_addr}$ here) is specific to the CPU and may vary
-in time according to its addressing mode (real mode, long mode, etc.), therefore
-we left its value as a parameter of our model.
+set of physical addresses the CPU uses to perform \IO.
+%
+The maximal address offset (denoted by $\val{max\_addr}$ here) is specific to
+the CPU and may vary in time according to its addressing mode (real mode, long
+mode, etc.), therefore we left its value as a parameter of our model.
 
 %%%%% APPENDIX State %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{table}
   \centerline{%
-  \begin{tabular}{ll}
-    \hline
-    \bf{Notation} & \bf{Description} \\
-    \hline
-    $ A \triangleq \begin{array}{ll}
-                      \{\,field_1 &: T_1 \\
-                      ;\,field_2 &: T_2\,\}
-                    \end{array} $ & Set of records definition \\
-    \hline
-    $field_1(a)$ & Field selection \\
-    \hline
-    %$a\,\{ field_1 \leftarrow t \}$ & Field update \\
-    %\hline
-    $M \triangleq [A \rightarrow B]$ & Set of maps definition \\
-    \hline
-    $m[a]$ & Map application \\
-    %\hline
-    %$m[a \leftarrow b']$ & Map update \\
-    \hline
-  \end{tabular}
+    \begin{tabular}{ll}
+      \hline
+      \bf{Notation} & \bf{Description} \\
+      \hline
+      $ A \triangleq \begin{array}{ll}
+                       \{\,field_1 &: T_1 \\
+                       ;\,field_2 &: T_2\,\}
+                     \end{array} $ & Set of records definition \\
+      \hline
+      $field_1(a)$ & Field selection \\
+      \hline
+      % $a\,\{ field_1 \leftarrow t \}$ & Field update \\
+      % \hline
+      $M \triangleq [A \rightarrow B]$ & Set of maps definition \\
+      \hline
+      $m[a]$ & Map application \\
+      % \hline
+      % $m[a \leftarrow b']$ & Map update \\
+      \hline
+    \end{tabular}
   }
   \caption{List of notations}
   \label{tab:notation}
@@ -496,9 +628,13 @@ we left its value as a parameter of our model.
 
 To describe the hardware architecture state of \formatLTS{Minx86} Computing
 Platforms, we use record types and maps with the notations listed in Table
-\ref{tab:notation}.  Given $\set{S}$ a set of software components, the set of
-states of the hardware architecture is denoted by $\texttt{Archi}_{\set{S}}$.
-\[ \texttt{Archi}_{\set{S}} \triangleq
+\ref{tab:notation}.
+%
+Given $\set{S}$ a set of software components, the set of states of the hardware
+architecture is denoted by $\texttt{Archi}_{\set{S}}$.
+%
+\[
+  \texttt{Archi}_{\set{S}} \triangleq
   \begin{array}{ll}
     \,\{proc &: \texttt{Proc}          \\
     ;\,mc    &: \texttt{MC}            \\
@@ -506,181 +642,251 @@ states of the hardware architecture is denoted by $\texttt{Archi}_{\set{S}}$.
     ;\,cache &: \texttt{Cache}_{\set{S}}\,\}
   \end{array}
 \]
+%
 $\texttt{Proc}$ denotes the CPU set of states, $\texttt{MC}$ the memory
 controller set of states, $\texttt{Mem}_{\set{S}}$ the physical memories set of
 states and $\texttt{Cache}_{\set{S}}$ the cache set of states.
 
 We define $\texttt{CacheStrat} \triangleq \setshortdef{\val{UC}, \val{WB}}$ the
-set of the modeled cache strategies. The set of states of the SMRRs is denoted
-$\texttt{Smrr}$.
+set of the modelled cache strategies.
+%
+The set of states of the SMRRs is denoted $\texttt{Smrr}$.
 
-\[ \texttt{Smrr} \triangleq \begin{array}{ll}
-                              \{\,range &: \set{P}(\texttt{PhysAddr}) \\
-                               ;\,smram\_strat &: \texttt{CacheStrat} \}
-\end{array} \]
+\[ \texttt{Smrr} \triangleq
+  \begin{array}{ll}
+    \{\,range &: \set{P}(\texttt{PhysAddr}) \\
+    ;\,smram\_strat &: \texttt{CacheStrat} \}
+  \end{array}
+\]
 
 The set of physical addresses $range$ tells the CPU the location of the SMRAM
-and $smram\_strat$ tells which cache strategy has to be used when the CPU is in
-SMM. As we said, the set of states of the CPU is denoted $\texttt{Proc}$.
+and $\func{smram\_strat}$ tells which cache strategy has to be used when the CPU
+is in SMM.
+%
+As we said, the set of states of the CPU is denoted $\texttt{Proc}$.
 
-\[ \texttt{Proc} \triangleq \begin{array}{ll}
-                              \{\,in\_smm &: \setshortdef{\val{true},
-                              \val{false}} \\
-                              ;\,pc &: \texttt{PhysAddr} \\
-                              ;\,smbase &: \texttt{PhysAddr} \\
-                              ;\,smrr &: \texttt{Smrr} \\
-                              ;\,strat &: [ \texttt{PhysAddr} \rightarrow
-                              \texttt{CacheStrat}]\,\}
-                            \end{array} \]
+\[
+  \texttt{Proc} \triangleq
+  \begin{array}{ll}
+    \{\,in\_smm &: \setshortdef{\val{true}, \val{false}} \\
+    ;\,pc &: \texttt{PhysAddr} \\
+    ;\,smbase &: \texttt{PhysAddr} \\
+    ;\,smrr &: \texttt{Smrr} \\
+    ;\,strat &: [ \texttt{PhysAddr} \rightarrow \texttt{CacheStrat}]\,\}
+  \end{array}
+\]
 
-The boolean $in\_smm$ is a boolean set to $\val{true}$ when the CPU is in
-SMM and to $\val{false}$ when it leaves it. The physical address $pc$ models the
-program counter, a register used to store the address of the next instruction to
-be fetched and executed. The physical address $smbase$ models the register of
-the same name. The map $strat$ abstracts away the numerous mechanisms of the x86
+The boolean $in\_smm$ is a boolean set to $\val{true}$ when the CPU is in SMM
+and to $\val{false}$ when it leaves it.
+%
+The physical address $pc$ models the program counter, a register used to store
+the address of the next instruction to be fetched and executed.
+%
+The physical address $smbase$ models the register of the same name.
+%
+The map $strat$ abstracts away the numerous mechanisms of the x86
 microprocessors to determine which cache strategy to use for a given \IO.
 
 The set of states of the \formatLTS{Minx86} Computing Platforms memory
 controller is denoted by $\val{MC}$.
 
-\[ \texttt{MC} \triangleq \begin{array}{ll}
-                              \{\,d\_open &: \setshortdef{\val{true},
-                              \val{false}} \\
-                              ;\,d\_lock &: \setshortdef{\val{true},
-                          \val{false}}\,\}
-                            \end{array} \]
+\[
+  \texttt{MC} \triangleq
+  \begin{array}{ll}
+    \{\,d\_open &: \setshortdef{\val{true}, \val{false}} \\
+    ;\,d\_lock &: \setshortdef{\val{true}, \val{false}}\,\}
+  \end{array}
+\]
+%
 The two booleans $d\_open$ and $d\_lock$ model two bits of a configuration
-register named \texttt{smramc}. They are used to determine how the memory
-controller dispatches the \IO which targets a physical address of the SMRAM.
+register named \texttt{smramc}.
+%
+They are used to determine how the memory controller dispatches the \IO which
+targets a physical address of the SMRAM.
 
 For a memory controller state $mc \in \texttt{MC}$ to be consistent with respect
-to the hardware specifications, it has to to verify that $d\_lock(mc) =
-\val{true} \Rightarrow d\_open(mc) = \val{false}$.
+to the hardware specifications, it has to to verify that
+$d\_lock(mc) = \val{true} \Rightarrow d\_open(mc) = \val{false}$.
 
 We then define several address spaces:
+%
 \begin{itemize}
-  \item $\texttt{PhysAddr} \triangleq \setdef{\val{pa}_i}{i \leq
-    \val{max\_addr}}$ the set of physical addresses the CPU uses to perform \IO.
-  \item $\texttt{DRAMAddr} \triangleq \setdef{\val{dram}_i}{i \leq
-    \val{max\_addr}}$ the set of addresses of the memory cells exposed by the
-    DRAM controller
-  \item $\texttt{VGAAddr} \triangleq \setdef{\val{vga}_i}{i \leq
-    \val{max\_addr}}$ the set of addresses of the memory cells exposed by the
-    VGA controller
-  \item $\texttt{HardAddr} \triangleq \texttt{DRAMAddr}\,\cup\,\texttt{VGAAddr}$
+\item $\texttt{PhysAddr} \triangleq \setdef{\val{pa}_i}{i \leq \val{max\_addr}}$
+  the set of physical addresses the CPU uses to perform \IO.
+%
+\item
+  $\texttt{DRAMAddr} \triangleq \setdef{\val{dram}_i}{i \leq \val{max\_addr}}$
+  the set of addresses of the memory cells exposed by the DRAM controller
+%
+\item $\texttt{VGAAddr} \triangleq \setdef{\val{vga}_i}{i \leq \val{max\_addr}}$
+  the set of addresses of the memory cells exposed by the VGA controller
+%
+\item $\texttt{HardAddr} \triangleq \texttt{DRAMAddr}\,\cup\,\texttt{VGAAddr}$
 \end{itemize}
 
-The maximal address offset (denoted by $\val{max\_addr}$ here) is specific to the
-CPU (for the physical addresses), the DRAM controller and the VGA controller. By
-convenience, we give the same values to each of them in our model.
+The maximal address offset (denoted by $\val{max\_addr}$ here) is specific to
+the CPU (for the physical addresses), the DRAM controller and the
+VGA controller. By convenience, we give the same values to each of them in our
+model.
 
 The memory controller translates physical addresses into hardware addresses and
-forwards the \IO accordingly. We model this translation with the function \[
-phys\_to\_hard : \texttt{MC} \times \setshortdef{\val{true},\,\val{false}}
-\times \texttt{PhysAddr} \rightarrow \texttt{HardAddr} \] which maps a state of
-the memory controller, a boolean which tells if the CPU is in SMM or not and a
-physical address to a hardware address.  It is important to keep in mind that
-the same physical address can be translated into two different hardware
-addresses for two memory controller states $m$ and $m'$, hence it is possible to
-have \[ phys\_to\_hard(m, b, pa) \neq phy\_to\_hard(m', b, pa) \]
+forwards the \IO accordingly.
+%
+We model this translation with the function
+%
+\[
+  phys\_to\_hard : \texttt{MC} \times \setshortdef{\val{true},\,\val{false}}
+  \times \texttt{PhysAddr} \rightarrow \texttt{HardAddr}
+  %
+\]
+%
+which maps a state of the memory controller, a boolean which tells if the CPU is
+in SMM or not and a physical address to a hardware address.
+%
+It is important to keep in mind that the same physical address can be translated
+into two different hardware addresses for two memory controller states $m$ and
+$m'$, hence it is possible to have
+%
+\[
+  phys\_to\_hard(m, b, pa) \neq phy\_to\_hard(m', b, pa)
+\]
 
 We model the SMRAM with two ranges of addresses:
+%
 \begin{itemize}
-  \item $\texttt{hSmram} \triangleq \setdef{\val{dram}_i}{\val{smram\_base} \leq
-    i \le \val{smram\_end}}$ the SMRAM memory range within the DRAM memory
-  \item $\texttt{pSmram} \triangleq \setdef{\val{pa}_i}{\val{smram\_base} \leq i
-    \le \val{smram\_end}}$ the projection of the SMRAM in the memory map
+\item
+  $\texttt{hSmram} \triangleq \setdef{\val{dram}_i}{\val{smram\_base} \leq i \le
+    \val{smram\_end}}$ the SMRAM memory range within the DRAM memory
+%
+\item
+  $\texttt{pSmram} \triangleq \setdef{\val{pa}_i}{\val{smram\_base} \leq i \le
+    \val{smram\_end}}$ the projection of the SMRAM in the memory map
 \end{itemize}
 
 The values of $\val{smram\_base}$ and $\val{smram\_end}$ are specified in the
-memory controller specifications. It is the software responsability to set the
-SMRR accordingly. We assume $\val{smram\_end} - \val{smram\_base} > 0x8000$.
-This way, when the SMBASE contains the address of the beginning of the SMRAM,
-the SMM entry point (that is $SMBASE + 0x8000$) is in SMRAM.
+memory controller specifications.
+%
+It is the software responsability to set the SMRR accordingly.
+%
+We assume $\val{smram\_end} - \val{smram\_base} > 0x8000$.  This way, when the
+SMBASE contains the address of the beginning of the SMRAM, the SMM entry point
+(that is $SMBASE + 0x8000$) is in SMRAM.
 
 The physical memories state (exposed by the DRAM controller and the
-VGA controller) is modeled with a mapping between the hardware addresses and the
-software component which owns the related memory location. Given $\set{S}$ the
-set of software components, we denote $\texttt{Mem}_{\set{S}}$ the set of states
-of the physical memories. \[ \texttt{Mem}_{\set{S}} \triangleq [
-\texttt{HardAddr} \rightarrow \set{S} ] \]
+VGA controller) is modelled with a mapping between the hardware addresses and
+the software component which owns the related memory location.
+%
+Given $\set{S}$ the set of software components, we denote
+$\texttt{Mem}_{\set{S}}$ the set of states of the physical memories.
+\[
+  \texttt{Mem}_{\set{S}} \triangleq [ \texttt{HardAddr} \rightarrow \set{S} ]
+\]
+% which can be available or already used. A cache line already used is tagged
+% with the physical address of its content. For a given physical address, the
+% CPU computes an index to select a cache line and verify its tag.  hich
+% contain, in addition to the copy of the cached memory content, a "dirty bit"
+% and a tag. A cache line is marked as dirty when its content is modified which
+% indicates if the cache line content has been modified without propagating the
+% underlying hardware memories and the .
 
-%which can be available or already
-%used. A cache line already used is tagged with the physical address of its
-%content. For a given physical address, the CPU computes an index to select a
-%cache line and verify its tag.
-%hich contain, in addition to the
-%copy of the cached memory content, a "dirty bit" and a tag. A cache line is
-%marked as dirty when its content is modified
-%which indicates if the cache
-%line content has been modified without propagating the underlying hardware
-%memories and the .
-We assume $\texttt{Index}$ is the set of cache indexes and $index :
-\texttt{PhysAddr} \rightarrow \texttt{Index}$ the function used by the CPU to
-determine which index to use for a given physical address. The cache is divided
-into several cache lines which contain the cached memory content and several
-additional information required by the cache strategy algorithm. The set of
-states of the cache line is denoted by $\texttt{CacheLine}_{\set{S}}$. In
-addition to modeling the hardware specifications, the definition of
-$\texttt{CacheLine}_{\set{S}}$ attaches a software owner to a cache line. We do
-not give more details about the cache line model because the cache behavior is
-out of the scope of this article.
+We assume $\texttt{Index}$ is the set of cache indexes and
+$index : \texttt{PhysAddr} \rightarrow \texttt{Index}$ the function used by the
+CPU to determine which index to use for a given physical address.
+%
+The cache is divided into several cache lines which contain the cached memory
+content and several additional information required by the cache strategy
+algorithm.
+%
+The set of states of the cache line is denoted by
+$\texttt{CacheLine}_{\set{S}}$.
+%
+In addition to modeling the hardware specifications, the definition of
+$\texttt{CacheLine}_{\set{S}}$ attaches a software owner to a cache line.
+%
+We do not give more details about the cache line model because the cache
+behavior is out of the scope of this article.
 
-%\[ \texttt{CacheLine}_{\set{S}} \triangleq \begin{array}{ll}
-%    \{\,dirty &: \setshortdef{\val{true},\,\val{false}} \\
-%    ;\,tag &: \texttt{PhysAddr} \\
-%  ;\,owner &: \set{S}\,\}
-%\end{array} \]
+% \[
+%   \texttt{CacheLine}_{\set{S}} \triangleq \begin{array}{ll} \{\,dirty &:
+%     \setshortdef{\val{true},\,\val{false}} \\
+%     ;\,tag
+%     &:
+%     \texttt{PhysAddr}
+%     \\
+%     ;\,owner
+%     &:
+%     \set{S}\,\}
+%   \end{array} \]
 
-\[ \texttt{Cache}_{\set{S}} \triangleq [ \texttt{Index} \rightarrow
-\texttt{CacheLine}_{\set{S}} ] \]
+\[
+  \texttt{Cache}_{\set{S}} \triangleq [ \texttt{Index} \rightarrow
+  \texttt{CacheLine}_{\set{S}} ]
+\]
 
 The hardware architecture states are implemented in the
-\emph{SpecCert.x86.Archi\-tecture} module (about 1\,500 lines of code). In
-addition to the state definitions, we have implemented several helper functions
-and predicates. For instance,
+\emph{SpecCert.x86.Archi\-tecture} module (about 1\,500 lines of code).
+%
+In addition to the state definitions, we have implemented several helper
+functions and predicates.
+%
+For instance,
+%
 \begin{itemize}
-\item[] $address\_location\_owner : \texttt{Archi}_{\set{S}} \rightarrow
+\item
+  $address\_location\_owner : \texttt{Archi}_{\set{S}} \rightarrow
   \texttt{PhysAddr} \rightarrow \set{S}$
-    \begin{quote}
-      \small Given a hardware architecture state and a physical address,
-      returns the memory content software owner
-    \end{quote}
-\item[] $cache\_hit : \texttt{Archi}_{\set{S}} \rightarrow
-  \texttt{PhysAddr} \rightarrow \texttt{Prop}$
-    \begin{quote}
-      \small Given a hardware architecture state and a physical address,
-      holds true if the memory content is in the cache
-    \end{quote}
-\item[] $cache\_line\_owner : \texttt{Archi}_{\set{S}} \rightarrow
-  \texttt{Index} \rightarrow \set{S}$
-    \begin{quote}
-      \small Given a hardware architecture state and a cache line index,
-      returns the owner of this cache line
-    \end{quote}
-\item[] $resolve\_cache\_strategy : \texttt{Archi}_{\set{S}} \rightarrow
+  \begin{quote}
+    \small Given a hardware architecture state and a physical address, returns
+    the memory content software owner
+  \end{quote}
+%
+\item
+  $cache\_hit : \texttt{Archi}_{\set{S}} \rightarrow \texttt{PhysAddr}
+  \rightarrow \texttt{Prop}$
+  \begin{quote}
+    \small Given a hardware architecture state and a physical address, holds
+    true if the memory content is in the cache
+  \end{quote}
+%
+\item
+  $cache\_line\_owner : \texttt{Archi}_{\set{S}} \rightarrow \texttt{Index}
+  \rightarrow \set{S}$
+  \begin{quote}
+    \small Given a hardware architecture state and a cache line index, returns
+    the owner of this cache line
+  \end{quote}
+%
+\item
+  $resolve\_cache\_strategy : \texttt{Archi}_{\set{S}} \rightarrow
   \texttt{PhysAddr} \rightarrow \texttt{CacheStrat}$
-    \begin{quote}
-      \small Given a hardware architecture state and a physical address,
-      returns the cache strategy used by the CPU for this address
-    \end{quote}
-\item[] $translate\_physical\_address : \texttt{Archi}_{\set{S}} \rightarrow
+  \begin{quote}
+    \small Given a hardware architecture state and a physical address, returns
+    the cache strategy used by the CPU for this address
+  \end{quote}
+%
+\item
+  $translate\_physical\_address : \texttt{Archi}_{\set{S}} \rightarrow
   \texttt{PhysAddr} \rightarrow \texttt{HardAddr}$
-    \begin{quote}
-      \small Given a hardware architecture state and a physical address,
-      returns the result of the memory controller address translation
-    \end{quote}
+  \begin{quote}
+    \small Given a hardware architecture state and a physical address, returns
+    the result of the memory controller address translation
+  \end{quote}
 \end{itemize}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 We model the projection of the SMRAM in the memory map such that
 $\texttt{pSmram} \triangleq \setdef{\val{pa}_i}{\val{smram\_base} \leq i \le
-  \val{smram\_end}}$.  The values of $\val{smram\_base}$ and $\val{smram\_end}$
-are specified in the memory controller specifications. It is the software
-responsability to set the SMRR accordingly. We assume
-$\val{smram\_end} - \val{smram\_base} > \val{0x8000}$. This way, when the SMBASE
-contains the address of the beginning of the SMRAM, the SMM entry point (that is
-$SMBASE + \val{0x8000}$) is in SMRAM.
+  \val{smram\_end}}$.
+%
+The values of $\val{smram\_base}$ and $\val{smram\_end}$ are specified in the
+memory controller specifications.
+%
+It is the software responsability to set the SMRR accordingly.
+%
+We assume $\val{smram\_end} - \val{smram\_base} > \val{0x8000}$.
+%
+This way, when the SMBASE contains the address of the beginning of the SMRAM,
+the SMM entry point (that is $SMBASE + \val{0x8000}$) is in SMRAM.
 
 The hardware architecture states are implemented in the
 \emph{SpecCert.x86.Archi\-tecture} module (about 1\,500 lines of code).
@@ -688,51 +894,54 @@ The hardware architecture states are implemented in the
 \subsection{Events as State-Transformers}
 
 The set of events which trigger the state-transformations is denoted by
-$\texttt{Event}$. As we said in Section \ref{subsec:speccert:computing}, we
-distinguish hardware events denoted by $\texttt{Event}_{Hard}$ and software
-events denoted by $\texttt{Event}_{Soft}$.
+$\texttt{Event}$.
+%
+As we said in Section \ref{subsec:speccert:computing}, we distinguish hardware
+events denoted by $\texttt{Event}_{Hard}$ and software events denoted by
+$\texttt{Event}_{Soft}$.
 
 \begin{table}
   \centerline{%
-  \begin{tabular}{lp{3cm}p{6cm}}
-    \hline
-    \textbf{Event} & \textbf{Paramters} & \textbf{Description} \\
-    \hline
-    $Write$ & $pa \in \texttt{PhysAddr}$ & A CPU \IO to write at physical address
-                                           $pa$ \\
-    \hline
-    $Read$ & $pa \in \texttt{PhysAddr}$ & A CPU \IO to read at physical address $pa \in
-                                          \texttt{PhysAddr}$ \\
-    \hline
-    $SetCacheStrat$ & $pa \in \texttt{PhysAddr}$ \newline $strat \in
-                      \setshortdef{\val{UC}, \val{WB}}$ & Change the cache strategy for $pa$ to
-                                                          $strat$ ($\val{WB}$ means write-back and $\val{UC}$ means uncacheable) \\
-    \hline
-    $UpdateSmrr$ & $smrr \in \texttt{Smrr}$ & Update the SMRR content with the
-                                              new value $smrr$ \\
-    \hline
-    $Rsm$ & \centering --- & The CPU leaves SMM \\
-    \hline
-    $OpenBitFlip$ & \centering --- & Flip the $d\_open$ bit \\
-    \hline
-    $LockSmramc$ & \centering --- & Set the $d\_lock$ bit \\
-    \hline
-    $NextInstruction\quad$ & $pa \in \texttt{PhysAddr}$ & The program counter register
-                                                          of the CPU is set to $pa$ \\
-    \hline
-  \end{tabular}
+    \begin{tabular}{lp{3cm}p{6cm}}
+      \hline
+      \textbf{Event} & \textbf{Paramters} & \textbf{Description} \\
+      \hline
+      $Write$ & $pa \in \texttt{PhysAddr}$ & A CPU \IO to write at physical address
+                                             $pa$ \\
+      \hline
+      $Read$ & $pa \in \texttt{PhysAddr}$ & A CPU \IO to read at physical address $pa \in
+                                            \texttt{PhysAddr}$ \\
+      \hline
+      $SetCacheStrat$ & $pa \in \texttt{PhysAddr}$ \newline $strat \in
+                        \setshortdef{\val{UC}, \val{WB}}$ & Change the cache strategy for $pa$ to
+                                                            $strat$ ($\val{WB}$ means write-back and $\val{UC}$ means uncacheable) \\
+      \hline
+      $UpdateSmrr$ & $smrr \in \texttt{Smrr}$ & Update the SMRR content with the
+                                                new value $smrr$ \\
+      \hline
+      $Rsm$ & \centering --- & The CPU leaves SMM \\
+      \hline
+      $OpenBitFlip$ & \centering --- & Flip the $d\_open$ bit \\
+      \hline
+      $LockSmramc$ & \centering --- & Set the $d\_lock$ bit \\
+      \hline
+      $NextInstruction\quad$ & $pa \in \texttt{PhysAddr}$ & The program counter register
+                                                            of the CPU is set to $pa$ \\
+      \hline
+    \end{tabular}
   }
   \caption{List of software events}
   \label{tab:softev}
 \end{table}
 
 Table~\ref{tab:softev} lists the software events we consider in the
-$\formatLTS{Minx86}$ Computing Platforms. We model the CPU \IOs with $Read(pa)$
-and $Write(pa)$, the configuration of the memory controller with $OpenBitFlip$
-and $LockSmramc$, the configuration of the cache strategy with
-$SetCacheStrat(pa,strat)$, the configuration of the SMRR with $UpdateSmrr(smrr)$
-the exit of the SMM with $Rsm$ and the update of the CPU program counter
-register with $NextInstruction(pa)$.
+$\formatLTS{Minx86}$ Computing Platforms.
+%
+We model the CPU \IOs with $Read(pa)$ and $Write(pa)$, the configuration of the
+memory controller with $OpenBitFlip$ and $LockSmramc$, the configuration of the
+cache strategy with $SetCacheStrat(pa,strat)$, the configuration of the SMRR
+with $UpdateSmrr(smrr)$ the exit of the SMM with $Rsm$ and the update of the CPU
+program counter register with $NextInstruction(pa)$.
 
 \begin{table}
   \bigcentering
@@ -750,114 +959,185 @@ register with $NextInstruction(pa)$.
   \label{tab:hardev}
 \end{table}
 
-The other causes of state-transformations are modeled using hardware events.
+The other causes of state-transformations are modelled using hardware events.
+%
 Table \ref{tab:hardev} lists the hardware events we consider in the
-$\formatLTS{Minx86}$ Computing Platforms. $Fetch$ models the \IO to fetch the
-instruction pointed by the program counter register. $ReceiveSmi$ models a
-System Management Interrupt being risen and handled by the CPU.
+$\formatLTS{Minx86}$ Computing Platforms.
+%
+$Fetch$ models the \IO to fetch the instruction pointed by the program counter
+register.
+%
+$ReceiveSmi$ models a System Management Interrupt being risen and handled by the
+CPU.
 
 We define $minx86\_fetched$ an event-software mapping for $\formatLTS{Minx86}$
-Computing Platforms (see Definition \ref{def:evsoft}). The $minx86\_fetched$
-function maps a state-transformation to the set of software components which own
-an instruction fetched during this state-transformation. In the case of
-\formatLTS{Minx86}, there is only one event which implies fetching instructions:
-$Fetch$. Let $o$ be the owner of the instruction pointed by the program counter
-register in the formula
-\[ minx86\_fetched(h, ev) \triangleq \begin{cases}
+Computing Platforms (see Definition \ref{def:evsoft}).
+%
+The $minx86\_fetched$ function maps a state-transformation to the set of
+software components which own an instruction fetched during this
+state-transformation.
+%
+In the case of \formatLTS{Minx86}, there is only one event which implies
+fetching instructions: $Fetch$.
+%
+Let $o$ be the owner of the instruction pointed by the program counter register
+in the formula
+%
+\[
+  minx86\_fetched(h, ev) \triangleq
+  \begin{cases}
     \setshortdef{o} & \text{if }ev = Fetch \\
-    \emptyset & \text{otherwise} \\
-  \end{cases} \] We can determine $o$ because $\formatLTS{Minx86}$ tracks the
-memory location ownership.
+    \emptyset       & \text{otherwise} \\
+  \end{cases}
+\]
+%
+We can determine $o$ because $\formatLTS{Minx86}$ tracks the memory location
+ownership.
 
 \label{page:minx86def} Given $context$ a hardware-software mapping (see
 Definition \ref{def:hardsoftmap}), the precondition predicate of the Computing
 Platform $\formatLTS{Minx86}(context)$ is named $min\-x86\_pre$ and the
-postcondition predicate is named $min\-x86\_post(con\-text)$. We give an
-informal description of the $min\-x86\_pre$ and $minx\-86\_post(context)$ for
-each event. These definitions have been implemented in Coq in the module
+postcondition predicate is named $min\-x86\_post(con\-text)$.
+%
+We give an informal description of the $min\-x86\_pre$ and
+$minx\-86\_post(context)$ for each event.
+%
+These definitions have been implemented in Coq in the module
 \emph{Spec\-Cert.x86.Transi\-tion}.
 
-We first give the semantics of software events as state-transformers. A software
-component can always read and write at any physical address. As a consequence,
-the precondition for $Read(pa)$ and $Write(pa)$ always holds true. The
-postcondition for $Read(pa)$ and $Write(pa)$ requires the memory ownership to be
-updated according to the memories and cache state updates. The memory controller
-enforces a simple access control to protect the SMRAM content in the DRAM memory
-by forwarding the related \IO to the VGA controller when the CPU is not in SMM.
+We first give the semantics of software events as state-transformers.
+%
+A software component can always read and write at any physical address.
+%
+As a consequence, the precondition for $Read(pa)$ and $Write(pa)$ always holds
+true.
+%
+The postcondition for $Read(pa)$ and $Write(pa)$ requires the memory ownership
+to be updated according to the memories and cache state updates.
+%
+The memory controller enforces a simple access control to protect the
+SMRAM content in the DRAM memory by forwarding the related \IO to the VGA
+controller when the CPU is not in SMM.
+%
 To determine the owner of the memory location which sees its content overriden
 during a state transformation, the postcondition uses the hardware-software
 mapping used to define the Computing Platform.
 
-A software component can always update the cache strategy used for an \IO. The
-postcondition for $SetCacheStrat(pa,strat)$ requires only the cache strategy
-setting for this physical address $pa$ to change. The precondition for
-$UpdateSmrr$ requires the CPU to be in SMM. The postcondition requires the SMRR
-of the CPU to be updated with the correct value, the rest of the hardware
-architecture state being left unchanged.
+A software component can always update the cache strategy used for an \IO.
+%
+The postcondition for $SetCacheStrat(pa,strat)$ requires only the cache strategy
+setting for this physical address $pa$ to change.
+%
+The precondition for $UpdateSmrr$ requires the CPU to be in SMM.
+%
+The postcondition requires the SMRR of the CPU to be updated with the correct
+value, the rest of the hardware architecture state being left unchanged.
 
 A software component can jump to any physical address, hence the postcondition
-for $NextInstru\-ction(pa)$ always holds true. The postcondition for
-$NextInstru\-ction(pa)$ requires the program counter register to be updated with
-$pa$. The $OpenBitFlip$ precondition requires the SMRAMC register to be
-unlocked. The postcondition requires the \texttt{d\_open} bit to be updated. The
-$Lock\-Smramc$ precondition requires the $\texttt{d\_lock}$ bit to be unset. The
-postcondition requires the $\texttt{d\_open}$ bit to be unset and the $d\_lock$
-bit to be unset.
+for $\func{NextInstru\-ction}(pa)$ always holds true.
+%
+The postcondition for $NextInstru\-ction(pa)$ requires the program counter
+register to be updated with $pa$. The $OpenBitFlip$ precondition requires the
+SMRAMC register to be unlocked. The postcondition requires the \texttt{d\_open}
+bit to be updated. The $Lock\-Smramc$ precondition requires the
+$\texttt{d\_lock}$ bit to be unset. The postcondition requires the
+$\texttt{d\_open}$ bit to be unset and the $d\_lock$ bit to be unset.
 
-We now describe the semantics of hardware events as state-transformers. $Fetch$
-models the fetching of an instruction by the CPU. As a consequence, the
-definition of its precondition and postcondition are the same as $Read(pa)$ with
-$pa$ being the program register value.  $ReceiveSmi$ precondition requires the
-CPU not to be in SMM because SMM is non-reentrant.  The postcondition of
-$ReceiveSmi$ requires the program counter to be set with the
-$smbase + \val{0x8000}$ (where $smbase$ is the value of the SMBASE register of
-the CPU) and the CPU is in SMM.
+We now describe the semantics of hardware events as state-transformers.
+%
+$\func{Fetch}$ models the fetching of an instruction by the CPU.
+%
+As a consequence, the definition of its precondition and postcondition are the
+same as $Read(pa)$ with $pa$ being the program register value.
+%
+$ReceiveSmi$ precondition requires the CPU not to be in SMM because SMM is
+non-reentrant.
+%
+The postcondition of $ReceiveSmi$ requires the program counter to be set with
+the $smbase + \val{0x8000}$ (where $smbase$ is the value of the SMBASE register
+of the CPU) and the CPU is in SMM.
 
 \section{System Management Mode HSE} \label{sec:speccert:smm}
 
-In \cite{intel2014manual}, Intel states "the main benefit of SMM is that it
+In \cite{intel2014manual}, Intel states ``the main benefit of SMM is that it
 offers a distinct and easily isolated processor environment that operates
-transparently to the operating system or executive and software
-applications". For the SMM processor environment to be isolated, the code
-executed when the CPU is in SMM needs to implement a HSE mechanism. In this
-section, we formalize and verify this mechanism against the model we have
-previously introduced.
+transparently to the operating system or executive and software applications''.
+%
+For the SMM processor environment to be isolated, the code executed when the CPU
+is in SMM needs to implement a HSE mechanism.
+%
+In this section, we formalize and verify this mechanism against the model we
+have previously introduced.
 
 \subsection{Computing Platform and Security Policy}
 
 We consider three software components: the boot sequence code, the SMM code and
-the OS code. During the boot sequence, only the boot sequence code is executed
-and it loads both the OS code and the SMM code into memory. At the end of the
-boot sequence, the OS kernel is executed. This OS kernel will schedule different
-applications. Because applications are less privileged than the OS kernel, we
-will not distinguish them from the kernel code. Thus, in the following, OS code
-refers to both OS kernel and application codes.
+the OS code.
+%
+During the boot sequence, only the boot sequence code is executed and it loads
+both the OS code and the SMM code into memory.
+%
+At the end of the boot sequence, the OS kernel is executed.
+%
+This OS kernel will schedule different applications.
+%
+Because applications are less privileged than the OS kernel, we will not
+distinguish them from the kernel code.
+%
+Thus, in the following, OS code refers to both OS kernel and application codes.
 
-At runtime, both the OS code and the SMM code can be executed. Our objective is
-to evaluate the security provided by the hardware to isolate SMM code from OS
-code. Thus, we define \[ \set{S} \triangleq \setshortdef{\val{smm}, \val{os}} \]
+At runtime, both the OS code and the SMM code can be executed.
+%
+Our objective is to evaluate the security provided by the hardware to isolate
+SMM code from OS code.
+%
+Thus, we define
+%
+\[
+  \set{S} \triangleq \setshortdef{\val{smm}, \val{os}}
+\]
 
-We assume the SMM is dedicated to the SMM code.  Let
+We assume the SMM is dedicated to the SMM code.
+%
+Let
 $cpu\_in\_smm : \texttt{Archi}_{\set{S}} \rightarrow \setshortdef{\val{true},
   \val{false}}$ be the function which returns $\val{true}$ if the CPU is in SMM
-and $\val{false}$ otherwise.  We define $smm\_context$ a hardware-software
-mapping such that
-\[ smm\_context(h) \triangleq \begin{cases}
-    \val{smm} & \text{if } cpu\_in\_smm(h) = \val{true} \\
+and $\val{false}$ otherwise.
+%
+We define $smm\_context$ a hardware-software mapping such that
+%
+\[
+  smm\_context(h) \triangleq
+  \begin{cases}
+    \val{smm} & \text{if } \func{cpu\_in\_smm}(h) = \val{true} \\
     \val{os} & \text{otherwise}
-  \end{cases} \] Let $\formatLTS{Smmx86}$ be the Computing Platform such as
-\[ \formatLTS{Smmx86} \triangleq \formatLTS{Minx86}(smm\_context) \]
+  \end{cases}
+\]
+%
+Let $\formatLTS{Smmx86}$ be the Computing Platform such as
+%
+\[
+  \formatLTS{Smmx86} \triangleq \formatLTS{Minx86}(smm\_context)
+\]
 
 We assume that both the OS code and the SMM code have been loaded in distinct
-memory regions. In particular, all the SMM code has been loaded in SMRAM. Our
-objective is to enforce a security policy which prevents the OS code to tamper
-with the SMM code execution. This way, the SMM (which is the most privileged
-execution mode of the CPU) cannot be used to perform an escalation privilege. We
-define $smm\_security$ a predicate to model this security policy such as given
-$\rho \in \formatLTS{Smmx86}$,
-\[ \begin{array}{l} smm\_security(\rho) \triangleq \\ \qquad
-    software\_execution\_isolation(smm\_context, minx86\_execute, \rho,
-    \setshortdef{\val{smm}}) \end{array} \]
+memory regions. In particular, all the SMM code has been loaded in SMRAM.
+%
+Our objective is to enforce a security policy which prevents the OS code to
+tamper with the SMM code execution.
+%
+This way, the SMM (which is the most privileged execution mode of the CPU)
+cannot be used to perform an escalation privilege.
+%
+We define $smm\_security$ a predicate to model this security policy such as
+given $\rho \in \formatLTS{Smmx86}$,
+%
+\[
+  \begin{array}{l} smm\_security(\rho) \triangleq \\
+    \qquad software\_execution\_isolation(smm\_context, minx86\_execute, \rho,
+    \setshortdef{\val{smm}})
+  \end{array}
+\]
 
 \subsection{HSE Definition}
 
@@ -887,68 +1167,65 @@ on states.
 %%%%%% APPENDIX INV %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-We now define $\func{behavior_{Smm}}$. We only define two
-restrictions. First, we force the SMM code execution to remain confined within
-the SMRAM. The reason is simple: the OS code can tamper with the memory outside
-the SMRAM. As a consequence, jumping outside the SMRAM is the best way to fail
-the security policy. Secondly, we prevent the SMM code to update the SMRR
-registers as it is the responsability of the boot sequence code to correctly set
-them.
+We now define $\func{behavior_{Smm}}$.
+%
+We only define two restrictions.
+%
+First, we force the SMM code execution to remain confined within the SMRAM.
+%
+The reason is simple: the OS code can tamper with the memory outside the SMRAM.
+%
+As a consequence, jumping outside the SMRAM is the best way to fail the security
+policy.
+%
+Secondly, we prevent the SMM code to update the SMRR registers as it is the
+responsability of the boot sequence code to correctly set them.
 
 \[
-  \func{behavior_{Smm}}(h, ev) \triangleq \begin{array}{l}
-                                           \func{smm\_context}(h) = \val{smm} \\
-                                           \quad \Rightarrow ((e =
-                                           NextInstruction(pa)
-                                           \Rightarrow pa \in \texttt{pSmram}) \\
-                                           \qquad \wedge\,(e \neq UpdateSmrr(smrr))) \\
-                                         \end{array}
-                                       \]
+  \func{behavior_{Smm}}(h, ev) \triangleq
+  \begin{array}{l}
+    \func{smm\_context}(h) = \val{smm} \\
+    \quad \Rightarrow ((e =
+    NextInstruction(pa)
+    \Rightarrow pa \in \texttt{pSmram}) \\
+    \qquad \wedge\,(e \neq UpdateSmrr(smrr))) \\
+  \end{array}
+\]
 
-                                       For $\Delta_{Smm}$ to be a HSE mechanism,
-                                       we need to prove the two HSE Laws (see
-                                       Definition \ref{def:laws}).  The first
-                                       law states the state requirements modeled
-                                       with $inv_{Smm}$ are preserved through
-                                       state-transformations if the
-                                       transformations which do not satisfy
-                                       $behavior_{Smm}$ are discarded. We prove
-                                       this by enumeration of
-                                       $ev \in \texttt{Event}$ and
-                                       $h \in \texttt{Archi}_{Smm}$, we check
-                                       that each requirement described
-                                       previously is preserved by
-                                       $\Delta_{Smm}$. We use those intermediary
-                                       results to conclude. The second law
-                                       states that the $behavior_{Smm}$
-                                       predicate specifies
-                                       state-trans\-formation requirements for
-                                       the TCB only. In this use case, it means
-                                       $behavior_{Smm}$ should always hold true
-                                       when the OS code is executed by the
-                                       hardware architecture.  By definition of
-                                       $behavior_{Smm}$,
-                                       $smm\_context(h) = \val{smm}$ is an
-                                       antecedent of the conditional.
+For $\Delta_{Smm}$ to be a HSE mechanism, we need to prove the two HSE Laws (see
+Definition \ref{def:laws}).
+%
+The first law states the state requirements modelled with $inv_{Smm}$ are
+preserved through state-transformations if the transformations which do not
+satisfy $behavior_{Smm}$ are discarded.
+%
+We prove this by enumeration of $ev \in \texttt{Event}$ and
+$h \in \texttt{Archi}_{Smm}$, we check that each requirement described
+previously is preserved by $\Delta_{Smm}$.
+%
+We use those intermediary results to conclude.
+%
+The second law states that the $behavior_{Smm}$ predicate specifies
+state-trans\-formation requirements for the TCB only.
+%
+In this use case, it means $behavior_{Smm}$ should always hold true when the OS
+code is executed by the hardware architecture.
+%
+By definition of $behavior_{Smm}$, $smm\_context(h) = \val{smm}$ is an
+antecedent of the conditional.
 
-                                       Let $smm\_secure\_transformation$ be a
-                                       predicate which holds true when a
-                                       state-transformation does not imply the
-                                       OS code to tamper with the execution of
-                                       SMM code.
-                                       \[ \begin{array}{l}
-                                            smm\_secure\_transformation(h, ev) \triangleq \\
-                                            \qquad \neg
-                                            software\_tampering(smm\_context,
-                                            minx86\_execute, h, ev, \val{os},
-                                            \val{smm})
-                                          \end{array} \]
+Let $smm\_secure\_transformation$ be a predicate which holds true when a
+state-transformation does not imply the OS code to tamper with the execution of
+SMM code.
+\[ \begin{array}{l}
+     smm\_secure\_transformation(h, ev) \triangleq \\
+     \qquad \neg software\_tampering(smm\_context, minx86\_execute, h, ev,
+     \val{os}, \val{smm})
+   \end{array} \]
 
-                                        We prove that this predicate holds true
-                                        for a state-transformation with respect
-                                        to the HSE mechanism. With this result,
-                                        we can prove the HSE mechanism is sound
-                                        (see Definition \ref{def:sound}).
+ We prove that this predicate holds true for a state-transformation with respect
+ to the HSE mechanism. With this result, we can prove the HSE mechanism is sound
+ (see Definition \ref{def:sound}).
 
 \begin{lemma}[Invariants Enforce Security]
   $\forall \transitionLTS{Smmx86}{h}{ev}{h'}$,
@@ -963,7 +1240,7 @@ them.
     By enumeration of $ev \in \texttt{Event}$ and
     $h \in \texttt{Archi}_{\set{S}}$.
   \end{proof}
- \end{lemma}
+\end{lemma}
 
 \begin{theorem}[$\Delta_{Smm}$ is Sound]
   \[ sound(\Delta_{Smm}, smm\_security) \]
@@ -974,52 +1251,75 @@ them.
 \end{theorem}
 
 
-\section{Conclusion} \label{sec:speccert:discuss}
+\section{Conclusion}
+\label{sec:speccert:discuss}
 
 Our effort has been originally motivated by the disclosure of several
 vulnerabilities targeting multiple x86 HSE mechanisms for the past few
-years\,\cite{wojtczuk2009smram,duflot2009smram,rutkowska2008remap,domas2015sinkhole,kallenberg2015racecondition}. These
-attacks do not benefit from a software implementation error but rather from a
-flaw in the hardware specifications themselves. The result of our work is a
-three-steps methodology for formally specifying and verifying HSE mechanisms
-against a hardware architecture model. We believe each aspect is important.
+years\,\cite{wojtczuk2009smram,duflot2009smram,rutkowska2008remap,domas2015sinkhole,kallenberg2015racecondition}.
+%
+These attacks do not benefit from a software implementation error but rather
+from a flaw in the hardware specifications themselves.
+%
+The result of our work is a three-steps methodology for formally specifying and
+verifying HSE mechanisms against a hardware architecture model.
+%
+We believe each aspect is important.
 
 First, the hardware architecture model can be used as a formal specification.
+%
 The main benefit of a formal specification is to avoid any ambiguity such as the
-one we have found in \cite{intel2009mch}. One can read at Section 3.8.3.8, page
-102 that “the OPEN bit must be reset before the LOCK bit is set”.  At the same
-page, in the description of the LOCK bit, one can also read that “when [LOCK] is
-set to 1 then [OPEN] is reset to 0”. We had modeled the second statement as the
-behavior of the memory controller is not specified if the first statement is
-true\,\footnote{If we had to actually implement the HSE mechanism, we would have
-  to assume the first was the correct one.}  \formatLTS{Minx86} as a formal
-specification does not suffer from the same flaw.
+one we have found in \cite{intel2009mch}.
+%
+One can read at Section 3.8.3.8, page 102 that ``the OPEN bit must be reset
+before the LOCK bit is set''.
+%
+At the same page, in the description of the LOCK bit, one can also read that
+``when [LOCK] is set to 1 then [OPEN] is reset to 0''.
+%
+We had modelled the second statement as the behavior of the memory controller is
+not specified if the first statement is true\,\footnote{If we had to actually
+  implement the HSE mechanism, we would have to assume the first was the correct
+  one.}  \formatLTS{Minx86} as a formal specification does not suffer from the
+same flaw.
 
 Secondly, a formal specification of a HSE mechanism will help software
-developers when the time comes to implement it. For instance, the Chapter 34,
-Volume 3C of \cite{intel2014manual} about SMM is about 30 pages long, it gives
-many details on how the SMM actually works, yet no section is actually dedicated
-to security. On the contrary, our HSE mechanism definition gathers six
-requirements on hardware configurations and two requirements on software
-executions to enforce a well-defined security property. Even if the proofs only
-apply to an abstract model, we believe it is a valuable improvement.
+developers when the time comes to implement it.
+%
+For instance, the Chapter 34, Volume 3C of \cite{intel2014manual} about SMM is
+about 30 pages long, it gives many details on how the SMM actually works, yet no
+section is actually dedicated to security.
+%
+On the contrary, our HSE mechanism definition gathers six requirements on
+hardware configurations and two requirements on software executions to enforce a
+well-defined security property.
+%
+Even if the proofs only apply to an abstract model, we believe it is a valuable
+improvement.
 
 Lastly, the verification process of a HSE mechanism specification against a
 hardware architecture model may help to highlight hidden flaws in the hardware
-specifications assumptions. We take the example of the SMRAM cache poisonning
+specifications assumptions.
+%
+We take the example of the SMRAM cache poisonning
 attack\,\cite{wojtczuk2009smram,duflot2009smram}, which has motivated the
-introduction of the SMRR. If an attacker can set the proper cache strategy (WB)
-for the SMRAM physical addresses, then the code inside the SMRAM is loaded into
-the cache as soon as the CPU in SMM is executing it. From this point forward
----because the access control is enforced at the memory controller level---
-nothing prevents the attacker to tamper with it. The next time the CPU enters in
-SMM, it executes the code stored in the cache. With a SMRR-less version of
-\formatLTS{Minx86}, we were not able to conclude our HSE mechanism was sound:
-such a scenario draws attention of the SpecCert user who is forced to
-investigate.
+introduction of the SMRR.
+%
+If an attacker can set the proper cache strategy (WB) for the SMRAM physical
+addresses, then the code inside the SMRAM is loaded into the cache as soon as
+the CPU in SMM is executing it.
+%
+From this point forward ---because the access control is enforced at the memory
+controller level--- nothing prevents the attacker to tamper with it.
+%
+The next time the CPU enters in SMM, it executes the code stored in the
+cache. With a SMRR-less version of \formatLTS{Minx86}, we were not able to
+conclude our HSE mechanism was sound: such a scenario draws attention of the
+SpecCert user who is forced to investigate.
 
 From our point of view, the clear separation between the hardware model, the
 security properties and the HSE mechanisms to enforce those properties are the
 main advantage of our approach, as two different use cases can be studied
-against the same hardware model. However, the scalability of SpecCert remains to
-be proven.
+against the same hardware model.
+%
+However, the scalability of SpecCert remains to be proven.

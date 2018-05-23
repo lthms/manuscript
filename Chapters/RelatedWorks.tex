@@ -593,9 +593,54 @@ A component $M$ can be composed with another component $M'$ to form a larger
 component $M + M'$, for instance when the interface exposed by $M'$ is the
 interface used by $M$.
 %
-Reasoning about $M + M'$ can be done using a two-steps methodology, where $M$ is
-firstly verified under hypotheses about operations' results of $M'$, then these
-hypotheses are proven to be true.
+To reason about $M + M'$, it is possible to define an abstract module $M''$,
+verify $M + M''$ with respect to a given property, then prove that $M'$ is
+equivalent to $M''$.
+
+Reasoning about $M + M'$ can also be done using a two-steps methodology, where
+$M$ is firstly verified under hypotheses about operations' results of $M'$, then
+these hypotheses are proven to be true.
+%
+We have found a good illustration of this approach in the work of Thomas Heyman
+\emph{et al.}\,\cite{heyman2012securemodel}.
+%
+They have presented a component-based modelling technique for
+Alloy\,\cite{jackson2012alloy}, where components are primarily defined as
+semantics for sets of operations.
+%
+One component is connected to another when it leverages its operations.
+%
+The goal of the analysis is to reason about component composition, in particular
+with respects with security requirements.
+%
+These requirements are defined in terms of predicates on operation results.
+%
+One very interesting feature of Alloy is that it allows for reasoning about
+partial models.
+%
+This is done by specifying a set of requirements over the operations results, in
+place of a complete implementation.
+%
+From our perspective, this is useful for at least two situations:
+%
+\begin{inparaenum}[(1)]
+\item it enables incremental verification, where the system is specified
+  component by component
+%
+\item it can be leveraged to ``fill the gap'' of a system where certain
+  components are under-specified, or their implementations are proprietary.
+%
+\end{inparaenum}
+%
+Because of the scale of a hardware architecture, incremental modelling and
+verification is a game changer.
+%
+At the same time, being able to model completely and accurately each hardware
+component is unlikely, as proprietary components are the norm, while open
+hardware remains a niche market.
+%
+At least, it becomes possible to clearly define the assumptions that are made
+about these black boxes
 
 \subsection{Executable Models}
 \label{subsec:related:ease:exec}
@@ -629,6 +674,12 @@ That is, a model which can be extracted can also be executed.
 \section{A Tour of Large Verified Systems}
 
 \subsection{Hardware Systems}
+
+\paragraph{Intel}
+%
+
+\paragraph{ARM}
+%
 
 \paragraph{\ac{xom}.}
 %
@@ -684,6 +735,50 @@ model to validate their countermeasures.
 %
 However, the state explosion problem obliges the authors to simplify their
 model, in order to reduce the state combinatory.
+
+%\paragraph{Kami}
+%%
+%As part of the DeepSpec project\,\cite{appel2017deepspec}, Joonwon Choi \emph{et
+%  al.} have released Kami\,\cite{choi2017kami}.
+%%
+%Kami's main objective is to bring software formal verification technique based
+%on proof assistants to hardware conception; a world that is still dominated by
+%model checking approaches.
+%%
+%The result is a framework for the Coq proof assistant, to implement and verify
+%hardware components.
+%%
+%Pushing the \texttt{Notation} feature of Coq, which let the developer extend the
+%proof assistant parser with its own construction, to its maximum, they offer a
+%development environment very close to BlueSpec\,\cite{nikhil2004bluespec}.
+%%
+%Kami's hardware component is specified as labelled transition systems, whose set
+%of transition labels forms its interface.
+%%
+%A transition is defined in terms of actions, which can be local to a component,
+%or consists of interacting with another component.
+%%
+%Finally, Kami enables modularity, by allowing for substituting one module $m$ by
+%another module $m'$, if the latter is proven to be a refinement of the former.
+%%
+%For a given component of the computing platform, it becomes possible to reason
+%about the rest of the system in terms of high-level, specification modules.
+%%
+%These modules are as many hypotheses which can be confirmed by proving the
+%related subsystems effectively refine them.
+%
+%BlueSpec is a target for Kami's models extraction.
+%%
+%Therefore, it s possible to generate FPGA bitstream from a Kami module, using
+%the BlueSpec compiler.
+%%
+%Although Kami allows for more components’ connection patterns than what we
+%eventually propose in the context of this thesis, it is hardware-specific, thus
+%is not suitable for reasoning about systems which also contain software
+%components.
+%%
+%In addition, its purpose is to verify hardware component implementation, while
+%we rather stay at the specification level.
 
 \subsection{Software Systems}
 
@@ -749,6 +844,29 @@ Indeed, it is not possible, only with the trace of one execution, to know
 whether a given implemantion is constant time.
 %
 It is required to consider all the possible traces.
+
+\paragraph{Pip}
+%
+Pip is a minimal kernel whose reference implementation is written in {\sc
+  Gallina}, the specification language of Coq.
+%
+The authors have verified their reference implementation correctly configures a
+\ac{mmu} in order to isolate the applications it manages\,\cite{jomaa2016mmu}.
+%
+The objective is similar to the first iteration of
+VirtCert\,\cite{barthe2011virtcert1}, However their approach to specify the
+system software is closer to what Ynot has proposed.
+%
+The Pip system calls are defined in terms of a dedicated monad, which allows for
+manipulating a mix of hardware state (notably including the \ac{mmu} current
+configuration) and Pip internal state (\emph{e.g.} shadow \ac{mmu} tables with
+additional information).
+%
+The correct isolation of applications is defined as a predicate on this state,
+and they prove this predicate is an invariant during Pip execution:
+%
+from a ``secure'' state, the new state resulting of the execution of any Pip
+system call is ``secure.’’
 
 \subsection{Perspectives on HSE Mechanisms Verification}
 
