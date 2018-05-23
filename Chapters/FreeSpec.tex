@@ -971,8 +971,8 @@ FreeSpec provides a theorem which allows for extending the result obtained with
 the Theorem~\ref{theorem:der-compliance}, in the specific case where concurrent
 accesses do not lead to any change of the abstract state.
 %
-In FreeSpec, two interfaces are assumed to be independent, which means
-the use of one does not interfere with the use of the other.
+In FreeSpec, two interfaces are assumed to be independent, which means the use
+of one does not interfere with the use of the other.
 %
 This key property allows a FreeSpec user to compose interfaces and operational
 semantics together and abstract them away with abstract specifications.
@@ -1005,7 +1005,7 @@ This property is not necessarily symmetric.
 
 \begin{definition}[Predicate of Non-Interference]
   Let $\I$ be an interface and
-  $A \triangleq \langle \Omega, \textbf{step}, \mathbb{P}, \mathbb{Q} \rangle$
+  $A \triangleq \langle \Omega, \func{step}, \mathbb{P}, \mathbb{Q} \rangle$
   be an abstract specification dedicated to $\I$. Let
   $\func{pnf} : \I \rightarrow \texttt{Prop}$ be a subset of
   effects. $\func{pnf}$ is said to be a predicate of non-interference of
@@ -1020,7 +1020,7 @@ This property is not necessarily symmetric.
   \]
 \end{definition}
 
-In a similar manner to the predicate of synchronisation, FreeSpec provides a
+In a similar manner to the predicate of synchronization, FreeSpec provides a
 theorem to help and guide the verification work of its users.
 
 \begin{theorem}[Non-Interference and Concurrency]
@@ -1035,14 +1035,14 @@ theorem to help and guide the verification work of its users.
   \]
 \end{theorem}
 
-In other words, a second component which only uses the effects that
-satisfies $\textbf{pnf}$ can use the interface concurrently to a component that
-abstracts it away with $A$.
+In other words, a second component which only uses the effects that satisfies
+$\func{pnf}$ can use the interface concurrently to a component that abstracts it
+away with $A$.
 
 \begin{example}[MCH and IOMMU]
-  As pictured in Figure\,\ref{fig:freespec:computing-platform}, the Memory controller
-  not only arbitrates the memory accesses of the CPU, but also to other hardware
-  components (mostly PCI and PCIe devices).
+  As pictured in Figure\,\ref{fig:freespec:computing-platform}, the Memory
+  controller not only arbitrates the memory accesses of the CPU, but also to
+  other hardware components (mostly PCI and PCIe devices).
   %
   One possible predicate of non-interference for $A_{MCH}$ is to deny the IOMMU
   the possibility to perform privileged write, so that only the main CPU could
