@@ -1,5 +1,396 @@
-\chapter{SpecCert}
+\chapter{A Formal Definition of HSE Mechanisms}
 \label{chapter:speccert}
+
+In this Chapter, we give a formal definition of HSE mechanisms.
+
+\section{Hardware Model}
+
+In line with the works we have described in Section~\ref{sec:related:review}, we
+model a hardware architecture which executes several software components as a
+\ac{lts}.
+
+\subsection{Definition}
+
+The state of a hardware architecture models the configuration of its devices at
+a given time.
+%
+This configuration may change over time with respect to the hardware
+specifications and comprises any relevant data such as registers values, inner
+memory contents, etc.
+%
+These state transformations occur during the system's transitions.
+%
+We distinguish between two classes of transitions: the software transitions
+which are direct and foreseeable side-effects of the execution of a \ac{cpu}
+instruction and the hardware transitions which are not.
+
+\begin{definition}[Hardware Model]
+  A hardware model $\Sigma$ is a tuple
+  $\langle H, L_S, L_H, \rightarrow \rangle$, where
+  %
+  \begin{itemize}
+  \item $H$ is the set of configurations of the hardware architecture
+  \item $L_S$ is the set of labels to identify software transitions
+  \item $L_H$ is the set of labels to identify hardware transitions
+  \item $\rightarrow$ is a the transition relation of the system
+  \end{itemize}
+
+  The transition relation $\rightarrow$ is a predicate on
+  $H \times (L_S~\uplus~L_H) \times H$.
+  %
+  Afterwards, we simply write $L$ for $L_S \uplus L_H$.
+  %
+  A transition labelled with $l$ from $h$ to $h'$ is denoted by
+  %
+  \[
+    \transitionLTS{Ez}{h}{l}{h'}
+  \]
+  %
+\end{definition}
+
+\subsection{Software vs. Hardware Transitions}
+
+The execution of an instruction can be broken down into sequences of these
+transitions.
+%
+For instance, to execute the x86 instruction\,\footnote{Written in AT\&T syntax
+  here.} \texttt{mov (\%ecx),\%eax}, a x86 \ac{cpu}:
+%
+\begin{itemize}
+\item reads the content of the register \texttt{ecx}
+%
+\item interprets this value as an address and reads the main memory at this
+  address
+%
+\item writes this content into the register \text{eax}
+%
+\item updates the register \texttt{eip} with the address of the next instruction
+  to execute
+\end{itemize}
+
+This translates into four software transitions, if the content of \texttt{ecx}
+is a valid address.
+%
+On the contrary, the \ac{cpu} typically raises an interrupt.
+%
+In this scenario, only one software transition occurs, when the \ac{cpu} reads
+the content of \texttt{ecx}.
+%
+The following transition models the interrupt, and is labelled as ``hardware''.
+%
+Other hardware transitions may be provoked by other hardware components.
+%
+For instance, \ac{dma} transactions by a network card qualify as hardware
+transitions.
+
+\begin{definition}[Transitions]
+  We denote by $\mathcal{T}(\Sigma)$ the set of triples which satisfy the
+  transition relation, that is
+  \[
+    \mathcal{T}(\Sigma) \triangleq \{\ (h, ev, h')\ |\
+    \transitionLTS{Ez}{h}{ev}{h'}\ \}
+  \]
+\end{definition}
+
+\begin{definition}[Runs]
+  One particular execution of software components by the hardware architecture
+  is modelled as a run of $\Sigma$.
+  %
+  A run is a sequence of transitions of~$\Sigma$, such that for two consecutive
+  transitions, the resulting state of the first is the initial state of the
+  next.
+
+  We denote $\pathesLTS{Ez}$ the set of runs of the Computing Platform
+  $\shortLTS{Ez}$, $\func{init}(\rho) \in H$ the initial state of a run $\rho$,
+  and $\func{trans}(\rho) \in \powerset(\mathcal{T}(\Sigma))$ the set of
+  transitions which occur during this run.
+\end{definition}
+
+\section{Security Policies}
+
+\subsection{General Case}
+
+\[
+  P : \powerset(\pathesLTS{Ez}) \rightarrow \ac{prop}
+\]
+
+\subsection{Properties on Runs}
+
+\[
+  P : \pathesLTS{Ez} \rightarrow \ac{prop}
+\]
+
+\[
+  \func{run\_property}_{P}(R) \triangleq \forall \rho \in R, P(\rho)
+\]
+
+\subsection{Safety Properties}
+
+\[
+  P : \mathcal{T}(\Sigma) \rightarrow \ac{prop}
+\]
+
+\[
+  \func{safety\_property}_{P}(R) \triangleq \forall \rho \in R, \forall
+  (h, ev, h') \in \mathcal{T}(\rho), P(h, ev, h')
+\]
+
+\section{Hardware-based Security Enforcement Mechanisms}
+
+\subsection{Definition}
+
+One of the specificities of HSE mechanisms is the sharing of the \ac{cpu}
+interface between the trusted components and the rest of the software stack,
+considered as the adversary.
+%
+To reason about HSE mechanisms, it is necessary to be able to determine which
+software component is executed at a given time.
+%
+In practice, a subset of states of the hardware architecture is dedicated to
+each software component.
+%
+For instance, the x86 \ac{cpu} has a feature called protection rings where each
+ring can be seen as an execution mode dedicated to a software component.
+%
+Hence, the ring 0 is dedicated to the operating system whereas the userland
+applications are executed when the \ac{cpu} is in ring 3, with a particular page
+table setup.
+
+\begin{definition}[Hardware-Software Mapping]
+  \label{def:hardsoftmap}
+  A hardware-software mapping $\func{con\-text} : H \rightarrow S$ is a function
+  which takes a hardware state and returns the software component currently
+  executed.
+\end{definition}
+
+Dealing with multi-core architectures would require additional efforts and
+notations.
+%
+One possible solution could be to define an identifier per core and to use this
+identifier in addition to the current hardware state to deduce the software
+component currently executed by the corresponding core.
+%
+However, this is out of the scope of this Chapter.
+
+A \ac{hse} mechanism is a set of requirements on states to characterize safe
+hardware configurations and a set of requirements on software transitions to
+preserve the state requirements through software execution.
+%
+The software components which implement a \ac{hse} mechanism form its the
+\ac{tcb}.
+
+\begin{definition}[HSE Mechanism]
+  \label{def:speccert:hse}
+  A \ac{hse} mechanism is specified with a tuple
+  $\Delta = \langle \Sigma, S, T, \func{context}, \func{inv}, \func{behaviour}
+  \rangle$, such that
+  %
+  \begin{itemize}
+  \item $\Sigma$ is the hardware model against which $\Delta$ is defined
+  %
+  \item $S$ is the set of software components executed by the hardware
+    architecture
+  %
+  \item $T \subseteq$ is the set of trusted software components which implement
+    the \ac{hse} mechanism and form its \ac{tcb}
+  %
+  \item $\func{context}$ is a hardware-software mapping to determine when the
+    \ac{tcb} is executed
+  %
+  \item $\func{inv}$ is a predicate on $H$ to distinguish between safe hardware
+    configurations and potentially vulnerable ones
+  %
+  \item $\func{behaviour}$ is a predicate on $H \times L_S$ to distinguish
+    between safe software transitions and potentially harmful ones
+  \end{itemize}
+\end{definition}
+
+We illustrate this definition with the Flash Memory Lock-down mechanism
+described in Section~\ref{subsec:usecase:hse:smm}.
+%
+As a reminder, the Flash Memory Lock-down mechanism enforces the integrity of
+the \ac{bios} code within the Flash Memory, as follows:
+%
+\begin{enumerate}
+\item By default, the Flash Memory is locked and its content cannot be modified
+%
+\item When a software component (\emph{e.g.} a system software) tries to unlock
+  the Flash Memory, the \ac{pch} triggers a \ac{smi}
+%
+\item This forces the \ac{cpu} to enter \ac{smm}
+%
+\item The \ac{smm} code is expected to lock the Flash Memory again, before
+  resuming the execution of the system software
+\end{enumerate}
+
+\begin{example}[Flash Memory Lock-down Mechanism]
+  \label{example:speccert:flashdef}
+  In this example, the trusted software component ($T$) is the \ac{bios}.
+  %
+  The \ac{cpu} executes the \ac{bios} when it is in \ac{smm}.
+  %
+  A safe hardware state ($\func{inv}$) is either a state wherein the \ac{bios}
+  is executed, or a state wherein the Flash Memory is locked.
+  %
+  It is expected that the \ac{bios} locks the Flash Memory before using the
+  \texttt{rsm} instruction ($\func{behaviour}$).
+\end{example}
+
+\subsection{HSE Laws}
+
+For a \ac{hse} mechanism to be correctly defined, it must obey a few axioms,
+together called the \ac{hse} Laws.
+%
+The first law says that the state requirements specified by $\func{inv}$ are
+preserved through transitions as long as the \ac{tcb} avoids software
+transformations which do not satisfy $\func{behavior}$.
+%
+The second law says that the $behavior$ predicate specifies
+state-transformations restrictions for the \ac{tcb} only.
+%
+The software components which are not part of the \ac{tcb} are considered
+untrusted and we make no assumption on their behavior.
+
+\begin{definition}[\ac{hse} Laws]
+  \label{def:laws}
+  A \ac{hse} mechanism $\Delta$ has to satisfy the following properties:
+  %
+  \begin{enumerate}
+  \item \func{behaviour} preserves \func{inv}:
+    $\forall (h, l, h') \in \mathcal{T}(\Sigma)$,
+    \[
+      \begin{array}{l} \func{inv}(h) \Rightarrow (l \in L_S \Rightarrow
+        \func{behaviour}(h,l)) \Rightarrow \func{inv}(h')
+      \end{array}
+    \]
+  %
+  \item $\func{behaviour}$ only restricts the \ac{tcb}:
+    $\forall x \not\in T, \forall h \in H, \forall l \in L_S$,
+    \[
+      \begin{array}{l}
+        \func{context}(h) = x \Rightarrow \func{behaviour}(h, l)
+      \end{array}
+    \]
+  \end{enumerate}
+\end{definition}
+
+\begin{example}[Flash Memory Lock-down Inconsistency]
+  We can convince ourselves that the informal definition description we have
+  discussed in the Example~\ref{example:speccert:flashdef} obeys the second HSE
+  Law, but \emph{does not} obey the first one.
+  %
+  \paragraph{\func{behaviour} only restricts the \ac{tcb}}
+  %
+  The only software restriction we formulate concerns the use of the
+  \texttt{rsm} instruction.
+  %
+  In particular, we do not forbid the attacker to unlock the Flash Memory.
+
+  \paragraph{\func{behaviour} does not preserve \func{inv}}
+  %
+  A \ac{cpu} is either in \ac{smm} or not in \ac{smm}.
+  %
+  If it is in \ac{smm}, the only way to leave \ac{smm} is to execute the
+  \texttt{rsm} instruction, which qualifies as a software transition.
+  %
+  If the \ac{cpu} is in \ac{smm}, the \func{behaviour} will hold true for this
+  software transition only if the Flash Memory is already locked.
+  %
+  As a consequence, it is not possible to leave \ac{smm} with the Flash Memory
+  unlocked.
+  %
+  However, if the \ac{cpu} is not in \ac{smm}, and tries to open the Flash
+  Memory, two things happen sequentially.
+  %
+  First, the Flash Memory is effectively opened (software transition)
+  %
+  Then, the \ac{pch} triggers a \ac{smi}, which eventually forces the \ac{cpu}
+  to enter \ac{smm} (hardware event).
+  %
+  That is, the protection consists in two transitions, and the \func{inv}
+  predicate is not satisfied in between.
+
+  It is because the Flash Memory Lock-down as described here does not satisfy
+  the first law that the race condition uncovered by Corey Kallenberg \emph{et
+    al.}\,\cite{kallenberg2015racecondition} is possible.
+  %
+  On the contrary, the \texttt{SMM\_BWP} register semantics allows for defining
+  a HSE mechanisms which satisfies both laws, because the register ties together
+  the state of the \acp{cpu} and the Flash Memory state.
+\end{example}
+
+\subsection{Run Compliance}
+
+We say a run complies to a \ac{hse} mechanism definition when its initial state
+satisfies the state requirements (\func{inv}) and each software transitions of the run
+satisfies the software requirements (\func{behaviour}).
+%
+The set of the runs which comply with $\Delta$ is denoted by
+$\mathcal{C}(\Delta)$.
+
+\begin{definition}[Compliant Runs]
+  Given $\rho \in \pathesLTS{Ez}$,
+  \[
+    \rho \in \mathcal{C}(\Delta) \triangleq
+    \func{inv}(\func{init}(\rho))\,\wedge\,\forall (h, l, h') \in
+    \mathcal{T}(\Sigma), l \in L_S \Rightarrow \func{behaviour}(h, l)
+  \]
+\end{definition}
+
+\subsection{HSE Mechanism Correctness}
+
+The main purpose of the \ac{hse} Laws is to verify it is consistent.
+%
+However, they say nothing about the security policy the \ac{hse} mechanism
+supposedly enforce.
+%
+Eventually, we aim to prove that a HSE mechanism is sound ---it succeeds in
+enforcing a security policy--- under the assumption that software components of
+the \ac{tcb} always behave according to the specification given in the HSE
+mechanism definition.
+
+\begin{definition}[Correct HSE Mechanism]
+  A \ac{hse} mechanism $\Delta$ is correct with respect to a security policy $P$
+  (denoted by $\Delta \sqsubseteq P$) if and only if the set of compliant runs
+  of $\Delta$ satisfies $P$, that is
+  %
+  \[
+    \Delta \sqsubseteq P \triangleq P(\mathcal{C}(\Delta))
+  \]
+\end{definition}
+
+It is possible to define a \ac{hse} mechanism which satisfies the \ac{hse} Laws,
+yet is not correct with respect to its targeted security policy.
+%
+It was the case, for instance, for the protection of the SMRAM by the sole
+\texttt{SMRAMC} register.
+%
+The state requirement at the time would have been focused on the SMRAM content,
+which is correctly guarded against unprivileged modifications by the memory
+controller.
+%
+However, this property alone is not strong enough to enforce the BIOS Integrity
+security property (Definition~\ref{def:usecase:biosint}), as evidenced by the
+SMRAM Cache Poisoning attack.
+
+\begin{theorem}[Correct HSE Mechanism for Safety Properties]
+  Given $P$ a safety property defined as a predicate on $\mathcal{T}(\Sigma)$
+  %
+  \[
+    (\func{inv}(h) \Rightarrow (l \in L_S \Rightarrow \func{behaviour}(h, l))
+    \Rightarrow P(h, l, h')) \Rightarrow \Delta \sqsubseteq
+    \func{safety\_property}_{P}
+  \]
+
+  \begin{proof}
+  \end{proof}
+\end{theorem}
+
+\section{Conclusion}
+
+\chapter{Specifying and Verifying an Idealized BIOS HSE Mechanism}
+
+\newpage
 
 In this Chapter, we introduce a three-step methodology for specifying and
 verifying \ac{hse} mechanisms against hardware architecture models, that is
@@ -34,8 +425,8 @@ policies using publicly available Intel specifications.
 %
 In Section \ref{sec:speccert:smm}, we verify the soundness of the \ac{hse}
 mechanism implemented in many x86 computer firmware codes to isolate the code
-executed while the \ac{cpu} is in System Management Mode (\ac{smm}), a highly privileged
-execution mode of x86 microprocessors.
+executed while the \ac{cpu} is in System Management Mode (\ac{smm}), a highly
+privileged execution mode of x86 microprocessors.
 %
 Our model and proofs have been implemented using Coq, a proof assistant system
 and have been released as an open source software\,\footnote{Which can can be
@@ -45,132 +436,7 @@ We discuss our results in Section \ref{sec:speccert:discuss}.
 
 \section{SpecCert Formalism} \label{sec:speccert:framework}
 
-In SpecCert, we model the hardware architecture and its features with a set of
-states $\set{H}$, a set of events $\set{E}$ and a Computing Platform $\Sigma$
-which defines a semantics of events as state-transformers.
-%
-Hence, the execution of a set of software components by a hardware architecture
-is a sequence of state-transformations (denoted $\transitionLTS{Ez}{h}{ev}{h'}$)
-in this model.
-%
-In this Chapter, we consider exclusively Execution Monitoring (EM) enforceable
-security policies\,\cite{schneider2000enforceable,basin2013enforceable} that are
-security policies which can be enforced by monitoring the software execution.
-%
-As a consequence, we model a security policy with a predicate $P$ on sequences
-of state-transformations.
-%
-Finally, we model a \ac{hse} mechanism $\Delta$ with a set of requirements on states
-to characterize safe hardware configurations and a set of requirements on
-state-transformations for trusted software components to preserve the state
-requirements through software execution.
-%
-A \ac{hse} mechanism is sound when every sequence of state transformations which
-satisfies these requirements also satisfies the security policy predicate.
-
-\subsection{Computing Platforms} \label{subsec:speccert:computing}
-
-We now dive more deeply into the SpecCert formalism and give a formal definition
-of the Computing Platform.
-%
-We model a hardware architecture which executes several software components
-using states, events and a semantics of events as states-transformers.
-
-The state of a hardware architecture models the configuration of its devices at
-a given time.
-%
-This configuration may change over time with respect to the hardware
-specifications and comprises any relevant data such as registers values, inner
-memory contents, etc.
-%
-A hardware architecture state update is triggered by some events. We distinguish
-two classes of events: the software events which are direct and forseeable
-side-effects of the execution of an instruction and the hardware events which
-are not.
-%
-The execution of an instruction can be broken down into a sequence of software
-events.
-%
-For instance, to execute the x86 instruction\,\footnote{Written in AT\&T syntax
-  here.} \texttt{mov (\%ecx),\%eax}, a x86 \ac{cpu}:
-%
-\begin{itemize}
-\item reads the content of the register \texttt{ecx} as an address
-%
-\item reads the main memory at this address
-%
-\item writes this content into the register \text{eax}
-%
-\item updates the register \texttt{eip} with the address of the next instruction
-  to execute
-\end{itemize}
-
-We model this sequence of actions as four software events which trigger four
-state updates.
-%
-Note that if the content of the \texttt{ecx} register is not a valid address,
-the scenario is different.
-%
-In such a case, the read access to the main memory fails and an interrupt is
-raised.
-%
-This second scenario is modelled with another sequence of events which involved a
-hardware event \emph{i.e.} the interrupt.
-
-The semantics of events as state-transformers is specified using preconditions
-and postconditions.
-%
-Preconditions specify the state requirements which are necessary for an event to
-be observed.
-%
-Postconditions specify the consequences of an event on the hardware architecture
-state.
-
-\begin{definition}[Computing System]
-  Given $\set{H}$ a set of hardware architecture states and $\set{E}$ a set of
-  events, a Computing Platform $\shortLTS{Ez}$ is a pair of
-  $(\func{pre\-condition}, \func{post\-condition})$ where
-  $\func{pre\-condition}$ is a predicate on $\set{H} \times \set{E}$ and
-  $\func{post\-condition}$ is a predicate on
-  $\set{H} \times \set{E} \times \set{H}$.
-  %
-  $\shortLTS{Ez}$ defines a semantics of events as state-transformers such that
-  %
-  \begin{prooftree}
-    \AxiomC{$\func{precondition}(h,ev)$}
-    \AxiomC{$\func{postcondition}(h,ev,h')$}
-    %
-    \BinaryInfC{\transitionLTS{Ez}{h}{ev}{h'}}
-  \end{prooftree}
-
-  \transitionLTS{Ez}{h}{ev}{h'} is called a state-transformation
-  of~$\shortLTS{Ez}$.
-\end{definition}
-
-% \begin{definition}[Software Stack]
-%   Given $\set{S}$ a set of Software Components, $\set{H}$ a Hardware
-%   Architecture and $\set{P}$ the Processor Unit of $\set{H}$,
-%   $\zeta : \set{P} \rightarrow \set{S}$ is a Software Stack which dedicates
-%   states of $\set{P}$ to each Software Component of $\set{S}$.
-% \end{definition}
-
 \subsection{Security Policies}
-
-Given $\set{H}$ a set of states of a hardware architecture, $\set{E}$ a set of
-events, $\shortLTS{Ez}$ a Computing Platform and $\set{S}$ a set of software
-components being executed by the hardware architecture, a particular execution
-of a set of software components is modelled with a sequence of
-state-transformations we call a run of $\shortLTS{Ez}$.
-
-\begin{definition}[Run]
-  A run of the Computing Platform $\shortLTS{Ez}$ is a sequence of
-  state-transformations of\, $\shortLTS{Ez}$ such that for two consecutive
-  transformations, the resulting state of the first is the initial state of the
-  next.
-  %
-  We denote $\pathesLTS{Ez}$ the set of runs of the Computing Platform
-  $\shortLTS{Ez}$ and $\func{init}(\rho)$ the initial state of a run $\rho$.
-\end{definition}
 
 We consider EM-enforceable security
 policies\,\cite{schneider2000enforceable,schneider2} specified with predicates
@@ -187,37 +453,6 @@ execution of another set of so-called trusted software components.
 %
 We consider that a software component tampers with the execution of another when
 it is able to make the latter execute an instruction of its choice.
-
-In practice, a subset of states of the hardware architecture is dedicated to
-each software component.
-%
-For instance, the x86 \ac{cpu} has a feature called protection rings where each ring
-can be seen as an execution mode dedicated to a software component.
-%
-Hence, the ring 0 is dedicated to the operating system whereas the userland
-applications are executed when the \ac{cpu} is in ring 3.
-%
-In SpecCert, we take advantage of this \ac{cpu} state sharing to infer which software
-component is currently executed from a hardware architecture state.
-%
-For the following definitions, we assume the hardware architecture contains only
-one \ac{cpu}.
-
-\begin{definition}[Hardware-Software Mapping]
-  \label{def:hardsoftmap}
-  A hardware-software mapping $\func{con\-text} : \set{H} \rightarrow \set{S}$
-  is a function which takes a hardware state and returns the software component
-  currently executed.
-\end{definition}
-
-Dealing with multi-core architectures would require additional efforts and
-notations.
-%
-One possible solution could be to define an identifier per core and to use this
-identifier in addition to the current hardware state to deduce the software
-component currently executed by the corresponding core.
-%
-However, this is out of the scope of this Chapter.
 
 We now introduce the concept of \textit{memory location ownership}.
 %
@@ -297,133 +532,6 @@ definition of a \textit{software execution tampering}.
   In this definition, $t$ is a trusted software component and $u$ is an
   untrusted ---~potentially malicious or hijacked~--- one.
 
-  \subsection{Hardware-based Security Enforcement Mechanism}
-
-  A \ac{hse} mechanism is a set of requirements on states to characterize safe
-  hardware configurations and a set of requirements on state-transformations to
-  preserve the state requirements through software execution.
-  %
-  The software components which implement a \ac{hse} mechanism form the Trusted
-  Computing Base (TCB).
-
-  \begin{definition}[\ac{hse} Mechanism]
-    \label{def:hse}
-    Given $\set{H} $ a set of states of a hardware architecture, $\set{E}$ a set
-    of events and $\shortLTS{Ez}$ a Computing Platform, we model a \ac{hse} mechanism
-    $\Delta$ with a tuple
-    $(\func{inv}, \func{behavior}, \set{T}, \func{context})$ such as
-    %
-    \begin{itemize}
-    \item $\func{inv}$ is a predicate on $\set{H}$ to distinguish between safe
-      hardware configurations and potentially vulnerable ones
-    %
-    \item $\func{behavior}$ is a predicate on $\set{H} \times \set{E}_{Soft}$ to
-      distinguish between safe software state-transformations and potentially
-      harmful ones
-    %
-    \item $\set{T} \subseteq{S}$ is the set of software components which form
-      the TCB of the \ac{hse} mechanism
-    %
-    \item $\func{context}$ is a hardware-software mapping to determine when the
-      TCB is executed
-    \end{itemize}
-  \end{definition}
-
-  For instance, in x86-based hardware architectures, the SPI Flash contents (the
-  code and configuration of the firmware) is protected as follows:
-
-  \begin{enumerate}
-  \item By default, the SPI Flash is locked and its content cannot be overriden
-    until it has been unlocked
-  %
-  \item Some software components can unlock the SPI Flash
-  %
-  \item When they do so, the \ac{cpu} is forced to start the execution of a
-    special-purpose software component
-  %
-  \item This software component has to lock the SPI Flash before the end of its
-    execution
-  \end{enumerate}
-  %
-  In this example, the special-purpose software component is the TCB.
-  %
-  A safe hardware state (modelled with $inv$) is either a state wherein the
-  special-purpose software component is executed or a state wherein the SPI
-  Flash is locked.
-  %
-  This requirement on hardware architecture states is preserved by preventing
-  the special-purpose software component to end its execution before it has
-  locked the SPI Flash (modelled with $behavior$).
-
-  For a \ac{hse} mechanism to be correctly defined, it must obey a few axioms,
-  together called the \ac{hse} Laws.
-  %
-  The first law says that the state requirements specified by $inv$ are
-  preserved through state-transformations if the software transformations which
-  do not satisfy $behavior$ are discarded.
-  %
-  The second law says that the $behavior$ predicate specifies
-  state-transformations restrictions for the TCB only.
-  %
-  The software components which are not part of the TCB are considered untrusted
-  and we make no assumption on their behavior.
-
-  \begin{definition}[\ac{hse} Laws]
-    \label{def:laws}
-    A \ac{hse} mechanism
-    $\Delta = (\func{inv}, \func{behavior}, \set{T}, \func{context})$ has to
-    satisfy the following properties:
-    %
-    \begin{enumerate}
-    \item \func{behavior} preserves \func{inv}:
-      $\forall \transitionLTS{Ez}{h}{ev}{h'}$,
-      \[ \begin{array}{l} \func{inv}(h) \Rightarrow (ev \in \set{E}_{Soft}
-          \Rightarrow \func{behavior}(h,ev)) \Rightarrow \func{inv}(h')
-         \end{array}
-       \]
-     %
-     \item $\func{behavior}$ only restricts the TCB:
-       $\forall x \not\in \set{T}, \forall h \in \set{H}, \forall ev \in
-       \set{E}_{Soft}$,
-       \[
-         \begin{array}{l}
-           \func{context}(h) = x \Rightarrow \func{behavior}(h, ev)
-         \end{array}
-       \]
-     \end{enumerate}
-   \end{definition}
-
-   A run complies to a \ac{hse} mechanism definition if its initial state satisfies
-   the state requirements and each state-transformation of the run satisfies the
-   state-transformations requirements.
-   %
-   The set of the runs which comply with $\Delta$ is denoted by
-   $\mathcal{C}(\Delta)$.
-
-\begin{definition}[Compliant Runs]
-  Given $\rho \in \pathesLTS{Ez}$,
-  \[ \rho \in \mathcal{C}(\Delta) \triangleq
-    \func{inv}(\func{init}(\rho))\,\wedge\,\forall
-    \transitionLTS{Ez}{h}{ev}{h'}, ev \in \set{E}_{Soft} \Rightarrow
-    \func{behavior}(h,ev) \]
-\end{definition}
-
-Eventually, we aim to prove that a \ac{hse} mechanism is sound \mbox{---it} succeeds
-to enforce a security policy--- under the assumption that software components of
-the TCB always behave according to the specification given in the \ac{hse} mechanism
-definition.
-
-\begin{definition}[Sound \ac{hse} Mechanism]
-  \label{def:sound}
-  A \ac{hse} mechanism $\Delta$ succeeds in enforcing a security policy $P$ when each
-  compliant run of $\Delta$ is secure. In such a case, $\Delta$ is said to be
-  sound.
-  %
-  \[
-    \func{sound}(\Delta, P) \triangleq \forall \rho \in \set{C}(\Delta), P(\rho)
-  \]
-\end{definition}
-
 \begin{table}[h]
   \centerline{%
     \begin{tabular}{clc}
@@ -459,8 +567,8 @@ definition.
 
 The SpecCert formalism is the foundation of the SpecCert framework.
 %
-It comprises a set of high-level definitions to specify a \ac{hse} mechanism against
-a hardware architecture model.
+It comprises a set of high-level definitions to specify a \ac{hse} mechanism
+against a hardware architecture model.
 %
 In its current state, the SpecCert framework contains a model of x86 called
 $\formatLTS{Minx86}$. $\formatLTS{Minx86}$ is intended to be a minimal model for
@@ -478,8 +586,8 @@ controller\,\footnote{A VGA controller is a hardware device which on we can
 $\formatLTS{Minx86}$ is meant to be a proof of concept of the SpecCert formalism
 and thus is not exhaustive.
 %
-In its current state of implementation, its scope
-focuses on the System Management Mode (\ac{smm}) feature of x86 microprocessors.
+In its current state of implementation, its scope focuses on the System
+Management Mode (\ac{smm}) feature of x86 microprocessors.
 
 \paragraph{Hardware Specifications}
 %
@@ -809,14 +917,14 @@ behavior is out of the scope of this article.
 
 % \[
 %   \texttt{CacheLine}_{\set{S}} \triangleq \begin{array}{ll} \{\,dirty &:
-                                                                          %                                                                           \setshortdef{\val{true},\,\val{false}} \\
-                                              %                                               ;\,tag
-                                              %                                               &:
-                                              %                                               \texttt{PhysAddr}
-                                                                                                %                                               \\
-                                              %                                               ;\,owner
-                                              %                                               &:
-                                              %                                               \set{S}\,\}
+%     \setshortdef{\val{true},\,\val{false}} \\
+%     ;\,tag
+%     &:
+%     \texttt{PhysAddr}
+%     \\
+%     ;\,owner
+%     &:
+%     \set{S}\,\}
 %   \end{array} \]
 
 \[
@@ -938,11 +1046,11 @@ $\texttt{Event}_{Soft}$.
 Table~\ref{tab:softev} lists the software events we consider in the
 $\formatLTS{Minx86}$ Computing Platforms.
 %
-We model the \ac{cpu} \IOs with $Read(pa)$ and $Write(pa)$, the configuration of the
-memory controller with $OpenBitFlip$ and $LockSmramc$, the configuration of the
-cache strategy with $SetCacheStrat(pa,strat)$, the configuration of the \ac{smrr}
-with $UpdateSmrr(smrr)$ the exit of the \ac{smm} with $Rsm$ and the update of the \ac{cpu}
-program counter register with $NextInstruction(pa)$.
+We model the \ac{cpu} \IOs with $Read(pa)$ and $Write(pa)$, the configuration of
+the memory controller with $OpenBitFlip$ and $LockSmramc$, the configuration of
+the cache strategy with $SetCacheStrat(pa,strat)$, the configuration of the
+\ac{smrr} with $UpdateSmrr(smrr)$ the exit of the \ac{smm} with $Rsm$ and the
+update of the \ac{cpu} program counter register with $NextInstruction(pa)$.
 
 \begin{table}
   \bigcentering
@@ -1031,8 +1139,8 @@ setting for this physical address $pa$ to change.
 %
 The precondition for $UpdateSmrr$ requires the \ac{cpu} to be in \ac{smm}.
 %
-The postcondition requires the \ac{smrr} of the \ac{cpu} to be updated with the correct
-value, the rest of the hardware architecture state being left unchanged.
+The postcondition requires the \ac{smrr} of the \ac{cpu} to be updated with the
+correct value, the rest of the hardware architecture state being left unchanged.
 
 A software component can jump to any physical address, hence the postcondition
 for $\func{NextInstru\-ction}(pa)$ always holds true.
@@ -1051,8 +1159,8 @@ $\func{Fetch}$ models the fetching of an instruction by the \ac{cpu}.
 As a consequence, the definition of its precondition and postcondition are the
 same as $Read(pa)$ with $pa$ being the program register value.
 %
-$ReceiveSmi$ precondition requires the \ac{cpu} not to be in \ac{smm} because \ac{smm} is
-non-reentrant.
+$ReceiveSmi$ precondition requires the \ac{cpu} not to be in \ac{smm} because
+\ac{smm} is non-reentrant.
 %
 The postcondition of $ReceiveSmi$ requires the program counter to be set with
 the $smbase + \val{0x8000}$ (where $smbase$ is the value of the SMBASE register
@@ -1061,20 +1169,20 @@ of the \ac{cpu}) and the \ac{cpu} is in \ac{smm}.
 \section{System Management Mode HSE}
 \label{sec:speccert:smm}
 
-In \cite{intel2014manual}, Intel states ``the main benefit of \ac{smm} is that it
-offers a distinct and easily isolated processor environment that operates
+In \cite{intel2014manual}, Intel states ``the main benefit of \ac{smm} is that
+it offers a distinct and easily isolated processor environment that operates
 transparently to the operating system or executive and software applications''.
 %
-For the \ac{smm} processor environment to be isolated, the code executed when the \ac{cpu}
-is in \ac{smm} needs to implement a \ac{hse} mechanism.
+For the \ac{smm} processor environment to be isolated, the code executed when
+the \ac{cpu} is in \ac{smm} needs to implement a \ac{hse} mechanism.
 %
 In this section, we formalize and verify this mechanism against the model we
 have previously introduced.
 
 \subsection{Computing Platform and Security Policy}
 
-We consider three software components: the boot sequence code, the \ac{smm} code and
-the OS code.
+We consider three software components: the boot sequence code, the \ac{smm} code
+and the OS code.
 %
 During the boot sequence, only the boot sequence code is executed and it loads
 both the OS code and the \ac{smm} code into memory.
@@ -1103,8 +1211,8 @@ We assume the \ac{smm} is dedicated to the \ac{smm} code.
 %
 Let
 $cpu\_in\_smm : \texttt{Archi}_{\set{S}} \rightarrow \setshortdef{\val{true},
-  \val{false}}$ be the function which returns $\val{true}$ if the \ac{cpu} is in \ac{smm}
-and $\val{false}$ otherwise.
+  \val{false}}$ be the function which returns $\val{true}$ if the \ac{cpu} is in
+\ac{smm} and $\val{false}$ otherwise.
 %
 We define $smm\_context$ a hardware-software mapping such that
 %
@@ -1122,14 +1230,15 @@ Let $\formatLTS{Smmx86}$ be the Computing Platform such as
   \formatLTS{Smmx86} \triangleq \formatLTS{Minx86}(smm\_context)
 \]
 
-We assume that both the OS code and the \ac{smm} code have been loaded in distinct
-memory regions. In particular, all the \ac{smm} code has been loaded in SMRAM.
+We assume that both the OS code and the \ac{smm} code have been loaded in
+distinct memory regions. In particular, all the \ac{smm} code has been loaded in
+SMRAM.
 %
 Our objective is to enforce a security policy which prevents the OS code to
 tamper with the \ac{smm} code execution.
 %
-This way, the \ac{smm} (which is the most privileged execution mode of the \ac{cpu})
-cannot be used to perform an escalation privilege.
+This way, the \ac{smm} (which is the most privileged execution mode of the
+\ac{cpu}) cannot be used to perform an escalation privilege.
 %
 We define $smm\_security$ a predicate to model this security policy such as
 given $\rho \in \formatLTS{Smmx86}$,
@@ -1143,16 +1252,16 @@ given $\rho \in \formatLTS{Smmx86}$,
 
 \subsection{HSE Definition}
 
-We define $\Delta_{Smm}$ to model the \ac{hse} mechanism applied by the \ac{smm} code such
-that
+We define $\Delta_{Smm}$ to model the \ac{hse} mechanism applied by the \ac{smm}
+code such that
 $\Delta_{Smm} = (inv_{Smm}, behavior_{Smm}, \setshortdef{\val{smm}},
 smm\_context)$ (see Definition \ref{def:hse}).
 
-In order to enforce the \ac{smm} security policy, we have identified six requirements
-on states.
+In order to enforce the \ac{smm} security policy, we have identified six
+requirements on states.
 \begin{itemize}
-\item When the \ac{cpu} executes the \ac{smm} code, the program counter register value
-  needs to be an address in SMRAM.
+\item When the \ac{cpu} executes the \ac{smm} code, the program counter register
+  value needs to be an address in SMRAM.
 \item The SMBASE register was correctly set during the boot sequence to point to
   the base of the SMRAM.
 \item The SMRAM contains only \ac{smm} code.
@@ -1160,8 +1269,8 @@ on states.
   line content must be owned by the \ac{smm} code.
 \item In order to protect the content of the SMRAM inside the DRAM memory, the
   boot sequence code has locked the SMRAMC controller. This ensures that an OS
-  cannot set the \texttt{d\_open} bit any longer and only a \ac{cpu} in \ac{smm} can
-  modify the content of the SMRAM.
+  cannot set the \texttt{d\_open} bit any longer and only a \ac{cpu} in \ac{smm}
+  can modify the content of the SMRAM.
 \item The range of memory declared with the \ac{smrr} needs to overlap with the
   SMRAM.
 \end{itemize}
@@ -1180,8 +1289,8 @@ The reason is simple: the OS code can tamper with the memory outside the SMRAM.
 As a consequence, jumping outside the SMRAM is the best way to fail the security
 policy.
 %
-Secondly, we prevent the \ac{smm} code to update the \ac{smrr} registers as it is the
-responsability of the boot sequence code to correctly set them.
+Secondly, we prevent the \ac{smm} code to update the \ac{smrr} registers as it
+is the responsability of the boot sequence code to correctly set them.
 
 \[
   \func{behavior_{Smm}}(h, ev) \triangleq
@@ -1194,8 +1303,8 @@ responsability of the boot sequence code to correctly set them.
   \end{array}
 \]
 
-For $\Delta_{Smm}$ to be a \ac{hse} mechanism, we need to prove the two \ac{hse} Laws (see
-Definition \ref{def:laws}).
+For $\Delta_{Smm}$ to be a \ac{hse} mechanism, we need to prove the two \ac{hse}
+Laws (see Definition \ref{def:laws}).
 %
 The first law states the state requirements modelled with $inv_{Smm}$ are
 preserved through state-transformations if the transformations which do not
@@ -1208,7 +1317,7 @@ previously is preserved by $\Delta_{Smm}$.
 We use those intermediary results to conclude.
 %
 The second law states that the $behavior_{Smm}$ predicate specifies
-state-trans\-formation requirements for the TCB only.
+state-trans\-formation requirements for the \ac{tcb} only.
 %
 In this use case, it means $behavior_{Smm}$ should always hold true when the OS
 code is executed by the hardware architecture.
@@ -1226,8 +1335,8 @@ state-transformation does not imply the OS code to tamper with the execution of
    \end{array} \]
 
  We prove that this predicate holds true for a state-transformation with respect
- to the \ac{hse} mechanism. With this result, we can prove the \ac{hse} mechanism is sound
- (see Definition \ref{def:sound}).
+ to the \ac{hse} mechanism. With this result, we can prove the \ac{hse}
+ mechanism is sound (see Definition \ref{def:sound}).
 
 \begin{lemma}[Invariants Enforce Security]
   $\forall \transitionLTS{Smmx86}{h}{ev}{h'}$,
@@ -1281,16 +1390,16 @@ At the same page, in the description of the LOCK bit, one can also read that
 %
 We had modelled the second statement as the behavior of the memory controller is
 not specified if the first statement is true\,\footnote{If we had to actually
-  implement the \ac{hse} mechanism, we would have to assume the first was the correct
-  one.}  \formatLTS{Minx86} as a formal specification does not suffer from the
-same flaw.
+  implement the \ac{hse} mechanism, we would have to assume the first was the
+  correct one.}  \formatLTS{Minx86} as a formal specification does not suffer
+from the same flaw.
 
 Secondly, a formal specification of a \ac{hse} mechanism will help software
 developers when the time comes to implement it.
 %
-For instance, the Chapter 34, Volume 3C of \cite{intel2014manual} about \ac{smm} is
-about 30 pages long, it gives many details on how the \ac{smm} actually works, yet no
-section is actually dedicated to security.
+For instance, the Chapter 34, Volume 3C of \cite{intel2014manual} about \ac{smm}
+is about 30 pages long, it gives many details on how the \ac{smm} actually
+works, yet no section is actually dedicated to security.
 %
 On the contrary, our \ac{hse} mechanism definition gathers six requirements on
 hardware configurations and two requirements on software executions to enforce a
@@ -1314,14 +1423,14 @@ the \ac{cpu} in \ac{smm} is executing it.
 From this point forward ---because the access control is enforced at the memory
 controller level--- nothing prevents the attacker to tamper with it.
 %
-The next time the \ac{cpu} enters in \ac{smm}, it executes the code stored in the
-cache. With a \ac{smrr}-less version of \formatLTS{Minx86}, we were not able to
-conclude our \ac{hse} mechanism was sound: such a scenario draws attention of the
-SpecCert user who is forced to investigate.
+The next time the \ac{cpu} enters in \ac{smm}, it executes the code stored in
+the cache. With a \ac{smrr}-less version of \formatLTS{Minx86}, we were not able
+to conclude our \ac{hse} mechanism was sound: such a scenario draws attention of
+the SpecCert user who is forced to investigate.
 
 From our point of view, the clear separation between the hardware model, the
-security properties and the \ac{hse} mechanisms to enforce those properties are the
-main advantage of our approach, as two different use cases can be studied
+security properties and the \ac{hse} mechanisms to enforce those properties are
+the main advantage of our approach, as two different use cases can be studied
 against the same hardware model.
 %
 However, the scalability of SpecCert remains to be proven.

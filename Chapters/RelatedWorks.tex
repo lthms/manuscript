@@ -521,6 +521,10 @@ a code snippet on the program state, using a so-called Hoare triple of the form
 where $P$ and $Q$ are two predicates (a pre and a postcondition) on the program
 state, and $C$ is the code snippet.
 %
+The semantics of the Hoare triple is the following: if, before the execution of
+$C$, the precondition $P$ holds true, then after the execution of $C$, the
+postcondition $Q$ holds true.
+%
 Hoare logic allows for modular reasoning.
 %
 Once a couple of pre and postconditions is proven for a given code snippet,

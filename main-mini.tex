@@ -10,9 +10,15 @@
 \usepackage{tocbibind}
 \usepackage[babel=true,kerning=true,spacing=true,auto=true]{microtype}
 \usepackage[babel=true]{csquotes}
-\usepackage{newpxtext,newpxmath}
-\let\openbox\undefined
 \usepackage{makeidx}
+\usepackage[mathscr]{euscript}
+\let\euscr\mathscr \let\mathscr\relax% just so we can load this and rsfs
+\usepackage[scr]{rsfso}
+\newcommand{\powerset}{\raisebox{.15\baselineskip}{\Large\ensuremath{\wp}}}
+
+\usepackage{newpxtext,newpxmath}
+\let\openbox\undefine
+\usepackage{inconsolata}
 
 \setminted{framesep=10pt,xleftmargin=18pt,frame=leftline,linenos=true}
 
@@ -141,6 +147,7 @@ linecolor=statementline}
   \listoffigures
   \listoftables
   \printacronyms[include-classes={abbrev},heading={chapter},name=Acronyms]
+  \acsetup{only-used=false}
   \printacronyms[include-classes={nomencl},heading={chapter},name=Notations]
 
   \mainmatter

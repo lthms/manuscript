@@ -139,10 +139,10 @@ The Memory Controller is connected to the \ac{dram} and to peripherals which
 require small latency, such as a graphic card or a ethernet controller.
 %
 If a given memory access does not target one of its peripherals or the
-\ac{dram}, the Memory Controller forwards the memory access to the Platform
-Controller Hub (PCH) (formally known as the \emph{southbridge}).
+\ac{dram}, the Memory Controller forwards the memory access to the \ac{pch}
+(formally known as the \emph{southbridge}).
 %
-The PCH acts as a proxy for the remaining peripherals.
+The \ac{pch} acts as a proxy for the remaining peripherals.
 
 \paragraph{}
 %
@@ -293,7 +293,7 @@ can only operate if certain security requirements are met
 \label{subsec:usecase:firm:boot}
 
 The \ac{bios} program is stored inside a flash memory, a small memory connected
-to the PCH through the Serial Peripheral Interface (SPI) bus on modern x86
+to the \ac{pch} through the Serial Peripheral Interface (SPI) bus on modern x86
 computing platform.
 %
 When the \ac{cpu} is powered up, it is programmed to fetch the code stored at a
@@ -416,7 +416,7 @@ This prevents the scenario where an arbitrary system software rewrite the
 Besides, the flash memory cannot be the only memory dedicated to the \ac{bios}.
 %
 Memory accesses which target the flash memory are slow, as the latter is
-connected to the PCH, behind the Memory Controller.
+connected to the \ac{pch}, behind the Memory Controller.
 %
 This is why Intel dedicates a portion of the system memory to the \ac{bios}
 runtime code, and for understandable reason provides the means to prevent the
@@ -569,7 +569,7 @@ similarly to the SMRAM protection.
 That is, only the \ac{smm} code should be capable of overwriting the content of
 the flash memory.
 %
-This second access control mechanism is implemented by the PCH.
+This second access control mechanism is implemented by the \ac{pch}.
 %
 It is configurable \emph{via} the \texttt{BIOS\_CNTL} (\ac{bios} control
 register).
@@ -579,20 +579,20 @@ Enable) bit, and the \texttt{BLE} (\ac{bios} Lock Enable) bit.
 
 The semantics of the \texttt{BIOSWE} and \texttt{BLE} bits is as follows.
 %
-When the \texttt{BIOSWE} bit is clear, the PCH only authorizes read accesses to
+When the \texttt{BIOSWE} bit is clear, the \ac{pch} only authorizes read accesses to
 the Flash Memory.
 %
-If the \texttt{BIOSWE} bit is set by a \ac{cpu}, the behaviour of the PCH
+If the \texttt{BIOSWE} bit is set by a \ac{cpu}, the behaviour of the \ac{pch}
 depends on the value of the \texttt{BLE} bit.
 %
 If the \texttt{BLE} bit has been set by the \ac{bios} during the boot sequence,
-then the PCH triggers a \ac{smi}.
+then the \ac{pch} triggers a \ac{smi}.
 %
 As a consequence, the \ac{cpu} stops its current execution and enters in
 \ac{smm}.
 %
 This prevents the system software from tampering with the content of the Flash
-Memory, even if the PCH now authorizes write accesses.
+Memory, even if the \ac{pch} now authorizes write accesses.
 %
 It is the \ac{smm} code responsibility to clear the \texttt{BIOSWE} bit before
 using the \texttt{rsm} instruction.
@@ -804,7 +804,7 @@ The attack proceeds as follows:
 
 \begin{enumerate}
 \item One \ac{cpu} tries \emph{ad infinitum} to overwrite the content of the
-  Flash Memory. Because the \texttt{BIOSWE} bit is initially clear, the PCH
+  Flash Memory. Because the \texttt{BIOSWE} bit is initially clear, the \ac{pch}
   discards its attempts, and the Flash Memory content is correctly protected.
 %
 \item At the same time, another \ac{cpu} set the \texttt{BIOSWE} bit.
@@ -821,7 +821,7 @@ To prevent this race condition, Intel has introduced a new configuration bit to
 the \texttt{BIOS\_CNTL} register: the \texttt{SMM\_BWP} (\ac{smm} \ac{bios}
 Write Protection).
 %
-If the \texttt{SMM\_BWP} is set, the PCH discards any write access which targets
+If the \texttt{SMM\_BWP} is set, the \ac{pch} discards any write access which targets
 the Flash Memory \emph{unless all processors are in \ac{smm}}.
 
 \section{Conclusion}
