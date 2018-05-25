@@ -48,6 +48,29 @@ instruction and the hardware transitions which are not.
   %
 \end{definition}
 
+\begin{definition}[Transitions]
+  We denote by $\mathcal{T}(\Sigma)$ the set of triples which satisfy the
+  transition relation, that is
+  \[
+    \mathcal{T}(\Sigma) \triangleq \{\ (h, ev, h')\ |\
+    \transitionLTS{Ez}{h}{ev}{h'}\ \}
+  \]
+\end{definition}
+
+\begin{definition}[Runs]
+  One particular execution of software components by the hardware architecture
+  is modelled as a run of $\Sigma$.
+  %
+  A run is a sequence of transitions of~$\Sigma$, such that for two consecutive
+  transitions, the resulting state of the first is the initial state of the
+  next.
+
+  We denote $\pathesLTS{Ez}$ the set of runs of the Computing Platform
+  $\shortLTS{Ez}$, $\func{init}(\rho) \in H$ the initial state of a run $\rho$,
+  and $\func{trans}(\rho) \in \powerset(\mathcal{T}(\Sigma))$ the set of
+  transitions which occur during this run.
+\end{definition}
+
 \subsection{Software vs. Hardware Transitions}
 
 The execution of an instruction can be broken down into sequences of these
@@ -83,30 +106,10 @@ Other hardware transitions may be provoked by other hardware components.
 For instance, \ac{dma} transactions by a network card qualify as hardware
 transitions.
 
-\begin{definition}[Transitions]
-  We denote by $\mathcal{T}(\Sigma)$ the set of triples which satisfy the
-  transition relation, that is
-  \[
-    \mathcal{T}(\Sigma) \triangleq \{\ (h, ev, h')\ |\
-    \transitionLTS{Ez}{h}{ev}{h'}\ \}
-  \]
-\end{definition}
-
-\begin{definition}[Runs]
-  One particular execution of software components by the hardware architecture
-  is modelled as a run of $\Sigma$.
-  %
-  A run is a sequence of transitions of~$\Sigma$, such that for two consecutive
-  transitions, the resulting state of the first is the initial state of the
-  next.
-
-  We denote $\pathesLTS{Ez}$ the set of runs of the Computing Platform
-  $\shortLTS{Ez}$, $\func{init}(\rho) \in H$ the initial state of a run $\rho$,
-  and $\func{trans}(\rho) \in \powerset(\mathcal{T}(\Sigma))$ the set of
-  transitions which occur during this run.
-\end{definition}
-
 \section{Security Policies}
+
+We now discuss how we can model the different security policies introduced in
+Section~\ref{subsec:state:secu}.
 
 \subsection{General Case}
 
@@ -131,8 +134,8 @@ transitions.
 \]
 
 \[
-  \func{safety\_property}_{P}(R) \triangleq \forall \rho \in R, \forall
-  (h, ev, h') \in \mathcal{T}(\rho), P(h, ev, h')
+  \func{safety\_property}_{P}(R) \triangleq \forall \rho \in R, \forall (h, ev,
+  h') \in \mathcal{T}(\rho), P(h, ev, h')
 \]
 
 \section{Hardware-based Security Enforcement Mechanisms}
@@ -181,8 +184,8 @@ The software components which implement a \ac{hse} mechanism form its the
 
 \begin{definition}[HSE Mechanism]
   \label{def:speccert:hse}
-  A \ac{hse} mechanism is specified with a tuple
-  $\Delta = \langle \Sigma, S, T, \func{context}, \func{inv}, \func{behaviour}
+  A \ac{hse} mechanism $\Delta$ is a tuple
+  $\langle \Sigma, S, T, \func{context}, \func{inv}, \func{behaviour}
   \rangle$, such that
   %
   \begin{itemize}
@@ -227,7 +230,7 @@ the \ac{bios} code within the Flash Memory, as follows:
   \label{example:speccert:flashdef}
   In this example, the trusted software component ($T$) is the \ac{bios}.
   %
-  The \ac{cpu} executes the \ac{bios} when it is in \ac{smm}.
+  The \ac{cpu} executes the \ac{bios} when it is in \ac{smm} (\func{context}).
   %
   A safe hardware state ($\func{inv}$) is either a state wherein the \ac{bios}
   is executed, or a state wherein the Flash Memory is locked.
@@ -324,13 +327,13 @@ untrusted and we make no assumption on their behavior.
 \subsection{Run Compliance}
 
 We say a run complies to a \ac{hse} mechanism definition when its initial state
-satisfies the state requirements (\func{inv}) and each software transitions of the run
-satisfies the software requirements (\func{behaviour}).
+satisfies the state requirements (\func{inv}) and each software transitions of
+the run satisfies the software requirements (\func{behaviour}).
 %
-The set of the runs which comply with $\Delta$ is denoted by
-$\mathcal{C}(\Delta)$.
-
 \begin{definition}[Compliant Runs]
+  We write $\mathcal{C}(\Delta)$ for the set of the runs which comply with
+  $\Delta$.
+  %
   Given $\rho \in \pathesLTS{Ez}$,
   \[
     \rho \in \mathcal{C}(\Delta) \triangleq
@@ -338,6 +341,23 @@ $\mathcal{C}(\Delta)$.
     \mathcal{T}(\Sigma), l \in L_S \Rightarrow \func{behaviour}(h, l)
   \]
 \end{definition}
+
+\begin{lemma}[HSE Invariant Enforcement]
+  For all $\rho \in \mathcal{C}(\Delta)$, we prove that \func{inv} is satisfied
+  throughout compliant runs, that is
+  %
+  \[
+    \forall (h, l, h') \in \mathcal{T}(\rho), inv(h) \wedge inv(h')
+  \]
+
+  \begin{proof}
+    By definition of $\mathcal{C}(\Delta)$, we know the initial state of the run
+    satisfies \func{inv}, and thanks to the first HSE Law, we can conclude the
+    state after the first transition also satisfies \func{inv}.
+    %
+    We can generalize to the run by induction.
+  \end{proof}
+\end{lemma}
 
 \subsection{HSE Mechanism Correctness}
 
@@ -376,12 +396,18 @@ security property (Definition~\ref{def:usecase:biosint}), as evidenced by the
 SMRAM Cache Poisoning attack.
 
 \begin{theorem}[Correct HSE Mechanism for Safety Properties]
-  Given $P$ a safety property defined as a predicate on $\mathcal{T}(\Sigma)$
+  Given $P$ a safety property defined as a predicate on $\mathcal{T}(\Sigma)$,
+  then
   %
   \[
-    (\func{inv}(h) \Rightarrow (l \in L_S \Rightarrow \func{behaviour}(h, l))
-    \Rightarrow P(h, l, h')) \Rightarrow \Delta \sqsubseteq
-    \func{safety\_property}_{P}
+    \func{inv}(h) \Rightarrow (l \in L_S \Rightarrow \func{behaviour}(h, l))
+    \Rightarrow P(h, l, h')
+  \]
+  %
+  is a sufficient condition for
+  %
+  \[
+    \Delta \sqsubseteq \func{safety\_property}_{P}
   \]
 
   \begin{proof}
