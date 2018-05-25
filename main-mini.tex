@@ -19,10 +19,8 @@
 \usepackage[light,math]{iwona}
 \usepackage[light]{merriweather}
 \usepackage{inconsolata}
-
 \let\openbox\undefine
 \let\circledS\undefine
-
 \linespread{1.25}
 \DeclareMathSizes{10.95}{13}{10}{7}
 
@@ -140,7 +138,14 @@ linecolor=statementline}
 \author{Thomas Letan}
 \date{2015 -- 2018}
 
-\pagestyle{plain}
+\newpagestyle{phd}{
+  \sethead[\small\itshape\ifthechapter{\thechapter\enspace}{}\chaptertitle][][]%
+    {}{}{\small\itshape\ifthesection{\thesection\enspace}{}\sectiontitle}
+  \setfoot*{}{}{\thepage}
+}
+
+\pagestyle{phd}
+
 \makeindex
 
 \begin{document}

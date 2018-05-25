@@ -4,11 +4,7 @@
 We first describe the formalism of hardware model against which we base our
 following definitions (Section~\ref{subsec:speccert:hardware}).
 %
-Then, we discuss how we model security policies using this model, based on the
-classes of security policies described in Section~\ref{subsec:state:secu}
-(Section~\ref{sec:speccert:security}).
-%
-Finally, we give a formal definition of HSE mechanisms and HSE mechanisms
+Then, we give a formal definition of HSE mechanisms and HSE mechanisms
 correctness (Section~\ref{sec:speccert:hse}).
 
 \section{Hardware Model}
@@ -17,11 +13,14 @@ correctness (Section~\ref{sec:speccert:hse}).
 In line with the works we have described in Section~\ref{sec:related:review}, we
 model a hardware architecture which executes several software components as a
 \ac{lts} with controllable and observable transitions
-(\ref{subsec:speccert:def}).
 %
-We then give a generic definition of runs of a \ac{lts}, so we can later reason
-about security policies and HSE mechanisms as properties on runs
-(\ref{subsec:speccert:run}).
+We then give a generic definition of traces of a \ac{lts}, so we can later reason
+about security policies and HSE mechanisms as sets of traces
+(\ref{subsec:speccert:trace}).
+%
+Then, we discuss how we model security policies using this model, based on the
+classes of security policies described in \ref{subsec:state:secu}
+(\ref{subsec:speccert:def}).
 
 \subsection{Definition}
 \label{subsec:speccert:def}
@@ -119,24 +118,24 @@ not guaranteed.
 Finally, and as suggested by David Bosin \emph{et al.}, hardware transitions can
 be leveraged to model a clock, and therefore reasoning about time.
 
-\subsection{Runs}
-\label{subsec:speccert:run}
+\subsection{Traces}
+\label{subsec:speccert:trace}
 
 One particular execution of software components by the hardware architecture is
-modelled as a run of $\Sigma$.
+modelled as a trace of $\Sigma$.
 %
-A run is a sequence of transitions of~$\Sigma$, such that for two consecutive
+A trace is a sequence of transitions of~$\Sigma$, such that for two consecutive
 transitions, the resulting state of the first is the initial state of the next.
 %
-We propose a definition for these runs, and we later use this definition to
-reason about security policies and HSE mechanisms as properties on runs.
+We propose a definition for these traces, and we later use this definition to
+reason about security policies and HSE mechanisms as properties on traces.
 %
 We want to emphasize that our approach remains suitable to use with model
-checkers, as long as their definitions of transitions and runs is equivalent
+checkers, as long as their definitions of transitions and traces is equivalent
 with ours.
 
-\begin{definition}[Runs]
-  We write $\pathesLTS{Ez}$ for the set of runs of the Computing Platform
+\begin{definition}[Traces]
+  We write $\pathesLTS{Ez}$ for the set of traces of the Computing Platform
   $\shortLTS{Ez}$, defined with two constructors:
   %
   \begin{itemize}
@@ -148,7 +147,7 @@ with ours.
   \end{itemize}
   %
   In addition, we consider the function
-  $\func{init}(\rho) : \pathesLTS{Ez} \rightarrow H$ maps a run of $\Sigma$ with
+  $\func{init} : \pathesLTS{Ez} \rightarrow H$ which maps a trace of $\Sigma$ with
   the initial state of the system, and is defined as follows:
   %
   \[
@@ -168,8 +167,8 @@ with ours.
   %
   Finally, we define
   $\func{trans} : \pathesLTS{Ez} \rightarrow \powerset(\mathcal{T}(\Sigma))$,
-  the function which maps a run of $\Sigma$ to the set of transitions which
-  occur during this run, such that
+  the function which maps a trace of $\Sigma$ to the set of transitions which
+  occur during this trace, such that
   %
   \[
     \func{trans}(\rho) \triangleq
@@ -180,45 +179,76 @@ with ours.
   \]
 \end{definition}
 
-\section{Security Policies}
-\label{sec:speccert:security}
+\subsection{Security Policies}
+\label{subsec:speccert:security}
 
-We now discuss how we can model the different security policies discussed in
+We now explain how we model the different security policies discussed in
 Section~\ref{subsec:state:secu}.
+%
+We start from the most general definition possible, then discuss how more
+specific security properties can be modelled as a specialization of that general
+definition.
 
-\subsection{General Case}
+\begin{definition}[Security Policy]
+  A security policy is a predicate on sets of traces
+  $\powerset(\pathesLTS{Ez})$.
+\end{definition}
 
-\[
-  P : \powerset(\pathesLTS{Ez}) \rightarrow \ac{prop}
-\]
+Hyperproperties\,\cite{clarkson2010hyperproperties} such as noninterference
+require a definition that general.
+%
+Liveness properties (something ``good'' happens) and safety properties (nothing
+``bad'' happens) are said to be security
+properties\,\cite{schneider2000enforceable}.
 
-\subsection{Properties on Runs}
+\begin{definition}[Security Property]
+  A security property is a predicate on traces $\pathesLTS{Ez}$.
+  %
+  To express a security property $P$ as a security policy, we rely on a function
+  we call $\func{trace\_property}$, such that
+  %
+  \[
+    \func{trace\_property}_{P}(R) \triangleq \forall \rho \in R, P(\rho)
+  \]
+\end{definition}
 
-\[
-  P : \pathesLTS{Ez} \rightarrow \ac{prop}
-\]
+Safety properties focuses on avoiding ``bad'' transitions, and therefore their
+definition can be even more simple, \emph{if the hardware model allows for
+  distinguish between safe and unsafe transitions solely based on the current
+  state, and not the traces past}.
 
-\[
-  \func{run\_property}_{P}(R) \triangleq \forall \rho \in R, P(\rho)
-\]
-
-\subsection{Safety Properties}
-
-\[
-  P : \mathcal{T}(\Sigma) \rightarrow \ac{prop}
-\]
-
-\[
-  \func{safety\_property}_{P}(R) \triangleq \forall \rho \in R, \forall (h, ev,
-  h') \in \func{trans}(\rho), P(h, ev, h')
-\]
+\begin{definition}[Safety Property]
+  A safety property is a predicate on transitions $\mathcal{T}(\Sigma)$.
+  %
+  To express a safety property $P$ as a security policy, we rely on a function
+  we call $\func{safety\_property}$ function, such that
+  %
+  \[
+    \func{safety\_property}_{P}(R) \triangleq \forall \rho \in R, \forall (h,
+    ev, h') \in \func{trans}(\rho), P(h, ev, h')
+  \]
+\end{definition}
 
 \section{Hardware-based Security Enforcement Mechanisms}
 \label{sec:speccert:hse}
 
-\subsection{Definition}
+The previous definitions allows us to propose a formal definition for \ac{hse}
+mechanisms, notably based on requirements on states and requirements on
+transitions (\ref{subsec:speccert:hsedef}).
+%
+Then, we detail two so-called \ac{hse} Laws, whose main purpose is to enforce
+requirements consistency: requirements on transitions should preserve
+requirements on states (\ref{subsec:speccert:laws}).
+%
+From a \ac{hse} mechanism definition, we derive a set of compliant traces
+(\ref{subsec:speccert:compliant}) which we use to determine if the \ac{hse}
+mechanism is correct with respect to a targeted security policy
+(\ref{subsec:speccert:correct}).
 
-One of the specificities of HSE mechanisms is the sharing of the \ac{cpu}
+\subsection{Definition}
+\label{subsec:speccert:hsedef}
+
+One of the specificities of \ac{hse} mechanisms is the sharing of the \ac{cpu}
 interface between the trusted components and the rest of the software stack,
 considered as the adversary.
 %
@@ -316,6 +346,7 @@ the \ac{bios} code within the Flash Memory, as follows:
 \end{example}
 
 \subsection{HSE Laws}
+\label{subsec:speccert:laws}
 
 For a \ac{hse} mechanism to be correctly defined, it must obey a few axioms,
 together called the \ac{hse} Laws.
@@ -400,14 +431,15 @@ untrusted and we make no assumption on their behaviour.
   the state of the \acp{cpu} and the Flash Memory state.
 \end{example}
 
-\subsection{Run Compliance}
+\subsection{Trace Compliance}
+\label{subsec:speccert:compliant}
 
-We say a run complies to a \ac{hse} mechanism definition when its initial state
-satisfies the state requirements (\func{inv}) and each software transitions of
-the run satisfies the software requirements (\func{behaviour}).
+We say a trace complies to a \ac{hse} mechanism definition when its initial
+state satisfies the state requirements (\func{inv}) and each software
+transitions of the trace satisfies the software requirements (\func{behaviour}).
 %
-\begin{definition}[Compliant Runs]
-  We write $\mathcal{C}(\Delta)$ for the set of the runs which comply with
+\begin{definition}[Compliant Traces]
+  We write $\mathcal{C}(\Delta)$ for the set of the traces which comply with
   $\Delta$.
   %
   Given $\rho \in \pathesLTS{Ez}$,
@@ -423,27 +455,37 @@ the run satisfies the software requirements (\func{behaviour}).
 \end{definition}
 
 \begin{example}[Memory Flash Lock-down Compliance]
-  TODO
+  We consider the execution to start at the end of the boot sequence, when the
+  \ac{bios} gives the control flow to the system software component it has
+  selected.
+  %
+  At the time, it is expected that the \texttt{BIOS\_CNTL} register of the
+  \ac{pch} has been correctly set; in particular, the \texttt{SMM\_BWP} bit
+  should be set, to avoid the Speed Racer
+  attack\,\cite{kallenberg2015racecondition}.
+  %
+  If the \ac{bios} fails to do so, then the related trace is not compliant.
 \end{example}
 
 \begin{lemma}[HSE Invariant Enforcement]
   For all $\rho \in \mathcal{C}(\Delta)$, we prove that \func{inv} is satisfied
-  throughout compliant runs, that is
+  throughout compliant traces, that is
   %
   \[
     \forall (h, l, h') \in \func{trans}(\rho), inv(h) \wedge inv(h')
   \]
 
   \begin{proof}
-    By definition of $\mathcal{C}(\Delta)$, we know the initial state of the run
-    satisfies \func{inv}, and thanks to the first HSE Law, we can conclude the
-    state after the first transition also satisfies \func{inv}.
+    By definition of $\mathcal{C}(\Delta)$, we know the initial state of the
+    trace satisfies \func{inv}, and thanks to the first HSE Law, we can conclude
+    the state after the first transition also satisfies \func{inv}.
     %
-    We can generalize to the run by induction.
+    We can generalize to the trace by induction.
   \end{proof}
 \end{lemma}
 
 \subsection{HSE Mechanism Correctness}
+\label{subsec:speccert:correct}
 
 The main purpose of the \ac{hse} Laws is to verify it is consistent.
 %
@@ -457,7 +499,7 @@ mechanism definition.
 
 \begin{definition}[Correct HSE Mechanism]
   A \ac{hse} mechanism $\Delta$ is correct with respect to a security policy $P$
-  (denoted by $\Delta \sqsubseteq P$) if and only if the set of compliant runs
+  (denoted by $\Delta \sqsubseteq P$) if and only if the set of compliant traces
   of $\Delta$ satisfies $P$, that is
   %
   \[
@@ -552,9 +594,9 @@ We discuss our results in Section \ref{sec:speccert:discuss}.
 
 We consider EM-enforceable security
 policies\,\cite{schneider2000enforceable,schneider2} specified with predicates
-on runs.
+on traces.
 %
-A run is said to be secure according to a security policy when it satisfies the
+A trace is said to be secure according to a security policy when it satisfies the
 predicate specifying this policy.
 
 In this Chapter, we focus on a class of security policies we call software
@@ -623,13 +665,13 @@ definition of a \textit{software execution tampering}.
  software execution isolation policy prevents the untrusted components from
  tampering with the execution of the trusted components.
  %
- Such a policy is enforced during a run if no untrusted component is able to
+ Such a policy is enforced during a trace if no untrusted component is able to
  tamper with the execution of a trusted component.
 
  \begin{definition}[Software Execution Isolation]
    \label{def:softwareisolation}
    Given $\func{context}$ a hardware-software mapping, $\func{fetched}$ an
-   event-software mapping and $\rho$ a run of $\shortLTS{Ez}$,
+   event-software mapping and $\rho$ a trace of $\shortLTS{Ez}$,
    %
    \[ \begin{array}{l}
         \func{software\_execution\_isolation}(\func{context}, \func{fetched}, \rho, \set{T}) \triangleq \\
@@ -663,9 +705,9 @@ definition of a \textit{software execution tampering}.
                                         $\shortLTS{Ez}$ \\
       \hline
       $\pathesLTS{Ez}$ & Set of sequences of $\shortLTS{Ez}$ state-transformations
-                         (Runs) \\
+                         (Traces) \\
       \hline
-      $P$ & Predicate on run to model a EM-enforceable security policy \\
+      $P$ & Predicate on trace to model a EM-enforceable security policy \\
       \hline
       $\Delta$ & Requirements on states and state-transformation (\ac{hse} mechanism)
       \\
@@ -1308,7 +1350,7 @@ distinguish them from the kernel code.
 %
 Thus, in the following, OS code refers to both OS kernel and application codes.
 
-At runtime, both the OS code and the \ac{smm} code can be executed.
+At tracetime, both the OS code and the \ac{smm} code can be executed.
 %
 Our objective is to evaluate the security provided by the hardware to isolate
 \ac{smm} code from OS code.
@@ -1469,7 +1511,7 @@ state-transformation does not imply the OS code to tamper with the execution of
   \[ sound(\Delta_{Smm}, smm\_security) \]
   \begin{proof}
     The "Invariants Enforce Security" lemma applies for one transition and the
-    first \ac{hse} law allows to reason by induction on runs.
+    first \ac{hse} law allows to reason by induction on traces.
   \end{proof}
 \end{theorem}
 
