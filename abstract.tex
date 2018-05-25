@@ -1,28 +1,28 @@
 In this thesis, we consider a class of security enforcement mechanisms we called
-\emph{Hardware-based Security Enforcement} (HSE), such that trusted software
-components rely on the underlying hardware architecture to constrain the
-execution of untrusted software components with respect to targeted security
-properties.
+\emph{Hardware-based Security Enforcement} (HSE).
 %
-For instance, a system software which sets up a page table to isolate
+In such mechanisms, some trusted software components rely on the underlying
+hardware architecture to constrain the execution of untrusted software
+components with respect to targeted security properties.
+%
+For instance, an Operating System that sets up page tables to isolate userland
 applications implements a HSE mechanism.
-%
-More generally, HSE mechanisms are particularly used to keep the software
-components of modern software stacks isolated from each other.
 
 For a HSE mechanism to correctly enforce a targeted security property, it
-requires both hardware components and trusted software components to play their
-parts.
+requires both hardware and trusted software components to play their parts.
 %
-During the past decades, several vulnerability disclosures have defeated such
-HSE mechanisms.
+During the past decades, several vulnerability disclosures have defeated HSE
+mechanisms.
 %
-We focus on vulnerabilities which are the result of errors at a specification
+We focus on the vulnerabilities that are the result of errors at a specification
 level, rather than implementation errors.
 %
-Several critical vulnerabilities are the result of a legitimate use by an
-attacker to one hardware component in order to circumvent the security
-enforcement of another.
+In some critical vulnerabilities, the attacker makes a legitimate use of one
+hardware component to circumvent the HSE mechanism provided by another
+one.
+%
+For instance, cache poisoning attacks leverages inconsistencies between cache
+and DRAM's access control mechanisms.
 %
 We call this class of security vulnerabilities \emph{architectural attacks}.
 %
@@ -34,21 +34,23 @@ This is in line with an ongoing effort, for many years and by industrial
 manufacturers and researchers alike, to formally verify computing platforms.
 %
 Unfortunately, defining a comprehensive model in terms of hardware and software
-components remains challenging, yet such a model is a prerequisite to verify a
-computing platform in terms of HSE mechanisms.
+components remains challenging, yet such a model is a prerequisite to verify HSE
+mechanisms.
 
 Our contribution is two-side:
 %
 \begin{itemize}
-\item We have proposed a three-step methodology for specifying and verifying HSE
+\item We proposed a three-step methodology for specifying and verifying HSE
   mechanisms against hardware architecture models.
   %
-  We have written a minimal model for a single core x86-based computing
-  platform, and used it to specify and verify a real HSE mechanism to
+  To evaluate our approach, we proposed a minimal model for a single core
+  x86-based computing platform.
+  %
+  We used it to specify and verify the HSE mechanism provided by Intel to
   isolate the code executed while the CPU is in System Management Mode (SMM), a
   highly privileged execution mode of x86 microprocessors.
-\item We have proposed a novel approach to verify compositions of
-  components, to enable modular verification of a complex hardware architecture.
+\item We proposed a novel approach to verify compositions of components and to
+  enable modular verification of a complex hardware architecture.
   %
   This approach is not specific to hardware models, and could also be leveraged
   to reason about software applications as well.
@@ -56,4 +58,4 @@ Our contribution is two-side:
 %
 We have implemented proofs of concepts of our approaches using the proof
 assistant Coq in two projects called SpecCert and FreeSpec. Both have been
-released as Free Software.
+released as free software.
