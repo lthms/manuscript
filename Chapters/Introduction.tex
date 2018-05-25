@@ -9,8 +9,8 @@
 \vspace{1cm}\noindent
 %
 To manage complexity, computing platforms are commonly built as successions of
-abstraction layers, from the hardware components  to
-high-level software applications.
+abstraction layers, from the hardware components to high-level software
+applications.
 %
 Each layer leverages the interface of its predecessor to expose a higher-level,
 more constrained set of functionalities for its successors.
@@ -33,23 +33,37 @@ The typical computing platform can be broken down to the following layers:
   %
 \item [Firmware/BIOS]
   %
-  Hardware components often require some firmware, i.e. a dedicated piece of software, to operate.
+  Hardware components often require some firmware, i.e. a dedicated piece of
+  software, to operate.
   %
-  \TODO{Il faudrait une petite phrase de liaison ici du style 'Hardware manufacturers tend to embed some features in their firmware for several reasons. First... }
-  Updating software is easier than updating hardware, as
-  the latter often requires a recall.
+  \TODO{Il faudrait une petite phrase de liaison ici du style 'Hardware
+    manufacturers tend to embed some features in their firmware for several
+    reasons. First... }
   %
-  Vendors can also implement additional high-level, business focus features in their firmware to differentiate from competitors.
+  Updating software is easier than updating hardware, as the latter often
+  requires a recall.
+  %
+  Vendors can also implement additional high-level, business focus features in
+  their firmware to differentiate from competitors.
   %
   For instance, Intel has started to provide out-of-band management features to
   its processors in 2008. \TODO{Ajouter une ref}
   %
   In addition, the hardware architecture as a whole is almost always provided
   with a dedicated piece of software which deals in particular with the
-  initialization of the computer. \TODO{Phrase bien alambiqué. En outre, éviter les formulation floue du style "almost always" Du coup, préférer une formulation plus neutre du style "Firmware is also used to initialized hardware components. This initilization consists in... In particular, some firmware is responsible for the initialization of the platform as a whole.}
+  initialization of the computer.
+  %
+  \TODO{Phrase bien alambiqué. En outre, éviter les formulation floue du style
+    "almost always" Du coup, préférer une formulation plus neutre du style
+    "Firmware is also used to initialized hardware components. This
+    initilization consists in... In particular, some firmware is responsible for
+    the initialization of the platform as a whole.}
   %
   Afterwards, when we refer to this specific type of firmware, we use the term
-  \ac{bios}. \TODO{Donner la définition de BIOS (que veulent dire les acronyme) et dire qu'aujourd'hui la plupart des BIOS respecte le standard UEFI.}
+  \ac{bios}.
+  %
+  \TODO{Donner la définition de BIOS (que veulent dire les acronyme) et dire
+    qu'aujourd'hui la plupart des BIOS respecte le standard UEFI.}
   %
 \item [System Software]
   %
@@ -58,7 +72,11 @@ The typical computing platform can be broken down to the following layers:
   %
   As a consequence, it requires a non-trivial amount of configuration.
   %
-  \TODO{Attention, software, hardware et firmware sont normalement indénombrable en anglais. Il faut que tu identifies les manières idiomatique d'utiliser ces termes }A system software leverages this environment to provide high-level interfaces
+  \TODO{Attention, software, hardware et firmware sont normalement indénombrable
+    en anglais. Il faut que tu identifies les manières idiomatique d'utiliser
+    ces termes }
+  %
+  System software leverages this environment to provide high-level interfaces
   (\emph{e.g.} system calls), so that applications can focus on business logic,
   and in many cases do not care about which particular hardware architecture
   they are executed on.

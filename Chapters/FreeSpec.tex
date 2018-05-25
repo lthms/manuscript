@@ -81,7 +81,7 @@ comprehensive in terms of its hardware and software components.
 Unfortunately, such a model is a prerequisite to verify a computing platform in
 terms of architectural attacks.
 %
-The \index{Coq} proof assistant\,\cite{coq} has proven to be effective to model
+The Coq proof assistant\,\cite{coq} has proven to be effective to model
 specific hardware
 components\,\cite{braibant2011coquet,morrisett2012rocksalt,choi2017kami,jomaa2016mmu}.
 %
@@ -98,7 +98,7 @@ This objective is reminiscent of the programming language problematic to model
 and verify large programs with side effects.
 %
 Reasoning about side effects in purely functional languages such as {\sc
-  Gallina}, the \index{Coq} specification language, is difficult, firstly
+  Gallina}, the Coq specification language, is difficult, firstly
 because they imply to somehow take into account an outer \emph{stateful}
 environment and secondly, because the composition of stateful computations is
 not well-handled by traditional (monadic) approaches.
@@ -122,7 +122,7 @@ Our contribution is threefold:
   these components in order to verify the properties of the resulting system.
 \item We have implemented FreeSpec\,\footnote{FreeSpec has been released as a
     free software, under the terms of the GPLv3.
-    \url{https://github.com/ANSSI-FR/FreeSpec}}, a framework for the \index{Coq}
+    \url{https://github.com/ANSSI-FR/FreeSpec}}, a framework for the Coq
   proof assistant to \emph{modularly} verify programs with effects and effects
   handlers with our approach.
 \item We have modelled and verified a simplified subset of an x86 computing
@@ -386,8 +386,8 @@ computing platforms are often designed as a hierarchical succession of layers.
 % -----------------------------------------------------------------------------
 
 Modelling programs with side effects in purely functional languages such as {\sc
-  Gallina} (the \index{Coq} specification language) or Haskell is usually
-achieved thanks to monads\,\cite{hoareetal2001monad}.
+  Gallina} (the Coq specification language) or Haskell is usually achieved
+thanks to monads\,\cite{hoareetal2001monad}.
 %
 FreeSpec leverages a variant of the Free monad called the Program
 monad\,\cite{operational} to model programs with effects. Operational semantics

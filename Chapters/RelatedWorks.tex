@@ -80,7 +80,7 @@ from one formalism to another.
 %
 In the meantime, the underlying principles remain the same.
 
-\subsection{Specifying Security Properties}
+\subsection{Specifying Security Policies}
 \label{subsec:state:secu}
 
 Once a system $C$ is modelled with a model $M$, we can reason about the
@@ -297,7 +297,7 @@ They do not excuse users from \emph{writing proofs}, which can be very important
 in terms of effort for real world systems.
 
 \begin{example}[Airlock System Verification in Coq]
-  The \index{Coq} theorem prover\,\cite{coq} includes two languages: a rich
+  The Coq theorem prover\,\cite{coq} includes two languages: a rich
   functional language to write specifications ({\sc Gallina}) and a tactic
   language to write proofs ({\sc Ltac}).
   %
@@ -345,7 +345,7 @@ in terms of effort for real world systems.
   We can express that in the form of a \emph{lemma}, that is a logical statement
   for each we exhibit a proof.
   %
-  We write the proof with {\sc Ltac}, and trust \index{Coq} to refuse it in case
+  We write the proof with {\sc Ltac}, and trust Coq to refuse it in case
   it is incorrect.
   %
   The proof is written in terms of {\sc Ltac} tactics.
@@ -355,7 +355,7 @@ in terms of effort for real world systems.
   For instance, the \texttt{right} tactic refers to the fact that given two
   statements $P$ and $Q$, then if $Q$ is true, then $P \vee Q$ is also
   true. Tactics updates the proof obligation (initially the lemma statement),
-  and the goal of a \index{Coq} user is to bring back this proof obligation to
+  and the goal of a Coq user is to bring back this proof obligation to
   something that has already been proven.
 
   \inputminted[firstline=40,lastline=57]{coq}{Listings/Airlock.v}
@@ -677,7 +677,7 @@ inconsistencies which otherwise could damage the value of the verification
 process.
 
 From this perspective, it is interesting to emphasis that, if not all model
-defined in {\sc Gallina} within the \index{Coq} proof assistant are executable, it is
+defined in {\sc Gallina} within the Coq proof assistant are executable, it is
 possible to leverage the extraction mechanism to that end.
 %
 That is, a model which can be extracted can also be executed.
@@ -756,10 +756,10 @@ model, in order to reduce the state combinatory.
 %on proof assistants to hardware conception; a world that is still dominated by
 %model checking approaches.
 %%
-%The result is a framework for the \index{Coq} proof assistant, to implement and verify
+%The result is a framework for the Coq proof assistant, to implement and verify
 %hardware components.
 %%
-%Pushing the \texttt{Notation} feature of \index{Coq}, which let the developer extend the
+%Pushing the \texttt{Notation} feature of Coq, which let the developer extend the
 %proof assistant parser with its own construction, to its maximum, they offer a
 %development environment very close to BlueSpec\,\cite{nikhil2004bluespec}.
 %%
@@ -859,7 +859,7 @@ It is required to consider all the possible traces.
 \paragraph{Pip}
 %
 Pip is a minimal kernel whose reference implementation is written in {\sc
-  Gallina}, the specification language of \index{Coq}.
+  Gallina}, the specification language of Coq.
 %
 The authors have verified their reference implementation correctly configures a
 \ac{mmu} in order to isolate the applications it manages\,\cite{jomaa2016mmu}.
