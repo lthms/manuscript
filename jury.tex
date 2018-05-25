@@ -1,0 +1,135 @@
+\documentclass{article}
+
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+
+\title{Specifying and Verifying Hardware-based Security Enforcement Mechanisms}
+\author{Thomas Letan}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Abstract}
+
+In this thesis, we consider a class of security enforcement mechanisms we called
+\emph{Hardware-based Security Enforcement} (HSE).
+%
+In such mechanisms, some trusted software components rely on the underlying
+hardware architecture to constrain the execution of untrusted software
+components with respect to targeted security properties.
+%
+For instance, an Operating System that sets up page tables to isolate userland
+applications implements a HSE mechanism.
+
+For a HSE mechanism to correctly enforce a targeted security property, it
+requires both hardware and trusted software components to play their parts.
+%
+During the past decades, several vulnerability disclosures have defeated HSE
+mechanisms.
+%
+We focus on the vulnerabilities that are the result of errors at a specification
+level, rather than implementation errors.
+%
+In some critical vulnerabilities, the attacker makes a legitimate use of one
+hardware component to circumvent the HSE mechanism provided by another one.
+%
+For instance, cache poisoning attacks leverages inconsistencies between cache
+and DRAM's access control mechanisms.
+%
+We call this class of security vulnerabilities \emph{architectural attacks}.
+
+Our objective is to explore systemic approaches to specify and verify HSE
+mechanisms using formal methods.
+%
+We believe this would benefit both hardware designers and software developers.
+%
+Firstly, a formal specification of HSE mechanisms can be leveraged as a
+foundation for a systemic approach to verify hardware specifications, in the
+hope of uncovering potential architectural attacks ahead of time.
+%
+Secondly, it provides unambiguous specifications to software developers. We
+believe these specifications can be a valuable addition to the existing
+documentation.
+%
+This is in line with an ongoing effort, for many years and by industrial
+manufacturers and researchers alike, to formally verify computing platforms.
+%
+Unfortunately, defining a comprehensive model in terms of hardware and software
+components remains challenging, yet such a model is a prerequisite to verify HSE
+mechanisms.
+
+Our contribution is two-side:
+%
+\begin{itemize}
+\item We proposed a formal definition of HSE mechanisms against hardware
+  architecture models to be used to specify and verify them\,[1].
+  %
+  To evaluate our approach, we proposed a minimal model for a single core
+  x86-based computing platform.
+  %
+  We used it to specify and verify the HSE mechanism provided by Intel to
+  isolate the code executed while the CPU is in System Management Mode (SMM), a
+  highly privileged execution mode of x86 microprocessors.
+  %
+  We have written machine-checked proofs in the Coq proof assistant to that
+  end\,[4].
+\item We proposed a novel approach to verify compositions of components and to
+  enable modular verification of a complex hardware architecture, inspired by
+  algebraic effects\,[2].
+  %
+  This approach is not specific to hardware models, and could also be leveraged
+  to reason about software applications as well.
+  %
+  In addition, we have implemented FreeSpec, a framework for the Coq proof
+  assistant\,[5].
+  %
+  FreeSpec is a complete implementation of our approach, and takes advantages of
+  the proof automation features of Coq mechanisms to ease the verification
+  process.
+\end{itemize}
+
+\paragraph{Keywords}
+%
+Security $\bullet$ Hardware Verification $\bullet$ Formal Specification
+$\bullet$ Formal Methods $\bullet$ Coq
+
+\section{Publications}
+
+\subsection{Peer-reviewed Conferences}
+
+\begin{itemize}
+\item[] [1] \textbf{SpecCert: Specifying and Verifying Hardware-based Security
+    Enforcement
+    Mechanisms.} \\
+  Thomas Letan, Pierre Chifflier, Guillaume Hiet, Pierre Néron, Benjamin Morin,
+  \emph{21st International Symposium on Formal Methods (FM 2016)}.
+\item[] [2] \textbf{Modular Verification of Programs with Effects and Effect
+    Handlers in Coq.} \\
+  Thomas Letan, Yann Régis-Gianas, Pierre Chifflier, Guillaume Hiet, \emph{22st
+    International Symposium on Formal Methods (FM 2018)}.
+\end{itemize}
+
+\subsection{Seminar}
+
+\begin{itemize}
+\item[] [3] FreeSpec : Modular Verification of Systems using Effects and Effect
+  Handlers in Coq, \emph{Analyse et conception de systèmes, IRIF} --
+  \url{https://www.irif.fr/seminaires/acs/index}
+\end{itemize}
+
+\subsection{Open Source Software}
+
+\begin{itemize}
+\item[] [4] \textbf{SpecCert}, a Coq framework for specifying and verifying
+  Hardware-based Security Enforcement, distributed under the terms of the
+  CeCILL-B --- \url{https://github.com/lthms/speccert}
+\item[] [5] \textbf{FreeSpec}, a Coq framework for modularly verifying programs
+  with effects and effect handlers, distributed under the terms of the GPL-3 ---
+  \url{https://github.com/ANSSI-FR/FreeSpec}
+\end{itemize}
+
+\end{document}
