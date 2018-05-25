@@ -13,7 +13,7 @@ LISTINGS := $(wildcard Listings/*.v)      \
 
 default: minimal
 
-minimal: main-mini.pdf
+minimal: main-mini.pdf jury.pdf
 full: main.pdf
 
 %.pdf: %.tex ${STY-SRC} ${BIB-SRC} ${TEX-SRC} ${ABSTRACT} ${LISTINGS}
