@@ -476,6 +476,7 @@ transitions of the trace satisfies the software requirements (\func{behaviour}).
   \]
 
   \begin{proof}
+    \label{lemma:speccert:invariant}
     By definition of $\mathcal{C}(\Delta)$, we know the initial state of the
     trace satisfies \func{inv}, and thanks to the first HSE Law, we can conclude
     the state after the first transition also satisfies \func{inv}.
@@ -537,6 +538,11 @@ SMRAM Cache Poisoning attack.
   \]
 
   \begin{proof}
+    With Lemma~\ref{lemma:speccert:invariant}, we know that every initial state
+    of a transition of $\rho$ satisfies $\rho$, meaning they all satisfies the
+    safety property $P$.
+    %
+    We conclude with the Definition of $\func{safety\_property}_{P}$.
   \end{proof}
 \end{theorem}
 
