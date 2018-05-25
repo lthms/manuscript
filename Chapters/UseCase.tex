@@ -303,7 +303,7 @@ The first task of the \ac{bios} is to initiate the hardware architecture,
 starting with the \ac{dram}.
 %
 Once the hardware components of the computing platform have been initiated, the
-\ac{bios} searches for a system software to load into memory.
+\ac{bios} searches for a system software component to load into memory.
 %
 Historically, ``legacy'' \acp{bios} were looking for a Master Boot Record (MBR)
 at the beginning of mass storage devices (\emph{e.g.} hard drive, USB stick).
@@ -337,9 +337,9 @@ case of bad \ac{bios} configuration (\emph{e.g.} Secure Boot is disabled).
 \subsection{At runtime}
 \label{subsec:usecase:firm:runtime}
 
-Once a system software has been selected and loaded into memory (ideally,
-without any tampering with the \ac{bios}), the boot sequence ends, and the
-runtime begins.
+Once a system software component has been selected and loaded into memory
+(ideally, without any tampering with the \ac{bios}), the boot sequence ends, and
+the runtime begins.
 %
 At runtime, the system software is in charge of the \ac{cpu} control flow,
 meaning it decides which piece of software is executed at a given time.
@@ -373,9 +373,8 @@ from the system software perspective.
 The \ac{bios} autonomy from the system software has important consequences in
 terms of security.
 %
-Software vulnerabilities affecting the \ac{bios} could by used by an
-attacker to take complete control over the software stack executed by the
-\ac{cpu}.
+Software vulnerabilities affecting the \ac{bios} could by used by an attacker to
+take complete control over the software stack executed by the \ac{cpu}.
 
 \subsection{Security Model}
 \label{subsec:usecase:firm:sec}
@@ -738,10 +737,10 @@ protection\,\cite{kovah2015senter}.
 
 \paragraph{Intel TXT}
 The Intel Trusted eXecution Technology (TXT) is a recent feature of some x86
-\acp{cpu}, whose aim is to reduce the \ac{tcb} of the system software, by removing
-most of the \ac{bios} from it.
+\acp{cpu}, whose aim is to reduce the \ac{tcb} of the system software, by
+removing most of the \ac{bios} from it.
 %
-Using a new family of instructions called \texttt{SENTER}, a system software can
+Using a new family of instructions called \texttt{SENTER}, system software can
 initiate an isolated execution environment.
 %
 The motivation behind TXT is to reduce the size of the architecture \ac{tcb}.
