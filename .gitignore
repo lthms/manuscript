@@ -10,5 +10,12 @@ main-blx.bib
 *.pdf
 *.bbl
 *.blg
+*.dvi
+*.eps
+*.fdb_latexmk
+*.fls
+*.idx
+*.ilg
+*.ind
 plan.tex
 _minted*/
