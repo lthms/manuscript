@@ -190,14 +190,6 @@ sending the latter back to the client component.
 In FreeSpec, a computational request is modelled with an effect, that is a
 symbolic value which describes the request and its potential result.
 
-Thereafter, we often define sets of values, and interfaces in particular, in
-terms of functions to construct these values.
-%
-These functions are called ``constructors''\,\footnote{In this article,
-  functions are written in bold. In addition, constructors begin with a capital
-  letter.}, and they have mutually exclusive images, i.e. it is not possible to
-construct the same value with two different constructors.
-%
 For $\I$ an interface, we denote by $\Interface{\I}{\mathcal{A}} \subseteq \I$
 the subset of effects whose results belong to a set~$\mathcal{A}$.
 

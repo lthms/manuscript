@@ -1,10 +1,10 @@
 \chapter{State of the Art of Formal Verification}
 \label{chapter:relatedwork}
 
-\endquote{``\emph{Walking on water and developing software from a specification
-    are easy if both are frozen.}''
+\endquote{``\emph{We build our computers the way we build our cities: over time,
+    without a plan, on top of ruins.}''
 
-  \hfill\footnotesize --- Edward V. Berard}
+  \hfill\footnotesize --- Ellen Ullman}
 
 \vspace{1cm}\noindent
 %
@@ -297,9 +297,9 @@ They do not excuse users from \emph{writing proofs}, which can be very important
 in terms of effort for real world systems.
 
 \begin{example}[Airlock System Verification in Coq]
-  The Coq theorem prover\,\cite{coq} includes two languages: a rich
-  functional language to write specifications ({\sc Gallina}) and a tactic
-  language to write proofs ({\sc Ltac}).
+  The Coq theorem prover\,\cite{coq} includes two languages: a rich functional
+  language to write specifications ({\sc Gallina}) and a tactic language to
+  write proofs ({\sc Ltac}).
   %
   We can {\sc Gallina} to describe the system in terms of states and actions to
   update this state.
@@ -345,8 +345,8 @@ in terms of effort for real world systems.
   We can express that in the form of a \emph{lemma}, that is a logical statement
   for each we exhibit a proof.
   %
-  We write the proof with {\sc Ltac}, and trust Coq to refuse it in case
-  it is incorrect.
+  We write the proof with {\sc Ltac}, and trust Coq to refuse it in case it is
+  incorrect.
   %
   The proof is written in terms of {\sc Ltac} tactics.
   %
@@ -355,8 +355,8 @@ in terms of effort for real world systems.
   For instance, the \texttt{right} tactic refers to the fact that given two
   statements $P$ and $Q$, then if $Q$ is true, then $P \vee Q$ is also
   true. Tactics updates the proof obligation (initially the lemma statement),
-  and the goal of a Coq user is to bring back this proof obligation to
-  something that has already been proven.
+  and the goal of a Coq user is to bring back this proof obligation to something
+  that has already been proven.
 
   \inputminted[firstline=40,lastline=57]{coq}{Listings/Airlock.v}
 
@@ -747,49 +747,51 @@ model to validate their countermeasures.
 However, the state explosion problem obliges the authors to simplify their
 model, in order to reduce the state combinatory.
 
-%\paragraph{Kami}
+% \paragraph{Kami}
 %%
-%As part of the DeepSpec project\,\cite{appel2017deepspec}, Joonwon Choi \emph{et
-%  al.} have released Kami\,\cite{choi2017kami}.
+% As part of the DeepSpec project\,\cite{appel2017deepspec}, Joonwon Choi
+% \emph{et al.} have released Kami\,\cite{choi2017kami}.
 %%
-%Kami's main objective is to bring software formal verification technique based
-%on proof assistants to hardware conception; a world that is still dominated by
-%model checking approaches.
+% Kami's main objective is to bring software formal verification technique based
+% on proof assistants to hardware conception; a world that is still dominated by
+% model checking approaches.
 %%
-%The result is a framework for the Coq proof assistant, to implement and verify
-%hardware components.
+% The result is a framework for the Coq proof assistant, to implement and verify
+% hardware components.
 %%
-%Pushing the \texttt{Notation} feature of Coq, which let the developer extend the
-%proof assistant parser with its own construction, to its maximum, they offer a
-%development environment very close to BlueSpec\,\cite{nikhil2004bluespec}.
+% Pushing the \texttt{Notation} feature of Coq, which let the developer extend
+% the proof assistant parser with its own construction, to its maximum, they
+% offer a development environment very close to
+% BlueSpec\,\cite{nikhil2004bluespec}.
 %%
-%Kami's hardware component is specified as labelled transition systems, whose set
-%of transition labels forms its interface.
+% Kami's hardware component is specified as labelled transition systems, whose
+% set of transition labels forms its interface.
 %%
-%A transition is defined in terms of actions, which can be local to a component,
-%or consists of interacting with another component.
+% A transition is defined in terms of actions, which can be local to a
+% component, or consists of interacting with another component.
 %%
-%Finally, Kami enables modularity, by allowing for substituting one module $m$ by
-%another module $m'$, if the latter is proven to be a refinement of the former.
+% Finally, Kami enables modularity, by allowing for substituting one module $m$
+% by another module $m'$, if the latter is proven to be a refinement of the
+% former.
 %%
-%For a given component of the computing platform, it becomes possible to reason
-%about the rest of the system in terms of high-level, specification modules.
+% For a given component of the computing platform, it becomes possible to reason
+% about the rest of the system in terms of high-level, specification modules.
 %%
-%These modules are as many hypotheses which can be confirmed by proving the
-%related subsystems effectively refine them.
+% These modules are as many hypotheses which can be confirmed by proving the
+% related subsystems effectively refine them.
 %
-%BlueSpec is a target for Kami's models extraction.
+% BlueSpec is a target for Kami's models extraction.
 %%
-%Therefore, it s possible to generate FPGA bitstream from a Kami module, using
-%the BlueSpec compiler.
+% Therefore, it s possible to generate FPGA bitstream from a Kami module, using
+% the BlueSpec compiler.
 %%
-%Although Kami allows for more components’ connection patterns than what we
-%eventually propose in the context of this thesis, it is hardware-specific, thus
-%is not suitable for reasoning about systems which also contain software
-%components.
+% Although Kami allows for more components’ connection patterns than what we
+% eventually propose in the context of this thesis, it is hardware-specific,
+% thus is not suitable for reasoning about systems which also contain software
+% components.
 %%
-%In addition, its purpose is to verify hardware component implementation, while
-%we rather stay at the specification level.
+% In addition, its purpose is to verify hardware component implementation, while
+% we rather stay at the specification level.
 
 \subsection{Software Systems}
 
@@ -881,9 +883,9 @@ system call is ``secure.’’
 
 \subsection{Perspectives on HSE Mechanisms Verification}
 
-%\begin{table}
-%  \centerline{%
-%    \begin{tabular}{lcp{7cm}}
+% \begin{table}
+%   \centerline{%
+%     \begin{tabular}{lcp{7cm}}
 %      \multicolumn{1}{c}{\bf Target}
 %      & \bf Approach
 %      & \multicolumn{1}{c}{\bf Hypotheses} \\

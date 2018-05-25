@@ -1,15 +1,30 @@
 \chapter{A Formal Definition of HSE Mechanisms}
 \label{chapter:speccert}
 
-In this Chapter, we give a formal definition of HSE mechanisms.
+We first describe the formalism of hardware model against which we base our
+following definitions (Section~\ref{subsec:speccert:hardware}).
+%
+Then, we discuss how we model security policies using this model, based on the
+classes of security policies described in Section~\ref{subsec:state:secu}
+(Section~\ref{sec:speccert:security}).
+%
+Finally, we give a formal definition of HSE mechanisms and HSE mechanisms
+correctness (Section~\ref{sec:speccert:hse}).
 
 \section{Hardware Model}
+\label{subsec:speccert:hardware}
 
 In line with the works we have described in Section~\ref{sec:related:review}, we
 model a hardware architecture which executes several software components as a
-\ac{lts}.
+\ac{lts} with controllable and observable transitions
+(\ref{subsec:speccert:def}).
+%
+We then give a generic definition of runs of a \ac{lts}, so we can later reason
+about security policies and HSE mechanisms as properties on runs
+(\ref{subsec:speccert:run}).
 
 \subsection{Definition}
+\label{subsec:speccert:def}
 
 The state of a hardware architecture models the configuration of its devices at
 a given time.
@@ -23,6 +38,12 @@ These state transformations occur during the system's transitions.
 We distinguish between two classes of transitions: the software transitions
 which are direct and foreseeable side-effects of the execution of a \ac{cpu}
 instruction and the hardware transitions which are not.
+%
+Differentiating between transitions which are controllable and transitions which
+are only observable is not a novel approach.
+%
+David Basin \emph{et al.} have notably emphasize the importance of transitions
+which are only observable in terms of security\,\cite{basin2013enforceable}.
 
 \begin{definition}[Hardware Model]
   A hardware model $\Sigma$ is a tuple
@@ -30,8 +51,11 @@ instruction and the hardware transitions which are not.
   %
   \begin{itemize}
   \item $H$ is the set of configurations of the hardware architecture
+  %
   \item $L_S$ is the set of labels to identify software transitions
+  %
   \item $L_H$ is the set of labels to identify hardware transitions
+  %
   \item $\rightarrow$ is a the transition relation of the system
   \end{itemize}
 
@@ -46,32 +70,13 @@ instruction and the hardware transitions which are not.
     \transitionLTS{Ez}{h}{l}{h'}
   \]
   %
-\end{definition}
-
-\begin{definition}[Transitions]
-  We denote by $\mathcal{T}(\Sigma)$ the set of triples which satisfy the
+  and we write $\mathcal{T}(\Sigma)$ for the set of triples which satisfy the
   transition relation, that is
   \[
     \mathcal{T}(\Sigma) \triangleq \{\ (h, ev, h')\ |\
     \transitionLTS{Ez}{h}{ev}{h'}\ \}
   \]
 \end{definition}
-
-\begin{definition}[Runs]
-  One particular execution of software components by the hardware architecture
-  is modelled as a run of $\Sigma$.
-  %
-  A run is a sequence of transitions of~$\Sigma$, such that for two consecutive
-  transitions, the resulting state of the first is the initial state of the
-  next.
-
-  We denote $\pathesLTS{Ez}$ the set of runs of the Computing Platform
-  $\shortLTS{Ez}$, $\func{init}(\rho) \in H$ the initial state of a run $\rho$,
-  and $\func{trans}(\rho) \in \powerset(\mathcal{T}(\Sigma))$ the set of
-  transitions which occur during this run.
-\end{definition}
-
-\subsection{Software vs. Hardware Transitions}
 
 The execution of an instruction can be broken down into sequences of these
 transitions.
@@ -100,15 +105,85 @@ In this scenario, only one software transition occurs, when the \ac{cpu} reads
 the content of \texttt{ecx}.
 %
 The following transition models the interrupt, and is labelled as ``hardware''.
+
+Hardware transitions are not limited to interrupts raised by a \ac{cpu}.
 %
-Other hardware transitions may be provoked by other hardware components.
+They make be provoked by other hardware components as well.
 %
 For instance, \ac{dma} transactions by a network card qualify as hardware
 transitions.
+%
+This allows for taking into account active peripherals whose trustworthiness is
+not guaranteed.
+%
+Finally, and as suggested by David Bosin \emph{et al.}, hardware transitions can
+be leveraged to model a clock, and therefore reasoning about time.
+
+\subsection{Runs}
+\label{subsec:speccert:run}
+
+One particular execution of software components by the hardware architecture is
+modelled as a run of $\Sigma$.
+%
+A run is a sequence of transitions of~$\Sigma$, such that for two consecutive
+transitions, the resulting state of the first is the initial state of the next.
+%
+We propose a definition for these runs, and we later use this definition to
+reason about security policies and HSE mechanisms as properties on runs.
+%
+We want to emphasize that our approach remains suitable to use with model
+checkers, as long as their definitions of transitions and runs is equivalent
+with ours.
+
+\begin{definition}[Runs]
+  We write $\pathesLTS{Ez}$ for the set of runs of the Computing Platform
+  $\shortLTS{Ez}$, defined with two constructors:
+  %
+  \begin{itemize}
+  \item
+    $\func{Cons} : H \rightarrow L \rightarrow \pathesLTS{Ez} \rightarrow
+    \pathesLTS{Ez}$
+  %
+  \item $\func{Step} : \mathcal{T}(\Sigma) \rightarrow \pathesLTS{Ez}$
+  \end{itemize}
+  %
+  In addition, we consider the function
+  $\func{init}(\rho) : \pathesLTS{Ez} \rightarrow H$ maps a run of $\Sigma$ with
+  the initial state of the system, and is defined as follows:
+  %
+  \[
+    \func{init}(\rho) \triangleq
+    \begin{cases}
+      h & \text{if } \rho = \func{Cons}(h,l,\rho') \\
+      h & \text{if } \rho = \func{Step}(h,l,h')
+    \end{cases}
+  \]
+  %
+  and we require that $\func{Cons}(h, l, \rho) \in \pathesLTS{Ez}$ if and only
+  if
+  %
+  \[
+    (h, l, \func{init}(\rho)) \in \mathcal{T}(\Sigma)
+  \]
+  %
+  Finally, we define
+  $\func{trans} : \pathesLTS{Ez} \rightarrow \powerset(\mathcal{T}(\Sigma))$,
+  the function which maps a run of $\Sigma$ to the set of transitions which
+  occur during this run, such that
+  %
+  \[
+    \func{trans}(\rho) \triangleq
+    \begin{cases}
+      \{(h,l,\func{init}(\rho'))\} \cup \func{trans(\rho')} & \text{if } \rho = \func{Cons}(h,l,\rho') \\
+      (h, l, h') & \text{if } \rho = \func{Step}(h,l,h')
+    \end{cases}
+  \]
+\end{definition}
 
 \section{Security Policies}
+\label{sec:speccert:security}
 
-We now discuss how we can model the different security policies introduced in
+We now discuss how we can model the different security policies discussed in
 Section~\ref{subsec:state:secu}.
 
 \subsection{General Case}
@@ -135,10 +210,11 @@ Section~\ref{subsec:state:secu}.
 
 \[
   \func{safety\_property}_{P}(R) \triangleq \forall \rho \in R, \forall (h, ev,
-  h') \in \mathcal{T}(\rho), P(h, ev, h')
+  h') \in \func{trans}(\rho), P(h, ev, h')
 \]
 
 \section{Hardware-based Security Enforcement Mechanisms}
+\label{sec:speccert:hse}
 
 \subsection{Definition}
 
@@ -185,8 +261,8 @@ The software components which implement a \ac{hse} mechanism form its the
 \begin{definition}[HSE Mechanism]
   \label{def:speccert:hse}
   A \ac{hse} mechanism $\Delta$ is a tuple
-  $\langle \Sigma, S, T, \func{context}, \func{inv}, \func{behaviour}
-  \rangle$, such that
+  $\langle \Sigma, S, T, \func{context}, \func{inv}, \func{behaviour} \rangle$,
+  such that
   %
   \begin{itemize}
   \item $\Sigma$ is the hardware model against which $\Delta$ is defined
@@ -246,13 +322,13 @@ together called the \ac{hse} Laws.
 %
 The first law says that the state requirements specified by $\func{inv}$ are
 preserved through transitions as long as the \ac{tcb} avoids software
-transformations which do not satisfy $\func{behavior}$.
+transformations which do not satisfy $\func{behaviour}$.
 %
-The second law says that the $behavior$ predicate specifies
+The second law says that the $\func{behaviour}$ predicate specifies
 state-transformations restrictions for the \ac{tcb} only.
 %
 The software components which are not part of the \ac{tcb} are considered
-untrusted and we make no assumption on their behavior.
+untrusted and we make no assumption on their behaviour.
 
 \begin{definition}[\ac{hse} Laws]
   \label{def:laws}
@@ -336,18 +412,26 @@ the run satisfies the software requirements (\func{behaviour}).
   %
   Given $\rho \in \pathesLTS{Ez}$,
   \[
-    \rho \in \mathcal{C}(\Delta) \triangleq
-    \func{inv}(\func{init}(\rho))\,\wedge\,\forall (h, l, h') \in
-    \mathcal{T}(\Sigma), l \in L_S \Rightarrow \func{behaviour}(h, l)
+    \begin{array}{lcl}
+      \rho \in \mathcal{C}(\Delta)
+      & \triangleq
+      & \func{inv}(\func{init}(\rho))\ \wedge \\
+      &
+      & \forall (h,l,h') \in \func{trans}(\rho), l \in L_S \Rightarrow \func{behaviour}(h, l)
+    \end{array}
   \]
 \end{definition}
+
+\begin{example}[Memory Flash Lock-down Compliance]
+  TODO
+\end{example}
 
 \begin{lemma}[HSE Invariant Enforcement]
   For all $\rho \in \mathcal{C}(\Delta)$, we prove that \func{inv} is satisfied
   throughout compliant runs, that is
   %
   \[
-    \forall (h, l, h') \in \mathcal{T}(\rho), inv(h) \wedge inv(h')
+    \forall (h, l, h') \in \func{trans}(\rho), inv(h) \wedge inv(h')
   \]
 
   \begin{proof}
@@ -441,7 +525,7 @@ As we have already argued in Section~\ref{sec:intro:verif}, we believe this
 approach would benefit to both hardware designers and software developers.
 %
 Formal specifications for \ac{hse} mechanisms can be the foundation of a
-systemic approach to verify hardware specifications, and form a valuable
+systematic approach to verify hardware specifications, and form a valuable
 addition to the existing documentation.
 
 In Section \ref{sec:speccert:framework}, we give a formal definition of the
@@ -945,14 +1029,14 @@ behavior is out of the scope of this article.
 
 % \[
 %   \texttt{CacheLine}_{\set{S}} \triangleq \begin{array}{ll} \{\,dirty &:
-%     \setshortdef{\val{true},\,\val{false}} \\
-%     ;\,tag
-%     &:
-%     \texttt{PhysAddr}
-%     \\
-%     ;\,owner
-%     &:
-%     \set{S}\,\}
+                                                                          %                                                                           \setshortdef{\val{true},\,\val{false}} \\
+                                              %                                               ;\,tag
+                                              %                                               &:
+                                              %                                               \texttt{PhysAddr}
+                                                                                                %                                               \\
+                                              %                                               ;\,owner
+                                              %                                               &:
+                                              %                                               \set{S}\,\}
 %   \end{array} \]
 
 \[
