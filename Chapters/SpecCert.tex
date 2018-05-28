@@ -123,60 +123,47 @@ be leveraged to model a clock, and therefore reasoning about time.
 
 One particular execution of software components by the hardware architecture is
 modelled as a trace of $\Sigma$.
-%
-A trace is a sequence of transitions of~$\Sigma$, such that for two consecutive
-transitions, the resulting state of the first is the initial state of the next.
-%
-We propose a definition for these traces, and we later use this definition to
-reason about security policies and HSE mechanisms as properties on traces.
-%
-We want to emphasize that our approach remains suitable to use with model
-checkers, as long as their definitions of transitions and traces is equivalent
-with ours.
 
 \begin{definition}[Traces]
-  We write $\pathesLTS{Ez}$ for the set of traces of the Computing Platform
-  $\shortLTS{Ez}$, defined with two constructors:
+  A trace is a sequence of transitions of~$\Sigma$, such that for two
+  consecutive transitions, the resulting state of the first is the initial state
+  of the next.
+
+  We write $\pathesLTS{Ez}$ for the set of traces of a hardware model $\Sigma$,
+  and we consider the following functions:
   %
   \begin{itemize}
+  \item $\func{init} : \pathesLTS{Ez} \rightarrow S$ maps a trace with its
+    initial state
   \item
-    $\func{Cons} : H \rightarrow L \rightarrow \pathesLTS{Ez} \rightarrow
-    \pathesLTS{Ez}$
-  %
-  \item $\func{Step} : \mathcal{T}(\Sigma) \rightarrow \pathesLTS{Ez}$
+    $\func{trace} : \pathesLTS{Ez} \rightarrow \powerset(\mathcal{T}(\Sigma))$
+    maps a trace with the set of transitions
   \end{itemize}
+
+  Given $t \in \mathcal{T}(\Sigma)$, we write $[t]$ for the trace which consists
+  in the transition $t$.
   %
-  In addition, we consider the function
-  $\func{init} : \pathesLTS{Ez} \rightarrow H$ which maps a trace of $\Sigma$ with
-  the initial state of the system, and is defined as follows:
-  %
-  \[
-    \func{init}(\rho) \triangleq
-    \begin{cases}
-      h & \text{if } \rho = \func{Cons}(h,l,\rho') \\
-      h & \text{if } \rho = \func{Step}(h,l,h')
-    \end{cases}
-  \]
-  %
-  and we require that $\func{Cons}(h, l, \rho) \in \pathesLTS{Ez}$ if and only
-  if
+  Given $(h, l, h') \in \mathcal{T}(\Sigma)$, given $\rho \in \pathesLTS{Ez}$
+  such that $\func{init}(\rho) = h'$, we write $[(h, l, h')|\rho]$ for the
+  transition which consists in a first transition labelled $l$ from $h$ to $h'$,
+  followed by a trace $\rho$. Thereafter, we omit to restate that
+  $\func{init}(\rho) = h'$ when we write $[(h, l, h')|\rho]$, but it remains
+  implicitly required.
+
+  To reason about traces, we also consider a induction principle such that,
+  given $P$ a predicate on traces,
   %
   \[
-    (h, l, \func{init}(\rho)) \in \mathcal{T}(\Sigma)
+    \begin{array}{l}
+      (\forall t \in \mathcal{T}(\Sigma), P([t])) \\
+      \Rightarrow (\forall t \in \mathcal{T}(\Sigma), \forall \rho \in
+      \pathesLTS{Ez}, P(\rho) \Rightarrow P([t|\rho])) \\
+      \Rightarrow (\forall \rho \in \pathesLTS{Ez}, P(\rho))
+    \end{array}
   \]
   %
-  Finally, we define
-  $\func{trans} : \pathesLTS{Ez} \rightarrow \powerset(\mathcal{T}(\Sigma))$,
-  the function which maps a trace of $\Sigma$ to the set of transitions which
-  occur during this trace, such that
-  %
-  \[
-    \func{trans}(\rho) \triangleq
-    \begin{cases}
-      \{(h,l,\func{init}(\rho'))\} \cup \func{trans(\rho')} & \text{if } \rho = \func{Cons}(h,l,\rho') \\
-      (h, l, h') & \text{if } \rho = \func{Step}(h,l,h')
-    \end{cases}
-  \]
+  Afterwards, when we write ``by induction on [a trace] $\rho$'', we implicitly
+  refer to this induction principle.
 \end{definition}
 
 \subsection{Security Policies}
@@ -212,7 +199,7 @@ properties\,\cite{schneider2000enforceable}.
   \]
 \end{definition}
 
-Safety properties focuses on avoiding ``bad'' transitions, and therefore their
+Safety properties focus on avoiding ``bad'' transitions, and therefore their
 definition can be even more simple, \emph{if the hardware model allows for
   distinguish between safe and unsafe transitions solely based on the current
   state, and not the traces past}.
@@ -229,7 +216,7 @@ definition can be even more simple, \emph{if the hardware model allows for
   \]
 \end{definition}
 
-\section{Hardware-based Security Enforcement Mechanisms}
+\section{HSE Mechanisms}
 \label{sec:speccert:hse}
 
 The previous definitions allows us to propose a formal definition for \ac{hse}
@@ -300,8 +287,8 @@ The software components which implement a \ac{hse} mechanism form its the
   \item $S$ is the set of software components executed by the hardware
     architecture
   %
-  \item $T \subseteq$ is the set of trusted software components which implement
-    the \ac{hse} mechanism and form its \ac{tcb}
+  \item $T \subseteq S$ is the set of trusted software components which
+    implement the \ac{hse} mechanism and form its \ac{tcb}
   %
   \item $\func{context}$ is a hardware-software mapping to determine when the
     \ac{tcb} is executed
@@ -355,8 +342,8 @@ The first law says that the state requirements specified by $\func{inv}$ are
 preserved through transitions as long as the \ac{tcb} avoids software
 transformations which do not satisfy $\func{behaviour}$.
 %
-The second law says that the $\func{behaviour}$ predicate specifies
-state-transformations restrictions for the \ac{tcb} only.
+The second law says that the $\func{behaviour}$ predicate specifies restrictions
+of software transitions for the \ac{tcb} only.
 %
 The software components which are not part of the \ac{tcb} are considered
 untrusted and we make no assumption on their behaviour.
@@ -375,11 +362,11 @@ untrusted and we make no assumption on their behaviour.
     \]
   %
   \item $\func{behaviour}$ only restricts the \ac{tcb}:
-    $\forall x \not\in T, \forall h \in H, \forall l \in L_S$,
+    $\forall (h, l, h') \in \mathcal{T}(\Sigma)$, $\forall x \not\in T$,
+    %
     \[
-      \begin{array}{l}
-        \func{context}(h) = x \Rightarrow \func{behaviour}(h, l)
-      \end{array}
+      l \in L_S \Rightarrow \func{context}(h) = x \Rightarrow
+      \func{behaviour}(h, l)
     \]
   \end{enumerate}
 \end{definition}
@@ -442,16 +429,21 @@ transitions of the trace satisfies the software requirements (\func{behaviour}).
   We write $\mathcal{C}(\Delta)$ for the set of the traces which comply with
   $\Delta$.
   %
-  Given $\rho \in \pathesLTS{Ez}$,
+  Given $\rho \in \pathesLTS{Ez}$, then $\rho \in \mathcal{C}(\Delta)$ iff
   \[
-    \begin{array}{lcl}
-      \rho \in \mathcal{C}(\Delta)
-      & \triangleq
-      & \func{inv}(\func{init}(\rho))\ \wedge \\
-      &
-      & \forall (h,l,h') \in \func{trans}(\rho), l \in L_S \Rightarrow \func{behaviour}(h, l)
-    \end{array}
+    \func{inv}(\func{init}(\rho)) \wedge \forall (h,l,h') \in
+    \func{trans}(\rho)\text{, }l \in L_S \Rightarrow \func{behaviour}(h, l)
   \]
+  % \[
+  %   \begin{array}{lcl}
+  %     \rho \in \mathcal{C}(\Delta)
+  %     & \triangleq
+  %     & \func{inv}(\func{init}(\rho))\ \wedge \\
+  %     &
+  %     & \forall (h,l,h') \in \func{trans}(\rho), l \in L_S \Rightarrow
+  %      %     \func{behaviour}(h, l)
+  %   \end{array}
+  % \]
 \end{definition}
 
 \begin{example}[Memory Flash Lock-down Compliance]
@@ -468,11 +460,11 @@ transitions of the trace satisfies the software requirements (\func{behaviour}).
 \end{example}
 
 \begin{lemma}[HSE Invariant Enforcement]
-  For all $\rho \in \mathcal{C}(\Delta)$, we prove that \func{inv} is satisfied
-  throughout compliant traces, that is
+  We prove that \func{inv} is satisfied throughout compliant traces, that is
   %
   \[
-    \forall (h, l, h') \in \func{trans}(\rho), inv(h) \wedge inv(h')
+    \forall \rho \in \mathcal{C}(\Delta), \forall (h, l, h') \in
+    \func{trans}(\rho), \func{inv}(h) \wedge \func{inv}(h')
   \]
 
   \begin{proof}
@@ -481,7 +473,7 @@ transitions of the trace satisfies the software requirements (\func{behaviour}).
     trace satisfies \func{inv}, and thanks to the first HSE Law, we can conclude
     the state after the first transition also satisfies \func{inv}.
     %
-    We can generalize to the trace by induction.
+    We generalize to the trace by induction.
   \end{proof}
 \end{lemma}
 
@@ -500,11 +492,11 @@ mechanism definition.
 
 \begin{definition}[Correct HSE Mechanism]
   A \ac{hse} mechanism $\Delta$ is correct with respect to a security policy $P$
-  (denoted by $\Delta \sqsubseteq P$) if and only if the set of compliant traces
+  (denoted by $\Delta \models P$) if and only if the set of compliant traces
   of $\Delta$ satisfies $P$, that is
   %
   \[
-    \Delta \sqsubseteq P \triangleq P(\mathcal{C}(\Delta))
+    \Delta \models P \triangleq P(\mathcal{C}(\Delta))
   \]
 \end{definition}
 
@@ -527,20 +519,26 @@ SMRAM Cache Poisoning attack.
   then
   %
   \[
-    \func{inv}(h) \Rightarrow (l \in L_S \Rightarrow \func{behaviour}(h, l))
-    \Rightarrow P(h, l, h')
+    \begin{array}{l}
+      \forall (h, l, h') \in \mathcal{T}(\Sigma), \\
+      \qquad \func{inv}(h) \\
+      \qquad \Rightarrow (l \in L_{S} \Rightarrow \func{behaviour}(h, l))\\
+      \qquad \Rightarrow P(h, l, h')
+    \end{array}
   \]
   %
   is a sufficient condition for
   %
   \[
-    \Delta \sqsubseteq \func{safety\_property}_{P}
+    \Delta \models \func{safety\_property}_{P}
   \]
 
   \begin{proof}
     With Lemma~\ref{lemma:speccert:invariant}, we know that every initial state
-    of a transition of $\rho$ satisfies $\rho$, meaning they all satisfies the
-    safety property $P$.
+    of a transition of $\rho$ satisfies $\func{inv}$.
+    %
+    By definition of Compliant Runs, we know that any transitions meaning they
+    all satisfies the safety property $P$.
     %
     We conclude with the Definition of $\func{safety\_property}_{P}$.
   \end{proof}
@@ -559,7 +557,7 @@ verifying \ac{hse} mechanisms against hardware architecture models, that is
 \item specifying the software requirements that must be satisfied by the trusted
   software components which implement the \ac{hse} mechanism,
 %
-\item specifying the targeted security property the \ac{hse} mechanism
+\item specifying the targeted security policy the \ac{hse} mechanism
   supposedly enforces, and
 %
 \item verifying that the \ac{hse} mechanism is sound.

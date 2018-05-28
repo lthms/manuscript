@@ -1,22 +1,19 @@
 STY-SRC  := freespec.sty speccert.sty phdcmd.sty
 BIB-SRC  := manuscript.bib
-TEX-SRC  := Chapters/Introduction.tex     \
-            Chapters/UseCase.tex          \
-            Chapters/RelatedWorks.tex     \
-            Chapters/SpecCert.tex         \
-            Chapters/FreeSpec.tex         \
+TEX-SRC  := $(wildcard Chapter/*.tex)     \
+            $(wildcard Appendices/*.tex)  \
             abbrev.tex                    \
-            nomencl.tex
-ABSTRACT := abstract.tex
+            nomencl.tex                   \
+            abstract.tex
 LISTINGS := $(wildcard Listings/*.v)      \
-            $(wildcard Listings/*.nusmv)  \
+            $(wildcard Listings/*.nusmv)
 
 default: minimal
 
 minimal: main-mini.pdf jury.pdf
 full: main.pdf
 
-%.pdf: %.tex ${STY-SRC} ${BIB-SRC} ${TEX-SRC} ${ABSTRACT} ${LISTINGS}
+%.pdf: %.tex ${STY-SRC} ${BIB-SRC} ${TEX-SRC} ${LISTINGS}
 	latexmk $< -shell-escape -pdf
 
 clean:
