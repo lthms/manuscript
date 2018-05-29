@@ -460,6 +460,7 @@ transitions of the trace satisfies the software requirements (\func{behaviour}).
 \end{example}
 
 \begin{lemma}[HSE Invariant Enforcement]
+  \label{lemma:speccert:hseinv}
   We prove that \func{inv} is satisfied throughout compliant traces, that is
   %
   \[
@@ -468,7 +469,6 @@ transitions of the trace satisfies the software requirements (\func{behaviour}).
   \]
 
   \begin{proof}
-    \label{lemma:speccert:invariant}
     By definition of $\mathcal{C}(\Delta)$, we know the initial state of the
     trace satisfies \func{inv}, and thanks to the first HSE Law, we can conclude
     the state after the first transition also satisfies \func{inv}.
@@ -515,6 +515,7 @@ security property (Definition~\ref{def:usecase:biosint}), as evidenced by the
 SMRAM Cache Poisoning attack.
 
 \begin{theorem}[Correct HSE Mechanism for Safety Properties]
+  \label{theorem:speccert:correcthse}
   Given $P$ a safety property defined as a predicate on $\mathcal{T}(\Sigma)$,
   then
   %
@@ -534,7 +535,7 @@ SMRAM Cache Poisoning attack.
   \]
 
   \begin{proof}
-    With Lemma~\ref{lemma:speccert:invariant}, we know that every initial state
+    With Lemma~\ref{lemma:speccert:hseinv}, we know that every initial state
     of a transition of $\rho$ satisfies $\func{inv}$.
     %
     By definition of Compliant Runs, we know that any transitions meaning they

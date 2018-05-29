@@ -102,8 +102,8 @@ Section SpecCert.
        end.
 
   Definition trans
-           {m:  t}
-           (rho:  trace m)
+             {m:  t}
+             (rho:  trace m)
     : transition m -> Prop :=
     trans_aux (proj1_sig rho).
 
@@ -131,27 +131,27 @@ Section SpecCert.
   Record HSE
          (m:  t) :=
     { software:  Type
-    ; tcb:        software -> Prop
-    ; context:    S -> software
-    ; inv:        S -> Prop
-    ; behaviour:  S -> Ls -> Prop
-    ; law_1:      forall (tr:  transition m),
-        inv (from tr)
-        -> match (labelled tr) with
-           | Software l
-             => behaviour (from tr) l
-           | _
-             => True
-           end
-        -> inv (to tr)
-    ; law_2:      forall (tr:  transition m),
-        tcb (context (from tr))
-        -> match (labelled tr) with
-           | Software l
-             => behaviour (from tr) l
-           | _
-             => True
-           end
+      ; tcb:        software -> Prop
+      ; context:    S -> software
+      ; inv:        S -> Prop
+      ; behaviour:  S -> Ls -> Prop
+      ; law_1:      forall (tr:  transition m),
+          inv (from tr)
+          -> match (labelled tr) with
+             | Software l
+               => behaviour (from tr) l
+             | _
+               => True
+             end
+          -> inv (to tr)
+      ; law_2:      forall (tr:  transition m),
+          tcb (context (from tr))
+          -> match (labelled tr) with
+             | Software l
+               => behaviour (from tr) l
+             | _
+               => True
+             end
     }.
 
   Definition compliant_trace
@@ -258,15 +258,15 @@ Section SpecCert.
           (p:    transition m -> Prop)
     : (forall (rho:  trace m)
               (tr:   transition m),
-      trans rho tr
-      -> inv _ hse (from tr)
-      -> (match labelled tr with
-          | Software l
-            => behaviour _ hse (from tr) l
-          | _
-            => True
-          end)
-      -> p tr)
+          trans rho tr
+          -> inv _ hse (from tr)
+          -> (match labelled tr with
+              | Software l
+                => behaviour _ hse (from tr) l
+              | _
+                => True
+              end)
+          -> p tr)
       -> correct_hse hse (safety_property p).
   Proof.
     intros Hreq.
@@ -279,4 +279,4 @@ Section SpecCert.
     + apply Hcomp.
       exact Htrans.
   Qed.
-Section SpecCert.
+  Section SpecCert.
