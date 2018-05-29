@@ -69,15 +69,16 @@ The typical computing platform can be broken down to the following layers:
   As a consequence, it requires a non-trivial amount of configuration.
   %
   System software leverages this environment to provide high-level interfaces
-  (\emph{e.g.} system calls), so that applications can focus on business logic,
-  and in many cases do not care about which particular hardware architecture
+  (\emph{e.g.} system calls), so that applications can focus on business logic. Thus, applications often 
+  do not care about which particular hardware architecture
   they are executed on.
   %
-  In addition, mainstream system software deal with the complexity implied by
+  In addition, system software deal with the complexity implied by
   the concurrent execution of several applications.
   %
 \item [Applications]
   %
+  \TODO{Il faudrait définir positivement les applications : ce sont elles qui offre un service à l'utilisateur}
   The previous layers only exist so that applications can be executed.
   %
   Thanks to the principle of separation of concerns, they delegate the hardware
@@ -87,7 +88,7 @@ The typical computing platform can be broken down to the following layers:
 Variations of these abstraction layers exist.
 %
 For instance, for embedded devices, it is common that the system software and
-the applications form one layer.
+the applications form one single layer.
 %
 On the contrary, for mainstream computers, the system software can be formed by
 an operating system only, or by the combination of one hypervisor and several
@@ -95,10 +96,12 @@ operating systems.
 %
 The latter case is common in the context of cloud computing, as modern
 hypervisors bring powerful features such as virtual machines snapshots or
-migrations.
+migrations. \TODO{ajouter des références. De quels hyperviseurs veux tu parler? c'est un peu flou}
 %
 It is also frequent that application internals are themselves built as
-abstraction layers (\emph{e.g.} applicative framework, core logic, plugins).
+abstraction layers (\emph{e.g.} applicative framework, core logic, plugins, etc.).
+
+\TODO{Rajouter une jolie figure pour illustrer cet empilement de couches et y faire référence dans le texte}
 
 \section{Hardware-based Security Enforcement mechanisms}
 
@@ -115,8 +118,10 @@ restart\,\cite{embleton2013smm};
 %
 the operating system manages the application life cycle, and actively tamper
 with their execution (\emph{e.g.} dynamic linking, system calls).
+\TODO{La phrase précédente est beaucoup trop longue et confuse. On ne voit pas ce que tu veux dire au final. Fait plusieurs phrase. Si j'ai bien suivi, tu veux dire 1) que chaque couche fait confiance à la précédente. Mais que 2) cette confiance est discutable car l'histoire montre que des vulnérabilités ou des portes dérobées existent dans chacune des couches. Ecrit 1), donne un exemple puis 2 et donne un exemple mais ne mélange pas tout.}
+
 %
-One layer may constrain its successors' execution, with respect to targeted
+One layer may constrain its successors' execution \TODO{the execution of its successors? J'ai l'impression qu'on ne voit pas trop la construction somethings' blabla dans des articles techniques et scientifiques. cf \url{https://ell.stackexchange.com/questions/157380/whats-the-correct-usage-of-something-of-something-and-somethings-something} }, with respect to targeted
 security properties.
 %
 For instance, an operating system shares hardware resources among several
@@ -132,10 +137,10 @@ on features provided by the hardware architecture.
 In a nutshell, the main idea is to reduce the hardware capabilities one software
 can leverage while it is executed.
 %
-For instance, a typical system software leverages among other mechanisms a
+For instance, system software often leverages among other mechanisms a
 \ac{mmu} to partition the system memory.
 %
-Thus, when an application is executed, it can only access a portion of the
+Thus, when an application is executed, it can only access a portion \TODO{a subset?} of the
 system memory.
 %
 In addition, the \ac{cpu} can leverage a hardware timer to stop applications'
@@ -144,15 +149,15 @@ execution, without the need for these applications to cooperate.
 \begin{definition}[Hardware-based Security Enforcement]
   We call \ac{hse} the class of security enforcement mechanisms where a trusted
   software component configure the underlying hardware architecture to constrain
-  the execution of untrusted and potentially arbitrary software components.
+  the execution of untrusted software components.
 \end{definition}
 
 A \ac{hse} mechanism enforces its targeted security property when the trusted
 software components correctly configure the hardware features at their disposal,
 and these features are sufficient to constrain the untrusted software execution
-as expected.
+as expected.\TODO{En relisant, c'est cette première phrase qui n'est pas claire. Je pense que tu voulias dire que pour que le HSE assure bien la propriété de sécurité, cela suppose deux chose :1) qu'il soit correctement configuré pas le code trusté et 2) que les fonctionnalité hardware fonctionne comme espéré. Il faudrait mieux faire ressortir cela. Ne pas hésiter à faire une énumération explicite.}
 %
-Both remain challenging.
+Both remain challenging. \TODO{Cette dernière phrase n'est pas claire. A quoi renvoie "both"?}
 
 \paragraph{Software Errors.}
 %
@@ -162,17 +167,18 @@ advantage of important hardware features at their disposal.
 These lacks of hardware configurations put the affected computing platforms at
 risk.
 %
+\TODO{Je propose de virer les deux phrases précédentes qui sont redondantes avec ce qui précède et sont plutôt confuses}
 Many security vulnerabilities disclosed over the years have been the result of a
 misconfiguration of hardware features by key software
-components\,\cite{bulygin2014bios}.
+components\,\cite{bulygin2014bios}. \TODO{"many security vulne" $\rightarrow$ on s'attend à avoir plusieurs références}
 %
 Many facts can explain this state of things.
 %
 In the past, lower-level pieces of software, such as firmware components, may
 not have been conceived and implemented with security as a primary focus.
 %
-The increasing hardware architectures' complexity can also be held partly
-responsible.
+The increasing complexity of hardware architectures can also be held partly
+responsible.s
 %
 While one computer can be made of dozens of components, software developers have
 to read and understand as many, independent and often large documents of various
