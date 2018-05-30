@@ -3,59 +3,77 @@ In this thesis, we consider a class of security enforcement mechanisms we called
 %
 In such mechanisms, some trusted software components rely on the underlying
 hardware architecture to constrain the execution of untrusted software
-components with respect to targeted security properties.
+components with respect to targeted security policies.
 %
 For instance, an Operating System that sets up page tables to isolate userland
 applications implements a HSE mechanism.
 
-For a HSE mechanism to correctly enforce a targeted security property, it
-requires both hardware and trusted software components to play their parts.
+For a HSE mechanism to correctly enforce a targeted security policy, it requires
+both hardware and trusted software components to play their parts.
 %
 During the past decades, several vulnerability disclosures have defeated HSE
 mechanisms.
 %
-We focus on the vulnerabilities that are the result of errors at a specification
-level, rather than implementation errors.
+We focus on the vulnerabilities that are the result of errors at the
+specification level, rather than implementation errors.
 %
 In some critical vulnerabilities, the attacker makes a legitimate use of one
-hardware component to circumvent the HSE mechanism provided by another
-one.
+hardware component to circumvent the HSE mechanism provided by another one.
 %
-For instance, cache poisoning attacks leverages inconsistencies between cache
+For instance, cache poisoning attacks leverage inconsistencies between cache
 and DRAM's access control mechanisms.
 %
 We call this class of security vulnerabilities \emph{architectural attacks}.
-%
-Our objective is to explore systemic approaches to specify and verify HSE
-mechanisms using formal methods, in the hope of uncovering potential
-architectural attacks ahead of time.
-%
-This is in line with an ongoing effort, for many years and by industrial
-manufacturers and researchers alike, to formally verify computing platforms.
-%
-Unfortunately, defining a comprehensive model in terms of hardware and software
-components remains challenging, yet such a model is a prerequisite to verify HSE
-mechanisms.
 
-Our contribution is two-side:
+Our goal is to explore approaches to specify and verify HSE mechanisms using
+formal methods.
+%
+We believe this would benefit both hardware designers and software developers.
+%
+Firstly, a formal specification of HSE mechanisms can be leveraged as a
+foundation for a systematic approach to verify hardware specifications, in the
+hope of uncovering potential architectural attacks ahead of time.
+%
+Secondly, it provides unambiguous specifications to software developers, in the
+form of a list of requirements.
+%
+These requirements have to be satisfied by trusted software components in order
+for the hardware architecture to enforce the targeted security policy.
+%
+We believe these specifications can be a valuable addition to the existing
+documentation, and should eventually be leveraged in a software verification
+process as well.
+
+Our contribution is two-fold:
 %
 \begin{itemize}
-\item We proposed a three-step methodology for specifying and verifying HSE
-  mechanisms against hardware architecture models.
+\item We propose a formal definition of HSE mechanisms against hardware
+  architecture models to be used to specify and verify them.
   %
-  To evaluate our approach, we proposed a minimal model for a single core
+  To evaluate our approach, we propose a minimal model for a single core
   x86-based computing platform.
   %
-  We used it to specify and verify the HSE mechanism provided by Intel to
-  isolate the code executed while the CPU is in System Management Mode (SMM), a
-  highly privileged execution mode of x86 microprocessors.
-\item We proposed a novel approach to verify compositions of components and to
-  enable modular verification of a complex hardware architecture.
+  We use it to specify and verify the HSE mechanism provided by Intel to isolate
+  the code executed while the CPU is in System Management Mode (SMM), a highly
+  privileged execution mode of x86 microprocessors.
+  %
+  We have written machine-checked proofs in the Coq proof assistant to that
+  end.
+\item We propose a novel approach to verify compositions of components inspired
+  by algebraic effects, to enable modular verification of complex hardware
+  architectures.
   %
   This approach is not specific to hardware models, and could also be leveraged
   to reason about software applications as well.
+  %
+  In addition, we have implemented FreeSpec, a framework for the Coq proof
+  assistant.
+  %
+  FreeSpec is a complete implementation of our approach, and takes advantages of
+  the proof automation features of Coq to ease the verification process.
 \end{itemize}
+
+\paragraph{Keywords:}
 %
-We have implemented proofs of concepts of our approaches using the proof
-assistant Coq in two projects called SpecCert and FreeSpec. Both have been
-released as free software.
+Security $\bullet$ Hardware Verification $\bullet$ Formal Specification
+$\bullet$ Formal Methods $\bullet$ Coq
