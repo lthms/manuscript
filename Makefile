@@ -5,15 +5,15 @@ TEX-SRC  := $(wildcard Chapter/*.tex)     \
             abbrev.tex                    \
             nomencl.tex                   \
             abstract.tex
-LISTINGS := $(wildcard Listings/*.v)      \
-            $(wildcard Listings/*.nusmv)
+COQ      := $(wildcard Listings/*.v)
+NUSMV    := $(wildcard Listings/*.nusmv)
 
 default: minimal
 
 minimal: main-mini.pdf jury.pdf
 full: main.pdf
 
-%.pdf: %.tex ${STY-SRC} ${BIB-SRC} ${TEX-SRC} ${LISTINGS}
+%.pdf: %.tex ${STY-SRC} ${BIB-SRC} ${TEX-SRC} ${COQ} ${NUSMV}
 	latexmk $< -shell-escape -pdf
 
 clean:

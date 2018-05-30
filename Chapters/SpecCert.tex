@@ -45,6 +45,7 @@ David Basin \emph{et al.} have notably emphasize the importance of transitions
 which are only observable in terms of security\,\cite{basin2013enforceable}.
 
 \begin{definition}[Hardware Model]
+  \label{def:speccert:model}
   A hardware model $\Sigma$ is a tuple
   $\langle H, L_S, L_H, \rightarrow \rangle$, where
   %
@@ -125,6 +126,7 @@ One particular execution of software components by the hardware architecture is
 modelled as a trace of $\Sigma$.
 
 \begin{definition}[Traces]
+  \label{def:speccert:trace}
   A trace is a sequence of transitions of~$\Sigma$, such that for two
   consecutive transitions, the resulting state of the first is the initial state
   of the next.

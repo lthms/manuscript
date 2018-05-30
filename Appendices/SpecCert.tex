@@ -1,14 +1,132 @@
 \chapter{A Formal Definition of HSE Mechanisms in Coq}
 
-This Appendix presents in depth an implementation of the formal definition of
-HSE mechanisms detailed in Chapter~\ref{chapter:speccert}, and follows a similar
+This Appendix presents an implementation of the formal definition of HSE
+mechanisms detailed in Chapter~\ref{chapter:speccert}, and follows a similar
 outline.
 %
-The main purpose of the presented development is to provide rigorous,
-machine-checked proofs of the Lemma~\ref{lemma:speccert:hseinv} and the
+The main purpose of this development is to provide rigorous, machine-checked
+proofs of the Lemma~\ref{lemma:speccert:hseinv} and the
 Theorem~\ref{theorem:speccert:correcthse}.
 %
 The sketch proofs given in Chapter~\ref{chapter:speccert} are manual
 verbalization of the {\sc Ltac} script proofs.
+%
+We assume the reader is familiar with Coq, and we discuss several key fragments
+of the development.
 
-\inputminted{coq}{Listings/SpecCert.v}
+\section{Hardware Model}
+
+\subsection{Definition}
+
+A hardware model in our formalism is a tuple
+$\langle S, L_S, L_H, \rightarrow \rangle$
+(Definition~\ref{def:speccert:model}), with $\rightarrow$ being a predicate on
+$H \times (L_S \uplus L_H) \times H$.
+
+The three sets $H$, $L_S$ and $L_H$ are introduced as variables of our
+development.
+%
+This means they are implicit arguments of any further definition which uses
+them.
+
+\inputminted[gobble=2,firstline=2,lastline=2]{coq}{Listings/SpecCert.v}
+
+The disjoint union $\uplus$ is modelled through a dedicated inductive type
+called \texttt{label}.
+
+\inputminted[gobble=2,firstline=4,lastline=8]{coq}{Listings/SpecCert.v}
+
+Because $S$, $L_S$ and $L_H$ are \emph{implicit} arguments of our development, a
+hardware model can be reduced to its relation transition~$\rightarrow$.
+
+\inputminted[gobble=2,firstline=10,lastline=12]{coq}{Listings/SpecCert.v}
+
+A transition in our formalism is a tuple $(h, l, h')$ which satisfies the
+transition relation of the model.
+%
+Subsets in Coq are usually modelled using so-called sigma-type:
+%
+\texttt{\{ x: A | P x \}} is the subset of elements of type \texttt{A} which
+satisfy the predicate \texttt{P}.
+%
+We define \texttt{transition m}, the set of transitions of a model \texttt{m},
+using a sigma-type.
+
+\inputminted[gobble=2,firstline=29,lastline=32]{coq}{Listings/SpecCert.v}
+
+Because {\sc Gallina} is a strongly-typed language, manipulating a sigma-type
+can be cumbersome.
+%
+In particular, there is no implicit coercion from \texttt{\{ x: A | P x \}} to
+\texttt{A} by default.
+%
+The function \texttt{proj1\_sig} can be used to explicitly coerce a sigma-type
+value, and we leverage the \texttt{Notation} feature of Coq, in order to ease
+the coercion.
+
+\inputminted[gobble=2,firstline=34,lastline=35]{coq}{Listings/SpecCert.v}
+
+That is, when we write \texttt{[x]}, Coq will unwrap the sigma-type.
+
+\subsection{Traces}
+
+The next step is to model traces (Definition~\ref{def:speccert:trace}).
+%
+We first introduce \texttt{sequence}, a parameterized type which cannot be
+empty.
+%
+This simplifies several definitions, such as \texttt{init} (which returns the
+initial state of a trace).
+
+\inputminted[gobble=2,firstline=39,lastline=46]{coq}{Listings/SpecCert.v}
+
+Not all sequences are traces, as a trace is a sequence where, given two
+consecutive transitions, the initial state of the second one is the resulting
+state of the first.
+%
+Similarly to the \texttt{transition} type, we define \texttt{trace} with a
+sigma-type.
+%
+To define the predicate to distinguish between valid and invalid trace, we first
+define \texttt{init} and \texttt{trace} as functions on \texttt{sequence
+  (transition~m)}, with the set of transitions returned by \texttt{trace} is
+modelled as a predicate on \texttt{transition m}.
+%
+Then, we define \texttt{is\_trace}, an inductive predicate on \texttt{sequence
+  (transition~m)}.
+
+\inputminted[gobble=2,firstline=62,lastline=71]{coq}{Listings/SpecCert.v}
+
+Finally, we use the \texttt{is\_trace} predicate to define \texttt{trace m}.
+
+\inputminted[gobble=2,firstline=73,lastline=76]{coq}{Listings/SpecCert.v}
+
+\subsection{Security Policies}
+
+\inputminted[gobble=2,firstline=90,lastline=92]{coq}{Listings/SpecCert.v}
+
+\inputminted[gobble=2,firstline=94,lastline=99]{coq}{Listings/SpecCert.v}
+
+\inputminted[gobble=2,firstline=101,lastline=109]{coq}{Listings/SpecCert.v}
+
+\section{HSE Mechanisms}
+
+\subsection{Definition and HSE Laws}
+
+\inputminted[gobble=2,firstline=111,lastline=120]{coq}{Listings/SpecCert.v}
+
+\inputminted[gobble=2,firstline=122,lastline=138]{coq}{Listings/SpecCert.v}
+
+\subsection{Trace Compliance}
+
+\inputminted[gobble=2,firstline=146,lastline=155]{coq}{Listings/SpecCert.v}
+
+\inputminted[gobble=2,firstline=157,lastline=181]{coq}{Listings/SpecCert.v}
+
+\inputminted[gobble=2,firstline=183,lastline=228]{coq}{Listings/SpecCert.v}
+
+\subsection{HSE Mechanism Correctness}
+
+\inputminted[gobble=2,firstline=230,lastline=235]{coq}{Listings/SpecCert.v}
+
+\inputminted[gobble=2,firstline=237,lastline=259]{coq}{Listings/SpecCert.v}
