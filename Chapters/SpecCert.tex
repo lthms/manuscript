@@ -1,6 +1,13 @@
 \chapter{A Formal Definition of HSE Mechanisms}
 \label{chapter:speccert}
 
+\endquote{``\emph{The purpose of abstraction is not to be vague, but to create a
+    new semantic level in which one can be absolutely precise}''
+
+  \hfill\footnotesize --- Edsger Dijkstra}
+
+\vspace{1cm}\noindent
+%
 We first describe the formalism of hardware model against which we base our
 following definitions (Section~\ref{subsec:speccert:hardware}).
 %
@@ -14,8 +21,8 @@ In line with the works we have described in Section~\ref{sec:related:review}, we
 model a hardware architecture which executes several software components as a
 \ac{lts} with controllable and observable transitions
 %
-We then give a generic definition of traces of a \ac{lts}, so we can later reason
-about security policies and HSE mechanisms as sets of traces
+We then give a generic definition of traces of a \ac{lts}, so we can later
+reason about security policies and HSE mechanisms as sets of traces
 (\ref{subsec:speccert:trace}).
 %
 Then, we discuss how we model security policies using this model, based on the
@@ -494,8 +501,8 @@ mechanism definition.
 
 \begin{definition}[Correct HSE Mechanism]
   A \ac{hse} mechanism $\Delta$ is correct with respect to a security policy $P$
-  (denoted by $\Delta \models P$) if and only if the set of compliant traces
-  of $\Delta$ satisfies $P$, that is
+  (denoted by $\Delta \models P$) if and only if the set of compliant traces of
+  $\Delta$ satisfies $P$, that is
   %
   \[
     \Delta \models P \triangleq P(\mathcal{C}(\Delta))
@@ -537,8 +544,8 @@ SMRAM Cache Poisoning attack.
   \]
 
   \begin{proof}
-    With Lemma~\ref{lemma:speccert:hseinv}, we know that every initial state
-    of a transition of $\rho$ satisfies $\func{inv}$.
+    With Lemma~\ref{lemma:speccert:hseinv}, we know that every initial state of
+    a transition of $\rho$ satisfies $\func{inv}$.
     %
     By definition of Compliant Runs, we know that any transitions meaning they
     all satisfies the safety property $P$.
