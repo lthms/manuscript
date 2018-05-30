@@ -13,6 +13,9 @@ following definitions (Section~\ref{subsec:speccert:hardware}).
 %
 Then, we give a formal definition of HSE mechanisms and HSE mechanisms
 correctness (Section~\ref{sec:speccert:hse}).
+%
+For the reader familiar with Coq, we present an implementation of our formalism
+in Appendix~\ref{appendix:speccert}.
 
 \section{Hardware Model}
 \label{subsec:speccert:hardware}
@@ -558,71 +561,23 @@ SMRAM Cache Poisoning attack.
 
 \chapter{Specifying and Verifying an Idealized BIOS HSE Mechanism}
 
-\newpage
+\section{Software Execution Isolation}
 
-In this Chapter, we introduce a three-step methodology for specifying and
-verifying \ac{hse} mechanisms against hardware architecture models, that is
-%
-\begin{inparaenum}[(1)]
-\item specifying the software requirements that must be satisfied by the trusted
-  software components which implement the \ac{hse} mechanism,
-%
-\item specifying the targeted security policy the \ac{hse} mechanism
-  supposedly enforces, and
-%
-\item verifying that the \ac{hse} mechanism is sound.
-\end{inparaenum}
-%
-A \ac{hse} mechanism specification is sound when untrusted software components'
-executions are constrain with respect to the security property as long as the
-trusted software component correctly implements it.
-%
-As we have already argued in Section~\ref{sec:intro:verif}, we believe this
-approach would benefit to both hardware designers and software developers.
-%
-Formal specifications for \ac{hse} mechanisms can be the foundation of a
-systematic approach to verify hardware specifications, and form a valuable
-addition to the existing documentation.
-
-In Section \ref{sec:speccert:framework}, we give a formal definition of the
-SpecCert formalism.
-%
-In Section \ref{sec:speccert:hardware}, we define a model of x86-based hardware
-architectures to verify \ac{hse} mechanisms targeting software isolation
-policies using publicly available Intel specifications.
-%
-In Section \ref{sec:speccert:smm}, we verify the soundness of the \ac{hse}
-mechanism implemented in many x86 computer firmware codes to isolate the code
-executed while the \ac{cpu} is in System Management Mode (\ac{smm}), a highly
-privileged execution mode of x86 microprocessors.
-%
-Our model and proofs have been implemented using Coq, a proof assistant system
-and have been released as an open source software\,\footnote{Which can can be
-  found at: \url{https://github.com/lthms/speccert}}.
-%
-We discuss our results in Section \ref{sec:speccert:discuss}.
-
-\section{SpecCert Formalism} \label{sec:speccert:framework}
-
-\subsection{Security Policies}
-
-We consider EM-enforceable security
-policies\,\cite{schneider2000enforceable,schneider2} specified with predicates
-on traces.
-%
-A trace is said to be secure according to a security policy when it satisfies the
-predicate specifying this policy.
-
-In this Chapter, we focus on a class of security policies we call software
-execution isolation policies.
+In this Chapter, we focus on a class of security policies we call \emph{software
+  execution isolation policies}.
 %
 Such a policy prevents a set of untrusted software components to tamper with the
 execution of another set of so-called trusted software components.
 %
 We consider that a software component tampers with the execution of another when
 it is able to make the latter execute an instruction of its choice.
+%
+This is particular case of the Integrity property
+(Definition~\ref{def:usecase:int}), as we focus on instruction fetches
+exclusively.
 
-We now introduce the concept of \textit{memory location ownership}.
+In this Section, we give a generic definition of software execution isolation,
+based upon the concept of \textit{memory location ownership}.
 %
 A memory location within a hardware architecture is a container which is able to
 store data used by a software component \emph{e.g.}~a general-purpose register
@@ -642,45 +597,46 @@ location in which these data are stored.
 With this mapping, it becomes possible to determine the owner of an instruction
 fetched by the \ac{cpu} in order to be decoded and executed.
 
-\begin{definition}[Event-Software Mapping]
-  \label{def:evsoft}
-  An event-software mapping
-  $\func{fet\-ched}: \set{H} \times \set{E} \rightarrow \mathcal{P}(\set{S})$ is
-  a function which takes an initial hardware state and an event and returns the
-  set of the fetched instructions owners during this state-transformation.
+\begin{definition}[Transition-Software Mapping]
+  \label{def:minx86:transsoft}
+  A transition-software mapping
+  $\func{fet\-ched}: H \times L \rightarrow \powerset(S)$ is a function which
+  takes an initial hardware state, a transition label and returns the set of
+  owners of the fetched instructions during this transition.
 \end{definition}
 
-Hence, $s \in \func{fetched}(h, ev)$ means that an instruction owned by $s$ was
-fetched during a state-transformation triggered by an event $ev$ from a state
-$h$.
+Hence, $s \in \func{fetched}(h, l)$ means that an instruction owned by $s$ was
+fetched during a transition labelled with $l$ from a state $h$.
 %
 With a hardware-software mapping and an event-software mapping, we give a formal
 definition of a \textit{software execution tampering}.
 
 \begin{definition}[Software Execution Tampering]
   \label{def:codeinjection}
-  Given $h$ the initial state of a state-transformation triggered by an event
-  $ev$, $\func{context}$ a hardware-software mapping, $\func{fetched}$ an
-  event-software mapping and $x, y \in \set{S}$ two software components, the
-  software component $y$ tampers with the execution of another software
+  Given $h$ the initial state of a transition labelled with $l$,
+  $\func{context}$ a hardware-software mapping, $\func{fetched}$ an
+  event-software mapping and $(x, y) \in S \times S$ two software components,
+  the software component $y$ tampers with the execution of another software
   component $x$ if the \ac{cpu} fetches an instruction owned by $y$ in a state
   dedicated to $x$.
   %
   \[ \begin{array}{l} \func{software\_tampering}(\func{context}, \func{fetched},
-      h, ev, x, y)
-       \triangleq \\
+       h, l, x, y) \triangleq \\
        \qquad\qquad\qquad\qquad \func{context}(h) = x\,\wedge\,y \in
-       \func{fetched}(h,ev)
+       \func{fetched}(h,l)
      \end{array}
    \]
  \end{definition}
 
- Given $\set{T} \subseteq \set{S}$ a set of trusted software components, the
- software execution isolation policy prevents the untrusted components from
- tampering with the execution of the trusted components.
+ Given $T \subseteq S$ a set of trusted software components, the software
+ execution isolation policy prevents the untrusted components from tampering
+ with the execution of the trusted components.
  %
  Such a policy is enforced during a trace if no untrusted component is able to
  tamper with the execution of a trusted component.
+ %
+ As a consequence, a software execution isolation policy is a safety property,
+ and we can model it using a predicate on traces.
 
  \begin{definition}[Software Execution Isolation]
    \label{def:softwareisolation}
@@ -699,6 +655,52 @@ definition of a \textit{software execution tampering}.
 
   In this definition, $t$ is a trusted software component and $u$ is an
   untrusted ---~potentially malicious or hijacked~--- one.
+
+  \newpage
+
+  In this Chapter, we introduce a three-step methodology for specifying and
+  verifying \ac{hse} mechanisms against hardware architecture models, that is
+%
+  \begin{inparaenum}[(1)]
+  \item specifying the software requirements that must be satisfied by the
+    trusted software components which implement the \ac{hse} mechanism,
+%
+  \item specifying the targeted security policy the \ac{hse} mechanism
+    supposedly enforces, and
+%
+  \item verifying that the \ac{hse} mechanism is sound.
+  \end{inparaenum}
+%
+  A \ac{hse} mechanism specification is sound when untrusted software
+  components' executions are constrain with respect to the security property as
+  long as the trusted software component correctly implements it.
+%
+  As we have already argued in Section~\ref{sec:intro:verif}, we believe this
+  approach would benefit to both hardware designers and software developers.
+%
+  Formal specifications for \ac{hse} mechanisms can be the foundation of a
+  systematic approach to verify hardware specifications, and form a valuable
+  addition to the existing documentation.
+
+  In Section \ref{sec:speccert:framework}, we give a formal definition of the
+  SpecCert formalism.
+%
+  In Section \ref{sec:speccert:hardware}, we define a model of x86-based
+  hardware architectures to verify \ac{hse} mechanisms targeting software
+  isolation policies using publicly available Intel specifications.
+%
+  In Section \ref{sec:speccert:smm}, we verify the soundness of the \ac{hse}
+  mechanism implemented in many x86 computer firmware codes to isolate the code
+  executed while the \ac{cpu} is in System Management Mode (\ac{smm}), a highly
+  privileged execution mode of x86 microprocessors.
+%
+  Our model and proofs have been implemented using Coq, a proof assistant system
+  and have been released as an open source software\,\footnote{Which can can be
+    found at: \url{https://github.com/lthms/speccert}}.
+%
+  We discuss our results in Section \ref{sec:speccert:discuss}.
+
+\section{SpecCert Formalism} \label{sec:speccert:framework}
 
 \begin{table}[h]
   \centerline{%
