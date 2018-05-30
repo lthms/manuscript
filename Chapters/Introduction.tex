@@ -61,28 +61,27 @@ The typical computing platform can be broken down to the following layers:
   %
   \TODO{Dire qu'aujourd'hui la plupart des BIOS respecte le standard UEFI.}
   %
-\item [System Software]
+\item [System Software] \hfill\\
   %
-  The computing environment provided by the hardware architecture alone is very
-  generic.
+  The computing environment which is provided by the hardware architecture alone
+  is very generic.
   %
   As a consequence, it requires a non-trivial amount of configuration.
   %
   System software leverages this environment to provide high-level interfaces
-  (\emph{e.g.} system calls), so that applications can focus on business logic. Thus, applications often 
-  do not care about which particular hardware architecture
-  they are executed on.
+  (\emph{e.g.} system calls), so that applications can focus on business
+  logic. Thus, applications often do not care about which particular hardware
+  architecture they are executed on.
   %
-  In addition, system software deal with the complexity implied by
-  the concurrent execution of several applications.
+  In addition, system software deal with the complexity implied by the
+  concurrent execution of several applications.
   %
-\item [Applications]
+\item [Applications] \hfill\\
   %
-  \TODO{Il faudrait définir positivement les applications : ce sont elles qui offre un service à l'utilisateur}
+  Applications leverages the high-level interface exposed by system software in
+  order to provide a service to the user of the computing platform.
+  %
   The previous layers only exist so that applications can be executed.
-  %
-  Thanks to the principle of separation of concerns, they delegate the hardware
-  configuration and management to the lower layers of abstraction.
 \end{description}
 
 Variations of these abstraction layers exist.
@@ -95,41 +94,44 @@ an operating system only, or by the combination of one hypervisor and several
 operating systems.
 %
 The latter case is common in the context of cloud computing, as modern
-hypervisors bring powerful features such as virtual machines snapshots or
-migrations. \TODO{ajouter des références. De quels hyperviseurs veux tu parler? c'est un peu flou}
+hypervisors (\emph{e.g.} Xen, Hyper-V) bring powerful features such as virtual
+machines snapshots or migrations. \TODO{ajouter des références. De quels
+  hyperviseurs veux tu parler?  c'est un peu flou}
 %
 It is also frequent that application internals are themselves built as
-abstraction layers (\emph{e.g.} applicative framework, core logic, plugins, etc.).
+abstraction layers (\emph{e.g.} applicative framework, core logic, plugins,
+etc.).
 
-\TODO{Rajouter une jolie figure pour illustrer cet empilement de couches et y faire référence dans le texte}
+\TODO{Rajouter une jolie figure pour illustrer cet empilement de couches et y
+  faire référence dans le texte}
 
 \section{Hardware-based Security Enforcement mechanisms}
 
-From a security perspective, each layer is often more privileged than, and
-therefore implicitly trusted by, its successors:
+From a security perspective, each layer is often more privileged than its
+successors.
 %
-the hardware architecture executes the hardware components' firmware, the
-software system and the applications, and hardware implants and backdoors are no
-fantasy\,\cite{yang2016a2};
-%
-the \ac{bios} initiates the execution of the system software, and has been used
-as an attack vector to tamper with its execution even after a machine
-restart\,\cite{embleton2013smm};
-%
-the operating system manages the application life cycle, and actively tamper
-with their execution (\emph{e.g.} dynamic linking, system calls).
-\TODO{La phrase précédente est beaucoup trop longue et confuse. On ne voit pas ce que tu veux dire au final. Fait plusieurs phrase. Si j'ai bien suivi, tu veux dire 1) que chaque couche fait confiance à la précédente. Mais que 2) cette confiance est discutable car l'histoire montre que des vulnérabilités ou des portes dérobées existent dans chacune des couches. Ecrit 1), donne un exemple puis 2 et donne un exemple mais ne mélange pas tout.}
+For instance, system software manages the life cycle of the applications, by
+actively tampering with their execution.
 
+As a consequence, each layer implicitly trusts its predecessors.
 %
-One layer may constrain its successors' execution \TODO{the execution of its successors? J'ai l'impression qu'on ne voit pas trop la construction somethings' blabla dans des articles techniques et scientifiques. cf \url{https://ell.stackexchange.com/questions/157380/whats-the-correct-usage-of-something-of-something-and-somethings-something} }, with respect to targeted
-security properties.
+On the one hand, it is important to keep this fact in mind when we consider the
+security of the computing platform.
+%
+Trust in lowest levels of abstraction can be misplaced: hardware implants and
+backdoors are no fantasy\,\cite{yang2016a2}, the \ac{bios} has been used as an
+attack vector to tamper with its execution even after a machine
+restart\,\cite{embleton2013smm}, etc.
+%
+On the other hand, one layer may constrain the execution of its successors
+execution, with respect to a targeted security policy.
 %
 For instance, an operating system shares hardware resources among several
 applications, and therefore is able to enforce availability ---fair share of
 \ac{cpu} time---, confidentiality and integrity ---exclusive partition of
 physical memories--- properties.
 
-Constraining one's execution can be achieved in various ways.
+Constraining an execution can be achieved in various ways.
 %
 Concerning the lowest layers of a software stack, the common approach is to rely
 on features provided by the hardware architecture.
@@ -137,11 +139,11 @@ on features provided by the hardware architecture.
 In a nutshell, the main idea is to reduce the hardware capabilities one software
 can leverage while it is executed.
 %
-For instance, system software often leverages among other mechanisms a
-\ac{mmu} to partition the system memory.
+For instance, system software often leverages among other mechanisms a \ac{mmu}
+to partition the system memory.
 %
-Thus, when an application is executed, it can only access a portion \TODO{a subset?} of the
-system memory.
+Thus, when an application is executed, it can only access a subset of the system
+memory.
 %
 In addition, the \ac{cpu} can leverage a hardware timer to stop applications'
 execution, without the need for these applications to cooperate.
@@ -149,28 +151,23 @@ execution, without the need for these applications to cooperate.
 \begin{definition}[Hardware-based Security Enforcement]
   We call \ac{hse} the class of security enforcement mechanisms where a trusted
   software component configure the underlying hardware architecture to constrain
-  the execution of untrusted software components.
+  the execution of untrusted software components with respect to a targeted
+  security policy.
 \end{definition}
 
-A \ac{hse} mechanism enforces its targeted security property when the trusted
-software components correctly configure the hardware features at their disposal,
-and these features are sufficient to constrain the untrusted software execution
-as expected.\TODO{En relisant, c'est cette première phrase qui n'est pas claire. Je pense que tu voulias dire que pour que le HSE assure bien la propriété de sécurité, cela suppose deux chose :1) qu'il soit correctement configuré pas le code trusté et 2) que les fonctionnalité hardware fonctionne comme espéré. Il faudrait mieux faire ressortir cela. Ne pas hésiter à faire une énumération explicite.}
+A \ac{hse} mechanism enforces its targeted security property when
 %
-Both remain challenging. \TODO{Cette dernière phrase n'est pas claire. A quoi renvoie "both"?}
+\begin{inparaenum}[(1)]
+\item the trusted software components correctly configure the hardware features
+  at their disposal, and
+%
+\item these features are sufficient to constrain the untrusted software
+  execution as expected.
+\end{inparaenum}
+%
+Both remain challenging.
 
 \paragraph{Software Errors.}
-%
-It has been repeatedly shown that vendors were not always correctly taking
-advantage of important hardware features at their disposal.
-%
-These lacks of hardware configurations put the affected computing platforms at
-risk.
-%
-\TODO{Je propose de virer les deux phrases précédentes qui sont redondantes avec ce qui précède et sont plutôt confuses}
-Many security vulnerabilities disclosed over the years have been the result of a
-misconfiguration of hardware features by key software
-components\,\cite{bulygin2014bios}. \TODO{"many security vulne" $\rightarrow$ on s'attend à avoir plusieurs références}
 %
 Many facts can explain this state of things.
 %
@@ -192,7 +189,7 @@ important.
 
 \paragraph{Hardware Errors.}
 %
-Over the past decades, vendors have added many security features to their
+Over the past decades, vendors have regularly added security features to their
 products.
 %
 Intel, for instance, has notably introduced hardware-based virtualization (VT-x,
