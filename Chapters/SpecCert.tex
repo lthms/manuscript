@@ -572,8 +572,8 @@ execution of another set of so-called trusted software components.
 We consider that a software component tampers with the execution of another when
 it is able to make the latter execute an instruction of its choice.
 %
-This is particular case of the Integrity property
-(Definition~\ref{def:usecase:int}), as we focus on instruction fetches
+This is particular sub-case of the Integrity property
+(Definition~\ref{def:usecase:int}), as we focus on instructions fetches
 exclusively.
 
 In this Section, we give a generic definition of software execution isolation,
@@ -638,18 +638,19 @@ definition of a \textit{software execution tampering}.
  As a consequence, a software execution isolation policy is a safety property,
  and we can model it using a predicate on traces.
 
- \begin{definition}[Software Execution Isolation]
+ \begin{definition}[Software Execution Isolation Policy]
    \label{def:softwareisolation}
-   Given $\func{context}$ a hardware-software mapping, $\func{fetched}$ an
-   event-software mapping and $\rho$ a trace of $\shortLTS{Ez}$,
+   A Software Execution Isolation Policy $I$ is a tuple
+   $\langle \func{fetched}, \func{context}, T \rangle$, such that \func{fetched}
+   is a transition-software mapping (specific to a hardware model),
+   \func{context} is a hardware-software mapping, and $T$ is a set of trusted
+   software components.
    %
    \[ \begin{array}{l}
-        \func{software\_execution\_isolation}(\func{context}, \func{fetched}, \rho, \set{T}) \triangleq \\
-        \qquad\forall \transitionLTS{Ez}{h}{ev}{h'} \in \rho, \forall t \in
-        \set{T}, \forall
-        u \not\in \set{T}, \\
+        \func{software\_execution\_isolation}_I(h, l, h') \triangleq \\
+        \forall t \in T, \forall u \not\in T, \\
         \qquad\qquad \neg \func{software\_tampering}(\func{context},
-        \func{fetched}, h, ev, t, u)
+        \func{fetched}, h, l, t, u)
       \end{array} \]
   \end{definition}
 
