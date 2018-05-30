@@ -1,6 +1,6 @@
 STY-SRC  := freespec.sty speccert.sty phdcmd.sty
 BIB-SRC  := manuscript.bib
-TEX-SRC  := $(wildcard Chapter/*.tex)     \
+TEX-SRC  := $(wildcard Chapters/*.tex)    \
             $(wildcard Appendices/*.tex)  \
             abbrev.tex                    \
             nomencl.tex                   \
