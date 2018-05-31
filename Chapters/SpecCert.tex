@@ -581,15 +581,15 @@ based upon the concept of \textit{memory location ownership}.
 %
 A memory location within a hardware architecture is a container which is able to
 store data used by a software component \emph{e.g.}~a general-purpose register
-of a \ac{cpu}, a DRAM memory cell, etc.
+of a \ac{cpu}, a \ac{dram} memory cell, etc.
 %
-We say that a Computing Platform tracks the memory location ownership if the
-hardware architecture states maps each memory location with a software component
-called its \emph{owner}, and the Computing Platform semantics updates this
-mapping through state-transformations.
+A hardware model tracks the memory location ownership when the hardware
+architecture states maps each memory location with a software component called
+its \emph{owner}, and transition relation updates this mapping throughout
+traces.
 %
 A software component becomes the new owner of a memory location when it
-overrides its content during a state-transformation.
+overwrites its content during a transition.
 %
 By extension, we say a software component owns some data when it owns the memory
 location in which these data are stored.
@@ -600,106 +600,117 @@ fetched by the \ac{cpu} in order to be decoded and executed.
 \begin{definition}[Transition-Software Mapping]
   \label{def:minx86:transsoft}
   A transition-software mapping
-  $\func{fet\-ched}: H \times L \rightarrow \powerset(S)$ is a function which
-  takes an initial hardware state, a transition label and returns the set of
-  owners of the fetched instructions during this transition.
+  $\func{fetched}_{\Sigma}: H \times L \rightarrow \powerset(S)$ is a function
+  which takes an initial hardware state, a transition label and returns the set
+  of owners of the fetched instructions during this transition.
 \end{definition}
 
-Hence, $s \in \func{fetched}(h, l)$ means that an instruction owned by $s$ was
-fetched during a transition labelled with $l$ from a state $h$.
+Hence, $s \in \func{fetched}_{\Sigma}(h, l)$ means that an instruction owned by
+$s$ was fetched during a transition labelled with $l$ from a state $h$.
+
+\paragraph{}
 %
 With a hardware-software mapping and an event-software mapping, we give a formal
 definition of a \textit{software execution tampering}.
 
 \begin{definition}[Software Execution Tampering]
   \label{def:codeinjection}
-  Given $h$ the initial state of a transition labelled with $l$,
-  $\func{context}$ a hardware-software mapping, $\func{fetched}$ an
-  event-software mapping and $(x, y) \in S \times S$ two software components,
-  the software component $y$ tampers with the execution of another software
-  component $x$ if the \ac{cpu} fetches an instruction owned by $y$ in a state
-  dedicated to $x$.
+  A software component $x \in S$ tampers with the execution of another software
+  component $y \in S$ during a transition labelled with $l \in L$ from a state
+  $h \in H$ to a state $h' \in H$, denoted by
   %
-  \[ \begin{array}{l} \func{software\_tampering}(\func{context}, \func{fetched},
-       h, l, x, y) \triangleq \\
-       \qquad\qquad\qquad\qquad \func{context}(h) = x\,\wedge\,y \in
-       \func{fetched}(h,l)
-     \end{array}
-   \]
- \end{definition}
+  \[
+    \transitionLTS{Ez}{h}{l}{h'} \models x \leadsto y
+  \]
+  %
+  when the \ac{cpu} fetches an instruction owned by $x$ while executing $y$,
+  that is
+  %
+  \[
+    \transitionLTS{Ez}{h}{l}{h'} \models x \leadsto y \triangleq
+    \func{context}(h) = y \wedge x \in \func{fetched}_{\Sigma}(h, l)
+  \]
 
- Given $T \subseteq S$ a set of trusted software components, the software
- execution isolation policy prevents the untrusted components from tampering
- with the execution of the trusted components.
- %
- Such a policy is enforced during a trace if no untrusted component is able to
- tamper with the execution of a trusted component.
- %
- As a consequence, a software execution isolation policy is a safety property,
- and we can model it using a predicate on traces.
+  We write $x \not\leadsto y$ for $\neg (x \leadsto y)$, that is $x$ does not
+  tamper with the execution of $y$.
+\end{definition}
 
- \begin{definition}[Software Execution Isolation Policy]
-   \label{def:softwareisolation}
-   A Software Execution Isolation Policy $I$ is a tuple
-   $\langle \func{fetched}, \func{context}, T \rangle$, such that \func{fetched}
-   is a transition-software mapping (specific to a hardware model),
-   \func{context} is a hardware-software mapping, and $T$ is a set of trusted
-   software components.
+Given $T \subseteq S$ a set of trusted software components, the software
+execution isolation policy prevents the untrusted components from tampering with
+the execution of the trusted components.
+ %
+Such a policy is enforced during a trace if no untrusted component is able to
+tamper with the execution of a trusted component.
+ %
+As a consequence, a software execution isolation policy is a safety property,
+and we can model it using a predicate on traces.
+
+\begin{definition}[Software Execution Isolation Policy]
+  \label{def:softwareisolation}
+  A Software Execution Isolation Policy $I$ is a tuple
+  $\langle \func{context}, T \rangle$, such that \func{context} is a
+  hardware-software mapping and $T$ is a set of trusted software components.
+  %
+  A transition labelled with $l \in L$ from $h \in H$ satisfies I (denoted by
+  $\transitionLTS{Ez}{h}{l}{h'} \models I$) when no untrusted software
+  component succeeds in tampering with the execution of any trusted sofware
+  components, that is
    %
-   \[ \begin{array}{l}
-        \func{software\_execution\_isolation}_I(h, l, h') \triangleq \\
-        \forall t \in T, \forall u \not\in T, \\
-        \qquad\qquad \neg \func{software\_tampering}(\func{context},
-        \func{fetched}, h, l, t, u)
-      \end{array} \]
-  \end{definition}
+  \[
+    \begin{array}{l}
+      \transitionLTS{Ez}{h}{l}{h'} \models I \triangleq \forall
+      t \in T \text{, } \forall u \not\in T, \transitionLTS{Ez}{h}{l}{h'}
+      \models u \not\leadsto t
+    \end{array}
+  \]
+\end{definition}
 
-  In this definition, $t$ is a trusted software component and $u$ is an
-  untrusted ---~potentially malicious or hijacked~--- one.
+In this definition, $t$ is a trusted software component and $u$ is an untrusted
+---potentially malicious or hijacked--- one.
 
-  \newpage
+\newpage
 
-  In this Chapter, we introduce a three-step methodology for specifying and
-  verifying \ac{hse} mechanisms against hardware architecture models, that is
+In this Chapter, we introduce a three-step methodology for specifying and
+verifying \ac{hse} mechanisms against hardware architecture models, that is
 %
-  \begin{inparaenum}[(1)]
-  \item specifying the software requirements that must be satisfied by the
-    trusted software components which implement the \ac{hse} mechanism,
+\begin{inparaenum}[(1)]
+\item specifying the software requirements that must be satisfied by the trusted
+  software components which implement the \ac{hse} mechanism,
 %
-  \item specifying the targeted security policy the \ac{hse} mechanism
-    supposedly enforces, and
+\item specifying the targeted security policy the \ac{hse} mechanism supposedly
+  enforces, and
 %
-  \item verifying that the \ac{hse} mechanism is sound.
-  \end{inparaenum}
+\item verifying that the \ac{hse} mechanism is sound.
+\end{inparaenum}
 %
-  A \ac{hse} mechanism specification is sound when untrusted software
-  components' executions are constrain with respect to the security property as
-  long as the trusted software component correctly implements it.
+A \ac{hse} mechanism specification is sound when untrusted software components'
+executions are constrain with respect to the security property as long as the
+trusted software component correctly implements it.
 %
-  As we have already argued in Section~\ref{sec:intro:verif}, we believe this
-  approach would benefit to both hardware designers and software developers.
+As we have already argued in Section~\ref{sec:intro:verif}, we believe this
+approach would benefit to both hardware designers and software developers.
 %
-  Formal specifications for \ac{hse} mechanisms can be the foundation of a
-  systematic approach to verify hardware specifications, and form a valuable
-  addition to the existing documentation.
+Formal specifications for \ac{hse} mechanisms can be the foundation of a
+systematic approach to verify hardware specifications, and form a valuable
+addition to the existing documentation.
 
-  In Section \ref{sec:speccert:framework}, we give a formal definition of the
-  SpecCert formalism.
+In Section \ref{sec:speccert:framework}, we give a formal definition of the
+SpecCert formalism.
 %
-  In Section \ref{sec:speccert:hardware}, we define a model of x86-based
-  hardware architectures to verify \ac{hse} mechanisms targeting software
-  isolation policies using publicly available Intel specifications.
+In Section \ref{sec:speccert:hardware}, we define a model of x86-based hardware
+architectures to verify \ac{hse} mechanisms targeting software isolation
+policies using publicly available Intel specifications.
 %
-  In Section \ref{sec:speccert:smm}, we verify the soundness of the \ac{hse}
-  mechanism implemented in many x86 computer firmware codes to isolate the code
-  executed while the \ac{cpu} is in System Management Mode (\ac{smm}), a highly
-  privileged execution mode of x86 microprocessors.
+In Section \ref{sec:speccert:smm}, we verify the soundness of the \ac{hse}
+mechanism implemented in many x86 computer firmware codes to isolate the code
+executed while the \ac{cpu} is in System Management Mode (\ac{smm}), a highly
+privileged execution mode of x86 microprocessors.
 %
-  Our model and proofs have been implemented using Coq, a proof assistant system
-  and have been released as an open source software\,\footnote{Which can can be
-    found at: \url{https://github.com/lthms/speccert}}.
+Our model and proofs have been implemented using Coq, a proof assistant system
+and have been released as an open source software\,\footnote{Which can can be
+  found at: \url{https://github.com/lthms/speccert}}.
 %
-  We discuss our results in Section \ref{sec:speccert:discuss}.
+We discuss our results in Section \ref{sec:speccert:discuss}.
 
 \section{SpecCert Formalism} \label{sec:speccert:framework}
 
