@@ -16,13 +16,23 @@
 \usepackage[scr]{rsfso}
 \newcommand{\powerset}{\raisebox{.15\baselineskip}{\Large\ensuremath{\wp}}}
 
-\usepackage[light,math]{iwona}
+%\usepackage[light,math]{iwona}
 \usepackage[light]{merriweather}
 \usepackage{inconsolata}
 \let\openbox\undefine
 \let\circledS\undefine
-\linespread{1.25}
+\linespread{1.5}
 \DeclareMathSizes{10}{12}{9}{6}
+
+\makeatletter
+\let\scshape\relax % to avoid a warning
+\DeclareRobustCommand\scshape{%
+  \not@math@alphabet\scshape\relax
+  \ifnum\pdf@strcmp{\f@family}{\familydefault}=\z@
+    \fontfamily{pbk}%
+  \fi
+  \fontshape\scdefault\selectfont}
+\makeatother
 
 \setminted{framesep=10pt,xleftmargin=18pt,frame=leftline,linenos=true}
 
