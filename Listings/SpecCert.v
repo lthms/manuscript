@@ -154,7 +154,7 @@ Section SpecCert.
       -> if_software (labelled [tr])
                      (behaviour hse (from [tr])).
 
-  Lemma compliant_run_rec
+  Lemma compliant_trace_rec
         {m:      model}
         (hse:    HSE m)
         (x:      transition m)
@@ -222,7 +222,7 @@ Section SpecCert.
          left; reflexivity.
       ++ inversion Hrho; subst.
          apply (IHrho Hrec).
-         +++ eapply compliant_run_rec.
+         +++ eapply compliant_trace_rec.
              apply Hcomp.
          +++ apply Htrans.
   Qed.
@@ -257,4 +257,201 @@ Section SpecCert.
     + apply Hcomp.
       exact Htrans.
   Qed.
+
+  Section Isolation.
+    Inductive software_stack
+    : Type :=
+    | BIOS
+      : software_stack
+    | OS
+      : software_stack
+    | App (n:  nat)
+      : software_stack.
+
+    Variables (ss_context:  S -> software_stack)
+              (ss_fetched:  S -> label -> (software_stack -> Prop)).
+
+    Inductive stack_ge
+      : software_stack -> software_stack -> Prop :=
+    | stack_ge_refl (x:  software_stack)
+      : stack_ge x x
+    | bios_bottom (x:  software_stack)
+      : stack_ge BIOS x
+    | os_apps (n:  nat)
+      : stack_ge OS (App n).
+
+    Require Import Coq.Arith.PeanoNat.
+    Require Import Coq.Logic.Decidable.
+
+    Definition stack_ge_dec
+             (x y:  software_stack)
+      : { stack_ge x y } + { ~ stack_ge x y }.
+      refine (
+          match x, y with
+          | BIOS, _
+          | OS, OS
+          | OS, App _
+            => _
+          | _, _
+            => _
+          end
+        );
+        try (left; constructor).
+      + right; intros Hge; inversion Hge.
+      + induction y.
+        ++ right; intros Hge; inversion Hge.
+        ++ right; intros Hge; inversion Hge.
+        ++ destruct (Nat.eq_dec n n0); subst.
+           +++ left; constructor.
+           +++ right; intros Hge; inversion Hge.
+               subst.
+               apply n1.
+               reflexivity.
+    Qed.
+
+    Lemma stack_ge_asym
+      : forall (x y:  software_stack),
+        x <> y -> stack_ge x y -> ~ stack_ge y x.
+    Proof.
+      induction x;
+        intros y Hneq Hge Hnge;
+        inversion Hnge;
+        subst;
+        try (apply Hneq; reflexivity);
+        try (inversion Hge).
+    Qed.
+
+    Lemma stack_ge_trans
+      : forall (x y z:  software_stack),
+        stack_ge x y -> stack_ge y z -> stack_ge x z.
+    Proof.
+      induction x;
+        intros y z Hge1 Hge2;
+        inversion Hge1;
+        inversion Hge2;
+        subst;
+        try constructor;
+        try discriminate.
+    Qed.
+
+    Definition tamper_with
+               {m:    model}
+               (tr:   transition m)
+               (x y:  software_stack)
+      : Prop :=
+      ss_fetched (from [tr]) (labelled [tr]) y
+      /\ ss_context (from [tr]) = y.
+
+    Definition isolation_policy
+               {m:   model}
+               (tr:  transition m)
+      : Prop :=
+      forall (x y:  software_stack),
+        tamper_with tr x y
+        -> stack_ge x y.
+
+    Ltac not_not_tac Hnnge :=
+      match goal with
+      | [ |- stack_ge ?x ?y ]
+        => assert (Hf:  ~ stack_ge x y) by (intros Hge; inversion Hge);
+           apply Hnnge in Hf;
+           destruct Hf
+      end.
+
+    Lemma not_not_stack_ge
+      : forall (x y:  software_stack),
+        ~ (~ stack_ge x y) -> stack_ge x y.
+    Proof.
+      induction x; induction y; try (intros Hnnge; constructor);
+        intros Hnnge;
+        try not_not_tac Hnnge.
+      destruct (Nat.eq_dec n n0).
+      + subst.
+        constructor.
+      + assert (Hf:  ~ stack_ge (App n) (App n0)). {
+          intros Hf.
+          inversion Hf.
+          subst.
+          apply n1.
+          reflexivity.
+        }
+        apply Hnnge in Hf.
+        destruct Hf.
+    Qed.
+
+    Corollary isolation_policy_aux
+              {m:   model}
+              (tr:  transition m)
+      : isolation_policy tr
+        <-> forall (x y:  software_stack),
+          ~ stack_ge x y -> ~ tamper_with tr x y.
+    Proof.
+      split.
+      + intros Hiso x y Hnge Htamper.
+        unfold isolation_policy in Hiso.
+        apply Hiso in Htamper.
+        apply Hnge.
+        exact Htamper.
+      + intros Hc x y.
+        apply contrapositive.
+        ++ destruct (stack_ge_dec x y); [left | right]; assumption.
+        ++ intros Hneq.
+           apply Hc.
+           exact Hneq.
+    Qed.
+
+    Definition is_tcb
+               (U:  software_stack -> Prop)
+               (x:  software_stack)
+      : Prop :=
+      ~ U x /\ forall (u:  software_stack), U u -> stack_ge x u.
+
+    Definition constrain_to_isolation
+               {m:   model}
+               (U:   software_stack -> Prop)
+               (tr:  transition m)
+      : Prop :=
+      forall (u y:  software_stack),
+        U u
+        -> tamper_with tr u y
+        -> stack_ge u y.
+
+    Inductive os_only
+      : software_stack -> Prop :=
+    | OS_only
+      : os_only OS.
+
+    Inductive apps_only
+      : software_stack -> Prop :=
+    | Apps_only (n:  nat)
+      : apps_only (App n).
+
+    Theorem constrain_everyone
+            {m:         model}
+            (hse_bios:  HSE m)
+            (hse_os:    HSE m)
+      : correct_hse hse_bios
+                    (safety_property (constrain_to_isolation os_only))
+        -> correct_hse hse_os
+                       (safety_property (constrain_to_isolation apps_only))
+        -> forall (rho:  trace m),
+            compliant_trace hse_bios rho
+            -> compliant_trace hse_os rho
+            -> forall (tr:  transition m),
+                trans [rho] tr
+                -> isolation_policy tr.
+    Proof.
+      intros Hbios Hos rho Hrb Hro tr Htrans.
+      intros x y Htamper.
+      unfold correct_hse, safety_property, constrain_to_isolation in *.
+      induction x.
+      + constructor.
+      + apply (Hbios rho Hrb tr Htrans).
+        ++ constructor.
+        ++ exact Htamper.
+      + apply (Hos rho Hro tr Htrans).
+        ++ constructor.
+        ++ exact Htamper.
+    Qed.
+  End Isolation.
 End SpecCert.
