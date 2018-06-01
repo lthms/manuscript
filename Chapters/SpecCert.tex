@@ -128,11 +128,13 @@ not guaranteed.
 Finally, and as suggested by David Bosin \emph{et al.}, hardware transitions can
 be leveraged to model a clock, and therefore reasoning about time.
 
-\subsection{Traces}
-\label{subsec:speccert:trace}
+\subsection{Security Policies}
+\label{subsec:speccert:security}
 
-One particular execution of software components by the hardware architecture is
-modelled as a trace of $\Sigma$.
+We now explain how we model the different security policies discussed in
+Section~\ref{subsec:state:secu}.
+%
+These security policies are defined against traces of the model.
 
 \begin{definition}[Traces]
   \label{def:speccert:trace}
@@ -147,17 +149,11 @@ modelled as a trace of $\Sigma$.
   \item $\func{init} : \pathesLTS{Ez} \rightarrow S$ maps a trace with its
     initial state
   \item
-    $\func{trace} : \pathesLTS{Ez} \rightarrow \powerset(\mathcal{T}(\Sigma))$
+    $\func{trans} : \pathesLTS{Ez} \rightarrow \powerset(\mathcal{T}(\Sigma))$
     maps a trace with the set of transitions
   \end{itemize}
 \end{definition}
 
-\subsection{Security Policies}
-\label{subsec:speccert:security}
-
-We now explain how we model the different security policies discussed in
-Section~\ref{subsec:state:secu}.
-%
 We start from the most general definition possible, then discuss how more
 specific security properties can be modelled as a specialization of that general
 definition.
@@ -547,12 +543,20 @@ it is able to make the latter execute an instruction of its choice.
 This is particular sub-case of the Integrity property
 (Definition~\ref{def:usecase:int}), as we focus on instructions fetches
 exclusively.
+%
+We use it as an illustration to demonstrate how our \ac{hse} mechanism
+definition can be used to reason about enforcement of security policies which
+involves several software components.
 
 We give a generic definition of software execution tampering
 (\ref{subsec:speccert:tampering}).
 %
-We leverage them as a foundation for global execution policies which apply to
-complete software stacks (\ref{subsec:speccert:globalsec}).
+We leverage it as a foundation for defining global execution policies which
+apply to complete software stacks (\ref{subsec:speccert:globalsec}).
+%
+Because such policies are enforced \emph{via} several \ac{hse} mechanisms, we
+then introduce partial execution policies (\ref{subsec:speccert:partialsec}),
+and \ac{hse} mechanisms cooperation (\ref{subsec:speccert:coop}).
 
 \subsection{Execution Tampering}
 \label{subsec:speccert:tampering}
@@ -735,6 +739,7 @@ software component.
 \end{figure}
 
 \subsection{Partial Execution Isolation Policies}
+\label{subsec:speccert:partialsec}
 
 A security policy such as the one detailed in
 Example~\ref{example:speccert:ssisolation} is not enforced by one but many HSE
@@ -785,6 +790,7 @@ HSE mechanism per set.
 \end{example}
 
 \subsection{HSE Mechanisms Cooperation}
+\label{subsec:speccert:coop}
 
 \begin{definition}[HSE Mechanisms Intersection]
   Given two HSE mechanism $\Delta_1$ and $\Delta_2$, such that
@@ -833,6 +839,22 @@ HSE mechanism per set.
   \]
 
   \begin{proof}
+    We leverage the definition of $\wedge$ and $\Rightarrow$ to turn a statement
+    of the form
+    %
+    \[
+      (P \wedge P') \wedge (R \Rightarrow Q \wedge Q')
+    \]
+    %
+    into
+    %
+    \[
+      (P \wedge (R \Rightarrow Q)) \wedge (P' \wedge (R \Rightarrow Q'))
+    \]
+    %
+    and vice versa, where $P$ and $P'$ are statements about the initial states
+    of traces and \func{inv}, $R$ is the premice about software transitions, and $Q$ and $Q'$
+    are statement about \func{behaviour}.
   \end{proof}
 \end{lemma}
 

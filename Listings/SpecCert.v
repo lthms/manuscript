@@ -474,6 +474,31 @@ Section SpecCert.
         apply Hcompatible.
     Defined.
 
+    Lemma compliant_trace_intersec_sketches
+          (P P' R Q Q':  Prop)
+      : (P /\ P') /\ (R -> Q /\ Q')
+        <-> (P /\ (R -> Q)) /\ (P' /\ (R -> Q')).
+    Proof.
+      split.
+      + intros [[Hp Hp'] Hr].
+        split.
+        ++ split.
+           +++ exact Hp.
+           +++ intros Hr'.
+               apply Hr in Hr'.
+               apply Hr'.
+        ++ split.
+           +++ exact Hp'.
+           +++ intros Hr'.
+               apply Hr in Hr'.
+               apply Hr'.
+      + intros [[Hp Hq] [Hp' Hq']].
+        split.
+        ++ split; assumption.
+        ++ intros Hr.
+           auto.
+    Qed.
+
     Lemma compliant_trace_intersec_intersec_compliant_trace
           {m:      model}
           (hse_1:  HSE m)
