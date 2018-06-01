@@ -132,7 +132,7 @@ Section SpecCert.
                        (behaviour (from [tr]))
         -> inv (to [tr])
     ; law_2:      forall (tr:  transition m),
-        tcb (context (from [tr]))
+        ~ tcb (context (from [tr]))
         -> if_software (labelled [tr])
                        (behaviour (from [tr]))
     }.
@@ -282,6 +282,7 @@ Section SpecCert.
 
     Require Import Coq.Arith.PeanoNat.
     Require Import Coq.Logic.Decidable.
+    Require Coq.Logic.Classical_Prop.
 
     Definition stack_ge_dec
              (x y:  software_stack)
@@ -426,22 +427,135 @@ Section SpecCert.
     | Apps_only (n:  nat)
       : apps_only (App n).
 
+    Require Import Coq.Program.Equality.
+
+    Definition compatible_hse
+               {m:  model}
+               (hse1 hse2:  HSE m)
+      : Prop :=
+      software hse1 = software hse2
+      /\ forall x H,
+        context hse2 x = eq_rect _ id (context hse1 x) _ H.
+
+    Definition HSE_cap
+               {m:            model}
+               (hse1 hse2:    HSE m)
+               (Hcompatible:  compatible_hse hse1 hse2)
+      : HSE m.
+      refine ({| software := software hse1
+               ; context  := context hse1
+               ; tcb := fun x
+                        => tcb hse1 x \/ tcb hse2 (eq_rect _ id x _ _)
+               ; inv := fun x
+                        => inv hse1 x /\ inv hse2 x
+               ; behaviour := fun x l
+                              => behaviour hse1 x l /\ behaviour hse2 x l
+               |}).
+      + intros tr [Hi1 Hi2] Hsoft.
+        split; apply law_1; [exact Hi1 | idtac | exact Hi2 | idtac];
+           induction tr as [tr Htr]; induction tr as [[h l] h'];
+           induction l; auto;
+           apply Hsoft.
+      + intros tr Htcb.
+        apply Classical_Prop.not_or_and in Htcb.
+        destruct Htcb as [Ht1 Ht2].
+        inversion Hcompatible as [Hsoftware Hcontext].
+        rewrite <- Hcontext in Ht2.
+        apply law_2 in Ht1.
+        apply law_2 in Ht2.
+        induction tr as [tr Htr];
+          induction tr as [[h l] h'];
+          induction l; auto.
+        unfold proj1_sig.
+        split.
+        ++ apply Ht1.
+        ++ apply Ht2.
+        Unshelve.
+        apply Hcompatible.
+    Defined.
+
+    Lemma compliant_trace_intersec_intersec_compliant_trace
+          {m:      model}
+          (hse_1:  HSE m)
+          (hse_2:  HSE m)
+          (Hcomp:  compatible_hse hse_1 hse_2)
+          (rho:    trace m)
+      : compliant_trace (HSE_cap hse_1 hse_2 Hcomp) rho
+        -> compliant_trace hse_1 rho /\ compliant_trace hse_2 rho.
+    Proof.
+      intros Hct.
+      unfold compliant_trace in Hct.
+      unfold HSE_cap in Hct.
+      cbn in Hct.
+      split.
+      + constructor.
+        ++ apply Hct.
+        ++ intros tr Htr.
+           destruct Hct as [_H H].
+           assert (Hres:  if_software (labelled [tr])
+                                      (fun l : Ls =>
+                                         behaviour hse_1 (from [tr]) l
+                                         /\ behaviour hse_2 (from [tr]) l))
+             by (apply H; exact Htr).
+           induction tr as [tr _H2]; induction tr as [[h l] h'].
+           induction l; auto.
+           cbn in *.
+           apply Hres.
+      + constructor.
+        ++ apply Hct.
+        ++ intros tr Htr.
+           destruct Hct as [_H H].
+           assert (Hres:  if_software (labelled [tr])
+                                      (fun l : Ls =>
+                                         behaviour hse_1 (from [tr]) l
+                                         /\ behaviour hse_2 (from [tr]) l))
+             by (apply H; exact Htr).
+           induction tr as [tr _H2]; induction tr as [[h l] h'].
+           induction l; auto.
+           cbn in *.
+           apply Hres.
+    Qed.
+
+    Lemma intersec_compliant_trace_compliant_trace_intersec
+          {m:      model}
+          (hse_1:  HSE m)
+          (hse_2:  HSE m)
+          (Hcomp:  compatible_hse hse_1 hse_2)
+          (rho:    trace m)
+      : compliant_trace hse_1 rho /\ compliant_trace hse_2 rho
+        -> compliant_trace (HSE_cap hse_1 hse_2 Hcomp) rho.
+    Proof.
+      intros [H1 H2].
+      constructor.
+      + unfold HSE_cap.
+        cbn.
+        split; [apply H1|apply H2].
+      + intros tr Htrans.
+        assert (Hb1:  if_software (labelled [tr])
+                                  (behaviour hse_1 (from [tr])))
+          by (apply H1; exact Htrans).
+        assert (Hb2:  if_software (labelled [tr])
+                                  (behaviour hse_2 (from [tr])))
+          by (apply H2; exact Htrans).
+        induction tr as [tr _H3]; induction tr as [[h l] h'].
+        induction l; cbn in *; auto.
+    Qed.
+
     Theorem constrain_everyone
             {m:         model}
             (hse_bios:  HSE m)
             (hse_os:    HSE m)
+            (Hcomp:     compatible_hse hse_bios hse_os)
       : correct_hse hse_bios
                     (safety_property (constrain_to_isolation os_only))
         -> correct_hse hse_os
                        (safety_property (constrain_to_isolation apps_only))
-        -> forall (rho:  trace m),
-            compliant_trace hse_bios rho
-            -> compliant_trace hse_os rho
-            -> forall (tr:  transition m),
-                trans [rho] tr
-                -> isolation_policy tr.
+        -> correct_hse (HSE_cap hse_bios hse_os Hcomp)
+                       (safety_property isolation_policy).
     Proof.
-      intros Hbios Hos rho Hrb Hro tr Htrans.
+      intros Hbios Hos rho Hct tr Htrans.
+      apply compliant_trace_intersec_intersec_compliant_trace in Hct.
+      inversion Hct as [Hrb Hro].
       intros x y Htamper.
       unfold correct_hse, safety_property, constrain_to_isolation in *.
       induction x.

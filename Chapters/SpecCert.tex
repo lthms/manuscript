@@ -11,7 +11,7 @@
 We first describe the formalism of hardware model against which we base our
 following definitions (Section~\ref{subsec:speccert:hardware}).
 %
-Then, we give a formal definition of HSE mechanisms and HSE mechanisms
+Then, we give a formal definition of \ac{hse} mechanisms and \ac{hse} mechanisms
 correctness (Section~\ref{sec:speccert:hse}).
 %
 For the reader familiar with Coq, we present an implementation of our formalism
@@ -83,8 +83,7 @@ which are only observable in terms of security\,\cite{basin2013enforceable}.
   and we write $\mathcal{T}(\Sigma)$ for the set of triples which satisfy the
   transition relation, that is
   \[
-    \mathcal{T}(\Sigma) \triangleq \{\ (h, l, h')\ |\
-    \transition{h}{l}{h'}\ \}
+    \mathcal{T}(\Sigma) \triangleq \{\ (h, l, h')\ |\ \transition{h}{l}{h'}\ \}
   \]
 \end{definition}
 
@@ -534,17 +533,13 @@ SMRAM Cache Poisoning attack.
   \end{proof}
 \end{theorem}
 
-\section{Conclusion}
+\section{Use Case: Execution Isolation Policy}
 
-\chapter{Specifying and Verifying an Idealized BIOS HSE Mechanism}
-
-\section{Software Execution Isolation}
-
-In this Chapter, we focus on a class of security policies we call \emph{software
-  execution isolation policies}.
+We now focus on a class of security policies we call \emph{execution isolation
+  policies}.
 %
-Such a policy prevents a set of untrusted software components to tamper with the
-execution of another set of so-called trusted software components.
+Such a policy prevents a software component to tamper with the execution of
+their \acp{tcb}.
 %
 We consider that a software component tampers with the execution of another when
 it is able to make the latter execute an instruction of its choice.
@@ -553,8 +548,14 @@ This is particular sub-case of the Integrity property
 (Definition~\ref{def:usecase:int}), as we focus on instructions fetches
 exclusively.
 
-In this Section, we give a generic definition of software execution isolation,
-based upon the concept of \textit{memory location ownership}.
+We give a generic definition of software execution tampering
+(\ref{subsec:speccert:tampering}).
+%
+We leverage them as a foundation for global execution policies which apply to
+complete software stacks (\ref{subsec:speccert:globalsec}).
+
+\subsection{Execution Tampering}
+\label{subsec:speccert:tampering}
 %
 A memory location within a hardware architecture is a container which is able to
 store data used by a software component \emph{e.g.}~a general-purpose register
@@ -629,15 +630,18 @@ tampering.
   by an attacker to modify memory cells it should not be able to access.
 \end{example}
 
+\subsection{Global Execution Isolation Policies}
+\label{subsec:speccert:globalsec}
+
 We leverage the software execution tampering property to propose a generic
 formalization of \emph{software execution isolation policies}, to determine if a
 given software component is authorized to tamper with the execution of another
 software component.
 
-\begin{definition}[Software Execution Isolation Policy]
+\begin{definition}[Global Execution Isolation Policy]
   \label{def:softwareisolation}
-  A Software Execution Isolation Policy $I$ is a safety property characterized
-  by a tuple $\langle S, \ge, \func{context} \rangle$, such that
+  A Global Execution Isolation Policy $I$ is a safety property characterized by
+  a tuple $\langle S, \ge, \func{context} \rangle$, such that
   %
   \begin{itemize}
   \item $S$ is a set of software components executed by the hardware
@@ -654,7 +658,7 @@ software component.
   \[
     \begin{array}{l}
       I(h, l, h') \triangleq
-      \forall (x, y) \in T \times T \text{, } h \xrightarrow[y
+      \forall (x, y) \in S \times S \text{, } h \xrightarrow[y
       \leadsto x]{l} h' \Rightarrow y \ge x
     \end{array}
   \]
@@ -665,7 +669,7 @@ software component.
   $x$ cannot tamper with the execution of y, that is
   %
   \[
-    I(h, l, h') \iff \forall (x, y) \in T \times T \text{, } y \not\ge x
+    I(h, l, h') \iff \forall (x, y) \in S \times S \text{, } y \not\ge x
     \Rightarrow h \xrightarrow[y \not\leadsto x]{l} h'
   \]
 
@@ -730,24 +734,36 @@ software component.
   \label{fig:speccert:partialorder}
 \end{figure}
 
+\subsection{Partial Execution Isolation Policies}
+
 A security policy such as the one detailed in
 Example~\ref{example:speccert:ssisolation} is not enforced by one but many HSE
 mechanisms.
 %
-We can break it down to more specific security policies, by designating the set
-of security components whose executions $U \subseteq T$ has to be constrained
-with respect to the global security policy $I$.
-%
-\[
-  I|_{U}(h, l, h') \triangleq \forall u \in U, \forall x \in S, h \xrightarrow[u
-  \leadsto t]{l} h' \Rightarrow u \ge x
-\]
-%
-This safety property can only be enforced through a HSE mechanism which shares
-its hardware-software mapping with $I$, and whose \ac{tcb} is
-$T = \{ t \in S\ |\ t \not\in U \wedge \forall u \in U, t \ge u \}$.
+We can break it down to more specific security policies, by designating sets of
+software components whose executions has to be constrained with respect to the
+global security policy $I$.
 
-\begin{example}[Constraining Applications]
+\begin{definition}[Partial Execution Isolation Policies]
+  Given $I$ a global execution isolation policy and $U \subseteq S$ a set of
+  software components, we write $I|_{U}$ for the partial execution isolation
+  policy whose purpose is to enforce that all components of $U$ are constrained
+  with respect to $I$, that is
+  %
+  \[
+    I|_{U}(h, l, h') \triangleq \forall u \in U, \forall x \in S, h
+    \xrightarrow[u \leadsto t]{l} h' \Rightarrow u \ge x
+  \]
+  %
+  This safety property can only be enforced through a HSE mechanism which shares
+  its hardware-software mapping with $I$, and whose \ac{tcb} is
+  $T = \{ t \in S\ |\ t \not\in U \wedge \forall u \in U, t \ge u \}$.
+\end{definition}
+
+In practice, we identify a set of sets of software components and specify one
+HSE mechanism per set.
+
+\begin{example}
   For
   $U_{\mathtt{apps}} = \{ \mathtt{app}_1, \mathtt{app}_2, \ldots,
   \mathtt{app}_{n-1} \mathtt{app}_{n} \}$ the set of applications whose
@@ -762,9 +778,65 @@ $T = \{ t \in S\ |\ t \not\in U \wedge \forall u \in U, t \ge u \}$.
   system software component.
 
   On a similar basis, for $U_{\mathtt{os}} = \{ \mathtt{os} \}$, the related
-  \ac{tcb} is $T = \{ \mathtt{bios} \}$. Only the \ac{bios} is responsible for
-  constraining the execution of system software.
+  \ac{tcb} is the set $T_{\mathtt{bios}}~=~\{ \mathtt{bios} \}$.
+  %
+  Only the \ac{bios} is responsible for constraining the system software
+  execution.
+\end{example}
 
+\subsection{HSE Mechanisms Cooperation}
+
+\begin{definition}[HSE Mechanisms Intersection]
+  Given two HSE mechanism $\Delta_1$ and $\Delta_2$, such that
+%
+  \[
+    \begin{array}{rcl}
+      \Delta_1
+      & =
+      & \langle S, T_1, \func{context}, \func{inv}_1, \func{behaviour}_1
+        \rangle \\
+      \Delta_2
+      & =
+      & \langle S, T_2, \func{context}, \func{inv}_2, \func{behaviour}_2
+        \rangle
+    \end{array}
+  \]
+%
+  We write $\Delta_1 \sqcap \Delta_2$ for the \ac{hse} mechanism which combines
+  the requirements of both $\Delta_1$ and $\Delta_2$, that is
+%
+  \[
+    \Delta_1 \sqcap \Delta_2 \triangleq \langle S, T_1 \cup T_2, \func{context},
+    \func{inv}_{1\wedge2}, \func{behaviour}_{1\wedge2} \rangle
+  \]
+%
+  where
+  \[
+    \begin{array}{rcl}
+      \func{inv}_{1\wedge2}(h)
+      & \triangleq
+      & \func{inv}_1(h) \wedge \func{inv}_2(h) \\
+      \func{behaviour}_{1\wedge2}(h,l)
+      & \triangleq
+      & \func{behaviour}_1(h,l) \wedge \func{behaviour}_2(h,l)
+    \end{array}
+  \]
+\end{definition}
+
+\begin{lemma}[Compliant Traces of Intersection]
+  The set of compliant traces of the intersection of $\Delta_1$ and $\Delta_2$
+  is the intersection of the sets of compliant traces of $\Delta_1$ and
+  $\Delta_2$, that is
+  \[
+    \mathcal{C}(\Delta_1 \sqcap \Delta_2) = \mathcal{C}(\Delta_1) \cap
+    \mathcal{C}(\Delta_2)
+  \]
+
+  \begin{proof}
+  \end{proof}
+\end{lemma}
+
+\begin{example}[Global Execution Policy Enforcement]
   We consider two HSE mechanisms: $\Delta_\mathtt{bios}$ implemented by the
   \ac{bios} to constrain the execution of the system software component, and
   $\Delta_\mathtt{os}$ primarily implemented by the system software component to
@@ -784,14 +856,17 @@ $T = \{ t \in S\ |\ t \not\in U \wedge \forall u \in U, t \ge u \}$.
   that is
   %
   \[
-    \begin{array}{l}
-      \forall \rho \in \pathesLTS{Ez}, \\
-      \qquad \rho \in \mathcal{C}(\Delta_{\mathtt{bios}}) \cap
-      \mathcal{C}(\Delta_{\mathtt{os}}) \\
-      \qquad \Rightarrow \forall tr \in \func{trans}(\rho), I(tr)
-    \end{array}
+    \Delta_{\mathtt{bios}} \sqcap \Delta_{\mathtt{os}} \models
+    \func{safety\_property}_I
   \]
+
+  \begin{proof}
+  \end{proof}
 \end{example}
+
+\section{Conclusion}
+
+\chapter{Specifying and Verifying an Idealized BIOS HSE Mechanism}
 
 \section{{\sc MinX86}}
 \label{sec:speccert:hardware}
