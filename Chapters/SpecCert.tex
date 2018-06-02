@@ -161,11 +161,13 @@ be leveraged to model a clock, and therefore reasoning about time.
 We now explain how we model the different security policies discussed in
 Section~\ref{subsec:state:secu}.
 %
-These security policies are defined against traces of the model.
+Because these security policies are defined against traces of the model, we
+first introduce a formal definition of them, along with two helpers functions to
+manipulate them more easily.
 
 \begin{definition}[Traces]
   \label{def:speccert:trace}
-  A trace is a sequence of transitions of~$\Sigma$, such that for two
+  A trace is a non-empty sequence of transitions of~$\Sigma$, such that for two
   consecutive transitions, the resulting state of the first is the initial state
   of the next.
 
@@ -195,9 +197,9 @@ definition.
 Hyperproperties\,\cite{clarkson2010hyperproperties} such as noninterference
 require a definition that general.
 %
-Liveness properties (something ``good'' happens) and safety properties (nothing
-``bad'' happens) are said to be security
-properties\,\cite{schneider2000enforceable}.
+On the contrary, security properties\,\cite{schneider2000enforceable}, that is
+liveness properties (something ``good'' happens eventually) and safety
+properties (nothing ``bad'' happens) can be modelled more straightforwardly.
 
 \begin{definition}[Security Property]
   A security property is a predicate on traces $\pathesLTS{Ez}$.
@@ -211,9 +213,9 @@ properties\,\cite{schneider2000enforceable}.
 \end{definition}
 
 Safety properties focus on avoiding ``bad'' transitions, and therefore their
-definition can be even more simple, \emph{if the hardware model allows for
-  distinguish between safe and unsafe transitions solely based on the current
-  state, and not the traces past}.
+definition can be even more simple, if the hardware model allows for distinguish
+between safe and unsafe transitions solely based on the current state, and not
+the traces past.
 
 \begin{definition}[Safety Property]
   \label{def:speccert:safetyprop}
@@ -231,6 +233,15 @@ definition can be even more simple, \emph{if the hardware model allows for
     \func{trans}(\rho), P(h, ev, h')
   \]
 \end{definition}
+
+To the best of our knowledge, hardware architectures often provide security
+features to enforce security properties, in the form of memory protection
+(safety) and hardware interrupt (liveness).
+%
+Hyperproperties have to be implemented by software components themselves.
+%
+We already gave the example of the x86 architecture, which does explicitly state
+it does not protect against side-channel attacks such as cache-timing attacks.
 
 \section{HSE Mechanisms}
 \label{sec:speccert:hse}
@@ -665,7 +676,7 @@ tampering.
   by an attacker to modify memory cells it should not be able to access.
 \end{example}
 
-\subsection{Global Execution Isolation Policies}
+\subsection{Execution Isolation Policies}
 \label{subsec:speccert:globalsec}
 
 We leverage the software execution tampering property to propose a generic
@@ -674,7 +685,7 @@ given software component is authorized to tamper with the execution of another
 software component in the context of a software stack.
 
 \begin{definition}[Global Execution Isolation Policy]
-  \label{def:softwareisolation}
+  \label{def:speccert:global}
   A Global Execution Isolation Policy $I$ is a safety property characterized by
   a tuple $\langle S, \ge, \func{context} \rangle$, such that
   %
@@ -769,9 +780,6 @@ software component in the context of a software stack.
   \label{fig:speccert:partialorder}
 \end{figure}
 
-\subsection{Partial Execution Isolation Policies}
-\label{subsec:speccert:partialsec}
-
 A security policy such as the one detailed in
 Example~\ref{example:speccert:ssisolation} is not enforced by one but many HSE
 mechanisms.
@@ -781,6 +789,7 @@ software components whose executions has to be constrained with respect to the
 global security policy $I$.
 
 \begin{definition}[Partial Execution Isolation Policies]
+  \label{def:speccert:partial}
   Given $I$ a global execution isolation policy and $U \subseteq S$ a set of
   software components, we write $I|_{U}$ for the partial execution isolation
   policy whose purpose is to enforce that all components of $U$ are constrained
@@ -947,21 +956,98 @@ third \ac{hse} mechanism, constructed by a dedicated operator $\sqcap$.
 
 \section{Conclusion}
 
-In this Chapter, we present our formal definition of \ac{hse} mechanisms, and we
-have shown how we can leverage this definition to reason about so-called
+In this Chapter, we present our formal definition of \ac{hse} mechanisms, in the
+form of requirements over a hardware model.
+%
+This approach allows for reuse the same model to define and verify several
+\ac{hse} mechanisms.
+%
+This makes sense, especially because these multiple mechanisms will be
+implemented concurrently, and may interfere with each others.
+%
+Throughout this Chapter, we have tried to illustrate our definitions with
+real-world examples.
+%
+All being told, our approach can be summarized to a three-step methodology for
+specifying and verifying \ac{hse} mechanisms against hardware architecture
+models, that is
+%
+\begin{inparaenum}[(1)]
+\item specifying the software requirements that must be satisfied by the trusted
+  software components which implement the \ac{hse} mechanism,
+%
+\item specifying the targeted security policy the \ac{hse} mechanism supposedly
+  enforces, and
+%
+\item verifying that the \ac{hse} mechanism is correct with respect to the
+  targeted security policy.
+\end{inparaenum}
+
+We have finished our presentation with a more concrete use case: so-called
 execution isolation policies.
 %
 These policies prevent software components to tamper with the execution of their
 \ac{tcb}, where ``tampering with the execution'' means being able to provoke the
 execution of an instruction of their choice.
 %
-These security policies are representative of what real-world \ac{hse}
-mechanisms are meant to enforce.
+They are representative of what real-world \ac{hse} mechanisms are meant to
+enforce.
+%
+Our formalism has proven to be expressive enough to
+%
+\begin{inparaenum}[(1)]
+\item break down a global execution security policy into several, simpler
+  partial ones, and
+%
+\item prove that the global policy could be enforced by the concurrent
+  implementation of several \ac{hse} mechanisms which are dedicated to one
+  partial policy each.
+\end{inparaenum}
 
 \chapter{Specifying and Verifying an Idealized BIOS HSE Mechanism}
 
+\endquote{``\emph{BIOS as the root of trust. For everything.}''
+
+  \hfill\footnotesize --- Joanna Rutkowska}
+
+\vspace{1cm}\noindent
+%
+In the previous Chapter, we have introduced a formal definition of global and
+partial execution isolation policies (Definitions~\ref{def:speccert:global} and
+\ref{def:speccert:partial}).
+%
+We have detailed how the global execution isolation of a typical software stack
+(a \ac{bios}, a system software components and several applications) can be
+enforced through two dedicated \ac{hse} mechanisms which constrain two subsets
+of the software stack each.
+%
+In this Chapter, we continue to unfold this example, by formally specifying and
+verifying one of these \ac{hse} mechanisms against an idealized {\sc x86}
+hardware model.
+
+We proceed as follows.
+%
+First, we give an in-depth description of {\sc Minx86}: its scope, its set of
+hardware configurations, and its transition relation defined in terms of pre and
+postcondition (Section~\ref{sec:speccert2:minx86}).
+%
+Then, we formally specify the \ac{hse} mechanism implemented by the \ac{bios} to
+constrain the execution of the software component with respect to the global
+isolation policy, and prove this \ac{hse} mechanism is correct
+(Section~\ref{sec:speccert2:smm}).
+
+Our model and proofs have been implemented using Coq, a proof assistant system
+in a project called SpecCert.
+%
+SpecCert has been released as an free software\,\footnote{SpecCert can be
+  found at the following URL: \url{https://github.com/lthms/speccert}}.
+%
+As we introduce new definitions and theoretical results, we point to the related
+statements in our development, so the interesting reader familiar with Coq can
+read our machine-checked proofs.
+
 \section{{\sc MinX86}}
-\label{sec:speccert:hardware}
+\label{sec:speccert2:minx86}
 
 $\formatLTS{Minx86}$ is intended to be a minimal model for single core x86-based
 machines and we have used publicly available Intel
@@ -1532,51 +1618,12 @@ The postcondition of $ReceiveSmi$ requires the program counter to be set with
 the $smbase + \val{0x8000}$ (where $smbase$ is the value of the SMBASE register
 of the \ac{cpu}) and the \ac{cpu} is in \ac{smm}.
 
+
+\section{BIOS Isolation HSE Mechanism}
+\label{sec:speccert2:smm}
+
 \newpage
 
-In this Chapter, we introduce a three-step methodology for specifying and
-verifying \ac{hse} mechanisms against hardware architecture models, that is
-%
-\begin{inparaenum}[(1)]
-\item specifying the software requirements that must be satisfied by the trusted
-  software components which implement the \ac{hse} mechanism,
-%
-\item specifying the targeted security policy the \ac{hse} mechanism supposedly
-  enforces, and
-%
-\item verifying that the \ac{hse} mechanism is sound.
-\end{inparaenum}
-%
-A \ac{hse} mechanism specification is sound when untrusted software components'
-executions are constrain with respect to the security property as long as the
-trusted software component correctly implements it.
-%
-As we have already argued in Section~\ref{sec:intro:verif}, we believe this
-approach would benefit to both hardware designers and software developers.
-%
-Formal specifications for \ac{hse} mechanisms can be the foundation of a
-systematic approach to verify hardware specifications, and form a valuable
-addition to the existing documentation.
-
-In Section \ref{sec:speccert:framework}, we give a formal definition of the
-SpecCert formalism.
-%
-In Section \ref{sec:speccert:hardware}, we define a model of x86-based hardware
-architectures to verify \ac{hse} mechanisms targeting software isolation
-policies using publicly available Intel specifications.
-%
-In Section \ref{sec:speccert:smm}, we verify the soundness of the \ac{hse}
-mechanism implemented in many x86 computer firmware codes to isolate the code
-executed while the \ac{cpu} is in System Management Mode (\ac{smm}), a highly
-privileged execution mode of x86 microprocessors.
-%
-Our model and proofs have been implemented using Coq, a proof assistant system
-and have been released as an open source software\,\footnote{Which can can be
-  found at: \url{https://github.com/lthms/speccert}}.
-%
-We discuss our results in Section \ref{sec:speccert:discuss}.
-
-\section{SpecCert Formalism} \label{sec:speccert:framework}
 
 \begin{table}[h]
   \centerline{%
@@ -1594,7 +1641,7 @@ We discuss our results in Section \ref{sec:speccert:discuss}.
                         Platform) \\
       \hline
       $\transition{h}{ev}{h'}$ & State-transformation according to
-                                        $\shortLTS{Ez}$ \\
+                                 $\shortLTS{Ez}$ \\
       \hline
       $\pathesLTS{Ez}$ & Set of sequences of $\shortLTS{Ez}$ state-transformations
                          (Traces) \\
