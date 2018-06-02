@@ -8,29 +8,56 @@
 
 \vspace{1cm}\noindent
 %
-We first describe the formalism of hardware model against which we base our
-following definitions (Section~\ref{subsec:speccert:hardware}).
+Our first contribution is a formal definition of \ac{hse} mechanisms, which
+takes into account that
 %
-Then, we give a formal definition of \ac{hse} mechanisms and \ac{hse} mechanisms
-correctness (Section~\ref{sec:speccert:hse}).
+\begin{inparaenum}[(1)]
+\item interfaces exposed by commodity hardware architectures to software
+  components are not safe,
+\item trusted and untrusted software components use the same interface and
+  manipulates the same stateful environment, and
+\item several \ac{hse} mechanisms are often implemented simultaneously, to
+  enforce several security policies.
+\end{inparaenum}
+
+These characteristics convinced us to break down our approach into three
+components: hardware models, security policies and \ac{hse} mechanisms.
 %
+First, we model the hardware architecture as a \ac{lts} whose sequences of
+transitions, also called traces, characterize every possible software components
+executions (Section~\ref{subsec:speccert:hardware}).
+%
+This model acts as a foundation for the two other components: both security
+policies and \ac{hse} mechanisms are express against it
+(Section~\ref{sec:speccert:hse}).
+%
+This opens the road toward using one hardware model to define and verify as many
+\ac{hse} mechanisms as necessary.
+%
+As we conclude this Chapter, we illustrate how our formalism can be leveraged in
+order to reason about the isolation of components of a software stack, notably
+in terms of sharing of responsibility between software components.
+
 For the reader familiar with Coq, we present an implementation of our formalism
 in Appendix~\ref{appendix:speccert}.
+%
+This development comprises machine-checked proofs of the theoretical results
+that we present throughout this Chapter, and we have used these proofs to phrase
+the proof sketches which follow.
 
 \section{Hardware Model}
 \label{subsec:speccert:hardware}
 
 In line with the works we have described in Section~\ref{sec:related:review}, we
 model a hardware architecture which executes several software components as a
-\ac{lts} with controllable and observable transitions
+\ac{lts} with controllable and observable transitions.
 %
-We then give a generic definition of traces of a \ac{lts}, so we can later
-reason about security policies and HSE mechanisms as sets of traces
-(\ref{subsec:speccert:trace}).
-%
-Then, we discuss how we model security policies using this model, based on the
-classes of security policies described in \ref{subsec:state:secu}
+We then introduce the notion of traces of a hardware model, and model security
+policies as predicate on sets of traces
 (\ref{subsec:speccert:def}).
+%
+This allows us to model the different classes of security policies discussed
+previously (\ref{subsec:state:secu}).
 
 \subsection{Definition}
 \label{subsec:speccert:def}
@@ -175,11 +202,11 @@ properties\,\cite{schneider2000enforceable}.
 \begin{definition}[Security Property]
   A security property is a predicate on traces $\pathesLTS{Ez}$.
   %
-  To express a security property $P$ as a security policy, we rely on a function
-  we call $\func{trace\_property}$, such that
+  We write $\partial P$ for the security policy derived from the security
+  property $P$, such that
   %
   \[
-    \func{trace\_property}_{P}(R) \triangleq \forall \rho \in R, P(\rho)
+    \partial P(R) \triangleq \forall \rho \in R, P(\rho)
   \]
 \end{definition}
 
@@ -193,12 +220,15 @@ definition can be even more simple, \emph{if the hardware model allows for
   %
   A safety property is a predicate on transitions $\mathcal{T}(\Sigma)$.
   %
-  To express a safety property $P$ as a security policy, we rely on a function
-  we call $\func{safety\_property}$ function, such that
+  We write $\partial^2 P$ for the security policy derived from the safety
+  property $P$.
+  %
+  A set of trace $R$ satisfies $\partial^2 P$ if and only if every transitions
+  of every traces $\rho \in R$ satisfy $P$, that is
   %
   \[
-    \func{safety\_property}_{P}(R) \triangleq \forall \rho \in R, \forall (h,
-    ev, h') \in \func{trans}(\rho), P(h, ev, h')
+    \partial^2 P(R) \triangleq \forall \rho \in R, \forall (h, ev, h') \in
+    \func{trans}(\rho), P(h, ev, h')
   \]
 \end{definition}
 
@@ -515,7 +545,7 @@ SMRAM Cache Poisoning attack.
   is a sufficient condition for
   %
   \[
-    \Delta \models \func{safety\_property}_{P}
+    \Delta \models \partial^2 P
   \]
 
   \begin{proof}
@@ -525,11 +555,12 @@ SMRAM Cache Poisoning attack.
     By definition of Compliant Runs, we know that any transitions meaning they
     all satisfies the safety property $P$.
     %
-    We conclude with the Definition of $\func{safety\_property}_{P}$.
+    We conclude with the Definition of $\partial^2 P$.
   \end{proof}
 \end{theorem}
 
 \section{Use Case: Execution Isolation Policy}
+\label{sec:speccert:usecase}
 
 We now focus on a class of security policies we call \emph{execution isolation
   policies}.
@@ -640,7 +671,7 @@ tampering.
 We leverage the software execution tampering property to propose a generic
 formalization of \emph{software execution isolation policies}, to determine if a
 given software component is authorized to tamper with the execution of another
-software component.
+software component in the context of a software stack.
 
 \begin{definition}[Global Execution Isolation Policy]
   \label{def:softwareisolation}
@@ -760,23 +791,26 @@ global security policy $I$.
     \xrightarrow[u \leadsto t]{l} h' \Rightarrow u \ge x
   \]
   %
-  This safety property can only be enforced through a HSE mechanism which shares
-  its hardware-software mapping with $I$, and whose \ac{tcb} is
-  $T = \{ t \in S\ |\ t \not\in U \wedge \forall u \in U, t \ge u \}$.
+  This safety property is typically enforced by a \ac{hse} mechanism implemented
+  by the \acp{tcb} of the software components of $U$, that is
+  %
+  \[
+    T = \{ t \in S\ |\ t \not\in U \wedge \forall u \in U, t \ge u \}
+  \]
 \end{definition}
 
-In practice, we identify a set of sets of software components and specify one
-HSE mechanism per set.
-
-\begin{example}
+\begin{example}[Sharing of Responsibility]
   For
   $U_{\mathtt{apps}} = \{ \mathtt{app}_1, \mathtt{app}_2, \ldots,
   \mathtt{app}_{n-1} \mathtt{app}_{n} \}$ the set of applications whose
   executions have to be constrained, the related \ac{tcb} is the set
   $T_{\mathtt{apps}}~=~\{ \mathtt{bios}, \mathtt{os} \}$.
   %
-  Indeed, the responsibility to constrain the execution of applications cannot
-  fall entirely on system software.
+  $I_{U_{\mathtt{apps}}}$ states than one application can only tamper with its
+  own execution.
+  %
+  The responsibility to constrain the execution of applications cannot fall
+  entirely on system software.
   %
   For instance, the \ac{bios} executed while the \ac{cpu} is in \ac{smm} has to
   be careful not to tamper with the page tables previously configured by the
@@ -787,12 +821,22 @@ HSE mechanism per set.
   %
   Only the \ac{bios} is responsible for constraining the system software
   execution.
+  %
+  $I_{\mathtt{os}}$ states that a system software component can tamper with the
+  applications it manages, with its own execution, but not the \ac{bios}'s.
 \end{example}
 
-\subsection{HSE Mechanisms Cooperation}
+\subsection{HSE Mechanisms Concurrent Implementation}
 \label{subsec:speccert:coop}
 
-\begin{definition}[HSE Mechanisms Intersection]
+In practice, a global execution isolation policy is enforced thanks to several
+\ac{hse} mechanisms in charge of enforcing one partial execution isolation
+policy.
+%
+We model the requirement to implement both \ac{hse} mechanisms concurrently as a
+third \ac{hse} mechanism, constructed by a dedicated operator $\sqcap$.
+
+\begin{definition}[HSE Mechanisms Concurrent Implementation]
   Given two HSE mechanism $\Delta_1$ and $\Delta_2$, such that
 %
   \[
@@ -830,6 +874,7 @@ HSE mechanism per set.
 \end{definition}
 
 \begin{lemma}[Compliant Traces of Intersection]
+  \label{lemma:speccert:compinter}
   The set of compliant traces of the intersection of $\Delta_1$ and $\Delta_2$
   is the intersection of the sets of compliant traces of $\Delta_1$ and
   $\Delta_2$, that is
@@ -853,8 +898,8 @@ HSE mechanism per set.
     \]
     %
     and vice versa, where $P$ and $P'$ are statements about the initial states
-    of traces and \func{inv}, $R$ is the premice about software transitions, and $Q$ and $Q'$
-    are statement about \func{behaviour}.
+    of traces and \func{inv}, $R$ is the premice about software transitions, and
+    $Q$ and $Q'$ are statement about \func{behaviour}.
   \end{proof}
 \end{lemma}
 
@@ -867,9 +912,9 @@ HSE mechanism per set.
   \[
     \begin{array}{cl}
       \Delta_{\mathtt{bios}}
-      & \models \func{safety\_property}_{I|_{U_{\mathtt{os}}}} \\
+      & \models \partial^2 I|_{U_{\mathtt{os}}} \\
       \Delta_{\mathtt{os}} & \models
-                             \func{safety\_property}_{I|_{U_{\mathtt{apps}}}}
+                             \partial^2 I|_{U_{\mathtt{apps}}}
     \end{array}
   \]
 
@@ -878,15 +923,40 @@ HSE mechanism per set.
   that is
   %
   \[
-    \Delta_{\mathtt{bios}} \sqcap \Delta_{\mathtt{os}} \models
-    \func{safety\_property}_I
+    \Delta_{\mathtt{bios}} \sqcap \Delta_{\mathtt{os}} \models \partial^2 I
   \]
 
   \begin{proof}
+    By definition of correct \ac{hse} mechanism, we need to prove that the set
+    of traces which comply with
+    $\Delta_{\mathtt{bios}} \sqcap \Delta_{\mathtt{os}}$ has to satisfy the
+    security policy derived from our isolation policy $I$.
+    %
+    With Lemma~\ref{lemma:speccert:compinter}, we know that the set of compliant
+    traces of $\Delta_{\mathtt{bios}} \sqcap \Delta_{\mathtt{os}}$ is the
+    intersection of the sets of compliant traces of $\Delta_{\mathtt{bios}}$ and
+    $\Delta_{\mathtt{os}}$.
+    %
+    We know that the transitions of these traces satisfies respectively
+    $I_{U_{\mathtt{os}}}$ and $I_{U_{\mathtt{bios}}}$.
+    %
+    This is enough to conclude, based on the definitions of global and partial
+    execution isolation policies.
   \end{proof}
 \end{example}
 
 \section{Conclusion}
+
+In this Chapter, we present our formal definition of \ac{hse} mechanisms, and we
+have shown how we can leverage this definition to reason about so-called
+execution isolation policies.
+%
+These policies prevent software components to tamper with the execution of their
+\ac{tcb}, where ``tampering with the execution'' means being able to provoke the
+execution of an instruction of their choice.
+%
+These security policies are representative of what real-world \ac{hse}
+mechanisms are meant to enforce.
 
 \chapter{Specifying and Verifying an Idealized BIOS HSE Mechanism}
 
