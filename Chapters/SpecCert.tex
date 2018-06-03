@@ -589,6 +589,14 @@ exclusively.
 We use it as an illustration to demonstrate how our \ac{hse} mechanism
 definition can be used to reason about enforcement of security policies which
 involves several software components.
+%
+The word ``isolation'' often refers to stronger security properties; for
+instance, the guests isolation of the idealized hypervisor of Gilles Barthe
+\emph{et al.} is a hyperproperty similar to
+non-interference\,\cite{barthe2011virtcert1}.
+%
+However, enforcing such a property is a task mostly tackled by the hypervisor
+itself.
 
 We give a generic definition of software execution tampering
 (\ref{subsec:speccert:tampering}).
@@ -639,7 +647,7 @@ With a hardware-software mapping and an event-software mapping, we give a formal
 definition of a \textit{software execution tampering}.
 
 \begin{definition}[Software Execution Tampering]
-  \label{def:codeinjection}
+  \label{def:speccert:tempering}
   A software component $x \in S$ tampers with the execution of another software
   component $y \in S$ during a transition labelled with $l \in L$ from a state
   $h \in H$ to a state $h' \in H$, denoted by
@@ -720,7 +728,7 @@ software component in the context of a software stack.
   \]
 
   \begin{proof}
-    This is the contrapositive of Definition~\ref{def:softwareisolation}.
+    This is the contrapositive of Definition~\ref{def:speccert:global}.
   \end{proof}
 \end{corollary}
 
@@ -791,12 +799,12 @@ global security policy $I$.
 \begin{definition}[Partial Execution Isolation Policies]
   \label{def:speccert:partial}
   Given $I$ a global execution isolation policy and $U \subseteq S$ a set of
-  software components, we write $I|_{U}$ for the partial execution isolation
+  software components, we write $I|U$ for the partial execution isolation
   policy whose purpose is to enforce that all components of $U$ are constrained
   with respect to $I$, that is
   %
   \[
-    I|_{U}(h, l, h') \triangleq \forall u \in U, \forall x \in S, h
+    I|U(h, l, h') \triangleq \forall u \in U, \forall x \in S, h
     \xrightarrow[u \leadsto t]{l} h' \Rightarrow u \ge x
   \]
   %
@@ -815,7 +823,7 @@ global security policy $I$.
   executions have to be constrained, the related \ac{tcb} is the set
   $T_{\mathtt{apps}}~=~\{ \mathtt{bios}, \mathtt{os} \}$.
   %
-  $I_{U_{\mathtt{apps}}}$ states than one application can only tamper with its
+  $I|U_{\mathtt{apps}}$ states that one application can only tamper with its
   own execution.
   %
   The responsibility to constrain the execution of applications cannot fall
@@ -831,7 +839,7 @@ global security policy $I$.
   Only the \ac{bios} is responsible for constraining the system software
   execution.
   %
-  $I_{\mathtt{os}}$ states that a system software component can tamper with the
+  $I|U_{\mathtt{os}}$ states that a system software component can tamper with the
   applications it manages, with its own execution, but not the \ac{bios}'s.
 \end{example}
 
@@ -921,9 +929,9 @@ third \ac{hse} mechanism, constructed by a dedicated operator $\sqcap$.
   \[
     \begin{array}{cl}
       \Delta_{\mathtt{bios}}
-      & \models \partial^2 I|_{U_{\mathtt{os}}} \\
+      & \models \partial^2 I|U_{\mathtt{os}} \\
       \Delta_{\mathtt{os}} & \models
-                             \partial^2 I|_{U_{\mathtt{apps}}}
+                             \partial^2 I|U_{\mathtt{apps}}
     \end{array}
   \]
 
