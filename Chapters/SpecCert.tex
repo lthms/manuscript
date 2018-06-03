@@ -1022,14 +1022,14 @@ enforced through two dedicated \ac{hse} mechanisms which constrain two subsets
 of the software stack each.
 %
 In this Chapter, we continue to unfold this example, by formally specifying and
-verifying one of these \ac{hse} mechanisms against an idealized {\sc x86}
+verifying one of these \ac{hse} mechanisms against an idealized {\scshape x86}
 hardware model.
 
 We proceed as follows.
 %
-First, we give an in-depth description of {\sc Minx86}: its scope, its set of
-hardware configurations, and its transition relation defined in terms of pre and
-postcondition (Section~\ref{sec:speccert2:minx86}).
+First, we give an in-depth description of {\scshape Minx86}: its scope, its set
+of hardware configurations, and its transition relation defined in terms of pre
+and postcondition (Section~\ref{sec:speccert2:minx86}).
 %
 Then, we formally specify the \ac{hse} mechanism implemented by the \ac{bios} to
 constrain the execution of the software component with respect to the global
@@ -1039,14 +1039,14 @@ isolation policy, and prove this \ac{hse} mechanism is correct
 Our model and proofs have been implemented using Coq, a proof assistant system
 in a project called SpecCert.
 %
-SpecCert has been released as an free software\,\footnote{SpecCert can be
-  found at the following URL: \url{https://github.com/lthms/speccert}}.
+SpecCert has been released as an free software\,\footnote{SpecCert can be found
+  at the following URL: \url{https://github.com/lthms/speccert}}.
 %
 As we introduce new definitions and theoretical results, we point to the related
 statements in our development, so the interesting reader familiar with Coq can
 read our machine-checked proofs.
 
-\section{{\sc MinX86}}
+\section{{\scshape Minx86}}
 \label{sec:speccert2:minx86}
 
 $\formatLTS{Minx86}$ is intended to be a minimal model for single core x86-based
@@ -1629,7 +1629,7 @@ of the \ac{cpu}) and the \ac{cpu} is in \ac{smm}.
   \centerline{%
     \begin{tabular}{clc}
       \hline
-      \bf Notation  & \multicolumn{1}{c}{\bf Description} \\
+      \textbf Notation  & \multicolumn{1}{c}{\textbf Description} \\
       \hline
       $\set{S}$ & Set of software components \\
       \hline
