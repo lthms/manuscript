@@ -15,7 +15,7 @@ takes into account that
 \item interfaces exposed by commodity hardware architectures to software
   components are not safe,
 \item trusted and untrusted software components use the same interface and
-  manipulates the same stateful environment, and
+  manipulate the same stateful environment, and
 \item several \ac{hse} mechanisms are often implemented simultaneously, to
   enforce several security policies.
 \end{inparaenum}
@@ -25,10 +25,10 @@ components: hardware models, security policies and \ac{hse} mechanisms.
 %
 First, we model the hardware architecture as a \ac{lts} whose sequences of
 transitions, also called traces, characterize every possible software components
-executions (Section~\ref{subsec:speccert:hardware}).
+execution (Section~\ref{subsec:speccert:hardware}).
 %
 This model acts as a foundation for the two other components: both security
-policies and \ac{hse} mechanisms are express against it
+policies and \ac{hse} mechanisms are expressed against it
 (Section~\ref{sec:speccert:hse}).
 %
 This opens the road toward using one hardware model to define and verify as many
@@ -53,7 +53,7 @@ model a hardware architecture which executes several software components as a
 \ac{lts} with controllable and observable transitions.
 %
 We then introduce the notion of traces of a hardware model, and model security
-policies as predicate on sets of traces
+policies as predicates on sets of traces
 (\ref{subsec:speccert:def}).
 %
 This allows us to model the different classes of security policies discussed
@@ -66,19 +66,19 @@ The state of a hardware architecture models the configuration of its devices at
 a given time.
 %
 This configuration may change over time with respect to the hardware
-specifications and comprises any relevant data such as registers values, inner
+specifications and comprises any relevant data such as register values, inner
 memory contents, etc.
 %
 These state transformations occur during the system's transitions.
 %
 We distinguish between two classes of transitions: the software transitions
-which are direct and foreseeable side-effects of the execution of a \ac{cpu}
+which are direct and foreseeable side effects of the execution of a \ac{cpu}
 instruction and the hardware transitions which are not.
 %
 Differentiating between transitions which are controllable and transitions which
 are only observable is not a novel approach.
 %
-David Basin \emph{et al.} have notably emphasize the importance of transitions
+David Basin \emph{et al.} have notably emphasized the importance of transitions
 which are only observable in terms of security\,\cite{basin2013enforceable}.
 
 \begin{definition}[Hardware Model]
@@ -93,7 +93,7 @@ which are only observable in terms of security\,\cite{basin2013enforceable}.
   %
   \item $L_H$ is the set of labels to identify hardware transitions
   %
-  \item $\rightarrow$ is a the transition relation of the system
+  \item $\rightarrow$ is the transition relation of the system
   \end{itemize}
 
   The transition relation $\rightarrow$ is a predicate on
@@ -132,7 +132,7 @@ For instance, to execute the x86 instruction\,\footnote{Written in AT\&T syntax
   to execute
 \end{itemize}
 
-This translates into four software transitions, if the content of \texttt{ecx}
+This translates into four software transitions if the content of \texttt{ecx}
 is a valid address.
 %
 On the contrary, the \ac{cpu} typically raises an interrupt.
@@ -158,7 +158,7 @@ be leveraged to model a clock, and therefore reasoning about time.
 \subsection{Security Policies}
 \label{subsec:speccert:security}
 
-We now explain how we model the different security policies discussed in
+We now explain how we model different security policies discussed in
 Section~\ref{subsec:state:secu}.
 %
 Because these security policies are defined against traces of the model, we
@@ -213,7 +213,7 @@ properties (nothing ``bad'' happens) can be modelled more straightforwardly.
 \end{definition}
 
 Safety properties focus on avoiding ``bad'' transitions, and therefore their
-definition can be even more simple, if the hardware model allows for distinguish
+definition can be even simpler, if the hardware model allows for distinguishing
 between safe and unsafe transitions solely based on the current state, and not
 the traces past.
 
@@ -225,8 +225,8 @@ the traces past.
   We write $\partial^2 P$ for the security policy derived from the safety
   property $P$.
   %
-  A set of trace $R$ satisfies $\partial^2 P$ if and only if every transitions
-  of every traces $\rho \in R$ satisfy $P$, that is
+  A set of trace $R$ satisfies $\partial^2 P$ if and only if every transition
+  of every trace $\rho \in R$ satisfies $P$, that is
   %
   \[
     \partial^2 P(R) \triangleq \forall \rho \in R, \forall (h, ev, h') \in
@@ -246,7 +246,7 @@ it does not protect against side-channel attacks such as cache-timing attacks.
 \section{HSE Mechanisms}
 \label{sec:speccert:hse}
 
-The previous definitions allows us to propose a formal definition for \ac{hse}
+The previous definitions allow us to propose a formal definition for \ac{hse}
 mechanisms, notably based on requirements on states and requirements on
 transitions (\ref{subsec:speccert:hsedef}).
 %
@@ -446,7 +446,7 @@ untrusted and we make no assumption on their behaviour.
 \subsection{Trace Compliance}
 \label{subsec:speccert:compliant}
 
-We say a trace complies to a \ac{hse} mechanism definition when its initial
+We say a trace complies with a \ac{hse} mechanism definition when its initial
 state satisfies the state requirements (\func{inv}) and each software
 transitions of the trace satisfies the software requirements (\func{behaviour}).
 %
@@ -563,8 +563,7 @@ SMRAM Cache Poisoning attack.
     With Lemma~\ref{lemma:speccert:hseinv}, we know that every initial state of
     a transition of $\rho$ satisfies $\func{inv}$.
     %
-    By definition of Compliant Runs, we know that any transitions meaning they
-    all satisfies the safety property $P$.
+    By definition of Compliant Runs, we know that every transition satisfies the safety property $P$.
     %
     We conclude with the Definition of $\partial^2 P$.
   \end{proof}
@@ -582,7 +581,7 @@ their \acp{tcb}.
 We consider that a software component tampers with the execution of another when
 it is able to make the latter execute an instruction of its choice.
 %
-This is particular sub-case of the Integrity property
+This is a particular sub-case of the Integrity property
 (Definition~\ref{def:usecase:int}), as we focus on instructions fetches
 exclusively.
 %
@@ -606,7 +605,7 @@ apply to complete software stacks (\ref{subsec:speccert:globalsec}).
 %
 Because such policies are enforced \emph{via} several \ac{hse} mechanisms, we
 then introduce partial execution policies (\ref{subsec:speccert:partialsec}),
-and \ac{hse} mechanisms cooperation (\ref{subsec:speccert:coop}).
+and \ac{hse} mechanism cooperation (\ref{subsec:speccert:coop}).
 
 \subsection{Execution Tampering}
 \label{subsec:speccert:tampering}
@@ -616,7 +615,7 @@ store data used by a software component \emph{e.g.}~a general-purpose register
 of a \ac{cpu}, a \ac{dram} memory cell, etc.
 %
 A hardware model tracks the memory location ownership when the hardware
-architecture states maps each memory location with a software component called
+architecture state maps each memory location with a software component called
 its \emph{owner}, and transition relation updates this mapping throughout
 traces.
 %
@@ -667,11 +666,11 @@ We now give two examples of recent attacks which qualify as software execution
 tampering.
 
 \begin{example}[Thinkpwn]
-  The \ac{bios} of certain Lenovo laptops were subject to an trivial attack
+  The \ac{bios} of certain Lenovo laptops were subject to a trivial attack
   called Thinkpwn.
   %
   Under certain circumstances, the \ac{smm} code was using the content of a
-  structure provided by an untrusted source (\emph{e.g.} system software) as a
+  structure provided by a untrusted source (\emph{e.g.} system software) as a
   function pointer, without any safety checks.
 \end{example}
 
@@ -750,7 +749,7 @@ software component in the context of a software stack.
   This reads as follows: a software component is part of its own \ac{tcb}, and
   of the \ac{tcb} of any software component higher in the graph.
 
-  According of the definition of the Software Execution Isolation Policy, the
+  According to the definition of the Software Execution Isolation Policy, the
   \ac{bios} can tamper with the execution of the system software component and
   any applications, but applications can only tamper with their own executions.
 \end{example}
@@ -793,7 +792,7 @@ Example~\ref{example:speccert:ssisolation} is not enforced by one but many HSE
 mechanisms.
 %
 We can break it down to more specific security policies, by designating sets of
-software components whose executions has to be constrained with respect to the
+software components whose executions have to be constrained with respect to the
 global security policy $I$.
 
 \begin{definition}[Partial Execution Isolation Policies]
@@ -805,7 +804,7 @@ global security policy $I$.
   %
   \[
     I|U(h, l, h') \triangleq \forall u \in U, \forall x \in S, h
-    \xrightarrow[u \leadsto t]{l} h' \Rightarrow u \ge x
+    \xrightarrow[u \leadsto x]{l} h' \Rightarrow u \ge x
   \]
   %
   This safety property is typically enforced by a \ac{hse} mechanism implemented
@@ -915,8 +914,8 @@ third \ac{hse} mechanism, constructed by a dedicated operator $\sqcap$.
     \]
     %
     and vice versa, where $P$ and $P'$ are statements about the initial states
-    of traces and \func{inv}, $R$ is the premice about software transitions, and
-    $Q$ and $Q'$ are statement about \func{behaviour}.
+    of traces and \func{inv}, $R$ is the premise filtering software transitions, and
+    $Q$ and $Q'$ are statements about \func{behaviour}.
   \end{proof}
 \end{lemma}
 
@@ -954,8 +953,8 @@ third \ac{hse} mechanism, constructed by a dedicated operator $\sqcap$.
     intersection of the sets of compliant traces of $\Delta_{\mathtt{bios}}$ and
     $\Delta_{\mathtt{os}}$.
     %
-    We know that the transitions of these traces satisfies respectively
-    $I_{U_{\mathtt{os}}}$ and $I_{U_{\mathtt{bios}}}$.
+    We know that the transitions of these traces satisfy respectively
+    $I|U_{\mathtt{os}}$ and $I|U_{\mathtt{bios}}$.
     %
     This is enough to conclude, based on the definitions of global and partial
     execution isolation policies.
@@ -971,7 +970,7 @@ This approach allows for reuse the same model to define and verify several
 \ac{hse} mechanisms.
 %
 This makes sense, especially because these multiple mechanisms will be
-implemented concurrently, and may interfere with each others.
+implemented concurrently, and may interfere with each other.
 %
 Throughout this Chapter, we have tried to illustrate our definitions with
 real-world examples.
@@ -1045,10 +1044,9 @@ isolation policy, and prove this \ac{hse} mechanism is correct
 (Section~\ref{sec:speccert2:smm}).
 
 Our model and proofs have been implemented using Coq, a proof assistant system
-in a project called SpecCert.
-%
-SpecCert has been released as an free software\,\footnote{SpecCert can be found
-  at the following URL: \url{https://github.com/lthms/speccert}}.
+in a project called SpecCert, which we have released SpecCert as a free
+software\,\footnote{SpecCert can be found at the following URL:
+  \url{https://github.com/lthms/speccert}}.
 %
 As we introduce new definitions and theoretical results, we point to the related
 statements in our development, so the interesting reader familiar with Coq can
