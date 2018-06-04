@@ -1,3 +1,4 @@
+%!TEX root = ../main-mini.tex
 \chapter{Intel x86 Hardware and BIOS Background}
 \label{chapter:usecase}
 
@@ -9,16 +10,16 @@
 \vspace{1cm}\noindent
 %
 Our motivation to formally specify and verify architectural attacks comes from
-our experience with the x86 hardware architecture.
+our experience with the x86 hardware architecture. \TODO{"our experience" fait un peu pédant. Tu n'es pas le seul à t'intéresser au problème...}
 %
 Over the past decade, the security of the lowest levels of abstraction (hardware,
 firmware, system software) has grown in importance, and several critical
 vulnerabilities which fall in our definition of architectural attacks have been
-disclosed.
+disclosed. \TODO{ref!, En outre, cette phrase est très générique alors qu'il me semble que ce que tu veux dire c'est que l'architecture x86 en particulier est devenu de plus en plus complexe (et de fait, c'est surement une des architecture les plus complexe). En outre, elle est très populaire sur les laptop, desktop et serveurs} 
 %
 While our contributions are intended to be applicable to other hardware
 architectures, for purposes of evaluating our work, we have adopted the systemic
-approach to apply them to a x86 real example.
+approach to apply them to a x86 real example \TODO{pourquoi "systematic". je dirais plus sobrement, nous avons décidé d'évaluer notre approche sur l'architecture x86, qui représente une cible idéeal pour ce type d'approche. Toutefois, notre approche peut tout à fait s'appliquer à d'autres architecture, par exemple ARM très populaire dans les smartphones et systèmes embarqués. }.
 %
 We have chosen to focus on the \ac{hse} mechanism implemented by the BIOS at
 runtime to stay isolated from the rest of the software stack, including the
@@ -27,7 +28,7 @@ system software.
 Because the BIOS is the most privileged piece of software executed by the
 hardware architecture, this \ac{hse} mechanism is of key importance.
 %
-Despite this fact, it has been defeated several times, and therefore, it
+Despite this fact, it has been defeated several times \TODO{REF!}, and therefore, it
 illustrates perfectly our motivations.
 %
 However, it is important to emphasize that other mainstream architecture
@@ -60,26 +61,26 @@ At the time of writing this thesis\,\footnote{Spring 2018.}, the \emph{Intel 64
 %
 Executed on the computer used to write the present thesis, the GNU/Linux
 command-line application \texttt{lshw} lists about 30 hardware components, which
-come with their own documentation, often in the form of large data sheet.
+come with their own documentation, often in the form of large data sheet. \TODO{Donne quelques exemples de composants, sans être exaustif}
 
 A x86 computing platform is built upon two key components: \acp{cpu} and memory
 (\ref{subsec:usecase:cpumem}).
 %
 The \ac{cpu} communicates with peripherals to interact with the outside world
-(\emph{e.g.} another computing platform, a user) (\ref{subsec:usecase:perif}).
+(\emph{e.g.} another computing platform, a user) (\ref{subsec:usecase:perif}). \TODO{Ajouter un schéma d'archi x86 big picture (attention à ne pas être trop générique).}
 
 \subsection{Processors and Memory}
 \label{subsec:usecase:cpumem}
 
 A computer platform goal is to execute programs to perform arbitrary tasks.
 %
-To that end, it relies on one or more \acp{cpu}.
+To that end, it relies on one or more \acp{cpu}. \TODO{II faudrait décrire un peu plus précisement l'architecture x86 : CPU, coeur physique, coeur logique. }
 %
 A \ac{cpu} takes so-called ``instructions'' as input, and manipulates its
-internal states and data stored in a memory, as output
+internal states and data stored in a memory, as output.
 %
 A program is a sequence of instructions, often stored in the same memory as the
-data it manipulates.
+data it manipulates. \TODO{Dire explicitement que des fois ce n'est pas le cas par exemple cache instruction vs cache donnée, exécution d'un programme en ROM}
 %
 Overall, a \ac{cpu} basically repeats the following task, over and over:
 
@@ -93,7 +94,7 @@ Overall, a \ac{cpu} basically repeats the following task, over and over:
   perform
 %
 \item Act accordingly, by modifying its internal state, and interacting with the
-  memory.
+  memory. \TODO{et/ou les périphérique, même s'ils sont de plus en plus abstrait sous forme de mémoire}
 %
 \item Update the content of its \emph{program counter} register according to the
   semantics of the instruction it has executed. Most of the time, it increases
@@ -117,13 +118,13 @@ between them and the \acp{cpu}.
 %
 That is, to ``receives a message'' from a peripheral, a \ac{cpu} reads the
 content of the memory it exposed, while it can ``send a message'' by writing to
-the same memory.
+the same memory. \TODO{Tu pourrais aussi citer la ROM du BIOS, peut-être donner un petit exemple de code qui interagit avec un périphérique}.
 
 \paragraph{}
 %
 Historically, x86 \acp{cpu} were using two distinct memory spaces to communicate
 either with the \ac{dram} or with the peripherals, \emph{via} two families of
-instructions.
+instructions. \TODO{Cites les explicitement "in/out vs. mov/push/pop..."}
 %
 Nowadays, the memories exposed by the peripherals are mapped within the same
 address space, and accessed with the same instructions.
@@ -132,11 +133,11 @@ That is, when a \ac{cpu} read or write to an address, the access is
 transparently dispatched either to the \ac{dram} or to a peripheral.
 %
 The first component to intervene in the decision process is the Memory
-Controller (formally known as the \emph{northbridge}, and now integrated to the
+Controller (formally known as the \emph{northbridge}, and that is now integrated to the
 \ac{cpu} Die).
 %
 The Memory Controller is connected to the \ac{dram} and to peripherals which
-require small latency, such as a graphic card or a ethernet controller.
+require small latency, such as a graphic card or a ethernet controller. \TODO{Ethernet controler? A vérifier...}
 %
 If a given memory access does not target one of its peripherals or the
 \ac{dram}, the Memory Controller forwards the memory access to the \ac{pch}
@@ -144,21 +145,26 @@ If a given memory access does not target one of its peripherals or the
 %
 The \ac{pch} acts as a proxy for the remaining peripherals.
 
-\paragraph{}
+\paragraph{} \TODO{Pas de paragraph sans titre. Soit tu revois ton découpage en sous-section, soit tu découpe dès le début ta sous-section en plusieurs paragraph avec des titres}
 %
 One important property of x86 hardware architecture is that the memory map,
 which is the correspondence between the addresses used by the \ac{cpu} and the
 storage cells scattered among the hardware architecture, is dynamically
 configurable.
 %
+\TODO{Il serait bien d'evoquer ici rapidement la mémoire virtuelle. pagination plus segmentation.}
+
 As such, determining which hardware component will receive a given memory access
-is far from being trivial.
+is far from being trivial. \TODO{j'aime pas trop "far from being trivial". En outre, il faudrait donner un peu plus d'info pour juger objectivement si c'est difficile ou non.}
 
 \subsection{Active Peripherals}
 \label{subsec:usecase:perif}
+\TODO{Je mettrait simplement peripherals comme titre. On ne comprend pas au début ce que veut dire actif. En outre, j'ai l'impression que la majorité des périphérique sont actifs aujoourd'hui}
 
 It is worth mentioning that, since 2008, Intel embeds the Management Engine, a
 processor \emph{inside} the memory controller.
+
+\TODO{Commencer à parler du ME avant de parler des périphériques simples me semble contre-intuitif. Je décrirai les interactions "standard" avec les périphériques. Puis je parlerai de DMA. Enfin j'aborderai ME (avec des références!). Par ordre croissant de complexité. En outre, ta description du CPU et de la mémoire est factuelle et descriptive (tu décris comment çà marche). Alors que pour les périphériques, tu te lances directe dans une analyse de sécurité avant d'avoir décrit leur fonctionnement et le lien avec le reste. En outre, tu n'as pas encore parlé des propriétés et mécanismes de sécurité.  }
 %
 The Management Engine executes a complete software stack, and is capable of
 interacting with the \ac{dram} as well as other hardware components.
@@ -170,7 +176,7 @@ cooperation of the main \ac{cpu}.
 Although the Management Engine supposedly operates in a transparent manner from
 the \ac{cpu} perspective, we emphasize that a Management Engine vulnerability, a
 scenario which is not without precedent, potentially defeats any security
-measures implemented at the \ac{cpu} level.
+measures implemented at the \ac{cpu} level. \TODO{Il y a maintenant une litterature abondante (y compris dans le domaine académique) sur le sujet. As te lire, on a l'impression que c'est toi qui a analysé le problème. Tu devrais présenter cela de manière plus impersonnelle et en citant des ref! En outre, pourquoi parle tu du ME? Quel est le lien avec le reste?}
 
 The security threat posed by the Management Engine is not an isolated case.
 %
@@ -178,17 +184,17 @@ On the contrary, x86 hardware architectures contain several \emph{active}
 peripherals.
 %
 We say a peripheral is active if it can autonomously read and write to the
-system memory, using a feature called \ac{dma}.
+system memory, using a feature called \ac{dma}. \TODO{Le DMA est suffisamment connu pour ne pas le citer comme "a feature called DMA". using Direct Memory Access. }
 %
 This feature brings an important performance improvement, but it also opens an
 important surface of attacks.
 
 Historically, peripherals have been part of the \ac{tcb} of every x86 \ac{hse}
-mechanisms, with important consequences on the computing platform security.
+mechanisms, with important consequences on the computing platform security. \TODO{Tu n'as pas défini avant la TCB, il me semble.}
 %
 For instance, Loic Duflot \emph{et al.} have been able to take control of a
-network card, because the piece of software responsible for processing network
-packets was vulnerable\,\cite{duflot2010network}.
+network card. They exploit some vulnerability in the network card firmware, which process network
+packets\,\cite{duflot2010network}.
 %
 Because the network card can perform \ac{dma}, they were able to tamper with the
 system software code and data.
@@ -200,11 +206,11 @@ could be leveraged to achieve similar goals.
 
 In that respect, the current situation has improved.
 %
-Modern x86 \acp{cpu} provide a feature called I/O MMU, which allows for
+Modern x86 \acp{cpu} provide a feature called I/O MMU \TODO{ref!}, which allows for
 configuring the memory ranges each peripheral can access to.
 %
 In addition, Intel tends to take rogue peripherals into account when it
-conceives new security features.
+conceives new security features. \TODO{affirmation un peu gratuite sur Intel. Référence? }
 %
 A good example is the \ac{sgx} technology, whose \ac{tcb} is limited to the
 \ac{cpu} and its Memory Controller\,\cite{costan2016sgxexplained}.
@@ -212,7 +218,7 @@ A good example is the \ac{sgx} technology, whose \ac{tcb} is limited to the
 \subsection{Security Properties}
 
 From a security perspective, the attack surface on x86 computing platform is
-large.
+large. \TODO{phrase un peu gratuite. Surtout on ne voit pas le lien avec ce qui suit. Ce qu'il faudrait dire, c'est que le CPU et la RAM sont des ressources partagées par les différents composants logiciels et matériels. Du coup, d'un point de vue de la sécurité, comme ces composants ne se font pas nécessairement confiance (parsqu'ils viennent de fournisseur différent, parqsu'il peuvent être malveillant ou vulnérables, etc.) il est nécessaire de les isoler les un les autres. La plupart des mécanismes de sécurité de la plateforme fournisse don c un mécanisme d'isolation} 
 %
 The different software components which form the software stack are executed by
 the same \acp{cpu}, the instructions which form their programs are stored within
@@ -220,10 +226,10 @@ the same memories, which they also manipulate concurrently \emph{via} a
 configurable memory map.
 %
 In addition, active peripherals can also access the main memory concurrently
-with the \ac{cpu}, and they tend to be part of the \ac{tcb}.
+with the \ac{cpu}, and they tend to be part of the \ac{tcb}. \TODO{Que veut dire "tend to be part of the TCB"? TCB de quoi?}
 %
 As a consequence, most of the \ac{hse} mechanisms implemented in x86 computing
-platforms aim to enforce isolation properties, to prevent untrusted software
+platforms aim to enforce isolation properties, to prevent untrusted software \TODO{ou hardware dans le cas de l'IOMMU}
 components to tamper with the execution of trusted ones.
 %
 These isolation properties can take three forms.
@@ -233,7 +239,7 @@ These isolation properties can take three forms.
   The trusted software component is assigned a portion of the memory map.
   %
   Untrusted software components cannot tamper with the result of read accesses
-  targeting this portion and performed by the trusted software component,
+  targeting this portion and performed by the trusted software component.
 \end{definition}
 
 \begin{definition}[Confidentiality]
@@ -247,19 +253,19 @@ Integrity and confidentiality properties have to be considered from an
 information flow perspective.
 %
 The content of specific storage cells inside the hardware architecture is less
-relevant than the logical view exposed to the \acp{cpu}.
+relevant than the logical view exposed to the \acp{cpu}. \TODO{Telle quelle, cette phrase n'est pas compréhensible. Il faut que tu donnes plus de détails/explication pour qu'on comprenne ce que tu veux dire. Je pense que je comprends vaguement mais c'est suite à la discussion que nous avons eu} 
 
 \begin{definition}[Availability]
 Untrusted software components cannot prevent the execution of a trusted
-  software component
+  software component.
 \end{definition}
 
 On the contrary, there are complete classes of security properties which are not
-covered by \ac{hse} mechanisms.
+covered by \ac{hse} mechanisms. \TODO{La phrase est maladroite. Pourquoi "on the contrary"?}
 %
-The most famous is probably noninterference properties, notably defeated
+The most famous is probably noninterference properties \TODO{ref!!!}, notably defeated
 \emph{via} side-channel attacks (\emph{e.g.} cache-timing attacks). Indeed,
-Intel documentation clearly state:
+Intel documentation clearly state \TODO{Beaucoup de confusion dans ce paragraphe. 1) si tu parles de information flow et que tu dis que tu ne peux pas traiter la noninterference, tu vas te faire allumer... 2) la non-interference ne traite généralement pas des canaux auxilliaires mais seulement des flux directe et indirecte qui résulte d'une écriture explicite dans un conteneur d'informatin ou canal public et 3) je ne comprends pas ce que tu veux dire avec la citation du manuel Intel}:
 
 \begin{quote}
   The Intel architecture aims to provide protection against software
@@ -270,7 +276,7 @@ Intel documentation clearly state:
 
 Because computer programs rarely fit inside a cache line, preventing
 side-channel attacks therefore additional software-based security enforcement
-mechanisms.
+mechanisms. \TODO{Je pense qu'il manque un verbe à cette phrase.}
 
 \section{BIOS Overview}
 \label{sec:usecase:firmware}
@@ -282,10 +288,10 @@ the hardware architecture and the system software execution during the boot
 sequence (\ref{subsec:usecase:firm:boot}).
 %
 At runtime, it remains active to perform various tasks, including and not
-limited to platform-specific events, device emulation, \ac{bios} update
-management (\ref{subsec:usecase:firm:runtime})
+limited to platform-specific events, device emulation, or \ac{bios} update
+management (\ref{subsec:usecase:firm:runtime}).
 %
-As such, it is a natural part of the rest of the software stack \ac{tcb}, and it
+As such, it is a natural part of the rest of the software stack \ac{tcb} \TODO{je ne comprends pas ce que veut dire ce début de phrase}, and it
 can only operate if certain security requirements are met
 (\ref{subsec:usecase:firm:sec}).
 
@@ -300,9 +306,9 @@ When the \ac{cpu} is powered up, it is programmed to fetch the code stored at a
 hard-coded address within the flash memory.
 %
 The first task of the \ac{bios} is to initiate the hardware architecture,
-starting with the \ac{dram}.
+starting with the \ac{dram}. \TODO{ref}
 %
-Once the hardware components of the computing platform have been initiated, the
+Once the hardware components of the computing platform have been initiated \TODO{initialized?}, the
 \ac{bios} searches for a system software component to load into memory.
 %
 Historically, ``legacy'' \acp{bios} were looking for a Master Boot Record (MBR)
@@ -311,17 +317,17 @@ at the beginning of mass storage devices (\emph{e.g.} hard drive, USB stick).
 The MBR, whose size is limited to 512 bytes, contains a small program to
 initiate a loader for the system software.
 %
-Modern \acp{bios} implement the \ac{uefi}, whose purpose is to standardize the
+Modern \acp{bios} implement the \ac{uefi} \TODO{ref}, whose purpose is to standardize the
 boot sequence process in order to favour interoperability of \ac{bios}
 implementations.
 %
 In particular, UEFI-compliant \ac{bios} can load so-called UEFI applications of
-arbitrary size, leading modern operating systems to be packaged as UEFI
+arbitrary size, leading modern operating systems \TODO{tu mélange operating system et system software. Je propose de parler d'OS, qui est un acronyme communement admis} to be packaged as UEFI
 applications.
 
-The \ac{uefi} standard includes several interesting security mechanisms.
+The \ac{uefi} standard includes several interesting security mechanisms. \TODO{pourquoi "interesting"?}
 %
-For instance, it defines a protocol called the Secure Boot, which can be
+For instance, it defines a protocol called the Secure Boot \TODO{ref!}, which can be
 leveraged to improve the security of the boot sequence.
 %
 If Secure Boot is enabled, the UEFI-compliant \ac{bios} will only execute
@@ -333,6 +339,7 @@ software which can be executed prior to any system software.
 %
 As a consequence, it increases the attack surface of the computing platform in
 case of bad \ac{bios} configuration (\emph{e.g.} Secure Boot is disabled).
+\TODO{Cette fin de section est un peu confuse. Je dirais plus simplement que comme le BIOS est un logiciel privilégié, il est important de s'assurer de l'intégrité du code correspondant. Aujour'hui, des mécanismes d'authentification cryptographiques sont utilisé pour s'assurer de l'intégrité du code avant qu'il soit exécuté  ou lors des mises à jour. Par exemple, Trusted/secure Boot...}
 
 \subsection{At runtime}
 \label{subsec:usecase:firm:runtime}
