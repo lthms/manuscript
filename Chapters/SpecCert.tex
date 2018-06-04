@@ -8,29 +8,56 @@
 
 \vspace{1cm}\noindent
 %
-We first describe the formalism of hardware model against which we base our
-following definitions (Section~\ref{subsec:speccert:hardware}).
+Our first contribution is a formal definition of \ac{hse} mechanisms, which
+takes into account that
 %
-Then, we give a formal definition of HSE mechanisms and HSE mechanisms
-correctness (Section~\ref{sec:speccert:hse}).
+\begin{inparaenum}[(1)]
+\item interfaces exposed by commodity hardware architectures to software
+  components are not safe,
+\item trusted and untrusted software components use the same interface and
+  manipulates the same stateful environment, and
+\item several \ac{hse} mechanisms are often implemented simultaneously, to
+  enforce several security policies.
+\end{inparaenum}
+
+These characteristics convinced us to break down our approach into three
+components: hardware models, security policies and \ac{hse} mechanisms.
 %
+First, we model the hardware architecture as a \ac{lts} whose sequences of
+transitions, also called traces, characterize every possible software components
+executions (Section~\ref{subsec:speccert:hardware}).
+%
+This model acts as a foundation for the two other components: both security
+policies and \ac{hse} mechanisms are express against it
+(Section~\ref{sec:speccert:hse}).
+%
+This opens the road toward using one hardware model to define and verify as many
+\ac{hse} mechanisms as necessary.
+%
+As we conclude this Chapter, we illustrate how our formalism can be leveraged in
+order to reason about the isolation of components of a software stack, notably
+in terms of sharing of responsibility between software components.
+
 For the reader familiar with Coq, we present an implementation of our formalism
 in Appendix~\ref{appendix:speccert}.
+%
+This development comprises machine-checked proofs of the theoretical results
+that we present throughout this Chapter, and we have used these proofs to phrase
+the proof sketches which follow.
 
 \section{Hardware Model}
 \label{subsec:speccert:hardware}
 
 In line with the works we have described in Section~\ref{sec:related:review}, we
 model a hardware architecture which executes several software components as a
-\ac{lts} with controllable and observable transitions
+\ac{lts} with controllable and observable transitions.
 %
-We then give a generic definition of traces of a \ac{lts}, so we can later
-reason about security policies and HSE mechanisms as sets of traces
-(\ref{subsec:speccert:trace}).
-%
-Then, we discuss how we model security policies using this model, based on the
-classes of security policies described in \ref{subsec:state:secu}
+We then introduce the notion of traces of a hardware model, and model security
+policies as predicate on sets of traces
 (\ref{subsec:speccert:def}).
+%
+This allows us to model the different classes of security policies discussed
+previously (\ref{subsec:state:secu}).
 
 \subsection{Definition}
 \label{subsec:speccert:def}
@@ -77,14 +104,13 @@ which are only observable in terms of security\,\cite{basin2013enforceable}.
   A transition labelled with $l$ from $h$ to $h'$ is denoted by
   %
   \[
-    \transitionLTS{Ez}{h}{l}{h'}
+    \transition{h}{l}{h'}
   \]
   %
   and we write $\mathcal{T}(\Sigma)$ for the set of triples which satisfy the
   transition relation, that is
   \[
-    \mathcal{T}(\Sigma) \triangleq \{\ (h, ev, h')\ |\
-    \transitionLTS{Ez}{h}{ev}{h'}\ \}
+    \mathcal{T}(\Sigma) \triangleq \{\ (h, l, h')\ |\ \transition{h}{l}{h'}\ \}
   \]
 \end{definition}
 
@@ -129,15 +155,19 @@ not guaranteed.
 Finally, and as suggested by David Bosin \emph{et al.}, hardware transitions can
 be leveraged to model a clock, and therefore reasoning about time.
 
-\subsection{Traces}
-\label{subsec:speccert:trace}
+\subsection{Security Policies}
+\label{subsec:speccert:security}
 
-One particular execution of software components by the hardware architecture is
-modelled as a trace of $\Sigma$.
+We now explain how we model the different security policies discussed in
+Section~\ref{subsec:state:secu}.
+%
+Because these security policies are defined against traces of the model, we
+first introduce a formal definition of them, along with two helpers functions to
+manipulate them more easily.
 
 \begin{definition}[Traces]
   \label{def:speccert:trace}
-  A trace is a sequence of transitions of~$\Sigma$, such that for two
+  A trace is a non-empty sequence of transitions of~$\Sigma$, such that for two
   consecutive transitions, the resulting state of the first is the initial state
   of the next.
 
@@ -148,47 +178,18 @@ modelled as a trace of $\Sigma$.
   \item $\func{init} : \pathesLTS{Ez} \rightarrow S$ maps a trace with its
     initial state
   \item
-    $\func{trace} : \pathesLTS{Ez} \rightarrow \powerset(\mathcal{T}(\Sigma))$
+    $\func{trans} : \pathesLTS{Ez} \rightarrow \powerset(\mathcal{T}(\Sigma))$
     maps a trace with the set of transitions
   \end{itemize}
-
-  Given $t \in \mathcal{T}(\Sigma)$, we write $[t]$ for the trace which consists
-  in the transition $t$.
-  %
-  Given $(h, l, h') \in \mathcal{T}(\Sigma)$, given $\rho \in \pathesLTS{Ez}$
-  such that $\func{init}(\rho) = h'$, we write $[(h, l, h')|\rho]$ for the
-  transition which consists in a first transition labelled $l$ from $h$ to $h'$,
-  followed by a trace $\rho$. Thereafter, we omit to restate that
-  $\func{init}(\rho) = h'$ when we write $[(h, l, h')|\rho]$, but it remains
-  implicitly required.
-
-  To reason about traces, we also consider a induction principle such that,
-  given $P$ a predicate on traces,
-  %
-  \[
-    \begin{array}{l}
-      (\forall t \in \mathcal{T}(\Sigma), P([t])) \\
-      \Rightarrow (\forall t \in \mathcal{T}(\Sigma), \forall \rho \in
-      \pathesLTS{Ez}, P(\rho) \Rightarrow P([t|\rho])) \\
-      \Rightarrow (\forall \rho \in \pathesLTS{Ez}, P(\rho))
-    \end{array}
-  \]
-  %
-  Afterwards, when we write ``by induction on [a trace] $\rho$'', we implicitly
-  refer to this induction principle.
 \end{definition}
 
-\subsection{Security Policies}
-\label{subsec:speccert:security}
-
-We now explain how we model the different security policies discussed in
-Section~\ref{subsec:state:secu}.
-%
 We start from the most general definition possible, then discuss how more
 specific security properties can be modelled as a specialization of that general
 definition.
 
 \begin{definition}[Security Policy]
+  \label{def:speccert:secpol}
+  %
   A security policy is a predicate on sets of traces
   $\powerset(\pathesLTS{Ez})$.
 \end{definition}
@@ -196,37 +197,51 @@ definition.
 Hyperproperties\,\cite{clarkson2010hyperproperties} such as noninterference
 require a definition that general.
 %
-Liveness properties (something ``good'' happens) and safety properties (nothing
-``bad'' happens) are said to be security
-properties\,\cite{schneider2000enforceable}.
+On the contrary, security properties\,\cite{schneider2000enforceable}, that is
+liveness properties (something ``good'' happens eventually) and safety
+properties (nothing ``bad'' happens) can be modelled more straightforwardly.
 
 \begin{definition}[Security Property]
   A security property is a predicate on traces $\pathesLTS{Ez}$.
   %
-  To express a security property $P$ as a security policy, we rely on a function
-  we call $\func{trace\_property}$, such that
+  We write $\partial P$ for the security policy derived from the security
+  property $P$, such that
   %
   \[
-    \func{trace\_property}_{P}(R) \triangleq \forall \rho \in R, P(\rho)
+    \partial P(R) \triangleq \forall \rho \in R, P(\rho)
   \]
 \end{definition}
 
 Safety properties focus on avoiding ``bad'' transitions, and therefore their
-definition can be even more simple, \emph{if the hardware model allows for
-  distinguish between safe and unsafe transitions solely based on the current
-  state, and not the traces past}.
+definition can be even more simple, if the hardware model allows for distinguish
+between safe and unsafe transitions solely based on the current state, and not
+the traces past.
 
 \begin{definition}[Safety Property]
+  \label{def:speccert:safetyprop}
+  %
   A safety property is a predicate on transitions $\mathcal{T}(\Sigma)$.
   %
-  To express a safety property $P$ as a security policy, we rely on a function
-  we call $\func{safety\_property}$ function, such that
+  We write $\partial^2 P$ for the security policy derived from the safety
+  property $P$.
+  %
+  A set of trace $R$ satisfies $\partial^2 P$ if and only if every transitions
+  of every traces $\rho \in R$ satisfy $P$, that is
   %
   \[
-    \func{safety\_property}_{P}(R) \triangleq \forall \rho \in R, \forall (h,
-    ev, h') \in \func{trans}(\rho), P(h, ev, h')
+    \partial^2 P(R) \triangleq \forall \rho \in R, \forall (h, ev, h') \in
+    \func{trans}(\rho), P(h, ev, h')
   \]
 \end{definition}
+
+To the best of our knowledge, hardware architectures often provide security
+features to enforce security properties, in the form of memory protection
+(safety) and hardware interrupt (liveness).
+%
+Hyperproperties have to be implemented by software components themselves.
+%
+We already gave the example of the x86 architecture, which does explicitly state
+it does not protect against side-channel attacks such as cache-timing attacks.
 
 \section{HSE Mechanisms}
 \label{sec:speccert:hse}
@@ -290,12 +305,10 @@ The software components which implement a \ac{hse} mechanism form its the
 \begin{definition}[HSE Mechanism]
   \label{def:speccert:hse}
   A \ac{hse} mechanism $\Delta$ is a tuple
-  $\langle \Sigma, S, T, \func{context}, \func{inv}, \func{behaviour} \rangle$,
-  such that
+  $\langle S, T, \func{context}, \func{inv}, \func{behaviour} \rangle$, such
+  that
   %
   \begin{itemize}
-  \item $\Sigma$ is the hardware model against which $\Delta$ is defined
-  %
   \item $S$ is the set of software components executed by the hardware
     architecture
   %
@@ -543,7 +556,7 @@ SMRAM Cache Poisoning attack.
   is a sufficient condition for
   %
   \[
-    \Delta \models \func{safety\_property}_{P}
+    \Delta \models \partial^2 P
   \]
 
   \begin{proof}
@@ -553,21 +566,18 @@ SMRAM Cache Poisoning attack.
     By definition of Compliant Runs, we know that any transitions meaning they
     all satisfies the safety property $P$.
     %
-    We conclude with the Definition of $\func{safety\_property}_{P}$.
+    We conclude with the Definition of $\partial^2 P$.
   \end{proof}
 \end{theorem}
 
-\section{Conclusion}
+\section{Use Case: Execution Isolation Policy}
+\label{sec:speccert:usecase}
 
-\chapter{Specifying and Verifying an Idealized BIOS HSE Mechanism}
-
-\section{Software Execution Isolation}
-
-In this Chapter, we focus on a class of security policies we call \emph{software
-  execution isolation policies}.
+We now focus on a class of security policies we call \emph{execution isolation
+  policies}.
 %
-Such a policy prevents a set of untrusted software components to tamper with the
-execution of another set of so-called trusted software components.
+Such a policy prevents a software component to tamper with the execution of
+their \acp{tcb}.
 %
 We consider that a software component tampers with the execution of another when
 it is able to make the latter execute an instruction of its choice.
@@ -575,21 +585,43 @@ it is able to make the latter execute an instruction of its choice.
 This is particular sub-case of the Integrity property
 (Definition~\ref{def:usecase:int}), as we focus on instructions fetches
 exclusively.
+%
+We use it as an illustration to demonstrate how our \ac{hse} mechanism
+definition can be used to reason about enforcement of security policies which
+involves several software components.
+%
+The word ``isolation'' often refers to stronger security properties; for
+instance, the guests isolation of the idealized hypervisor of Gilles Barthe
+\emph{et al.} is a hyperproperty similar to
+non-interference\,\cite{barthe2011virtcert1}.
+%
+However, enforcing such a property is a task mostly tackled by the hypervisor
+itself.
 
-In this Section, we give a generic definition of software execution isolation,
-based upon the concept of \textit{memory location ownership}.
+We give a generic definition of software execution tampering
+(\ref{subsec:speccert:tampering}).
+%
+We leverage it as a foundation for defining global execution policies which
+apply to complete software stacks (\ref{subsec:speccert:globalsec}).
+%
+Because such policies are enforced \emph{via} several \ac{hse} mechanisms, we
+then introduce partial execution policies (\ref{subsec:speccert:partialsec}),
+and \ac{hse} mechanisms cooperation (\ref{subsec:speccert:coop}).
+
+\subsection{Execution Tampering}
+\label{subsec:speccert:tampering}
 %
 A memory location within a hardware architecture is a container which is able to
 store data used by a software component \emph{e.g.}~a general-purpose register
-of a \ac{cpu}, a DRAM memory cell, etc.
+of a \ac{cpu}, a \ac{dram} memory cell, etc.
 %
-We say that a Computing Platform tracks the memory location ownership if the
-hardware architecture states maps each memory location with a software component
-called its \emph{owner}, and the Computing Platform semantics updates this
-mapping through state-transformations.
+A hardware model tracks the memory location ownership when the hardware
+architecture states maps each memory location with a software component called
+its \emph{owner}, and transition relation updates this mapping throughout
+traces.
 %
 A software component becomes the new owner of a memory location when it
-overrides its content during a state-transformation.
+overwrites its content during a transition.
 %
 By extension, we say a software component owns some data when it owns the memory
 location in which these data are stored.
@@ -600,170 +632,456 @@ fetched by the \ac{cpu} in order to be decoded and executed.
 \begin{definition}[Transition-Software Mapping]
   \label{def:minx86:transsoft}
   A transition-software mapping
-  $\func{fet\-ched}: H \times L \rightarrow \powerset(S)$ is a function which
-  takes an initial hardware state, a transition label and returns the set of
-  owners of the fetched instructions during this transition.
+  $\func{fetched}_{\Sigma}: H \times L \rightarrow \powerset(S)$ is a function
+  which takes an initial hardware state, a transition label and returns the set
+  of owners of the fetched instructions during this transition.
 \end{definition}
 
-Hence, $s \in \func{fetched}(h, l)$ means that an instruction owned by $s$ was
-fetched during a transition labelled with $l$ from a state $h$.
+Hence, $s \in \func{fetched}_{\Sigma}(h, l)$ means that an instruction owned by
+$s$ was fetched in order to be executed by the \ac{cpu} during a transition
+labelled with $l$ from a state $h$.
+
+\paragraph{}
 %
 With a hardware-software mapping and an event-software mapping, we give a formal
 definition of a \textit{software execution tampering}.
 
 \begin{definition}[Software Execution Tampering]
-  \label{def:codeinjection}
-  Given $h$ the initial state of a transition labelled with $l$,
-  $\func{context}$ a hardware-software mapping, $\func{fetched}$ an
-  event-software mapping and $(x, y) \in S \times S$ two software components,
-  the software component $y$ tampers with the execution of another software
-  component $x$ if the \ac{cpu} fetches an instruction owned by $y$ in a state
-  dedicated to $x$.
+  \label{def:speccert:tempering}
+  A software component $x \in S$ tampers with the execution of another software
+  component $y \in S$ during a transition labelled with $l \in L$ from a state
+  $h \in H$ to a state $h' \in H$, denoted by
+  $h \xrightarrow[x \leadsto y]{l} h'$, when the \ac{cpu} fetches an instruction
+  owned by $x$ while executing $y$, that is
   %
-  \[ \begin{array}{l} \func{software\_tampering}(\func{context}, \func{fetched},
-       h, l, x, y) \triangleq \\
-       \qquad\qquad\qquad\qquad \func{context}(h) = x\,\wedge\,y \in
-       \func{fetched}(h,l)
-     \end{array}
-   \]
- \end{definition}
+  \[
+    h \xrightarrow[x \leadsto y]{l} h' \triangleq x \in
+    \func{fetched}_{\Sigma}(h, l) \wedge \func{context}(h) = y
+  \]
 
- Given $T \subseteq S$ a set of trusted software components, the software
- execution isolation policy prevents the untrusted components from tampering
- with the execution of the trusted components.
- %
- Such a policy is enforced during a trace if no untrusted component is able to
- tamper with the execution of a trusted component.
- %
- As a consequence, a software execution isolation policy is a safety property,
- and we can model it using a predicate on traces.
+  We write $h \xrightarrow[x \not\leadsto y]{l} h'$ when $x$ does not tamper
+  with the execution of~$y$.
+\end{definition}
 
- \begin{definition}[Software Execution Isolation Policy]
-   \label{def:softwareisolation}
-   A Software Execution Isolation Policy $I$ is a tuple
-   $\langle \func{fetched}, \func{context}, T \rangle$, such that \func{fetched}
-   is a transition-software mapping (specific to a hardware model),
-   \func{context} is a hardware-software mapping, and $T$ is a set of trusted
-   software components.
-   %
-   \[ \begin{array}{l}
-        \func{software\_execution\_isolation}_I(h, l, h') \triangleq \\
-        \forall t \in T, \forall u \not\in T, \\
-        \qquad\qquad \neg \func{software\_tampering}(\func{context},
-        \func{fetched}, h, l, t, u)
-      \end{array} \]
-  \end{definition}
+We now give two examples of recent attacks which qualify as software execution
+tampering.
 
-  In this definition, $t$ is a trusted software component and $u$ is an
-  untrusted ---~potentially malicious or hijacked~--- one.
+\begin{example}[Thinkpwn]
+  The \ac{bios} of certain Lenovo laptops were subject to an trivial attack
+  called Thinkpwn.
+  %
+  Under certain circumstances, the \ac{smm} code was using the content of a
+  structure provided by an untrusted source (\emph{e.g.} system software) as a
+  function pointer, without any safety checks.
+\end{example}
 
-  \newpage
+\begin{example}[Rowhammer]
+  Rowhammer designates a class of security vulnerabilities which leverage a flaw
+  in several \ac{dram}, such that repeated write accesses to a given memory line
+  provoke bit flips in neighbouring lines.
+  %
+  Rowhammer has been shown to be an efficient attack vector, as it can be used
+  by an attacker to modify memory cells it should not be able to access.
+\end{example}
 
-  In this Chapter, we introduce a three-step methodology for specifying and
-  verifying \ac{hse} mechanisms against hardware architecture models, that is
-%
-  \begin{inparaenum}[(1)]
-  \item specifying the software requirements that must be satisfied by the
-    trusted software components which implement the \ac{hse} mechanism,
-%
-  \item specifying the targeted security policy the \ac{hse} mechanism
-    supposedly enforces, and
-%
-  \item verifying that the \ac{hse} mechanism is sound.
-  \end{inparaenum}
-%
-  A \ac{hse} mechanism specification is sound when untrusted software
-  components' executions are constrain with respect to the security property as
-  long as the trusted software component correctly implements it.
-%
-  As we have already argued in Section~\ref{sec:intro:verif}, we believe this
-  approach would benefit to both hardware designers and software developers.
-%
-  Formal specifications for \ac{hse} mechanisms can be the foundation of a
-  systematic approach to verify hardware specifications, and form a valuable
-  addition to the existing documentation.
+\subsection{Execution Isolation Policies}
+\label{subsec:speccert:globalsec}
 
-  In Section \ref{sec:speccert:framework}, we give a formal definition of the
-  SpecCert formalism.
-%
-  In Section \ref{sec:speccert:hardware}, we define a model of x86-based
-  hardware architectures to verify \ac{hse} mechanisms targeting software
-  isolation policies using publicly available Intel specifications.
-%
-  In Section \ref{sec:speccert:smm}, we verify the soundness of the \ac{hse}
-  mechanism implemented in many x86 computer firmware codes to isolate the code
-  executed while the \ac{cpu} is in System Management Mode (\ac{smm}), a highly
-  privileged execution mode of x86 microprocessors.
-%
-  Our model and proofs have been implemented using Coq, a proof assistant system
-  and have been released as an open source software\,\footnote{Which can can be
-    found at: \url{https://github.com/lthms/speccert}}.
-%
-  We discuss our results in Section \ref{sec:speccert:discuss}.
+We leverage the software execution tampering property to propose a generic
+formalization of \emph{software execution isolation policies}, to determine if a
+given software component is authorized to tamper with the execution of another
+software component in the context of a software stack.
 
-\section{SpecCert Formalism} \label{sec:speccert:framework}
+\begin{definition}[Global Execution Isolation Policy]
+  \label{def:speccert:global}
+  A Global Execution Isolation Policy $I$ is a safety property characterized by
+  a tuple $\langle S, \ge, \func{context} \rangle$, such that
+  %
+  \begin{itemize}
+  \item $S$ is a set of software components executed by the hardware
+    architecture
+  \item $\ge$ is a non-strict partial order over $S$, such that given
+    $(x, y) \in S \times S$, $x \ge y$ means $x$ is part of the \ac{tcb} of $y$
+  \item \func{context} is a hardware-software mapping.
+  \end{itemize}
 
-\begin{table}[h]
-  \centerline{%
-    \begin{tabular}{clc}
-      \hline
-      \bf Notation  & \multicolumn{1}{c}{\bf Description} \\
-      \hline
-      $\set{S}$ & Set of software components \\
-      \hline
-      $\set{H}$ & Set of states of the hardware architecture \\
-      \hline
-      $\set{E}$ & Set of states of events of the hardware architecture \\
-      \hline
-      $\shortLTS{Ez}$ & Semantic of events as state-transformers (Computing
-                        Platform) \\
-      \hline
-      $\transitionLTS{Ez}{h}{ev}{h'}$ & State-transformation according to
-                                        $\shortLTS{Ez}$ \\
-      \hline
-      $\pathesLTS{Ez}$ & Set of sequences of $\shortLTS{Ez}$ state-transformations
-                         (Traces) \\
-      \hline
-      $P$ & Predicate on trace to model a EM-enforceable security policy \\
-      \hline
-      $\Delta$ & Requirements on states and state-transformation (\ac{hse} mechanism)
-      \\
-      \hline
-    \end{tabular}
-  }
-  \caption{SpecCert CheatSheet}
-\end{table}
+  A transition labelled with $l \in L$ from $h \in H$ to $h' \in H$ satisfies I
+  when only a software components which are part of the \ac{tcb} of $x$ can
+  tamper with the execution of $x$, that is
+  %
+  \[
+    \begin{array}{l}
+      I(h, l, h') \triangleq
+      \forall (x, y) \in S \times S \text{, } h \xrightarrow[y
+      \leadsto x]{l} h' \Rightarrow y \ge x
+    \end{array}
+  \]
+\end{definition}
 
-\section{\textsc{MinX86}} \label{sec:speccert:hardware}
+\begin{corollary}
+  A software component which is not part of the \ac{tcb} of a software component
+  $x$ cannot tamper with the execution of y, that is
+  %
+  \[
+    I(h, l, h') \iff \forall (x, y) \in S \times S \text{, } y \not\ge x
+    \Rightarrow h \xrightarrow[y \not\leadsto x]{l} h'
+  \]
 
-The SpecCert formalism is the foundation of the SpecCert framework.
+  \begin{proof}
+    This is the contrapositive of Definition~\ref{def:speccert:global}.
+  \end{proof}
+\end{corollary}
+
+\begin{example}[Software Stack Isolation]
+  \label{example:speccert:ssisolation}
+  Using our definition, we can define a isolation policy for a whole software
+  stack which comprises the \ac{bios}, a system software components and several
+  applications ($S$).
+  %
+  When the \ac{cpu} is in \ac{smm}, the \ac{bios} is executed, when the \ac{cpu}
+  is not in \ac{smm} and is in ring 0, the system software component is
+  executed, and when the \ac{cpu} is not in \ac{smm} and is in ring 3, one of
+  the applications ---identified by the page tables used by the \ac{cpu}--- is
+  executed (\func{context}).
+  %
+  We give a graphic representation of the considered partial order in
+  Figure~\ref{fig:speccert:partialorder}.
+  %
+  This reads as follows: a software component is part of its own \ac{tcb}, and
+  of the \ac{tcb} of any software component higher in the graph.
+
+  According of the definition of the Software Execution Isolation Policy, the
+  \ac{bios} can tamper with the execution of the system software component and
+  any applications, but applications can only tamper with their own executions.
+\end{example}
+
+\begin{figure}
+  \begin{center}
+    \begin{tikzpicture}
+      \node (A1) {$\mathtt{app}_1$};
+        %
+      \node [right=of A1] (A2) {$\mathtt{app}_2$};
+        %
+      \node [right=of A2] (Aetc) {$\ldots$};
+        %
+      \node [right=of Aetc] (An1) {$\mathtt{app}_{n-1}$};
+        %
+      \node [right=of An1] (An) {$\mathtt{app}_{n}$};
+
+      \node [below=of Aetc] (OS) {$\mathtt{os}$};
+
+      \draw (A1.south) -- (OS.north);
+        %
+      \draw (A2.south) -- (OS.north);
+        %
+      \draw (An1.south) -- (OS.north);
+        %
+      \draw (An.south) -- (OS.north);
+
+      \node [below=of OS] (bios) {$\mathtt{bios}$};
+
+      \draw (OS.south) -- (bios.north);
+    \end{tikzpicture}
+  \end{center}
+  \caption{Representation of the partial order of
+    Example~\ref{example:speccert:ssisolation}.}
+  \label{fig:speccert:partialorder}
+\end{figure}
+
+A security policy such as the one detailed in
+Example~\ref{example:speccert:ssisolation} is not enforced by one but many HSE
+mechanisms.
 %
-It comprises a set of high-level definitions to specify a \ac{hse} mechanism
-against a hardware architecture model.
+We can break it down to more specific security policies, by designating sets of
+software components whose executions has to be constrained with respect to the
+global security policy $I$.
+
+\begin{definition}[Partial Execution Isolation Policies]
+  \label{def:speccert:partial}
+  Given $I$ a global execution isolation policy and $U \subseteq S$ a set of
+  software components, we write $I|U$ for the partial execution isolation
+  policy whose purpose is to enforce that all components of $U$ are constrained
+  with respect to $I$, that is
+  %
+  \[
+    I|U(h, l, h') \triangleq \forall u \in U, \forall x \in S, h
+    \xrightarrow[u \leadsto t]{l} h' \Rightarrow u \ge x
+  \]
+  %
+  This safety property is typically enforced by a \ac{hse} mechanism implemented
+  by the \acp{tcb} of the software components of $U$, that is
+  %
+  \[
+    T = \{ t \in S\ |\ t \not\in U \wedge \forall u \in U, t \ge u \}
+  \]
+\end{definition}
+
+\begin{example}[Sharing of Responsibility]
+  For
+  $U_{\mathtt{apps}} = \{ \mathtt{app}_1, \mathtt{app}_2, \ldots,
+  \mathtt{app}_{n-1} \mathtt{app}_{n} \}$ the set of applications whose
+  executions have to be constrained, the related \ac{tcb} is the set
+  $T_{\mathtt{apps}}~=~\{ \mathtt{bios}, \mathtt{os} \}$.
+  %
+  $I|U_{\mathtt{apps}}$ states that one application can only tamper with its
+  own execution.
+  %
+  The responsibility to constrain the execution of applications cannot fall
+  entirely on system software.
+  %
+  For instance, the \ac{bios} executed while the \ac{cpu} is in \ac{smm} has to
+  be careful not to tamper with the page tables previously configured by the
+  system software component.
+
+  On a similar basis, for $U_{\mathtt{os}} = \{ \mathtt{os} \}$, the related
+  \ac{tcb} is the set $T_{\mathtt{bios}}~=~\{ \mathtt{bios} \}$.
+  %
+  Only the \ac{bios} is responsible for constraining the system software
+  execution.
+  %
+  $I|U_{\mathtt{os}}$ states that a system software component can tamper with the
+  applications it manages, with its own execution, but not the \ac{bios}'s.
+\end{example}
+
+\subsection{HSE Mechanisms Concurrent Implementation}
+\label{subsec:speccert:coop}
+
+In practice, a global execution isolation policy is enforced thanks to several
+\ac{hse} mechanisms in charge of enforcing one partial execution isolation
+policy.
 %
-In its current state, the SpecCert framework contains a model of x86 called
-$\formatLTS{Minx86}$. $\formatLTS{Minx86}$ is intended to be a minimal model for
-single core x86-based machines and we have used publicly available Intel
+We model the requirement to implement both \ac{hse} mechanisms concurrently as a
+third \ac{hse} mechanism, constructed by a dedicated operator $\sqcap$.
+
+\begin{definition}[HSE Mechanisms Concurrent Implementation]
+  Given two HSE mechanism $\Delta_1$ and $\Delta_2$, such that
+%
+  \[
+    \begin{array}{rcl}
+      \Delta_1
+      & =
+      & \langle S, T_1, \func{context}, \func{inv}_1, \func{behaviour}_1
+        \rangle \\
+      \Delta_2
+      & =
+      & \langle S, T_2, \func{context}, \func{inv}_2, \func{behaviour}_2
+        \rangle
+    \end{array}
+  \]
+%
+  We write $\Delta_1 \sqcap \Delta_2$ for the \ac{hse} mechanism which combines
+  the requirements of both $\Delta_1$ and $\Delta_2$, that is
+%
+  \[
+    \Delta_1 \sqcap \Delta_2 \triangleq \langle S, T_1 \cup T_2, \func{context},
+    \func{inv}_{1\wedge2}, \func{behaviour}_{1\wedge2} \rangle
+  \]
+%
+  where
+  \[
+    \begin{array}{rcl}
+      \func{inv}_{1\wedge2}(h)
+      & \triangleq
+      & \func{inv}_1(h) \wedge \func{inv}_2(h) \\
+      \func{behaviour}_{1\wedge2}(h,l)
+      & \triangleq
+      & \func{behaviour}_1(h,l) \wedge \func{behaviour}_2(h,l)
+    \end{array}
+  \]
+\end{definition}
+
+\begin{lemma}[Compliant Traces of Intersection]
+  \label{lemma:speccert:compinter}
+  The set of compliant traces of the intersection of $\Delta_1$ and $\Delta_2$
+  is the intersection of the sets of compliant traces of $\Delta_1$ and
+  $\Delta_2$, that is
+  \[
+    \mathcal{C}(\Delta_1 \sqcap \Delta_2) = \mathcal{C}(\Delta_1) \cap
+    \mathcal{C}(\Delta_2)
+  \]
+
+  \begin{proof}
+    We leverage the definition of $\wedge$ and $\Rightarrow$ to turn a statement
+    of the form
+    %
+    \[
+      (P \wedge P') \wedge (R \Rightarrow Q \wedge Q')
+    \]
+    %
+    into
+    %
+    \[
+      (P \wedge (R \Rightarrow Q)) \wedge (P' \wedge (R \Rightarrow Q'))
+    \]
+    %
+    and vice versa, where $P$ and $P'$ are statements about the initial states
+    of traces and \func{inv}, $R$ is the premice about software transitions, and
+    $Q$ and $Q'$ are statement about \func{behaviour}.
+  \end{proof}
+\end{lemma}
+
+\begin{example}[Global Execution Policy Enforcement]
+  We consider two HSE mechanisms: $\Delta_\mathtt{bios}$ implemented by the
+  \ac{bios} to constrain the execution of the system software component, and
+  $\Delta_\mathtt{os}$ primarily implemented by the system software component to
+  constrain the execution of the applications, that is
+  %
+  \[
+    \begin{array}{cl}
+      \Delta_{\mathtt{bios}}
+      & \models \partial^2 I|U_{\mathtt{os}} \\
+      \Delta_{\mathtt{os}} & \models
+                             \partial^2 I|U_{\mathtt{apps}}
+    \end{array}
+  \]
+
+  We can prove that any execution which complies with $\Delta_\mathtt{bios}$ and
+  $\Delta_\mathtt{os}$ satisfies the software execution isolation policy $I$,
+  that is
+  %
+  \[
+    \Delta_{\mathtt{bios}} \sqcap \Delta_{\mathtt{os}} \models \partial^2 I
+  \]
+
+  \begin{proof}
+    By definition of correct \ac{hse} mechanism, we need to prove that the set
+    of traces which comply with
+    $\Delta_{\mathtt{bios}} \sqcap \Delta_{\mathtt{os}}$ has to satisfy the
+    security policy derived from our isolation policy $I$.
+    %
+    With Lemma~\ref{lemma:speccert:compinter}, we know that the set of compliant
+    traces of $\Delta_{\mathtt{bios}} \sqcap \Delta_{\mathtt{os}}$ is the
+    intersection of the sets of compliant traces of $\Delta_{\mathtt{bios}}$ and
+    $\Delta_{\mathtt{os}}$.
+    %
+    We know that the transitions of these traces satisfies respectively
+    $I_{U_{\mathtt{os}}}$ and $I_{U_{\mathtt{bios}}}$.
+    %
+    This is enough to conclude, based on the definitions of global and partial
+    execution isolation policies.
+  \end{proof}
+\end{example}
+
+\section{Conclusion}
+
+In this Chapter, we present our formal definition of \ac{hse} mechanisms, in the
+form of requirements over a hardware model.
+%
+This approach allows for reuse the same model to define and verify several
+\ac{hse} mechanisms.
+%
+This makes sense, especially because these multiple mechanisms will be
+implemented concurrently, and may interfere with each others.
+%
+Throughout this Chapter, we have tried to illustrate our definitions with
+real-world examples.
+%
+All being told, our approach can be summarized to a three-step methodology for
+specifying and verifying \ac{hse} mechanisms against hardware architecture
+models, that is
+%
+\begin{inparaenum}[(1)]
+\item specifying the software requirements that must be satisfied by the trusted
+  software components which implement the \ac{hse} mechanism,
+%
+\item specifying the targeted security policy the \ac{hse} mechanism supposedly
+  enforces, and
+%
+\item verifying that the \ac{hse} mechanism is correct with respect to the
+  targeted security policy.
+\end{inparaenum}
+
+We have finished our presentation with a more concrete use case: so-called
+execution isolation policies.
+%
+These policies prevent software components to tamper with the execution of their
+\ac{tcb}, where ``tampering with the execution'' means being able to provoke the
+execution of an instruction of their choice.
+%
+They are representative of what real-world \ac{hse} mechanisms are meant to
+enforce.
+%
+Our formalism has proven to be expressive enough to
+%
+\begin{inparaenum}[(1)]
+\item break down a global execution security policy into several, simpler
+  partial ones, and
+%
+\item prove that the global policy could be enforced by the concurrent
+  implementation of several \ac{hse} mechanisms which are dedicated to one
+  partial policy each.
+\end{inparaenum}
+
+\chapter{Specifying and Verifying an Idealized BIOS HSE Mechanism}
+
+\endquote{``\emph{BIOS as the root of trust. For everything.}''
+
+  \hfill\footnotesize --- Joanna Rutkowska}
+
+\vspace{1cm}\noindent
+%
+In the previous Chapter, we have introduced a formal definition of global and
+partial execution isolation policies (Definitions~\ref{def:speccert:global} and
+\ref{def:speccert:partial}).
+%
+We have detailed how the global execution isolation of a typical software stack
+(a \ac{bios}, a system software components and several applications) can be
+enforced through two dedicated \ac{hse} mechanisms which constrain two subsets
+of the software stack each.
+%
+In this Chapter, we continue to unfold this example, by formally specifying and
+verifying one of these \ac{hse} mechanisms against an idealized {\scshape x86}
+hardware model.
+
+We proceed as follows.
+%
+First, we give an in-depth description of {\scshape Minx86}: its scope, its set
+of hardware configurations, and its transition relation defined in terms of pre
+and postcondition (Section~\ref{sec:speccert2:minx86}).
+%
+Then, we formally specify the \ac{hse} mechanism implemented by the \ac{bios} to
+constrain the execution of the software component with respect to the global
+isolation policy, and prove this \ac{hse} mechanism is correct
+(Section~\ref{sec:speccert2:smm}).
+
+Our model and proofs have been implemented using Coq, a proof assistant system
+in a project called SpecCert.
+%
+SpecCert has been released as an free software\,\footnote{SpecCert can be found
+  at the following URL: \url{https://github.com/lthms/speccert}}.
+%
+As we introduce new definitions and theoretical results, we point to the related
+statements in our development, so the interesting reader familiar with Coq can
+read our machine-checked proofs.
+
+\section{{\scshape Minx86}}
+\label{sec:speccert2:minx86}
+
+$\formatLTS{Minx86}$ is intended to be a minimal model for single core x86-based
+machines and we have used publicly available Intel
 documents\,\cite{intel2013celeron,intel2009mch,intel2014manual} to define it.
 
 \subsection{Model Scope}
 
 The hardware architecture we are modeling with $\formatLTS{Minx86}$ contains a
-\ac{cpu}, a cache, a memory controller, a DRAM controller and a VGA
+\ac{cpu}, a cache, a memory controller, a \ac{dram} controller and a VGA
 controller\,\footnote{A VGA controller is a hardware device which on we can
   connect a screen. It exposes some memory to the \ac{cpu} for communication
   purposes.} which both expose some memory to the \ac{cpu}.
 
-$\formatLTS{Minx86}$ is meant to be a proof of concept of the SpecCert formalism
-and thus is not exhaustive.
+$\formatLTS{Minx86}$ is meant to illustrate how our formalism can be leveraged
+to formally specify and verify a HSE mechanism, and thus is not exhaustive.
 %
-In its current state of implementation, its scope focuses on the System
-Management Mode (\ac{smm}) feature of x86 microprocessors.
+In its current state of implementation, its scope focuses on the \ac{smm}.
 
 \paragraph{Hardware Specifications}
 %
 We consider the \ac{cpu} can be either in System Management Mode (\ac{smm}) or
 in an unprivileged mode.
+%
+We give a brief summary of how the \ac{smm} works.
+%
+We remind our readers that Section~\ref{subsec:usecase:hse:smm}
 %
 The \ac{smm} is ``a special-purpose operating mode provided for handling
 system-wide functions like power management, system hardware control, or
@@ -774,7 +1092,7 @@ It is the most privileged execution mode of x86 processors.
 When a \ac{cpu} receives a special hardware interrupt called System Management
 Interrupt (SMI), it halts its current execution and reconfigures itself to a
 specified state from which it executes the code stored in memory at the address
-$SMBASE + \texttt{0x8000}$.
+$\mathtt{SMBASE} + \texttt{0x8000}$.
 %
 In practice, the SMBASE value points to the base of a memory region called the
 SMRAM.
@@ -825,14 +1143,13 @@ The SMRAM is dedicated to store the code intended to be executed when the
 
 \paragraph{Tracking the Memory Ownership}
 %
-The \formatLTS{Minx86} definition is parameterized with an hardware-software
-mapping (see Definition~\ref{def:hardsoftmap}).
+The \formatLTS{Minx86} definition is parameterized by a hardware-software
+mapping (Definition~\ref{def:hardsoftmap}).
 %
 The memory locations of \formatLTS{Minx86} Computing Platforms are either cache
-lines or memory cells exposed by the DRAM controller or the VGA controller.
+lines or memory cells exposed by the \ac{dram} controller or the VGA controller.
 %
-The memory ownership is updated through state-transformations according to three
-rules:
+The memory ownership is updated through transitions according to three rules:
 %
 \begin{enumerate}
 \item When a cache line gets a copy of a DRAM or VGA cell content, the owner of
@@ -841,14 +1158,13 @@ rules:
 \item When the content of this cache line is written back to a memory cell, the
   new owner of this memory cell is the owner of this cache line.
 %
-\item When a state-transformation implies the content of a memory location to be
-  overriden with a new value, the software currently executed becomes its new
-  owner.
+\item When the content of a memory location is overwritten during a transition,
+  the software currently executed becomes the new owner of this memory location.
 %
 \end{enumerate}
 
-Given $\set{S}$ a set of software components, the set of states of
-\formatLTS{Minx86} Computing Platform hardware architecture is denoted by
+Given $S$ a set of software components, the set of states of \formatLTS{Minx86}
+Computing Platform hardware architecture is denoted by
 $\texttt{Archi}_{\set{S}}$ and the set of \formatLTS{Minx86} Computing Platform
 events is denoted by $\texttt{Event}$.
 %
@@ -879,33 +1195,6 @@ the \ac{cpu} and may vary in time according to its addressing mode (real mode,
 long mode, etc.), therefore we left its value as a parameter of our model.
 
 %%%%% APPENDIX State %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{table}
-  \centerline{%
-    \begin{tabular}{ll}
-      \hline
-      \bf{Notation} & \bf{Description} \\
-      \hline
-      $ A \triangleq \begin{array}{ll}
-                       \{\,field_1 &: T_1 \\
-                       ;\,field_2 &: T_2\,\}
-                     \end{array} $ & Set of records definition \\
-      \hline
-      $field_1(a)$ & Field selection \\
-      \hline
-      % $a\,\{ field_1 \leftarrow t \}$ & Field update \\
-      % \hline
-      $M \triangleq [A \rightarrow B]$ & Set of maps definition \\
-      \hline
-      $m[a]$ & Map application \\
-      % \hline
-      % $m[a \leftarrow b']$ & Map update \\
-      \hline
-    \end{tabular}
-  }
-  \caption{List of notations}
-  \label{tab:notation}
-\end{table}
-
 To describe the hardware architecture state of \formatLTS{Minx86} Computing
 Platforms, we use record types and maps with the notations listed in Table
 \ref{tab:notation}.
@@ -1001,7 +1290,7 @@ We then define several address spaces:
 \item $\texttt{VGAAddr} \triangleq \setdef{\val{vga}_i}{i \leq \val{max\_addr}}$
   the set of addresses of the memory cells exposed by the VGA controller
 %
-\item $\texttt{HardAddr} \triangleq \texttt{DRAMAddr}\,\cup\,\texttt{VGAAddr}$
+\item $\texttt{HardAddr} \triangleq \texttt{DRAMAddr} \uplus \texttt{VGAAddr}$
 \end{itemize}
 
 The maximal address offset (denoted by $\val{max\_addr}$ here) is specific to
@@ -1088,14 +1377,14 @@ behavior is out of the scope of this article.
 
 % \[
 %   \texttt{CacheLine}_{\set{S}} \triangleq \begin{array}{ll} \{\,dirty &:
-                                                                          %                                                                           \setshortdef{\val{true},\,\val{false}} \\
-                                              %                                               ;\,tag
-                                              %                                               &:
-                                              %                                               \texttt{PhysAddr}
-                                                                                                %                                               \\
-                                              %                                               ;\,owner
-                                              %                                               &:
-                                              %                                               \set{S}\,\}
+%     \setshortdef{\val{true},\,\val{false}} \\
+%     ;\,tag
+%     &:
+%     \texttt{PhysAddr}
+%     \\
+%     ;\,owner
+%     &:
+%     \set{S}\,\}
 %   \end{array} \]
 
 \[
@@ -1336,6 +1625,45 @@ $ReceiveSmi$ precondition requires the \ac{cpu} not to be in \ac{smm} because
 The postcondition of $ReceiveSmi$ requires the program counter to be set with
 the $smbase + \val{0x8000}$ (where $smbase$ is the value of the SMBASE register
 of the \ac{cpu}) and the \ac{cpu} is in \ac{smm}.
+
+
+\section{BIOS Isolation HSE Mechanism}
+\label{sec:speccert2:smm}
+
+\newpage
+
+
+\begin{table}[h]
+  \centerline{%
+    \begin{tabular}{clc}
+      \hline
+      \textbf Notation  & \multicolumn{1}{c}{\textbf Description} \\
+      \hline
+      $\set{S}$ & Set of software components \\
+      \hline
+      $\set{H}$ & Set of states of the hardware architecture \\
+      \hline
+      $\set{E}$ & Set of states of events of the hardware architecture \\
+      \hline
+      $\shortLTS{Ez}$ & Semantic of events as state-transformers (Computing
+                        Platform) \\
+      \hline
+      $\transition{h}{ev}{h'}$ & State-transformation according to
+                                 $\shortLTS{Ez}$ \\
+      \hline
+      $\pathesLTS{Ez}$ & Set of sequences of $\shortLTS{Ez}$ state-transformations
+                         (Traces) \\
+      \hline
+      $P$ & Predicate on trace to model a EM-enforceable security policy \\
+      \hline
+      $\Delta$ & Requirements on states and state-transformation (\ac{hse} mechanism)
+      \\
+      \hline
+    \end{tabular}
+  }
+  \caption{SpecCert CheatSheet}
+\end{table}
+
 
 \section{System Management Mode HSE}
 \label{sec:speccert:smm}

@@ -1,4 +1,24 @@
-\documentclass[11pt,a4paper,oneside]{book}
+\documentclass[oneside,a4paper]{memoir}
+\setsecnumdepth{subsection}
+\usepackage[explicit]{titlesec}
+\usepackage{type1cm}
+
+\usepackage[light,math]{iwona}
+\usepackage[light]{noto}
+\usepackage[light]{merriweather}
+\usepackage{inconsolata}
+\linespread{1.5}
+\DeclareMathSizes{10}{12}{9}{6}
+
+\makeatletter
+\let\scshape\relax % to avoid a warning
+\DeclareRobustCommand\scshape{%
+  \not@math@alphabet\scshape\relax
+  \ifnum\pdf@strcmp{\f@family}{\familydefault}=\z@
+    \fontfamily{NotoSerif-TLF}%
+  \fi
+  \fontshape\scdefault\selectfont}
+\makeatother
 
 \usepackage[dvipsnames]{xcolor}
 
@@ -16,13 +36,7 @@
 \usepackage[scr]{rsfso}
 \newcommand{\powerset}{\raisebox{.15\baselineskip}{\Large\ensuremath{\wp}}}
 
-\usepackage[light,math]{iwona}
-\usepackage[light]{merriweather}
-\usepackage{inconsolata}
-\let\openbox\undefine
-\let\circledS\undefine
-\linespread{1.25}
-\DeclareMathSizes{10.95}{13}{10}{7}
+\usepackage{geometry}
 
 \setminted{framesep=10pt,xleftmargin=18pt,frame=leftline,linenos=true}
 
@@ -45,41 +59,12 @@
   allcolors=Violet
 }
 
-\usepackage[explicit]{titlesec}
-\usepackage{type1cm}
 \titleformat{\chapter}[display]
   {\normalfont\Large}
   {\flushright\fontsize{90}{0}\textbf{\textcolor{Violet!20}{\thechapter}}}{10pt}
   {\flushright\fontsize{30}{0}\textbf{#1}\vskip80pt}
 \titlespacing*{\chapter}
   {0pt}{-40pt}{0pt}
-
-\newcommand\abstractname{Abstract}  %%% here
-\makeatletter
-\if@titlepage
-  \newenvironment{abstract}{%
-      \titlepage
-      \null\vfil
-      \@beginparpenalty\@lowpenalty
-      \begin{center}%
-        \bfseries \abstractname
-        \@endparpenalty\@M
-      \end{center}}%
-     {\par\vfil\null\endtitlepage}
-\else
-  \newenvironment{abstract}{%
-      \if@twocolumn
-        \section*{\abstractname}%
-      \else
-        \small
-        \begin{center}%
-          {\bfseries \abstractname\vspace{-.5em}\vspace{\z@}}%
-        \end{center}%
-        \quotation
-      \fi}
-      {\if@twocolumn\else\endquotation\fi}
-\fi
-\makeatother
 
 \DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
 
@@ -89,32 +74,37 @@
 \definecolor{statementline}{HTML}{b7e2d6}
 
 \theoremstyle{break}
-\theorembodyfont{\normalfont}
+\theorembodyfont{\fontshape\rmdefault\selectfont}
 
 \mdfdefinestyle{quoted}{
 hidealllines=true,
 leftmargin=-15pt,
+rightmargin=-15pt,
 leftline=true,
-innertopmargin=5pt,
-innerbottommargin=5pt,
+innertopmargin=10pt,
+innerbottommargin=10pt,
+innerrightmargin=15pt,
 linewidth=5pt,
 linecolor=gray!40,
-%backgroundcolor=gray!5,
-innerrightmargin=0pt,
+backgroundcolor=gray!3,
+usetwoside=false,
 skipabove=\topsep,
 skipbelow=\topsep}
 
 \mdfdefinestyle{definition}{
 style=quoted,
-linecolor=Violet!20}
+linecolor=Violet!20,
+backgroundcolor=Violet!2}
 
 \mdfdefinestyle{statement}{
 style=quoted,
-linecolor=statementline}
+linecolor=PineGreen!30,
+backgroundcolor=PineGreen!2}
 
 \newmdtheoremenv[style=definition]{definition}{Definition}[chapter]
 \newmdtheoremenv{notation}{Notation}[chapter]
 \newmdtheoremenv[style=quoted]{example}{Example}[chapter]
+\newmdtheoremenv[style=statement]{corollary}{Corollary}[chapter]
 \newmdtheoremenv[style=statement]{lemma}{Lemma}[chapter]
 \newmdtheoremenv[style=statement]{theorem}{Theorem}[chapter]
 
@@ -138,13 +128,9 @@ linecolor=statementline}
 \author{Thomas Letan}
 \date{2015 -- 2018}
 
-\newpagestyle{phd}{
-  \sethead[\small\itshape\ifthechapter{\thechapter\enspace}{}\chaptertitle][][]%
-    {}{}{\small\itshape\ifthesection{\thesection\enspace}{}\sectiontitle}
-  \setfoot*{}{}{\thepage}
-}
+\pagestyle{plain}
 
-\pagestyle{phd}
+\usepackage{titlesec}
 
 \makeindex
 

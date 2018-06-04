@@ -27,7 +27,7 @@ interface can be seamlessly interchanged.
 The typical computing platform can be broken down to the following layers:
 %
 \begin{description}
-\item [Hardware Architecture] \hfill\\
+\item [Hardware Architecture]
   %
   A computer consist is made of several inter\-connected, physical hardware
   components.
@@ -37,7 +37,7 @@ The typical computing platform can be broken down to the following layers:
   abstraction, to the various input/output devices, which allow a user to
   interact with the computing platform.
   %
-\item [Firmware/BIOS] \hfill\\
+\item [Firmware/BIOS]
   %
   Hardware components often require some firm\-ware, \emph{i.e.} a dedicated
   piece of software, to operate.
@@ -62,7 +62,7 @@ The typical computing platform can be broken down to the following layers:
   %
   \TODO{Dire qu'aujourd'hui la plupart des BIOS respecte le standard UEFI.}
   %
-\item [System Software] \hfill\\
+\item [System Software]
   %
   The computing environment which is provided by the hardware architecture alone
   is very generic.
@@ -77,7 +77,7 @@ The typical computing platform can be broken down to the following layers:
   In addition, system software deal with the complexity implied by the
   concurrent execution of several applications.
   %
-\item [Applications] \hfill\\
+\item [Applications]
   %
   Applications leverages the high-level interface exposed by system software in
   order to provide a service to the user of the computing platform.
@@ -294,15 +294,15 @@ We have implemented our proofs of concepts in the Coq proof assistant.
 Our choice is motivated by the following reasons:
 %
 \begin{itemize}
-\item {\sc Gallina}, the specification of Coq, is an expressive formal language,
+\item {\scshape Gallina}, the specification of Coq, is an expressive formal language,
   that combines both a higher-order logic and à powerful dependent type system,
-  while {\sc Ltac}, the proof tactic language of Coq, enables powerful
+  while {\scshape Ltac}, the proof tactic language of Coq, enables powerful
   automation features.
   %
   This suits well for specifying security properties to be enforced by HSE
   mechanisms, as they can take many forms.
 \item The extraction mechanism of Coq allows for transpiling formal
-  specifications written in {\sc Gallina} to OCaml, meaning we can write
+  specifications written in {\scshape Gallina} to OCaml, meaning we can write
   \emph{executable specifications}.
   %
   In theory, we can leverage this feature to validate a model against a real
@@ -317,16 +317,39 @@ Our choice is motivated by the following reasons:
 As far as possible, we have tried to remain consistent while writing this
 thesis.
 
+\paragraph{Conventions}
+%
 We often define sets of values, and interfaces in particular, in terms of
 functions to construct these values.
 %
-These functions are called ``constructors'', and they have mutually exclusive
+These functions are called ``constructors,'' and they have mutually exclusive
 images, i.e. it is not possible to construct the same value with two different
 constructors.
 %
 Functions are written in bold.
 %
 In addition, constructors begin with a capital letter.
+
+\paragraph{Named Tuples}
+%
+We adopt a notation similar to Haskell record types to manipulate ``named''
+tuples, that is tuples where each component is a field identified by a name.
+
+\[
+  \begin{array}{rccll}
+    A & \triangleq & \{ & \func{field_1}: & T_1 \\
+      &            & ;  & \func{field_2}: & T_2 \\
+      &            & \} &
+  \end{array}
+\]
+
+For $a \in A$, we write $a.\func{field_1}$ for selecting the value of the
+\func{field_1} field. We write $a \{ \func{field_1} \leftarrow t \}$ for
+updating the value of the field \func{field_1}. As a consequence,
+%
+\[
+  a \{ \func{field_1} \leftarrow t \}.\func{field_1} = t
+\]
 
 \section{Contributions and Outline}
 
@@ -353,8 +376,8 @@ verify against a hardware model HSE mechanism whose purpose is to isolate
 trusted software components execution from the rest of the software stack.
 %
 We have implemented SpecCert, a framework for the Coq proof assistant based on
-this formalism. In addition, we have implemented {\sc Minx86}, a minimal x86
-model, and we have verified the HSE mechanism implemented by x86 BIOSes.
+this formalism. In addition, we have implemented {\scshape Minx86}, a minimal
+x86 model, and we have verified the HSE mechanism implemented by x86 BIOSes.
 %
 This work has been presented at the $21^{th}$ International Symposium on Formal
 Methods (FM2016)\,\cite{letan2016speccert}.

@@ -175,20 +175,13 @@ For each approach, we give a small overview of its core principles.
 In addition, we illustrate their verification process \emph{via} a common,
 minimal example: an airlock system.
 %
-A airlock system is a device made of two doors, and an intermediary chamber
-(Figure~\ref{fig:related:airlock}).
+A airlock system is a device made of two doors, and an intermediary chamber.
 %
 To pass through the airlock system, it is necessary to open the first door,
 enter the chamber, wait for the first door to close, then open the second door.
 %
 The security property of a airlock system is a safety property: at any time,
 there is at least one door closed.
-
-\begin{figure}
-  \centering \includestandalone[width=.4\textwidth]{Figures/Airlock}
-  \caption{Design of a ``cascade airlock''}
-  \label{fig:related:airlock}
-\end{figure}
 
 \paragraph{Model Checking}
 %
@@ -298,10 +291,10 @@ in terms of effort for real world systems.
 
 \begin{example}[Airlock System Verification in Coq]
   The Coq theorem prover\,\cite{coq} includes two languages: a rich functional
-  language to write specifications ({\sc Gallina}) and a tactic language to
-  write proofs ({\sc Ltac}).
+  language to write specifications ({\scshape Gallina}) and a tactic language to
+  write proofs ({\scshape Ltac}).
   %
-  We can {\sc Gallina} to describe the system in terms of states and actions to
+  We can {\scshape Gallina} to describe the system in terms of states and actions to
   update this state.
 
   \inputminted[firstline=1,lastline=14]{coq}{Listings/Airlock.v}
@@ -311,7 +304,7 @@ in terms of effort for real world systems.
   airlock system's state (opening the first or second door, closing the first or
   second door).
 
-  {\sc Gallina} includes a special type, called \texttt{Prop}, to write logical
+  {\scshape Gallina} includes a special type, called \texttt{Prop}, to write logical
   propositions which can be either true or false.
   %
   We can define the transition relation of our airlock system using
@@ -334,7 +327,7 @@ in terms of effort for real world systems.
   The security property of our airlock system is a safety property: at any time,
   at least one door is close.
   %
-  This property is a predicate on the system state, which we can define in {\sc
+  This property is a predicate on the system state, which we can define in {\scshape
     Gallina} \emph{via} the \texttt{Prop} type.
 
   \inputminted[firstline=35,lastline=38]{coq}{Listings/Airlock.v}
@@ -345,10 +338,10 @@ in terms of effort for real world systems.
   We can express that in the form of a \emph{lemma}, that is a logical statement
   for each we exhibit a proof.
   %
-  We write the proof with {\sc Ltac}, and trust Coq to refuse it in case it is
+  We write the proof with {\scshape Ltac}, and trust Coq to refuse it in case it is
   incorrect.
   %
-  The proof is written in terms of {\sc Ltac} tactics.
+  The proof is written in terms of {\scshape Ltac} tactics.
   %
   Each tactic corresponds to a reasoning rule.
   %
@@ -677,7 +670,7 @@ inconsistencies which otherwise could damage the value of the verification
 process.
 
 From this perspective, it is interesting to emphasis that, if not all model
-defined in {\sc Gallina} within the Coq proof assistant are executable, it is
+defined in {\scshape Gallina} within the Coq proof assistant are executable, it is
 possible to leverage the extraction mechanism to that end.
 %
 That is, a model which can be extracted can also be executed.
@@ -860,7 +853,7 @@ It is required to consider all the possible traces.
 
 \paragraph{Pip}
 %
-Pip is a minimal kernel whose reference implementation is written in {\sc
+Pip is a minimal kernel whose reference implementation is written in {\scshape
   Gallina}, the specification language of Coq.
 %
 The authors have verified their reference implementation correctly configures a
