@@ -231,7 +231,7 @@ had the particular side effect of disabling this hardware interrupt.
   implemented to constrain its execution.
 \end{definition}
 
-Architectural attacks result in a flaw in the specifications of the computing
+Architectural attacks result in \TODO{are due to (c'est plutôt une cause qu'une conséquence)} a flaw in the specifications of the computing
 platform.
 %
 As such, they precede implementation errors, and their countermeasures often
@@ -246,32 +246,31 @@ whole.
 The important impact of previously disclosed architectural attacks have
 motivated our will to formally specify HSE mechanisms.
 %
-We believe this would benefit both hardware designers and firmware and system
-software developers.
+We believe this would benefit both hardware designers and software developers.
 %
 Firstly, a formal specification of HSE mechanisms can be leveraged as a
 foundation for a systemic approach to verify hardware specifications.
 %
 For each novel hardware feature introduced, it would be necessary to check that
-the previous proofs hold, meaning this feature does not introduce an
+the previous proofs hold, meaning this feature does not introduce an \TODO{any?}
 architectural attack.
 %
-Secondly, it provides unambiguous specifications to software developers.
+Secondly, it provides unambiguous specifications to firmware and system software developers.
 %
 We believe these specifications can be a valuable addition to the existing
 documentation, because they gather at one place information that is normally
-scattered across many documents.
+scattered across many documents. \TODO{En outre, cela à le mérite d'établir une liste exauhstive et minimaliste des exigences à respecter pour espérer obtenir les garanti de sécurité promise. La documentation, outre le fait qu'elle est éparpillée, est rarement aussi claire à ce sujet.}
 
-To specify a HSE mechanism, we have to model the hardware architecture, and the
+To specify a HSE mechanism, we have to model the hardware architecture and the
 scale of the task represents an important challenge.
 %
-Because architectural attacks often come from unsuspected places, it is
-necessary to consider the whole computing platform; at the same time, many
-components are individually complex.
+Because architectural attacks often come from unsuspected places \TODO{Donner un exemple, par exemple le cache, qui n'est pas un mécanisme de sécurité}, it is
+necessary to consider the whole computing platform. At the same time, many
+components are individually complex. \TODO{Donner un exemple avec des données qualitative/quantitative.}
 %
 In addition, new hardware components are frequently released, and the same
 hardware component can be found in different hardware architecture to play a
-similar role.
+similar role. \TODO{Détail un peu tes idées. Ne fais pas trop d'implicite. De nouveaux mécanismes hardware -> refaire la preuve. Le même mécanisme pour différente plateforme (exemple?) ->  conséquence?}
 %
 As a consequence, the more modular our models and proofs are, the more
 practicable our approach becomes.
@@ -315,7 +314,7 @@ Our choice is motivated by the following reasons:
 \section{Notations}
 
 As far as possible, we have tried to remain consistent while writing this
-thesis.
+thesis. \TODO{euh... non je ne formulerais pas çà comme çà! :-)}
 
 \paragraph{Conventions}
 %
@@ -354,7 +353,7 @@ updating the value of the field \func{field_1}. As a consequence,
 \section{Contributions and Outline}
 
 Our works fall within a context where the security of lower levels of
-abstraction grows in importance.
+abstraction \TODO{lower lever of abstratcion? low-level components?} grows in importance.
 %
 In Chapter~\ref{chapter:usecase}, we describe in more detail the x86 hardware
 architecture, and a selection of representative architectural attacks which have
@@ -368,25 +367,26 @@ in line with the two challenges we tackle in this thesis, that is:
   model, and
 %
 \item defining hardware models which can remain exploitable in presence of large
-  architecture hardware.
+  architecture hardware. \TODO{C'est peut-être s'avancer un peu que de prétendre qu'on vise le passage à l'échelle. On s'attaque surtout à la modularité qui permettra peut-être de s'attaquer à des modèles complexes (mais c'est indirect)}
 \end{inparaenum}
+
 
 In Chapter~\ref{chapter:speccert}, we present a generic formalism to specify and
 verify against a hardware model HSE mechanism whose purpose is to isolate
-trusted software components execution from the rest of the software stack.
+trusted software components execution from the rest of the software stack. \TODO{Phrase longe, couper en deux? "to specify and verify HSE mechanisms against a hardware Model. The objectif of such HSE is ...}
 %
 We have implemented SpecCert, a framework for the Coq proof assistant based on
 this formalism. In addition, we have implemented {\scshape Minx86}, a minimal
-x86 model, and we have verified the HSE mechanism implemented by x86 BIOSes.
+x86 model, and we have verified the HSE mechanism implemented by x86 BIOSes.\TODO{La description du HSE est un peu vague. il faudrait dire que c'est le HSE pour protéger la SMM. En outre, tu as vérifié ce HSE sur Minx86 (il faut le dire explicitement)}
 %
 This work has been presented at the $21^{th}$ International Symposium on Formal
 Methods (FM2016)\,\cite{letan2016speccert}.
 
 In Chapter~\ref{chapter:freespec}, we present a systemic approach to specify and
-verify large systems, organized as trees of components, in a modular way.
+verify large \TODO{encore une fois, "large" est peut-être de trop... tu n'as pas montré que ton approche passe l'échelle. Par contre, le côté modulaire, pas de soucis. }systems, organized as trees of components, in a modular way.
 %
 We apply ideas from verification of computer programs with side effects to the
-domain of component-based modelling, and the resulting approach can be used both
+domain of component-based modelling. The resulting approach can be used both
 for verifying the composition of hardware components and software components
 alike.
 %
