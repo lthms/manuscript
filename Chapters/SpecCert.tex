@@ -954,7 +954,7 @@ third \ac{hse} mechanism, constructed by a dedicated operator $\sqcap$.
     $\Delta_{\mathtt{os}}$.
     %
     We know that the transitions of these traces satisfy respectively
-    $I_{U_{\mathtt{os}}}$ and $I_{U_{\mathtt{bios}}}$.
+    $I|U_{\mathtt{os}}$ and $I|U_{\mathtt{bios}}$.
     %
     This is enough to conclude, based on the definitions of global and partial
     execution isolation policies.
@@ -1044,10 +1044,9 @@ isolation policy, and prove this \ac{hse} mechanism is correct
 (Section~\ref{sec:speccert2:smm}).
 
 Our model and proofs have been implemented using Coq, a proof assistant system
-in a project called SpecCert.
-%
-SpecCert has been released as an free software\,\footnote{SpecCert can be found
-  at the following URL: \url{https://github.com/lthms/speccert}}.
+in a project called SpecCert, which we have released SpecCert as a free
+software\,\footnote{SpecCert can be found at the following URL:
+  \url{https://github.com/lthms/speccert}}.
 %
 As we introduce new definitions and theoretical results, we point to the related
 statements in our development, so the interesting reader familiar with Coq can
