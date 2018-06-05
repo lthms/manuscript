@@ -345,7 +345,7 @@ case of bad \ac{bios} configuration (\emph{e.g.} Secure Boot is disabled).
 \label{subsec:usecase:firm:runtime}
 
 Once a system software component has been selected and loaded into memory
-(ideally, without any tampering with the \ac{bios}), the boot sequence ends, and
+(ideally, without any tampering with the \ac{bios}, \TODO{Que veux-tu dire par "idealy, without any ... with the BIOS", ce n'est pas claire. En outre, éviter les phrases avec des avec des assertion floue genre "idealement", "généralement, etc. Il faut ou il ne faut pas faire x ou y.}), the boot sequence ends, and
 the runtime begins.
 %
 At runtime, the system software is in charge of the \ac{cpu} control flow,
@@ -353,23 +353,23 @@ meaning it decides which piece of software is executed at a given time.
 %
 However, the \ac{bios} remains active.
 
-Firstly, it provides a software interface to the system software.
+Firstly, it provides a software interface to the system software. \TODO{a software interface pour faire quoi? La phrase telle quelle est bizzare. A software interface to access to some vendor specific hardware features ou autre truc dans le genre.}
 %
 Some of these \emph{runtime services}, as they are called by the \ac{uefi}
-standard, can be leveraged by the system software as an intermediary layer to
+standard \TODO{est-ce que des services runtime existent dans le BIOS classique? runtime service est un truc spécifique à UEFI. Ok aujourd'hui la plupart des BIOS sont UEFI mais çà vaudrait le coup de parler du concept général puis de parler des instances spécifiques à un type d'implémentation}, can be leveraged by the system software as an intermediary layer to
 interact with the hardware architecture.
 %
 In doing so, it reduces the coupling between the system software and the
-hardware components.
+hardware components. 
 %
 Other runtime services are mandatory gates towards certain computing platform
-features.
+features. \TODO{Pourquoi other? Some? Tu n'explique pas pourquoi ils sont des "mandatory gates" Parsqu'on ne fait pas confiance à l'OS pour accéder à certaines fonctionnalité qui pourraient notamment atteindre à l'intégrité de la plateforme (gestion de l'énergie) ou du firmware lui-même. }
 %
 For instance, software update for the \ac{bios} code is performed by the
 \ac{bios} itself, so that the latter can validate the validity of the update.
 
 Secondly, the \ac{bios} often needs to operate independently of the system
-software.
+software. \TODO{Je ne comprends pas cette phrase ni le lien avec la suivante}
 %
 For instance, it manages platform-specific events whose internals are not
 publicly documented.
@@ -377,7 +377,7 @@ publicly documented.
 Some \acp{bios} also emulate complete hardware devices, in a transparent manner
 from the system software perspective.
 %
-The \ac{bios} autonomy from the system software has important consequences in
+The \ac{bios} autonomy \TODO{que veux dire autonomy dans ce contexte. Et surtout quel est le lien logique avec la phrase suivante (software vuln affecting...)} from the system software has important consequences in
 terms of security.
 %
 Software vulnerabilities affecting the \ac{bios} could by used by an attacker to
@@ -391,53 +391,56 @@ The \ac{bios} is provided by the hardware architecture’s manufacturer.
 In most cases, it is a proprietary software, and the computer owner has little
 control over it.
 %
-From the manufacturer software stack, the rest of the software stack is
+From the manufacturer software stack \TODO{la répétition de software stack est bizarre. From the manufacturer point of view?}, the rest of the software stack is
 considered untrusted, and the main goal of the \ac{bios} is to keep the computer
 in a working state.
 %
-Indeed, a malicious or erroneous system software could theoretically.
+Indeed, a malicious or erroneous system software could theoretically. \TODO{could theoretically what?}
 %
 The question whether this model benefits the x86 computing platform is out of the
-scope of this thesis.
+scope of this thesis. \TODO{Je ne vois pas trop de que benefits veut dire. Si ce n'est pas l'objet, autant ne pas en parler.}
 %
 We rather focus on its implementation, because of the important consequences in
-terms of security if an attacker succeeds in defeating it.
+terms of security if an attacker succeeds in defeating it. \TODO{phrase ambigu. Tu vas plutôt t'intéresser à la spécification.}
 
 The security model of a x86 \ac{bios} can be divided into two complementary
-security properties.
+security properties. \TODO{D'où viennent ces propriétés de sécurités? Elles sont clairement établies par Intel ou d'autres chercheurs. C'est toi qui les propose? A partir de quoi? Il faut clarifier cela.}
 
 \begin{definition}[BIOS Integrity]
   \label{def:usecase:biosint}
-  The \ac{bios} is assigned two memories: the memory flash and a subset of the
+  The \ac{bios} is assigned two memories: the flash memory  and a subset of the
   \ac{dram}, and the rest of the software stack cannot tamper with the result of
   read accesses performed by the \ac{bios} which target one of these memories.
+  \TODO{J'écrirerais la propriété de manière plus succinte et directe du style (the rest of the software stack (i.e the OS, applications...) cannot tamper with the result of read accesses performed by the BIOS on its dedicated memory regions. Such regions typically consists of the flash memory and a subset of the DRAM. En outre "tamper with" est-elle une expression idiomatique qui correspond précisement à ce que tu veux dire?}
 \end{definition}
 
 The \ac{bios} should be the only software component with the capability to
 modify the memory flash content.
 %
 This prevents the scenario where an arbitrary system software rewrite the
-\ac{bios} code inside the flash memory, then provoke a reboot.
+\ac{bios} code inside the flash memory, then provoke a reboot. \TODO{Pourquoi "arbitrary system software" ? Dire tout simplement que, comme les vendeurs ne font pas confiance à l'OS, celui-ci ne peut modifier directement la flash. Cela permet de garantir qu'un OS compromis ou malveillant ne puisse modifier le code du firmware arbitrairement.}
 %
-Besides, the flash memory cannot be the only memory dedicated to the \ac{bios}.
+Besides, the flash memory is not the only memory dedicated to the \ac{bios}.
 %
 Memory accesses which target the flash memory are slow, as the latter is
-connected to the \ac{pch}, behind the Memory Controller.
+connected to the \ac{pch}, behind the Memory Controller. \TODO{Ce n'est surement pas la seule raison : la technologie de la mémoire flash est intrinséquement plus lente que la RAM. En outre, je suppose que tu dois être limité en nombre de lecture/écriture en termes de durée de vie. Bref, c'est un choix technologique qui n'est pas spécifique au BIOS, on utilise de la mémoire rémanente qui est lente pour assurer la persistence et de la mémoire volatile qui est rapide pour l'exécution}
 %
-This is why Intel dedicates a portion of the system memory to the \ac{bios}
-runtime code, and for understandable reason provides the means to prevent the
+This is why Intel dedicates a portion of the system memory \TODO{DRAM? c'est quoi system memory?} to the \ac{bios}
+runtime code \TODO{c'est quoi runtime code? il y a du code non runtime?}, and for understandable reason \TODO{Eviter les expression du style "for understandable reason, obviously, etc." Reste factuel.} provides the means to prevent the
 system software to tamper with this portion.
 
 \begin{definition}[BIOS Availability]
   \label{def:usecase:biosav}
   If needed, the \ac{bios} can temporarily retrieve the \ac{cpu} control flow,
-  without any cooperation required from the system software.
+  without any cooperation \TODO{que veut dire "cooperation"? Peut-être que "preemptif" décrit ce que tu veux dire} required from the system software.
 \end{definition}
 
-The system software is untrusted, but it controls the \ac{cpu} control flow.
+The system software is untrusted, but it controls the \ac{cpu} control flow. \TODO{Controle le control flow n'est pas très claire. L'OS peut préempter l'exécution des applicatons. Le firmware peut à son tour présempter l'exécution de l'OS et des applications.}
 %
 We want to avoid a scenario where an arbitrary system software prevent the
-execution of the \ac{bios} at runtime.
+execution of the \ac{bios} at runtime. \TODO{Eviter les formulation personnelle "we want" sur quelque chose qui ne relève pas de ton implémentation ou de ton approche. Se sont des choix fait par les designer de la plateforme x86, pas par toi.}
+
+\TODO{Quid de la confidentialité? De manière générale, tu annonces avant trois propriétés générale puis maintenant tu en définis 2. Quel est le lien? Pourquoi redéfinir des propriétés?}
 
 \section{BIOS HSE Mechanism and Architectural Attacks}
 \label{sec:usecase:hse}
@@ -491,9 +494,9 @@ Intel describes the \ac{smm} as follows:
     Manual}
 \end{quote}
 
-The emphasis is ours, and does not exist in the original document.
+The emphasis is ours, and does not exist in the original document. \TODO{Je ne comprends pas. Tu as modifié la citation du manule Intel? Quel intérêt? Place tes remarques en dehors de la citation!}
 %
-This sentence roughly corresponds to our definitions of \ac{bios} Integrity and
+This sentence roughly \TODO{banni roughly de ton vocabulaire!} corresponds to our definitions of \ac{bios} Integrity and
 \ac{bios} Availability.
 %
 The \ac{smm} requires two additional hardware features: the SMRAM and the
@@ -506,11 +509,11 @@ dedicated to the \ac{smm}.
 %
 The exact location and size of the SMRAM are architecture dependent.
 %
-To locate it, the \ac{cpu} has a register named \texttt{SMBASE}, to be
+To locate it, the \ac{cpu} uses a dedicated register named \texttt{SMBASE}, that has to be
 configured by the \ac{bios} during the boot sequence.
 %
 As its name suggests, the \texttt{SMBASE} value should point to the base of the
-SMRAM.
+SMRAM. \TODO{Comment est identifié la fin de la plage de la SMRAM?}
 
 At the beginning of the boot sequence, the SMRAM is left unprotected, meaning
 arbitrary memory accesses targeting the SMRAM are authorized.
