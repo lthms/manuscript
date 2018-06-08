@@ -1,4 +1,4 @@
-\chapter{FreeSpec}
+\chapter{Modular Verification of Component-based Systems}
 \label{chapter:freespec}
 
 \endquote{``\emph{Give someone a program, you frustrate them for a day; teach
@@ -144,6 +144,326 @@ specification and verification of a simplified MCH.
 Then, we discuss how the different levels of composition of FreeSpec can be
 leveraged to scale the modelling and verification work for larger systems
 (Section~\ref{sec:freespec:scale}).
+
+\section{Big Picture}
+% ==============================================================================
+
+
+\subsection{Motivations}
+
+\paragraph{Model Reusability}
+%
+Here we talk about ``metadata'' required to express several security policies.
+
+\paragraph{Model Modularity}
+%
+Here we talk about the scale of the model.
+
+\subsection{Approach Overview}
+
+\begin{figure}
+  \begin{center}
+    \subfloat[Verification of the CPU]{
+      \begin{tikzpicture}
+        % styling nodes
+        % -------------------------------------------------------------------
+        [baseline, thick, scale=0.8, every node/.style={transform shape},
+        component/.style={draw, rectangle,inner sep=5pt, text badly centered},
+        interface/.style={font=\footnotesize}]
+        % --------------------------------------------------------------------------------
+
+        % defining nodes
+        % -----------------------------------------------------------------
+        \node (S) [component, dashed] {Software};%
+        \node (CPU) [component, right=of S] {CPU};%
+        \node (MC) [component, right=of CPU, dashed] {Memory Controller};%
+        % --------------------------------------------------------------------------------
+
+        % defining edges
+        % -----------------------------------------------------------------
+        \draw [-latex] (S) to node [interface, above] {$I_{\text{CPU}}$} (CPU);%
+        \draw [-latex] (CPU) to node [interface, above] {$I_{\text{MC}}$} (MC);%
+        % --------------------------------------------------------------------------------
+      \end{tikzpicture}
+    } \quad \subfloat[Verification of the Memory Controller]{
+      \begin{tikzpicture}
+        % styling nodes
+        % -------------------------------------------------------------------
+        [baseline, thick, scale=0.8, every node/.style={transform shape},
+        component/.style={draw, rectangle,inner sep=5pt, text badly centered},
+        interface/.style={font=\footnotesize}]
+        % --------------------------------------------------------------------------------
+
+        % defining nodes
+        % -----------------------------------------------------------------
+        \node (CPU) [component, right=of S, dashed] {CPU};%
+        \node (MC) [component, right=of CPU] {Memory Controller};%
+        \node (DRAM) [component, above=of MC, dashed] {DRAM Controller};%
+        \node (VGA) [component, below=of MC, dashed] {VGA Controller};
+        % --------------------------------------------------------------------------------
+
+        % defining edges
+        % -----------------------------------------------------------------
+        \draw [-latex] (CPU) to node [interface, above] {$I_{\text{MC}}$} (MC);%
+        \draw[-latex] (MC) to (DRAM);%
+        \draw[-latex] (MC) to (VGA);
+        % --------------------------------------------------------------------------------
+      \end{tikzpicture}
+    }
+  \end{center}
+
+  \caption{Two possible steps of a x86 hardware architecture verification}
+\end{figure}
+
+\begin{table}
+  \center
+  \begin{tabular}{ccccc}
+    $I_{\mathrm{CPU}}$
+    & $\xrightarrow{\mathrm{CPU}}$
+    & $I_{\mathrm{MCH}}$ \\
+    \hline
+    \hline
+    $\mathbb{P}$
+    & $\Longrightarrow$
+    & \ $\mathbb{P}'$ \\
+    $\Downarrow$
+    &
+    &
+      $\Downarrow$ \\
+    $\mathbb{Q}$
+    & $\Longleftarrow$
+    & \ $\mathbb{Q}'$ \\
+    \hline
+  \end{tabular}
+  \caption{Scheme of the verification proof for a component}
+\end{table}
+
+\subsection{Consequences for Hardware Models}
+
+\[
+  \mathtt{HANDLER}_{I} \rightarrow A \times \mathtt{HANDLER}_{I}
+\]
+
+\begin{figure}
+  \centering
+  \begin{tikzpicture}
+    % Doors
+    \node (D) {};%
+    \node [inner sep=8pt, dashed, draw, left=3pt of D.center] (D1) {Door 1};%
+    \node [inner sep=8pt, dashed, draw, right=3pt of D.center] (D2) {Door 2};%
+    \node [right=4pt of D2.north east, yshift=3pt] (Isys) {$I_{\mathrm{Sys}}$};%
+
+    % Controller
+    \node [inner sep=8pt, draw, above=30pt of D.center] (C) {Controller};%
+    \node [right=4pt of C.north east, yshift=3pt] (Ic) {$I_{\mathrm{C}}$};%
+
+    % User
+    \node [inner sep=8pt, draw, dashed, above=30pt of C.center] (U) {User};%
+
+    % Interfaces
+    \draw ([yshift=5pt, xshift=3pt]D1.north west) -- ([yshift=5pt,
+    xshift=-3pt]D2.north east);%
+    \draw ([yshift=5pt, xshift=3pt]C.north west) -- ([yshift=5pt,
+    xshift=-3pt]C.north east);%
+
+    % Use arrows
+    \draw [-latex] (U.south) -- ([yshift=5pt]C.north);%
+    \draw [-latex] (C.south) -- ([yshift=5pt, xshift=3pt]D1.north east);%
+  \end{tikzpicture}
+
+  \caption{Organization of a airsystem in terms of components}
+  \label{fig:freespec:airsystem}
+\end{figure}
+
+\begin{table}
+  \centering
+  \begin{tabular}{lc}
+    \multicolumn{1}{c}{{\scshape Name}}
+    & {\scshape Result values} \\
+    \hline
+    \hline
+    $\mathrm{sys/door\_1\_is\_open}$
+    & $\{ \mathtt{true}, \mathtt{false} \}$ \\
+    $\mathrm{sys/door\_2\_is\_open}$
+    & $\{ \mathtt{true}, \mathtt{false} \}$ \\
+    $\mathrm{sys/open\_door\_1}$
+    & $\{ () \}$ \\
+    $\mathrm{sys/open\_door\_2}$
+    & $\{ () \}$ \\
+    $\mathrm{sys/close\_door\_1}$
+    & $\{ () \}$ \\
+    $\mathrm{sys/open\_door\_1}$
+    & $\{ () \}$ \\
+    \hline
+  \end{tabular}
+  \caption{List of System's effects}
+\end{table}
+
+\begin{table}
+  \centering
+  \begin{tabular}{lc}
+    \multicolumn{1}{c}{{\scshape Name}}
+    & {\scshape Result values} \\
+    \hline
+    \hline
+    $\mathrm{c/open\_door\_1}$
+    & $\{ () \}$ \\
+    $\mathrm{c/open\_door\_2}$
+    & $\{ () \}$ \\
+    \hline
+  \end{tabular}
+  \caption{List of Controller's effects}
+\end{table}
+
+\[
+  \begin{array}{rcl}
+    \mathrm{c/open\_door\_1}
+    & :
+    & \mathtt{HANDLER}_{I_{\mathrm{Sys}}} \rightarrow \{()\} \times
+      \mathtt{HANDLER_{I_{\mathrm{Sys}}}} \\
+    \mathrm{c/open\_door\_1}(h)
+    & \triangleq
+    & \text{let } (\mathit{open}, h') = \mathrm{sys/door\_2\_is\_open}(h) \text{ in} \\
+
+    &
+    & \text{let }(\_, h'') = \text{if }\mathit{open} \\
+
+    &
+    & \text{then }\mathrm{sys/close\_door\_2}(h') \\
+
+    &
+    & \text{else }((), h') \text{ in} \\
+
+    &
+    & \mathrm{sys/open\_door\_1}(h'')\\
+  \end{array}
+\]
+
+\[
+  \mathtt{HANDLER}_I \times \Omega \rightarrow A \times \mathtt{HANDLER}_I \times
+  \Omega
+\]
+
+\[
+  \begin{array}{l}
+    \dots \\
+    \text{let } (\mathit{open}, h_1) = \mathrm{sys/door\_2\_is\_open}(h_0) \text{ in} \\
+    \text{let }\omega_1 = \mathrm{step}(\mathrm{sys/door\_2\_is\_open},
+    \mathit{open}, \omega_0) \text{ in} \\
+    \dots
+  \end{array}
+\]
+
+\[
+  \begin{array}{l}
+    \dots \\
+    \mathtt{GOAL} \quad \mathbb{P}(\mathrm{sys/door\_2\_is\_open}, \omega_0) \\
+    \text{let } (\mathit{open}, h_1) = \mathrm{sys/door\_2\_is\_open}(h_0) \text{ in} \\
+    \mathtt{HYP} \quad \mathbb{Q}(\mathrm{sys/door\_2\_is\_open}, open, \omega_0) \\
+    \dots
+  \end{array}
+\]
+
+The complete $\mathrm{c/open\_door\_1}$ program is listed in
+Figure~\ref{fig:freespec:instrumentation}.
+
+\begin{figure}
+  \centering
+  \[
+    \begin{array}{rcl}
+      \mathrm{c/open\_door\_1}
+      & :
+      & \mathtt{HANDLER}_{I_{\mathrm{Sys}}} \times \Omega \rightarrow \{()\} \times
+        \mathtt{HANDLER}_{I_{\mathrm{Sys}}} \times \Omega \\
+      \mathrm{c/open\_door\_1}(h_0, \omega_0)
+      & \triangleq
+      & \mathtt{GOAL} \quad \mathbb{P}(\mathrm{sys/door\_2\_is\_open}, \omega_0) \\
+
+      &
+      & \text{let } (\mathit{open}, h_1) = \mathrm{sys/door\_2\_is\_open}(h_0) \text{ in} \\
+
+      &
+      & \mathtt{HYP} \quad \mathbb{Q}(\mathrm{sys/door\_2\_is\_open}, open, \omega_0) \\
+
+      &
+      & \text{let }\omega_1 = \mathrm{step}(\mathrm{sys/door\_2\_is\_open}, \mathit{open}, \omega_0) \text{ in} \\
+
+      &
+      & \text{let }(h_3, \omega_3) = \\
+
+      &
+      & \qquad\text{if }\mathit{open} \\
+
+      &
+      & \qquad\text{then} \\
+
+      &
+      & \qquad\qquad\mathtt{GOAL} \quad \mathbb{P}(\mathrm{sys/close\_door\_2}, \omega_1) \\
+
+      &
+      & \qquad\qquad\text{let }(x, h_2) =
+        \mathrm{sys/close\_door\_2}(h_1) \text{ in} \\
+
+      &
+      & \qquad\qquad\mathtt{HYP} \quad \mathbb{Q}(\mathrm{sys/close\_door\_2}, x \omega_1) \\
+
+      &
+      & \qquad\qquad\text{let }\omega_2 =
+        \mathrm{step}(\mathrm{sys/close\_door\_2}, x, \omega_1) \text{ in} \\
+
+      &
+      & \qquad\qquad(h_2, \omega_2) \\
+
+      &
+      & \qquad\text{else }(h_1, \omega_1) \text{ in} \\
+
+      &
+      & \mathtt{GOAL} \quad \mathbb{P}(\mathrm{sys/open\_door\_1}, \omega_3) \\
+
+      &
+      & \text{let }(y, h_4) = \mathrm{sys/open\_door\_1}(h_3) \text{ in} \\
+
+      &
+      & \mathtt{HYP} \quad \mathbb{Q}(\mathrm{sys/open\_door\_1}, y, \omega_3) \\
+
+      &
+      & \text{let }\omega_4 = \mathrm{step}(\mathrm{sys/open\_door\_1}, y, \omega_3) \text{ in} \\
+
+      &
+      & ((), h_4, \omega_4)
+    \end{array}
+  \]
+  \caption{Complete instrumentation of a program with effects}
+  \label{fig:freespec:instrumentation}
+\end{figure}
+
+\[
+  \begin{array}{rcl}
+    \mathrm{c/open\_door\_1}
+    & \triangleq
+    & open \leftarrow \mathrm{sys/door\_2\_is\_open} \\
+
+    &
+    & \mathrm{when} \text{ } \mathit{open} \text{ } \mathrm{sys/close\_door\_2} \\
+
+    &
+    & \mathrm{sys/open\_door\_1}
+  \end{array}
+\]
+
+\[
+  \begin{array}{rcl}
+    \mathrm{c/open\_door\_1}
+    & \triangleq
+    & \mathrm{sys/open\_door\_1} \\
+
+    &
+    & \mathit{open} \leftarrow \mathrm{sys/door\_2\_is\_open} \\
+
+    &
+    & \mathrm{when} \text{ } \mathit{open} \text{ } \mathrm{sys/close\_door\_2}
+  \end{array}
+\]
 
 \section{Modelling Programs with Effects}
 % ==============================================================================
