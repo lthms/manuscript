@@ -619,7 +619,8 @@ disclosed over the past decade, including the SMRAM Cache Poisoning Attack
 To handle several software components with different level of privileges, Intel
 \acp{cpu} provide several execution modes.
 %
-An execution mode can be roughly \TODO{evite les formulation vague du style 'roughly"} assimilated to a set of hardware capabilities.
+An execution mode can be roughly \TODO{evite les formulation vague du style
+  'roughly"} assimilated to a set of hardware capabilities.
 %
 For instance, in a given execution mode, a \ac{cpu} may refuse to execute
 certain assembly instructions, and the software component executed at the time
@@ -687,15 +688,19 @@ SMRAM.
 %
 
 A locked SMRAM can only be accessed by a \ac{cpu} in \ac{smm}, and is invisible
-to a \ac{cpu} not in \ac{smm}. \TODO{expliquer ce que veut dire invisible -> la mémoire n'est plus mappé dans la plage d'adresse et soit le processeur accède à une autre mémoire soit il y a une exception (je suppose)}
+to a \ac{cpu} not in \ac{smm}. \TODO{expliquer ce que veut dire invisible -> la
+  mémoire n'est plus mappé dans la plage d'adresse et soit le processeur accède
+  à une autre mémoire soit il y a une exception (je suppose)}
 %
-This access control mechanism is implemented by the Memory Controller. \TODO{ref}
+This access control mechanism is implemented by the Memory
+Controller. \TODO{ref}
 %
 It can be configured by the \ac{bios} during the boot sequence, by setting the
 \texttt{D\_LCK} bit of the \texttt{SMRAMC} configuration register.
 %
 A Memory Controller with the \texttt{D\_LCK} bit set will prevent a \ac{cpu} not
-in \ac{smm} to tamper with \TODO{je n'aime pas trop tamper with. Access? Read? Write?} the SMRAM content.
+in \ac{smm} to tamper with \TODO{je n'aime pas trop tamper with. Access? Read?
+  Write?} the SMRAM content.
 %
 In addition, the \texttt{D\_LCK} cannot be cleared once it has been set, except
 by performing a complete reboot of the platform.
@@ -714,7 +719,7 @@ or, for most recent versions, in dedicated internal registers. \TODO{ref}
 %
 Once this preliminary step is done, the \ac{cpu} reconfigures itself;
 %
-in particular, it sets its program counter register to  the value
+in particular, it sets its program counter register to the value
 $\mathtt{SMBASE} + \mathrm{0x8000}$.
 %
 From this point, the \ac{cpu} is in \ac{smm} and starts to execute what should
@@ -729,33 +734,28 @@ restore its previous state.
 This way, the execution of the pieces of software previously halted by the
 \ac{smi} can resume.
 %
-From the system point of view, it is like if nothing has happened. \TODO{excepté les effets de bord (le temps s'est écoulé, l'état du hardware a pu evoluer...}
+From the system point of view, it is like if nothing has happened. \TODO{excepté
+  les effets de bord (le temps s'est écoulé, l'état du hardware a pu evoluer...}
 
 \paragraph{Flash Memory Lock-down}
 %
 The content of the flash memory has to be protected from arbitrary tampering,
 similarly to the SMRAM protection.
 %
-That is, only the \ac{smm} code should be able to overwrite the content of
-the flash memory.
+That is, only the \ac{smm} code should be able to overwrite the content of the
+flash memory.
 %
 This second access control mechanism is implemented by the \ac{pch}.
 %
-It is configurable \emph{via} the \texttt{BIOS\_CNTL} control
-register.
+It is configurable \emph{via} the \texttt{BIOS\_CNTL} control register.
 %
 Two bits of this register are of interest: the \texttt{BIOSWE} (\ac{bios} Write
 Enable) bit, and the \texttt{BLE} (\ac{bios} Lock Enable) bit.
 
 The semantics of the \texttt{BIOSWE} and \texttt{BLE} bits is as follows.
 %
-<<<<<<< HEAD
-When the \texttt{BIOSWE} bit is clear, the \ac{pch} only authorizes read accesses to
-the flash memory.
-=======
 When the \texttt{BIOSWE} bit is clear, the \ac{pch} only authorizes read
-accesses to the Flash Memory.
->>>>>>> 80 columns
+accesses to the flash memory.
 %
 If the \texttt{BIOSWE} bit is set by a \ac{cpu}, the behaviour of the \ac{pch}
 depends on the value of the \texttt{BLE} bit.
@@ -778,9 +778,10 @@ bit will not cause a \ac{smi}.
 Similarly to the \texttt{D\_LCK} bit of the \texttt{SMRAMC} register, the
 \texttt{BLE} bit cannot be cleared without a reboot.
 
-The Flash Memory \TODO{parfois tu mets Flash Memory en majuscul, parfois non. Je pense qu'il ne faut pas de majuscule, harmonise à tout le document.} Lock-down mechanism is often used as a communication channel
-between the system software and the \ac{smm} code, in order to initiate a
-\ac{bios} update.
+The Flash Memory \TODO{parfois tu mets Flash Memory en majuscul, parfois non. Je
+  pense qu'il ne faut pas de majuscule, harmonise à tout le document.} Lock-down
+mechanism is often used as a communication channel between the system software
+and the \ac{smm} code, in order to initiate a \ac{bios} update.
 %
 The system software sets the \texttt{BIOSWE} bit in order to notify the \ac{smm}
 code that a \ac{bios} update is available.
@@ -791,8 +792,9 @@ The combination of the SMRAM, the \ac{smi} and the Flash Memory Lock-down
 explains why the \ac{smm} is often introduced as the ``most privileged execution
 mode'' of a x86 \ac{cpu}.
 %
-In a nutshell, the \ac{smm} code can do all the things the system software does\TODO{can do?},
-including tampering with memories assigned to the system software.
+In a nutshell, the \ac{smm} code can do all the things the system software
+does\TODO{can do?}, including tampering with memories assigned to the system
+software.
 %
 On the contrary, the system software cannot modify neither the SMRAM content nor
 the \ac{smm} code stored in the flash memory, and cannot prevent the \ac{smm}
