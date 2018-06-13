@@ -9,10 +9,7 @@ TEX-SRC  := $(wildcard Chapters/*.tex)    \
 COQ      := $(wildcard Listings/*.v)
 NUSMV    := $(wildcard Listings/*.nusmv)
 
-default: minimal
-
-minimal: main-mini.pdf jury.pdf
-full: main.pdf
+default: main.pdf
 
 %.pdf: %.tex ${STY-SRC} ${BIB-SRC} ${TEX-SRC} ${COQ} ${NUSMV}
 	latexmk $< -shell-escape -pdf

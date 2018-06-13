@@ -1,269 +1,190 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Masters/Doctoral Thesis
-% LaTeX Template
-% Version 2.5 (27/8/17)
-%
-% This template was downloaded from:
-% http://www.LaTeXTemplates.com
-%
-% Version 2.x major modifications by:
-% Vel (vel@latextemplates.com)
-%
-% This template is based on a template by:
-% Steve Gunn (http://users.ecs.soton.ac.uk/srg/softwaretools/document/templates/)
-% Sunil Patel (http://www.sunilpatel.co.uk/thesis-template/)
-%
-% Template license:
-% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[oneside,a4paper]{memoir}
+\setsecnumdepth{subsection}
+\maxtocdepth{subsection}
+\usepackage{bookmark}
 
-%----------------------------------------------------------------------------------------
-%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
-%----------------------------------------------------------------------------------------
+\usepackage{subfig}
 
-\documentclass[
-11pt, % The default document font size, options: 10pt, 11pt, 12pt
-%oneside, % Two side (alternating margins) for binding by default, uncomment to switch to one side
-english, % ngerman for German
-singlespacing, % Single line spacing, alternatives: onehalfspacing or doublespacing
-%draft, % Uncomment to enable draft mode (no pictures, no links, overfull hboxes indicated)
-%nolistspacing, % If the document is onehalfspacing or doublespacing, uncomment this to set spacing in lists to single
-%liststotoc, % Uncomment to add the list of figures/tables/etc to the table of contents
-%toctotoc, % Uncomment to add the main table of contents to the table of contents
-%parskip, % Uncomment to add space between paragraphs
-%nohyperref, % Uncomment to not load the hyperref package
-headsepline, % Uncomment to get a line under the header
-%chapterinoneline, % Uncomment to place the chapter title next to the number on one line
-%consistentlayout, % Uncomment to change the layout of the declaration, abstract and acknowledgements pages to match the default layout
-]{MastersDoctoralThesis} % The class file specifying the document structure
+\usepackage[explicit]{titlesec}
+\usepackage{type1cm}
 
-\usepackage[utf8]{inputenc} % Required for inputting international characters
-\usepackage[T1]{fontenc} % Output font encoding for international characters
+\usepackage[light,math]{iwona}
+\usepackage[light]{noto}
+\usepackage[light]{merriweather}
+\usepackage{inconsolata}
+\linespread{1.5}
+\DeclareMathSizes{10}{12}{9}{6}
 
+\makeatletter
+\let\scshape\relax % to avoid a warning
+\DeclareRobustCommand\scshape{%
+  \not@math@alphabet\scshape\relax
+  \ifnum\pdf@strcmp{\f@family}{\familydefault}=\z@
+    \fontfamily{NotoSerif-TLF}%
+  \fi
+  \fontshape\scdefault\selectfont}
+\makeatother
+
+\usepackage[dvipsnames]{xcolor}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage[chapter]{minted}
+\usemintedstyle{bw}
+\usepackage{tocbibind}
+\usepackage[babel=true,kerning=true,spacing=true,auto=true]{microtype}
+\usepackage[babel=true]{csquotes}
+\usepackage{makeidx}
+\usepackage[mathscr]{euscript}
+\let\euscr\mathscr \let\mathscr\relax% just so we can load this and rsfs
+\usepackage[scr]{rsfso}
+\newcommand{\powerset}{\raisebox{.15\baselineskip}{\Large\ensuremath{\wp}}}
+
+\usepackage{geometry}
+
+\setminted{framesep=10pt,xleftmargin=18pt,frame=leftline,linenos=true}
+
+% Use -- instead of bullet for itemize
 \renewcommand{\labelitemi}{\normalfont\textendash}
 
-%\usepackage{mathpazo} % Use the Palatino font by default
-
-\usepackage[backend=bibtex,style=numeric,natbib=true]{biblatex} % Use the bibtex backend with the authoryear citation style (which resembles APA)
-
-\addbibresource{manuscript.bib} % The filename of the bibliography
-
-\usepackage[autostyle=true]{csquotes} % Required to generate language-dependent quotes in the bibliography
-
+\usepackage{textcomp}
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{bussproofs}
 \usepackage{paralist}
 \usepackage{bigcenter}
 \usepackage[mode=buildnew]{standalone}
-\usepackage{acro}
-
+\usepackage[index=true]{acro}
 \usepackage{xargs}
 \usepackage{todonotes}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  allcolors=Violet
+}
+
+\titleformat{\chapter}[display]
+  {\normalfont\Large}
+  {\flushright\fontsize{90}{0}\textbf{\textcolor{Violet!20}{\thechapter}}}{10pt}
+  {\flushright\fontsize{30}{0}\textbf{#1}\vskip80pt}
+\titlespacing*{\chapter}
+  {0pt}{-40pt}{0pt}
+
+\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
+
+\usepackage{mdframed} % or, "mdframed"
+\usepackage[amsthm,framed]{ntheorem}
+
+\definecolor{statementline}{HTML}{b7e2d6}
+
+\theoremstyle{break}
+\theorembodyfont{\fontshape\rmdefault\selectfont}
+
+\mdfdefinestyle{quoted}{
+hidealllines=true,
+leftmargin=-15pt,
+rightmargin=-15pt,
+leftline=true,
+innertopmargin=10pt,
+innerbottommargin=10pt,
+innerrightmargin=15pt,
+linewidth=5pt,
+linecolor=gray!40,
+backgroundcolor=gray!3,
+usetwoside=false,
+skipabove=\topsep,
+skipbelow=\topsep}
+
+\mdfdefinestyle{definition}{
+style=quoted,
+linecolor=Violet!20,
+backgroundcolor=Violet!2}
+
+\mdfdefinestyle{statement}{
+style=quoted,
+linecolor=PineGreen!30,
+backgroundcolor=PineGreen!2}
+
+\newmdtheoremenv[style=definition]{definition}{Definition}[chapter]
+\newmdtheoremenv{notation}{Notation}[chapter]
+\newmdtheoremenv[style=quoted]{example}{Example}[chapter]
+\newmdtheoremenv[style=statement]{corollary}{Corollary}[chapter]
+\newmdtheoremenv[style=statement]{lemma}{Lemma}[chapter]
+\newmdtheoremenv[style=statement]{theorem}{Theorem}[chapter]
+
+% A command I use to leave myself notes
 \newcommandx{\thomasrk}[2][1=]{\todo[linecolor=Plum,backgroundcolor=Plum!25,bordercolor=Plum,#1]{#2}}
 
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, positioning, arrows, intersections, fit, matrix}
 
+\usepackage{phdcmd}
 \usepackage{speccert}
 \usepackage{freespec}
 
-\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
-
-\newtheorem{definition}{Definition}
-\newtheorem{notation}{Notation}
-\newtheorem{example}{Example}
-\newtheorem{lemma}{Lemma}
-\newtheorem{theorem}{Theorem}
-\newtheorem{proof}{Proof}
+\usepackage{todonotes}
+\newcommand\TODO[1]{\todo[inline,linecolor=red,backgroundcolor=red!25,bordercolor=red]{\textbf{TODO:} #1}}
 
 \input{abbrev}
+\input{nomencl}
 
-%----------------------------------------------------------------------------------------
-%	MARGIN SETTINGS
-%----------------------------------------------------------------------------------------
+\title{Specifying and Verifying Hardware-based Security Enforcement Mechanisms}
+\author{Thomas Letan}
+\date{2015 -- 2018}
 
-\geometry{
-paper=a4paper, % Change to letterpaper for US letter
-inner=2.5cm, % Inner margin
-outer=3.8cm, % Outer margin
-bindingoffset=.5cm, % Binding offset
-top=1.5cm, % Top margin
-bottom=1.5cm, % Bottom margin
-%showframe, % Uncomment to show how the type block is set on the page
-}
+\pagestyle{plain}
 
-%----------------------------------------------------------------------------------------
-%	THESIS INFORMATION
-%----------------------------------------------------------------------------------------
+\usepackage{titlesec}
 
-\thesistitle{Specifying and Verifying Hardware-based Security Enforcement Mechanisms}
-\supervisor{Ludovic \textsc{Mé}} % Your supervisor's name, this is used in the title page, print it elsewhere with \supname
-\examiner{} % Your examiner's name, this is not currently used anywhere in the template, print it elsewhere with \examname
-\degree{Doctor of Computer Science} % Your degree name, this is used in the title page and abstract, print it elsewhere with \degreename
-\author{Thomas \textsc{Letan}} % Your name, this is used in the title page and abstract, print it elsewhere with \authorname
-\addresses{} % Your address, this is not currently used anywhere in the template, print it elsewhere with \addressname
-
-\subject{Computer Sciences} % Your subject area, this is not currently used anywhere in the template, print it elsewhere with \subjectname
-\keywords{} % Keywords for your thesis, this is not currently used anywhere in the template, print it elsewhere with \keywordnames
-\university{\href{http://www.centralesupelec.fr}{CentraleSupélec}} % Your university's name and URL, this is used in the title page and abstract, print it elsewhere with \univname
-\department{\href{http://department.university.com}{CentraleSupélec Rennes}} % Your department's name and URL, this is used in the title page and abstract, print it elsewhere with \deptname
-\group{\href{https://team.inria.fr/cidre/}{CIDRE}} % Your research group's name and URL, this is used in the title page, print it elsewhere with \groupname
-\faculty{\href{http://faculty.university.com}{CentraleSupélec Rennes}} % Your faculty's name and URL, this is used in the title page and abstract, print it elsewhere with \facname
-
-\AtBeginDocument{
-\hypersetup{pdftitle=\ttitle} % Set the PDF's title to your title
-\hypersetup{pdfauthor=\authorname} % Set the PDF's author to your name
-\hypersetup{pdfkeywords=\keywordnames} % Set the PDF's keywords to your keywords
-\hypersetup{allcolors=BlueViolet}
-}
+\makeindex
 
 \begin{document}
+  \frontmatter
 
-\frontmatter % Use roman page numbering style (i, ii, iii, iv...) for the pre-content pages
+  \maketitle
 
-\pagestyle{plain} % Default to the plain heading style until the thesis style is called for the body content
+  \cleardoublepage
 
-% ----------------------------------------------------------------------------------------
-% TITLE PAGE
-% ----------------------------------------------------------------------------------------
+  \begin{abstract}
+    \input{abstract}
+  \end{abstract}
 
-\begin{titlepage}
-  \begin{center}
+  \cleardoublepage
 
-    \vspace*{.06\textheight} {\scshape\LARGE
-      \univname\par}\vspace{1.5cm} % University name
-    \textsc{\Large Doctoral Thesis}\\[0.5cm] % Thesis type
+  \tableofcontents
 
-    \HRule \\[0.4cm] % Horizontal line
-    {\huge \bfseries \ttitle\par}\vspace{0.4cm} % Thesis title
-    \HRule \\[1.5cm] % Horizontal line
+  \cleardoublepage
 
-    \begin{minipage}[t]{0.4\textwidth}
-      \begin{flushleft} \large
-	\emph{Author:}\\
-	\href{http://www.johnsmith.com}{\authorname} % Author name - remove the \href bracket to remove the link
-      \end{flushleft}
-    \end{minipage}
-    \begin{minipage}[t]{0.4\textwidth}
-      \begin{flushright} \large
-	\emph{Supervisor:} \\
-	\href{http://www.jamessmith.com}{\supname} % Supervisor name - remove the \href bracket to remove the link
-      \end{flushright}
-    \end{minipage}\\[3cm]
+  \listoffigures
+  \listoftables
+  \input{notation}
 
-    \vfill
+  \mainmatter
 
-    \large \textit{A thesis submitted in fulfillment of the requirements\\ for
-      the degree of \degreename}\\[0.3cm] % University requirement text
-    \textit{in the}\\[0.4cm]
-    \groupname\\\deptname\\[2cm] % Research group name and department name
+  \input{Chapters/Introduction}
 
-    \vfill
+  \part{Context}
+  \input{Chapters/UseCase}
+  \input{Chapters/RelatedWorks}
 
-    {\large \today}\\[4cm] % Date
-    % \includegraphics{Logo} % University/department logo - uncomment to place it
+  \part{Specifying and Verifying HSE Mechanisms}
+  \input{Chapters/SpecCert}
 
-    \vfill
-  \end{center}
-\end{titlepage}
+  \part{Towards Comprehensive Hardware Models}
+  \input{Chapters/FreeSpec}
 
-\cleardoublepage
+  \addtocontents{toc}{\bigskip}
+  \bookmarksetup{startatroot}
+  \input{Chapters/Conclusion}
 
-% ----------------------------------------------------------------------------------------
-% QUOTATION PAGE
-% ----------------------------------------------------------------------------------------
+  \appendix
 
-\vspace*{0.2\textheight}
+  \input{Appendices/SpecCert}
+  \input{Appendices/FreeSpecTutorial}
 
-\noindent\enquote{\itshape All told, a monad in $X$ is just a monoid in the
-  category of endofunctors of $X$, with product $\times$ replaced by composition
-  of endofunctors and unit set by the identity endofunctor.}\bigbreak
-
-\hfill Saunders Mac Lane, in \emph{Categories for the Working Mathematician}
-
-% ----------------------------------------------------------------------------------------
-% ABSTRACT PAGE
-% ----------------------------------------------------------------------------------------
-
-\begin{abstract}
-  \addchaptertocentry{\abstractname} % Add the abstract to the table of contents
-  \input{abstract}
-\end{abstract}
-
-% ----------------------------------------------------------------------------------------
-% ACKNOWLEDGEMENTS
-% ----------------------------------------------------------------------------------------
-
-\begin{acknowledgements}
-  \addchaptertocentry{\acknowledgementname} % Add the acknowledgements to the table of contents
-  The acknowledgments and the people to thank go here, don't forget to include
-  your project advisor\ldots
-\end{acknowledgements}
-
-% ----------------------------------------------------------------------------------------
-% LIST OF CONTENTS/FIGURES/TABLES PAGES
-% ----------------------------------------------------------------------------------------
-
-\tableofcontents % Prints the main table of contents
-
-\listoffigures % Prints the list of figures
-
-\listoftables % Prints the list of tables
-
-% ----------------------------------------------------------------------------------------
-% DEDICATION
-% ----------------------------------------------------------------------------------------
-
-\dedicatory{For/Dedicated to/To my\ldots}
-
-% ----------------------------------------------------------------------------------------
-% THESIS CONTENT - CHAPTERS
-% ----------------------------------------------------------------------------------------
-
-\mainmatter % Begin numeric (1,2,3...) page numbering
-
-\pagestyle{thesis} % Return the page headers back to the "thesis" style
-
-% Include the chapters of the thesis as separate files from the Chapters folder
-% Uncomment the lines as you write the chapters
-
-\input{Chapters/Introduction}
-
-\input{Chapters/UseCase}
-
-\input{Chapters/RelatedWorks}
-
-\input{Chapters/SpecCert}
-
-\input{Chapters/FreeSpec}
-
-\chapter{Conclusion}
-
-%----------------------------------------------------------------------------------------
-%	THESIS CONTENT - APPENDICES
-%----------------------------------------------------------------------------------------
-
-\appendix % Cue to tell LaTeX that the following "chapters" are Appendices
-
-% Include the appendices of the thesis as separate files from the Appendices folder
-% Uncomment the lines as you write the Appendices
-
-\chapter{SpecCert Notations}
-
-\chapter{FreeSpec Notations}
-
-%\input{Appendices/AppendixA}
-%\input{Appendices/AppendixB}
-%\input{Appendices/AppendixC}
-
-%----------------------------------------------------------------------------------------
-%	BIBLIOGRAPHY
-%----------------------------------------------------------------------------------------
-
-\printbibliography[heading=bibintoc]
-
-%----------------------------------------------------------------------------------------
-
+  \printacronyms[include-classes={abbrev},heading={chapter},name=Acronyms]
+  \printindex
+  \bibliographystyle{unsrt}
+  \bibliography{manuscript}
 \end{document}
