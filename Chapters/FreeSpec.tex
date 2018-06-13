@@ -179,8 +179,10 @@ Here we talk about the scale of the model.
         {Memory Controller};%
         \draw ([yshift=5pt, xshift=3pt]MC.north west) -- ([yshift=5pt,
         xshift=-3pt]MC.north east);%
-        \node [right=4pt of MC.north east, yshift=3pt] (Im)
+        \node [right=4pt of MC.north east, yshift=3pt, text width=0.5cm] (Im)
         {$I_{\mathrm{MC}}$};%
+        \node [left=4pt of MC.north west, yshift=3pt, text width=0.5cm]
+        (Im_shadow) {};%
 
         % Software
         \node [inner sep=8pt, draw, dashed, above=30pt of CPU.center] (S)
@@ -202,14 +204,14 @@ Here we talk about the scale of the model.
         width=1.3cm, text badly centered] (DRAM) {DRAM};%
         \draw ([yshift=5pt, xshift=3pt]DRAM.north west) -- ([yshift=5pt,
         xshift=-3pt]DRAM.north east);%
-        \node [left=4pt of DRAM.north west, yshift=3pt] (Id)
+        \node [left=4pt of DRAM.north west, yshift=3pt, text width=1cm] (Id)
         {$I_{\mathrm{DRAM}}$};%
         % -- VGA
         \node [inner sep=8pt, dashed, draw, right=3pt of M.center, text
         width=1.3cm, text badly centered] (VGA) {VGA};%
         \draw ([yshift=5pt, xshift=3pt]VGA.north west) -- ([yshift=5pt,
         xshift=-3pt]VGA.north east);%
-        \node [right=4pt of VGA.north east, yshift=3pt] (Iv)
+        \node [right=4pt of VGA.north east, yshift=3pt, text width=1cm] (Iv)
         {$I_{\mathrm{VGA}}$};%
 
         % Memory Controller
