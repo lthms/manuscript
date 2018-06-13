@@ -168,11 +168,11 @@ Here we talk about the scale of the model.
     \subfloat[Verification of the CPU]{
       \begin{tikzpicture}
         % CPU
-        \node [inner sep=8pt, draw] (CPU) {CPU};%
+        \node [inner sep=8pt, draw] (CPU) {Core};%
         \draw ([yshift=5pt, xshift=3pt]CPU.north west) -- ([yshift=5pt,
         xshift=-3pt]CPU.north east);%
         \node [right=4pt of CPU.north east, yshift=3pt] (Ic)
-        {$I_{\mathrm{CPU}}$};%
+        {$I_{\mathrm{C}}$};%
 
         % Memory Controller
         \node [inner sep=8pt, draw, dashed, below=30pt of CPU.center] (MC)
@@ -224,7 +224,7 @@ Here we talk about the scale of the model.
 
         % CPU
         \node [inner sep=8pt, draw, dashed, above=30pt of MC.center] (CPU)
-        {CPU};%
+        {Core};%
 
         % arrows
         \draw [-latex] (CPU.south) -- ([yshift=5pt]MC.north);%
@@ -243,8 +243,8 @@ Here we talk about the scale of the model.
 \begin{table}
   \center
   \begin{tabular}{ccccc}
-    $I_{\mathrm{CPU}}$
-    & $\xrightarrow{\mathrm{CPU}}$
+    $I_{\mathrm{C}}$
+    & $\xrightarrow{\mathrm{Core}}$
     & $I_{\mathrm{MCH}}$ \\
     \hline
     \hline
