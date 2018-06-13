@@ -81,8 +81,8 @@ comprehensive in terms of its hardware and software components.
 Unfortunately, such a model is a prerequisite to verify a computing platform in
 terms of architectural attacks.
 %
-The Coq proof assistant\,\cite{coq} has proven to be effective to model
-specific hardware
+The Coq proof assistant\,\cite{coq} has proven to be effective to model specific
+hardware
 components\,\cite{braibant2011coquet,morrisett2012rocksalt,choi2017kami,jomaa2016mmu}.
 %
 It provides a rich specification language, tools to write machine-checked proofs
@@ -98,10 +98,10 @@ This objective is reminiscent of the programming language problematic to model
 and verify large programs with side effects.
 %
 Reasoning about side effects in purely functional languages such as {\textsc
-  Gallina}, the Coq specification language, is difficult, firstly
-because they imply to somehow take into account an outer \emph{stateful}
-environment and secondly, because the composition of stateful computations is
-not well-handled by traditional (monadic) approaches.
+  Gallina}, the Coq specification language, is difficult, firstly because they
+imply to somehow take into account an outer \emph{stateful} environment and
+secondly, because the composition of stateful computations is not well-handled
+by traditional (monadic) approaches.
 %
 Algebraic effects and handlers\,\cite{bauer2015effects} are a generic approach
 to overcome this double challenge.
@@ -120,11 +120,13 @@ Our contribution is threefold:
   effects and handlers to model and to verify each component of a computing
   system independently, while providing the necessary abstractions to compose
   these components in order to verify the properties of the resulting system.
+%
 \item We have implemented FreeSpec\,\footnote{FreeSpec has been released as a
     free software, under the terms of the GPLv3.
-    \url{https://github.com/ANSSI-FR/FreeSpec}}, a framework for the Coq
-  proof assistant to \emph{modularly} verify programs with effects and effects
+    \url{https://github.com/ANSSI-FR/FreeSpec}}, a framework for the Coq proof
+  assistant to \emph{modularly} verify programs with effects and effects
   handlers with our approach.
+%
 \item We have modelled and verified a simplified subset of an x86 computing
   system with FreeSpec in order to illustrate how our formalism can be leveraged
   to tackle our initial objective, that is modelling and verifying computing
@@ -340,8 +342,8 @@ Here we talk about the scale of the model.
 \]
 
 \[
-  \mathtt{HANDLER}_I \times \Omega \rightarrow A \times \mathtt{HANDLER}_I \times
-  \Omega
+  \mathtt{HANDLER}_I \times \Omega \rightarrow A \times \mathtt{HANDLER}_I
+  \times \Omega
 \]
 
 \[
@@ -405,7 +407,7 @@ Figure~\ref{fig:freespec:instrumentation}.
         \mathrm{sys/close\_door\_2}(h_1) \text{ in} \\
 
       &
-      & \qquad\qquad\mathtt{HYP} \quad \mathbb{Q}(\mathrm{sys/close\_door\_2}, x \omega_1) \\
+      & \qquad\qquad\mathtt{HYP} \quad \mathbb{Q}(\mathrm{sys/close\_door\_2}, x, \omega_1) \\
 
       &
       & \qquad\qquad\text{let }\omega_2 =
@@ -435,6 +437,29 @@ Figure~\ref{fig:freespec:instrumentation}.
   \]
   \caption{Complete instrumentation of a program with effects}
   \label{fig:freespec:instrumentation}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \[
+    \begin{array}{l}
+      \text{Given }h_0 \in \mathtt{HANDLER}_{I_{\mathrm{Sys}}} \text{ and }
+      \omega_0 \in \Omega, \\
+      \forall (h_1, h_2) \in \mathtt{HANDLER}_{I_{\mathrm{Sys}}} \times \mathtt{HANDLER}_{I_{\mathrm{Sys}}}, \\
+      \forall \omega_2 \in \Omega, \\
+      \forall \mathtt{open} \in \{ \mathtt{true}, \mathtt{false} \}, \\
+      \forall x \in \{()\}, \\
+      \qquad\mathbb{P}(sys/door\_2\_is\_open, \omega_0) \\
+      \qquad\Rightarrow (\mathit{open}, h_1) = \func{sys/door\_2\_is\_open}(h_0) \\
+      \qquad\Rightarrow \mathbb{Q}(\func{sys/door\_2\_is\_open}, \mathit{open}, \omega_0) \\
+      \qquad\Rightarrow \omega_1 = \func{step}(\func{sys/door\_2\_is\_open}, \omega_0) \\
+      \qquad\Rightarrow \mathit{open} = \mathtt{true} \\
+      \qquad\Rightarrow \mathbb{P}(\mathrm{sys/close\_door\_2}, \omega_1) \\
+    \end{array}
+  \]
+
+  \caption{Proof obligation about $\func{sys/door\_2\_is\_open}$ postcondition}
+  \label{fig:freespec:proofobligation}
 \end{figure}
 
 \[
@@ -697,9 +722,9 @@ computing platforms are often designed as a hierarchical succession of layers.
 \subsection{The Program Monad}
 % -----------------------------------------------------------------------------
 
-Modelling programs with side effects in purely functional languages such as {\textsc
-  Gallina} (the Coq specification language) or Haskell is usually achieved
-thanks to monads\,\cite{hoareetal2001monad}.
+Modelling programs with side effects in purely functional languages such as
+{\textsc Gallina} (the Coq specification language) or Haskell is usually
+achieved thanks to monads\,\cite{hoareetal2001monad}.
 %
 FreeSpec leverages a variant of the Free monad called the Program
 monad\,\cite{operational} to model programs with effects. Operational semantics
@@ -1336,9 +1361,9 @@ This property is not necessarily symmetric.
   Let $\I$ be an interface and
   $A \triangleq \langle \Omega, \func{step}, \mathbb{P}, \mathbb{Q} \rangle$ be
   an abstract specification dedicated to $\I$. Let
-  $\func{pnf} : \I \rightarrow \ac{prop}$ be a subset of
-  effects. $\func{pnf}$ is said to be a predicate of non-interference of $A$
-  (denoted $A \| \func{pnf}$) if and only if \[
+  $\func{pnf} : \I \rightarrow \ac{prop}$ be a subset of effects. $\func{pnf}$
+  is said to be a predicate of non-interference of $A$ (denoted
+  $A \| \func{pnf}$) if and only if \[
     \begin{array}{l}
       \forall \mathcal{A}\text{, } \omega \in \Omega\text{, } i \in
       \Interface{\I}{\mathcal{A}}\text{, }x \in \mathcal{A}\text{, } \\ \qquad
