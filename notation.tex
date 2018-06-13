@@ -9,9 +9,22 @@ These functions are called ``constructors,'' and they have mutually exclusive
 images, i.e. it is not possible to construct the same value with two different
 constructors.
 %
-Functions are written in bold.
+Constructor names begin with a capital letter.
 %
-In addition, constructors begin with a capital letter.
+We adopt a notation similar to Haskell sum types to define sets \emph{via}
+constructors.
+%
+That is, we can define the disjoint union operator $\uplus$ as follows:
+%
+\[
+  \begin{array}{rcl}
+    A \uplus B & \triangleq & \func{Left} : A \rightarrow A \uplus B \\
+               & |          & \func{Right} : B \rightarrow A \uplus B
+  \end{array}
+\]
+
+Given $a \in A$, we write $\func{Right}(a) \in A \uplus B$ for the injection of
+$a$ inside $A \uplus B$.
 
 \paragraph{Named Tuples}
 %

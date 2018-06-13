@@ -612,6 +612,13 @@ Our formalism has proven to be expressive enough to
 
 \chapter{Reasoning about Software Stack Isolation}
 
+\endquote{``\emph{BIOS as the root of trust. For everything.}''
+
+  \hfill\footnotesize --- Joanna Rutkowska}
+
+\vspace{1cm}\noindent
+%
+
 \section{Specifying Isolation Policies}
 \label{sec:speccert:usecase}
 
@@ -650,7 +657,7 @@ Because such policies are enforced \emph{via} several \ac{hse} mechanisms, we
 then introduce partial execution policies (\ref{subsec:speccert:partialsec}),
 and \ac{hse} mechanism cooperation (\ref{subsec:speccert:coop}).
 
-\subsection{Execution Tampering}
+\subsection{Code Injection}
 \label{subsec:speccert:tampering}
 %
 A memory location within a hardware architecture is a container which is able to
@@ -726,7 +733,7 @@ tampering.
   by an attacker to modify memory cells it should not be able to access.
 \end{example}
 
-\subsection{Execution Isolation Policies}
+\subsection{Isolation Policies}
 \label{subsec:speccert:globalsec}
 
 We leverage the software execution tampering property to propose a generic
@@ -887,12 +894,6 @@ global security policy $I$.
 
 \section{Specifying and Verifying an Idealized BIOS HSE Mechanism}
 
-\endquote{``\emph{BIOS as the root of trust. For everything.}''
-
-  \hfill\footnotesize --- Joanna Rutkowska}
-
-\vspace{1cm}\noindent
-%
 In the previous Chapter, we have introduced a formal definition of global and
 partial execution isolation policies (Definitions~\ref{def:speccert:global} and
 \ref{def:speccert:partial}).
@@ -926,7 +927,7 @@ As we introduce new definitions and theoretical results, we point to the related
 statements in our development, so the interesting reader familiar with Coq can
 read our machine-checked proofs.
 
-\subsection{{\scshape Minx86}}
+\subsection{{\scshape Minx86}: a Minimal x86 Hardware Model}
 \label{sec:speccert2:minx86}
 
 $\formatLTS{Minx86}$ is intended to be a minimal model for single core x86-based
@@ -944,7 +945,7 @@ to formally specify and verify a HSE mechanism, and thus is not exhaustive.
 %
 In its current state of implementation, its scope focuses on the \ac{smm}.
 
-\paragraph{Hardware Specifications}
+\paragraph{Model Scope}
 %
 We consider the \ac{cpu} can be either in System Management Mode (\ac{smm}) or
 in an unprivileged mode.
@@ -1011,7 +1012,7 @@ the SMRAM.
 The SMRAM is dedicated to store the code intended to be executed when the
 \ac{cpu} is in \ac{smm}.
 
-\paragraph{Tracking the Memory Ownership}
+\paragraph{Tracking Memory Ownership}
 %
 The \formatLTS{Minx86} definition is parameterized by a hardware-software
 mapping (Definition~\ref{def:hardsoftmap}).
@@ -1047,8 +1048,8 @@ that
   \formatLTS{Minx86}(context) \triangleq (minx86\_pre, minx86\_post(context))
 \]
 
-\subsection{Hardware Architecture State}
-
+\paragraph{Hardware Architecture State}
+%
 $\texttt{Archi}_{\set{S}}$ is defined as the Cartesian product of the set of
 states of the \ac{cpu}, the \ac{cpu}'s cache, the memory controller and the
 hardware memories exposed by both the DRAM controller and the VGA controller.
@@ -1330,7 +1331,7 @@ the \ac{smm} entry point (that is $SMBASE + \val{0x8000}$) is in SMRAM.
 The hardware architecture states are implemented in the
 \emph{SpecCert.x86.Archi\-tecture} module (about 1\,500 lines of code).
 
-\paragraph{Events as State-Transformers}
+\paragraph{Transition Labels and Transition Relation}
 %
 The set of events which trigger the state-transformations is denoted by
 $\texttt{Event}$.
@@ -1527,7 +1528,7 @@ of the \ac{cpu}) and the \ac{cpu} is in \ac{smm}.
 %  \caption{SpecCert CheatSheet}
 %\end{table}
 
-\section{System Management Mode HSE}
+\subsection{Specifying and Verifying a BIOS HSE Mechanism}
 \label{sec:speccert:smm}
 
 In \cite{intel2014manual}, Intel states ``the main benefit of \ac{smm} is that
@@ -1540,8 +1541,8 @@ the \ac{cpu} is in \ac{smm} needs to implement a \ac{hse} mechanism.
 In this section, we formalize and verify this mechanism against the model we
 have previously introduced.
 
-\subsection{Computing Platform and Security Policy}
-
+\paragraph{Specializing {\scshape Minx86}}
+%
 We consider three software components: the boot sequence code, the \ac{smm} code
 and the OS code.
 %
@@ -1600,19 +1601,9 @@ tamper with the \ac{smm} code execution.
 %
 This way, the \ac{smm} (which is the most privileged execution mode of the
 \ac{cpu}) cannot be used to perform an escalation privilege.
-%
-We define $smm\_security$ a predicate to model this security policy such as
-given $\rho \in \formatLTS{Smmx86}$,
-%
-\[
-  \begin{array}{l} smm\_security(\rho) \triangleq \\
-    \qquad software\_execution\_isolation(smm\_context, minx86\_execute, \rho,
-    \setshortdef{\val{smm}})
-  \end{array}
-\]
 
-\subsection{HSE Definition}
-
+\paragraph{HSE Definition}
+%
 We define $\Delta_{Smm}$ to model the \ac{hse} mechanism applied by the \ac{smm}
 code such that
 $\Delta_{Smm} = (inv_{Smm}, behavior_{Smm}, \setshortdef{\val{smm}},
