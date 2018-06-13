@@ -1,6 +1,7 @@
 \documentclass[oneside,a4paper]{memoir}
 \setsecnumdepth{subsection}
 \maxtocdepth{subsection}
+\usepackage{bookmark}
 
 \usepackage{subfig}
 
@@ -143,24 +144,38 @@ backgroundcolor=PineGreen!2}
 
   \maketitle
 
+  \cleardoublepage
+
   \begin{abstract}
     \input{abstract}
   \end{abstract}
 
+  \cleardoublepage
+
   \tableofcontents
+
+  \cleardoublepage
+
   \listoffigures
   \listoftables
-  \printacronyms[include-classes={abbrev},heading={chapter},name=Acronyms]
-  \acsetup{only-used=false}
-  \printacronyms[include-classes={nomencl},heading={chapter},name=Notations]
+  \input{notation}
 
   \mainmatter
 
   \input{Chapters/Introduction}
+
+  \part{Context}
   \input{Chapters/UseCase}
   \input{Chapters/RelatedWorks}
+
+  \part{Specifying and Verifying HSE Mechanisms}
   \input{Chapters/SpecCert}
+
+  \part{Towards Comprehensive Hardware Models}
   \input{Chapters/FreeSpec}
+
+  \addtocontents{toc}{\bigskip}
+  \bookmarksetup{startatroot}
   \input{Chapters/Conclusion}
 
   \appendix
@@ -168,7 +183,8 @@ backgroundcolor=PineGreen!2}
   \input{Appendices/SpecCert}
   \input{Appendices/FreeSpecTutorial}
 
+  \printacronyms[include-classes={abbrev},heading={chapter},name=Acronyms]
+  \printindex
   \bibliographystyle{unsrt}
   \bibliography{manuscript}
-  \printindex
 \end{document}

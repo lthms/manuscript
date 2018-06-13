@@ -4,7 +4,8 @@ TEX-SRC  := $(wildcard Chapters/*.tex)    \
             $(wildcard Appendices/*.tex)  \
             abbrev.tex                    \
             nomencl.tex                   \
-            abstract.tex
+            abstract.tex                  \
+            notation.tex
 COQ      := $(wildcard Listings/*.v)
 NUSMV    := $(wildcard Listings/*.nusmv)
 

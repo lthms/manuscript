@@ -311,45 +311,6 @@ Our choice is motivated by the following reasons:
   their implementation, this possibility is worth taking into account.
 \end{itemize}
 
-\section{Notations}
-
-As far as possible, we have tried to remain consistent while writing this
-thesis. \TODO{euh... non je ne formulerais pas çà comme çà! :-)}
-
-\paragraph{Conventions}
-%
-We often define sets of values, and interfaces in particular, in terms of
-functions to construct these values.
-%
-These functions are called ``constructors,'' and they have mutually exclusive
-images, i.e. it is not possible to construct the same value with two different
-constructors.
-%
-Functions are written in bold.
-%
-In addition, constructors begin with a capital letter.
-
-\paragraph{Named Tuples}
-%
-We adopt a notation similar to Haskell record types to manipulate ``named''
-tuples, that is tuples where each component is a field identified by a name.
-
-\[
-  \begin{array}{rccll}
-    A & \triangleq & \{ & \func{field_1}: & T_1 \\
-      &            & ;  & \func{field_2}: & T_2 \\
-      &            & \} &
-  \end{array}
-\]
-
-For $a \in A$, we write $a.\func{field_1}$ for selecting the value of the
-\func{field_1} field. We write $a \{ \func{field_1} \leftarrow t \}$ for
-updating the value of the field \func{field_1}. As a consequence,
-%
-\[
-  a \{ \func{field_1} \leftarrow t \}.\func{field_1} = t
-\]
-
 \section{Contributions and Outline}
 
 Our works fall within a context where the security of lower levels of
@@ -369,7 +330,6 @@ in line with the two challenges we tackle in this thesis, that is:
 \item defining hardware models which can remain exploitable in presence of large
   architecture hardware. \TODO{C'est peut-être s'avancer un peu que de prétendre qu'on vise le passage à l'échelle. On s'attaque surtout à la modularité qui permettra peut-être de s'attaquer à des modèles complexes (mais c'est indirect)}
 \end{inparaenum}
-
 
 In Chapter~\ref{chapter:speccert}, we present a generic formalism to specify and
 verify against a hardware model HSE mechanism whose purpose is to isolate

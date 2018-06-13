@@ -8,68 +8,7 @@
 
 \vspace{1cm}\noindent
 %
-A typical computing platform is made of dozens of hardware components, and some
-of them execute complex software stacks.
-%
-In this context, building a secure computing system with respect to a given
-security policy remains challenging, because attackers will leverage any
-vulnerability they can find.
-%
-Both local component flaws and components composition inconsistencies, that is,
-a mismatch between requirements assumed by some client components and the actual
-guarantees provided by others, can be used by attackers.
-
-The latter scenario may lead to a situation where every component seems to be
-working as expected, but their composition creates an attack path.
-%
-We name this class of security vulnerabilities ``architectural
-attacks''\,\cite{letan2016speccert} afterwards.
-%
-Over the past decade, many critical vulnerabilities affecting computing systems,
-in particular those relying on the x86 architecture, have raised awareness about
-the threat posed by architectural attacks.
-%
-Figure \ref{fig:freespec:computing-platform} summarizes several significant
-attacks\,\cite{wojtczuk2009smram,duflot2009smram,domas2015sinkhole,kallenberg2015racecondition,kovah2015senter,stewin2012dma}
-inside an idealized view of an x86 computing platform.
-%
-In all cases, the vulnerability was rooted in an inconsistency in the components
-composition.
-
-\begin{figure}
-  \centering \includestandalone[width=.8\textwidth]{Figures/computing-system}
-  \caption{Idealized x86 Computing Platform}
-  \label{fig:freespec:computing-platform}
-\end{figure}
-
-The isolation of the System Management Mode (SMM) code by the hardware
-architecture is a good example to illustrate the threat posed by architectural
-attacks.
-%
-The SMM is the most privileged execution mode of x86 CPU.
-%
-Its purpose is to provide an ``isolated processor environment that operates
-transparently to the operating system''\,\cite{intel2014manual} to execute a
-so-called SMM code provided by the computer manufacturer.
-%
-Since the SMM code is the most privileged software component executed by an x86
-CPU, it is a desirable target for an attacker.
-%
-The SMM code is stored in a dedicated memory region within the system memory,
-called the SMRAM; it is expected that only a CPU in SMM can access the SMRAM.
-%
-In particular, the Memory Controller Hub (MCH)\,\cite{intel2009mch} provides a
-security mechanism to that end.
-%
-In 2009, Duflot \emph{et al.}\,\cite{duflot2009smram} and Wojtczuk \emph{et
-  al.}\,\cite{wojtczuk2009smram} have independently shown that the cache could
-be used to circumvent this protection.
-%
-The countermeasure required to add a new security mechanism to the CPU, meaning
-only computers produced after 2009 are protected against this particular
-vulnerability.
-
-For many years, industrial manufacturers\,\cite{reid2017arm,leslie2015sgx} and
+For many years, industrial vendors\,\cite{reid2017arm,leslie2015sgx} and
 researchers\,\cite{chong2016report,choi2017kami} have aimed to formally specify
 and verify hardware architectures.
 %
@@ -80,13 +19,6 @@ comprehensive in terms of its hardware and software components.
 %
 Unfortunately, such a model is a prerequisite to verify a computing platform in
 terms of architectural attacks.
-%
-The Coq proof assistant\,\cite{coq} has proven to be effective to model specific
-hardware
-components\,\cite{braibant2011coquet,morrisett2012rocksalt,choi2017kami,jomaa2016mmu}.
-%
-It provides a rich specification language, tools to write machine-checked proofs
-and a mechanism to derive executable programs to experimentally validate models.
 %
 The scale of the task dictates several requirements regarding the formalism to
 adopt in this particular case.
@@ -110,7 +42,7 @@ They allow to model large classes of effects (e.g., exception, state,
 non-determinism) and to compose effects within purely functional programs, while
 deferring the realizations of these effects to dedicated handlers.
 
-In this paper, we aim to show how a variant of algebraic effects based on Free
+In this Chapter, we aim to show how a variant of algebraic effects based on Free
 monads can be used to reason about large systems, by modelling their components
 as effect handlers.
 %
@@ -165,7 +97,7 @@ Here we talk about the scale of the model.
 
 \begin{figure}
   \begin{center}
-    \subfloat[Verification of the CPU]{
+    \subfloat[Verification of a Core]{
       \begin{tikzpicture}
         % CPU
         \node [inner sep=8pt, draw] (CPU) {Core};%

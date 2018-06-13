@@ -1,0 +1,35 @@
+\chapter{Notations}
+
+\paragraph{Conventions}
+%
+We often define sets of values, and interfaces in particular, in terms of
+functions to construct these values.
+%
+These functions are called ``constructors,'' and they have mutually exclusive
+images, i.e. it is not possible to construct the same value with two different
+constructors.
+%
+Functions are written in bold.
+%
+In addition, constructors begin with a capital letter.
+
+\paragraph{Named Tuples}
+%
+We adopt a notation similar to Haskell record types to manipulate ``named''
+tuples, that is tuples where each component is a field identified by a name.
+
+\[
+  \begin{array}{rccll}
+    A & \triangleq & \{ & \func{field_1}: & T_1 \\
+      &            & ;  & \func{field_2}: & T_2 \\
+      &            & \} &
+  \end{array}
+\]
+
+For $a \in A$, we write $a.\func{field_1}$ for selecting the value of the
+\func{field_1} field. We write $a \{ \func{field_1} \leftarrow t \}$ for
+updating the value of the field \func{field_1}. As a consequence,
+%
+\[
+  a \{ \func{field_1} \leftarrow t \}.\func{field_1} = t
+\]
