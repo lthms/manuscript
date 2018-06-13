@@ -167,49 +167,70 @@ Here we talk about the scale of the model.
   \begin{center}
     \subfloat[Verification of the CPU]{
       \begin{tikzpicture}
-        % styling nodes
-        % -------------------------------------------------------------------
-        [baseline, thick, scale=0.8, every node/.style={transform shape},
-        component/.style={draw, rectangle,inner sep=5pt, text badly centered},
-        interface/.style={font=\footnotesize}]
-        % --------------------------------------------------------------------------------
+        % CPU
+        \node [inner sep=8pt, draw] (CPU) {CPU};%
+        \draw ([yshift=5pt, xshift=3pt]CPU.north west) -- ([yshift=5pt,
+        xshift=-3pt]CPU.north east);%
+        \node [right=4pt of CPU.north east, yshift=3pt] (Ic)
+        {$I_{\mathrm{CPU}}$};%
 
-        % defining nodes
-        % -----------------------------------------------------------------
-        \node (S) [component, dashed] {Software};%
-        \node (CPU) [component, right=of S] {CPU};%
-        \node (MC) [component, right=of CPU, dashed] {Memory Controller};%
-        % --------------------------------------------------------------------------------
+        % Memory Controller
+        \node [inner sep=8pt, draw, dashed, below=30pt of CPU.center] (MC)
+        {Memory Controller};%
+        \draw ([yshift=5pt, xshift=3pt]MC.north west) -- ([yshift=5pt,
+        xshift=-3pt]MC.north east);%
+        \node [right=4pt of MC.north east, yshift=3pt] (Im)
+        {$I_{\mathrm{MC}}$};%
 
-        % defining edges
-        % -----------------------------------------------------------------
-        \draw [-latex] (S) to node [interface, above] {$I_{\text{CPU}}$} (CPU);%
-        \draw [-latex] (CPU) to node [interface, above] {$I_{\text{MC}}$} (MC);%
-        % --------------------------------------------------------------------------------
+        % Software
+        \node [inner sep=8pt, draw, dashed, above=30pt of CPU.center] (S)
+        {Software};%
+
+        % arrows
+        \draw [-latex] (CPU.south) -- ([yshift=5pt]MC.north);%
+        \draw [-latex] (S.south) -- ([yshift=5pt]CPU.north);%
+
+        % blank
+        \node [below=of MC.center] (Blank) {};
       \end{tikzpicture}
     } \quad \subfloat[Verification of the Memory Controller]{
       \begin{tikzpicture}
-        % styling nodes
-        % -------------------------------------------------------------------
-        [baseline, thick, scale=0.8, every node/.style={transform shape},
-        component/.style={draw, rectangle,inner sep=5pt, text badly centered},
-        interface/.style={font=\footnotesize}]
-        % --------------------------------------------------------------------------------
+        % Mems
+        % -- DRAM
+        \node (M) {};%
+        \node [inner sep=8pt, dashed, draw, left=3pt of M.center, text
+        width=1.3cm, text badly centered] (DRAM) {DRAM};%
+        \draw ([yshift=5pt, xshift=3pt]DRAM.north west) -- ([yshift=5pt,
+        xshift=-3pt]DRAM.north east);%
+        \node [left=4pt of DRAM.north west, yshift=3pt] (Id)
+        {$I_{\mathrm{DRAM}}$};%
+        % -- VGA
+        \node [inner sep=8pt, dashed, draw, right=3pt of M.center, text
+        width=1.3cm, text badly centered] (VGA) {VGA};%
+        \draw ([yshift=5pt, xshift=3pt]VGA.north west) -- ([yshift=5pt,
+        xshift=-3pt]VGA.north east);%
+        \node [right=4pt of VGA.north east, yshift=3pt] (Iv)
+        {$I_{\mathrm{VGA}}$};%
 
-        % defining nodes
-        % -----------------------------------------------------------------
-        \node (CPU) [component, right=of S, dashed] {CPU};%
-        \node (MC) [component, right=of CPU] {Memory Controller};%
-        \node (DRAM) [component, above=of MC, dashed] {DRAM Controller};%
-        \node (VGA) [component, below=of MC, dashed] {VGA Controller};
-        % --------------------------------------------------------------------------------
+        % Memory Controller
+        \node [inner sep=8pt, draw, above=30pt of M.center] (MC) {Memory
+          Controller};%
+        \draw ([yshift=5pt, xshift=3pt]MC.north west) -- ([yshift=5pt,
+        xshift=-3pt]MC.north east);%
+        \node [right=4pt of MC.north east, yshift=3pt] (Im)
+        {$I_{\mathrm{MC}}$};%
 
-        % defining edges
-        % -----------------------------------------------------------------
-        \draw [-latex] (CPU) to node [interface, above] {$I_{\text{MC}}$} (MC);%
-        \draw[-latex] (MC) to (DRAM);%
-        \draw[-latex] (MC) to (VGA);
-        % --------------------------------------------------------------------------------
+        % CPU
+        \node [inner sep=8pt, draw, dashed, above=30pt of MC.center] (CPU)
+        {CPU};%
+
+        % arrows
+        \draw [-latex] (CPU.south) -- ([yshift=5pt]MC.north);%
+        \draw [latex-] ([yshift=5pt]DRAM.north) |- (MC.south);%
+        \draw [latex-] ([yshift=5pt]VGA.north) |- (MC.south);%
+
+        % blank
+        \node [below=of M.center] (Blank) {};
       \end{tikzpicture}
     }
   \end{center}
