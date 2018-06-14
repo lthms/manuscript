@@ -1,3 +1,8 @@
+# coq
+*.glob
+*.vo
+.*.aux
+# latex garbage
 *.thm
 *.aux
 main-blx.bib

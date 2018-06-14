@@ -24,5 +24,12 @@ clean:
 	rm -f main*.idx
 	rm -f main*.ind
 	rm -f main*.pdf
+	rm -f Listings/.*.aux
+	rm -f Listings/*.glob
+	rm -f Listings/*.vo
 
-.PHONY: minimal main default clean
+coq:
+	coqc Listings/Airlock.v
+	coqc Listings/SpecCert.v
+
+.PHONY: minimal main default clean coq
