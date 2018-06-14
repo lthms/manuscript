@@ -54,13 +54,14 @@ The typical computing platform can be broken down to the following layers:
   For instance, Intel has started to provide out-of-band management features to
   its processors in 2008\,\cite{ruan2014me}.
   %
-  In addition, some firmware is responsible for the initialization of the
+  In addition, a piece of firmware is responsible for the initialization of the
   platform as a whole.
   %
   Afterwards, when we refer to this specific type of firmware, we use the term
   \ac{bios}.
   %
-  \TODO{Dire qu'aujourd'hui la plupart des BIOS respecte le standard UEFI.}
+  Notably, the \ac{uefi}\,\cite{uefi2017uefi} is a standard whose purpose is to
+  describe the role and software architecture for modern \ac{bios}.
   %
 \item [System Software]
   %
@@ -141,10 +142,10 @@ The typical computing platform can be broken down to the following layers:
     \draw (App3.south) |- (OS.north);%
 
     %% LAYERS
-    \node [right=of MC] (Hardware) {\scshape Hardware};
-    \node [right=of MC, yshift=60pt] (Hardware) {\scshape Firmware};
-    \node [right=of MC, yshift=110pt] (Hardware) {\scshape System Software};
-    \node [right=of MC, yshift=150pt] (Hardware) {\scshape Applications};
+    \node [right=of MC] (Hardware) {\scshape Hardware};%
+    \node [right=of MC, yshift=60pt] (Hardware) {\scshape Firmware};%
+    \node [right=of MC, yshift=110pt] (Hardware) {\scshape System Software};%
+    \node [right=of MC, yshift=150pt] (Hardware) {\scshape Applications};%
   \end{tikzpicture}
 
   \caption{Layers of abstractions in a hypothetical computing platform}
@@ -169,7 +170,23 @@ It is also frequent that application internals are themselves built as
 abstraction layers (\emph{e.g.} applicative framework, core logic, plugins,
 etc.).
 
-\TODO{Faire reférénce à la figure dans le texte}
+Figure~\ref{fig:intro:layers} pictures the abstraction layers of an hypothetical
+---yet inspired by the Intel x86 hardware architecture--- computing platform.
+%
+The \ac{cpu} is connected to two other hardware components, a graphic card and a
+memory controller.
+%
+These three hardware components execute a software stack each.
+%
+Some features of the \ac{cpu} are implemented in the form of ``microcode''
+programs\,\cite{chen2014microcode}, which determine, in part, the semantics of
+instruction set.
+%
+The \ac{cpu} executes the \ac{bios}, an operating system (system software) and
+several applications.
+%
+Both the graphic card and the memory controller execute their own software
+stack, which may be broken down to several abstraction layers as well.
 
 \section{Hardware-based Security Enforcement mechanisms}
 
@@ -235,9 +252,9 @@ Both remain challenging.
 
 \paragraph{Software Errors.}
 %
-\TODO{Ajouter une phrase d'intro du style "Vulnerabilities in HSE are often due
-  to some misuse by trusted software" ou un truc du genre.}
-
+Vulnerabilities in \ac{hse} mechanism implementations by trusted software
+components are often due to some misuse of hardware features.
+%
 Many facts can explain this state of things.
 %
 In the past, lower-level pieces of software, such as firmware components, may
@@ -322,23 +339,22 @@ the previous proofs hold, meaning this feature does not introduce any
 architectural attack.
 %
 Secondly, it provides unambiguous specifications to firmware and system software
-developers.
+developers, in the form of a list of requirements to comply with.
 %
 We believe these specifications can be a valuable addition to the existing
 documentation, because they gather at one place information that is normally
-scattered across many documents. \TODO{En outre, cela à le mérite d'établir une
-  liste exauhstive et minimaliste des exigences à respecter pour espérer obtenir
-  les garanti de sécurité promise. La documentation, outre le fait qu'elle est
-  éparpillée, est rarement aussi claire à ce sujet.}
+scattered across many documents which sometimes suffer from lack of security
+focus.
 
 To specify a HSE mechanism, we have to model the hardware architecture and the
 scale of the task represents an important challenge.
 %
 Because architectural attacks often come from unsuspected places \TODO{Donner un
   exemple, par exemple le cache, qui n'est pas un mécanisme de sécurité}, it is
-necessary to consider the whole computing platform. At the same time, many
-components are individually complex. \TODO{Donner un exemple avec des données
-  qualitative/quantitative.}
+necessary to consider the whole computing platform. At the same time, some
+components are individually complex.
+%
+\TODO{Donner un exemple avec des données qualitative/quantitative.}
 %
 In addition, new hardware components are frequently released, and the same
 hardware component can be found in different hardware architecture to play a
@@ -388,8 +404,7 @@ Our choice is motivated by the following reasons:
 \section{Contributions and Outline}
 
 Our works fall within a context where the security of lower levels of
-abstraction \TODO{lower lever of abstratcion? low-level components?} grows in
-importance.
+abstraction (\emph{e.g.} hardware components, firmware) grows in importance.
 %
 In Chapter~\ref{chapter:usecase}, we describe in more detail the x86 hardware
 architecture, and a selection of representative architectural attacks which have
@@ -410,25 +425,25 @@ in line with the two challenges we tackle in this thesis, that is:
 \end{inparaenum}
 
 In Chapter~\ref{chapter:speccert}, we present a generic formalism to specify and
-verify against a hardware model HSE mechanism whose purpose is to isolate
-trusted software components execution from the rest of the software
-stack. \TODO{Phrase longe, couper en deux? "to specify and verify HSE mechanisms
-  against a hardware Model. The objectif of such HSE is ...}
+verify against a hardware model HSE mechanism.
+%
+In Chapter~\ref{chapter:speccert2}, we leverage our formal
+definition to reason about HSE mechanisms which isolate software components from
+each other within a software stack.
 %
 We have implemented SpecCert, a framework for the Coq proof assistant based on
 this formalism. In addition, we have implemented {\scshape Minx86}, a minimal
-x86 model, and we have verified the HSE mechanism implemented by x86
-BIOSes.\TODO{La description du HSE est un peu vague. il faudrait dire que c'est
-  le HSE pour protéger la SMM. En outre, tu as vérifié ce HSE sur Minx86 (il
-  faut le dire explicitement)}
+x86 model, and we have verified a HSE mechanism implemented by x86 BIOSes
+against {\scshape Minx86}.
+%
+This HSE mechanism relies on a high-privileged execution mode of x86 \acp{cpu}
+called the System Management Mode\,\cite{intel2014manual}.
 %
 This work has been presented at the $21^{th}$ International Symposium on Formal
 Methods (FM2016)\,\cite{letan2016speccert}.
 
-In Chapter~\ref{chapter:freespec}, we present a systemic approach to specify and
-verify large \TODO{encore une fois, "large" est peut-être de trop... tu n'as pas
-  montré que ton approche passe l'échelle. Par contre, le côté modulaire, pas de
-  soucis. }systems, organized as trees of components, in a modular way.
+In Chapter~\ref{chapter:freespec}, we present a systemic approach to modularly
+specify and verify systems organized as trees of components.
 %
 We apply ideas from verification of computer programs with side effects to the
 domain of component-based modelling. The resulting approach can be used both for
