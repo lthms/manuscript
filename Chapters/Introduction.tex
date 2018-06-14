@@ -97,7 +97,7 @@ The typical computing platform can be broken down to the following layers:
     height=40pt, text badly centered] (MC) {Memory Controller};%
 
     \draw [dotted] ([yshift=5pt,xshift=-5pt]Card.north west) --
-    ([yshift=5pt,xshift=5pt]MC.north east);%
+    ([yshift=5pt,xshift=125pt]MC.north east);%
 
     %% FIRMWARE
     \node [draw, inner sep=8pt, above=10pt of Card, text width=60pt, minimum
@@ -110,14 +110,14 @@ The typical computing platform can be broken down to the following layers:
     height=25pt, text badly centered] (BIOS) {BIOS};%
 
     \draw [dotted] ([yshift=71pt,xshift=-5pt]Card.north west) --
-    ([yshift=71pt,xshift=5pt]MC.north east);%
+    ([yshift=71pt,xshift=125pt]MC.north east);%
 
     %% OS
     \node [draw, inner sep=8pt, above=10pt of BIOS, text width=100pt, minimum
     height=30pt, text badly centered] (OS) {Operating System};%
 
     \draw [dotted] ([yshift=111pt,xshift=-5pt]Card.north west) --
-    ([yshift=111pt,xshift=5pt]MC.north east);%
+    ([yshift=111pt, xshift=125pt]MC.north east);%
 
     %% Applications
     \node [draw, above=10pt of OS, text width=29, minimum height=30pt, text
@@ -139,6 +139,12 @@ The typical computing platform can be broken down to the following layers:
     \draw (App1) -- (OS);%
     \draw (App2.south) |- (OS.north);%
     \draw (App3.south) |- (OS.north);%
+
+    %% LAYERS
+    \node [right=of MC] (Hardware) {\scshape Hardware};
+    \node [right=of MC, yshift=60pt] (Hardware) {\scshape Firmware};
+    \node [right=of MC, yshift=110pt] (Hardware) {\scshape System Software};
+    \node [right=of MC, yshift=150pt] (Hardware) {\scshape Applications};
   \end{tikzpicture}
 
   \caption{Layers of abstractions in a hypothetical computing platform}
