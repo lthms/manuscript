@@ -19,24 +19,18 @@ takes into account that
 \item several \ac{hse} mechanisms are often implemented simultaneously, to
   enforce several security policies.
 \end{inparaenum}
-
-These characteristics convinced us to break down our approach into three
-components: hardware models, security policies and \ac{hse} mechanisms.
+%
+As a consequences of these characteristics, we have broken down our formal
+definition into three components: hardware models, \ac{hse} mechanisms and
+security policies.
 %
 First, we model the hardware architecture as a \ac{lts} whose sequences of
 transitions, also called traces, characterize every possible software components
 execution (Section~\ref{sec:speccert:hardware}).
 %
-This model acts as a foundation for the two other components: both security
-policies and \ac{hse} mechanisms are expressed against it
-(Section~\ref{sec:speccert:hse}).
-%
-This opens the road toward using one hardware model to define and verify as many
-\ac{hse} mechanisms as necessary.
-%
-As we conclude this Chapter, we illustrate how our formalism can be leveraged in
-order to reason about the isolation of components of a software stack, notably
-in terms of sharing of responsibility between software components.
+This model acts as a foundation for the two other components: \ac{hse}
+mechanisms (Section~\ref{sec:speccert:hse}) and security policies
+(Section~\ref{sec:speccert:security}) are expressed against a hardware model.
 
 For the reader familiar with Coq, we present an implementation of our formalism
 in Appendix~\ref{appendix:speccert}.
@@ -52,30 +46,10 @@ In line with the works we have described in Section~\ref{sec:related:review}, we
 model a hardware architecture which executes several software components as a
 \ac{lts} with controllable and observable transitions.
 %
-We then introduce the notion of traces of a hardware model, and model security
-policies as predicates on sets of traces (\ref{subsec:speccert:def}).
+We also introduce the notion of traces of a hardware model.
 %
 This allows us to model the different classes of security policies discussed
 previously (\ref{subsec:state:secu}).
-
-The state of a hardware architecture models the configuration of its devices at
-a given time.
-%
-This configuration may change over time with respect to the hardware
-specifications and comprises any relevant data such as register values, inner
-memory contents, etc.
-%
-These state transformations occur during the system's transitions.
-%
-We distinguish between two classes of transitions: the software transitions
-which are direct and foreseeable side effects of the execution of a \ac{cpu}
-instruction and the hardware transitions which are not.
-%
-Differentiating between transitions which are controllable and transitions which
-are only observable is not a novel approach.
-%
-David Basin \emph{et al.} have notably emphasized the importance of transitions
-which are only observable in terms of security\,\cite{basin2013enforceable}.
 
 \begin{definition}[Hardware Model]
   \label{def:speccert:model}
@@ -110,6 +84,29 @@ which are only observable in terms of security\,\cite{basin2013enforceable}.
   \]
 \end{definition}
 
+\paragraph{States}
+%
+The state of a hardware architecture models the configuration of its devices at
+a given time.
+%
+This configuration may change over time with respect to the hardware
+specifications and comprises any relevant data such as register values, inner
+memory contents, etc.
+%
+These state transformations occur during the system's transitions.
+
+\paragraph{Transitions}
+%
+We distinguish between two classes of transitions: the software transitions
+which are direct and foreseeable side effects of the execution of a \ac{cpu}
+instruction and the hardware transitions which are not.
+%
+Differentiating between transitions which are controllable and transitions which
+are only observable is not a novel approach.
+%
+David Basin \emph{et al.} have notably emphasized the importance of transitions
+which are only observable in terms of security\,\cite{basin2013enforceable}.
+
 The execution of an instruction can be broken down into sequences of these
 transitions.
 %
@@ -137,7 +134,7 @@ In this scenario, only one software transition occurs, when the \ac{cpu} reads
 the content of \texttt{ecx}.
 %
 The following transition models the interrupt, and is labelled as ``hardware''.
-
+%
 Hardware transitions are not limited to interrupts raised by a \ac{cpu}.
 %
 They make be provoked by other hardware components as well.
@@ -151,22 +148,16 @@ not guaranteed.
 Finally, and as suggested by David Bosin \emph{et al.}, hardware transitions can
 be leveraged to model a clock, and therefore reasoning about time.
 
-\section{Security Policies}
-\label{sec:speccert:security}
-
-We now explain how we model different security policies discussed in
-Section~\ref{subsec:state:secu}.
+\paragraph{Trace}
 %
-Because these security policies are defined against traces of the model, we
-first introduce a formal definition of them, along with two helpers functions to
-manipulate them more easily.
+Finally, we formally introduce the definition of traces of a hardware model.
+%
+A trace is a non-empty sequence of transitions of~$\Sigma$, such that for two
+consecutive transitions, the resulting state of the first is the initial state
+of the next.
 
 \begin{definition}[Traces]
   \label{def:speccert:trace}
-  A trace is a non-empty sequence of transitions of~$\Sigma$, such that for two
-  consecutive transitions, the resulting state of the first is the initial state
-  of the next.
-
   We write $\pathesLTS{Ez}$ for the set of traces of a hardware model $\Sigma$,
   and we consider the following functions:
   %
@@ -179,82 +170,23 @@ manipulate them more easily.
   \end{itemize}
 \end{definition}
 
-We start from the most general definition possible, then discuss how more
-specific security properties can be modelled as a specialization of that general
-definition.
-
-\begin{definition}[Security Policy]
-  \label{def:speccert:secpol}
-  %
-  A security policy is a predicate on sets of traces
-  $\powerset(\pathesLTS{Ez})$.
-\end{definition}
-
-Hyperproperties\,\cite{clarkson2010hyperproperties} such as noninterference
-require a definition that general.
-%
-On the contrary, security properties\,\cite{schneider2000enforceable}, that is
-liveness properties (something ``good'' happens eventually) and safety
-properties (nothing ``bad'' happens) can be modelled more straightforwardly.
-
-\begin{definition}[Security Property]
-  A security property is a predicate on traces $\pathesLTS{Ez}$.
-  %
-  We write $\partial P$ for the security policy derived from the security
-  property $P$, such that
-  %
-  \[
-    \partial P(R) \triangleq \forall \rho \in R, P(\rho)
-  \]
-\end{definition}
-
-Safety properties focus on avoiding ``bad'' transitions, and therefore their
-definition can be even simpler, if the hardware model allows for distinguishing
-between safe and unsafe transitions solely based on the current state, and not
-the traces past.
-
-\begin{definition}[Safety Property]
-  \label{def:speccert:safetyprop}
-  %
-  A safety property is a predicate on transitions $\mathcal{T}(\Sigma)$.
-  %
-  We write $\partial^2 P$ for the security policy derived from the safety
-  property $P$.
-  %
-  A set of trace $R$ satisfies $\partial^2 P$ if and only if every transition of
-  every trace $\rho \in R$ satisfies $P$, that is
-  %
-  \[
-    \partial^2 P(R) \triangleq \forall \rho \in R, \forall (h, ev, h') \in
-    \func{trans}(\rho), P(h, ev, h')
-  \]
-\end{definition}
-
-To the best of our knowledge, hardware architectures often provide security
-features to enforce security properties, in the form of memory protection
-(safety) and hardware interrupt (liveness).
-%
-Hyperproperties have to be implemented by software components themselves.
-%
-We already gave the example of the x86 architecture, which does explicitly state
-it does not protect against side-channel attacks such as cache-timing attacks.
-
 \section{HSE Mechanisms}
 \label{sec:speccert:hse}
 
 The previous definitions allow us to propose a formal definition for \ac{hse}
 mechanisms, notably based on requirements on states and requirements on
-transitions (\ref{subsec:speccert:hsedef}).
+transitions.
 %
 Then, we detail two so-called \ac{hse} Laws, whose main purpose is to enforce
 requirements consistency: requirements on transitions should preserve
-requirements on states (\ref{subsec:speccert:laws}).
+requirements on states.
 %
-From a \ac{hse} mechanism definition, we derive a set of compliant traces
-(\ref{subsec:speccert:compliant}) which we use to determine if the \ac{hse}
-mechanism is correct with respect to a targeted security policy
-(\ref{subsec:speccert:correct}).
+From a \ac{hse} mechanism definition, we derive a set of compliant traces which
+we use to determine if the \ac{hse} mechanism is correct with respect to a
+targeted security policy.
 
+\paragraph{Execution Context}
+%
 One of the specificities of \ac{hse} mechanisms is the sharing of the \ac{cpu}
 interface between the trusted components and the rest of the software stack,
 considered as the adversary.
@@ -288,6 +220,8 @@ component currently executed by the corresponding core.
 %
 However, this is out of the scope of this Chapter.
 
+\paragraph{Definition}
+%
 A \ac{hse} mechanism is a set of requirements on states to characterize safe
 hardware configurations and a set of requirements on software transitions to
 preserve the state requirements through software execution.
@@ -493,6 +427,64 @@ transitions of the trace satisfies the software requirements (\func{behaviour}).
   \end{proof}
 \end{lemma}
 
+\section{Security Enforcement}
+\label{sec:speccert:security}
+
+\paragraph{Security Policies}
+%
+We now explain how we model different security policies discussed in
+Section~\ref{subsec:state:secu}.
+%
+We start from the most general definition possible, then discuss how more
+specific security properties can be modelled as a specialization of that general
+definition.
+
+\begin{definition}[Security Policy]
+  \label{def:speccert:secpol}
+  %
+  A security policy is a predicate on sets of traces
+  $\powerset(\pathesLTS{Ez})$.
+\end{definition}
+
+Hyperproperties\,\cite{clarkson2010hyperproperties} such as noninterference
+require a definition that general.
+%
+On the contrary, security properties\,\cite{schneider2000enforceable}, that is
+liveness properties (something ``good'' happens eventually) and safety
+properties (nothing ``bad'' happens) can be modelled more straightforwardly.
+
+\begin{definition}[Security Property]
+  A security property is a predicate on traces $\pathesLTS{Ez}$.
+
+  % We write $\partial P$ for the security policy derived from the security
+  % property $P$, such that
+  % %
+  % \[
+  %   \partial P(R) \triangleq \forall \rho \in R, P(\rho)
+  % \]
+\end{definition}
+
+Safety properties focus on avoiding ``bad'' transitions, and therefore their
+definition can be even simpler, if the hardware model allows for distinguishing
+between safe and unsafe transitions solely based on the current state, and not
+the traces past.
+
+\begin{definition}[Safety Property]
+  \label{def:speccert:safetyprop}
+  A safety property is a predicate on transitions $\mathcal{T}(\Sigma)$.
+
+  % We write $\partial^2 P$ for the security policy derived from the safety
+  % property $P$.
+  %  %
+  % A set of trace $R$ satisfies $\partial^2 P$ if and only if every transition
+  % of every trace $\rho \in R$ satisfies $P$, that is
+  %  %
+  % \[
+  %   \partial^2 P(R) \triangleq \forall \rho \in R, \forall (h, ev, h') \in
+  %   \func{trans}(\rho), P(h, ev, h')
+  % \]
+\end{definition}
+
 \paragraph{HSE Mechanism Correctness}
 %
 The main purpose of the \ac{hse} Laws is to verify it is consistent.
@@ -511,7 +503,17 @@ mechanism definition.
   $\Delta$ satisfies $P$, that is
   %
   \[
-    \Delta \models P \triangleq P(\mathcal{C}(\Delta))
+    \Delta \models P \triangleq
+    \begin{cases}
+      P(\mathcal{C}(\Delta)) & \text{if } P \text{ is a predicate on sets of
+        traces} \\
+      \forall \rho \in \mathcal{C}(\Delta), P(\rho) & \text{if } P \text{ is a
+        predicate on traces} \\
+      \forall \rho \in \mathcal{C}(\Delta), \forall \mathit{tr} \in
+      \func{trans}(\rho), & \text{if }P \text{ is a predicate on
+        transitions} \\
+      \qquad P(\mathit{tr}) &
+    \end{cases}
   \]
 \end{definition}
 
@@ -521,13 +523,16 @@ yet is not correct with respect to its targeted security policy.
 It was the case, for instance, for the protection of the SMRAM by the sole
 \texttt{SMRAMC} register.
 %
-The state requirement at the time would have been focused on the SMRAM content,
-which is correctly guarded against unprivileged modifications by the memory
-controller.
+The state requirement focused on the SMRAM content, which is correctly protected
+against unprivileged modifications by the memory controller.
 %
 However, this property alone is not strong enough to enforce the BIOS Integrity
 security property (Definition~\ref{def:usecase:biosint}), as evidenced by the
 SMRAM Cache Poisoning attack.
+
+\paragraph{Reasoning about Correctness}
+%
+Bla
 
 \begin{theorem}[Correct HSE Mechanism for Safety Properties]
   \label{theorem:speccert:correcthse}
@@ -546,7 +551,7 @@ SMRAM Cache Poisoning attack.
   is a sufficient condition for
   %
   \[
-    \Delta \models \partial^2 P
+    \Delta \models P
   \]
 
   \begin{proof}
@@ -556,7 +561,7 @@ SMRAM Cache Poisoning attack.
     By definition of Compliant Runs, we know that every transition satisfies the
     safety property $P$.
     %
-    We conclude with the Definition of $\partial^2 P$.
+    We conclude with the Definition of $P$.
   \end{proof}
 \end{theorem}
 
@@ -587,27 +592,6 @@ models, that is
 %
 \item verifying that the \ac{hse} mechanism is correct with respect to the
   targeted security policy.
-\end{inparaenum}
-
-We have finished our presentation with a more concrete use case: so-called
-execution isolation policies.
-%
-These policies prevent software components to tamper with the execution of their
-\ac{tcb}, where ``tampering with the execution'' means being able to provoke the
-execution of an instruction of their choice.
-%
-They are representative of what real-world \ac{hse} mechanisms are meant to
-enforce.
-%
-Our formalism has proven to be expressive enough to
-%
-\begin{inparaenum}[(1)]
-\item break down a global execution security policy into several, simpler
-  partial ones, and
-%
-\item prove that the global policy could be enforced by the concurrent
-  implementation of several \ac{hse} mechanisms which are dedicated to one
-  partial policy each.
 \end{inparaenum}
 
 \chapter{Reasoning about Software Stack Isolation}
@@ -1800,9 +1784,9 @@ third \ac{hse} mechanism, constructed by a dedicated operator $\sqcap$.
   \[
     \begin{array}{cl}
       \Delta_{\mathtt{bios}}
-      & \models \partial^2 I|U_{\mathtt{os}} \\
+      & \models I|U_{\mathtt{os}} \\
       \Delta_{\mathtt{os}} & \models
-                             \partial^2 I|U_{\mathtt{apps}}
+                             I|U_{\mathtt{apps}}
     \end{array}
   \]
 
@@ -1811,7 +1795,7 @@ third \ac{hse} mechanism, constructed by a dedicated operator $\sqcap$.
   that is
   %
   \[
-    \Delta_{\mathtt{bios}} \sqcap \Delta_{\mathtt{os}} \models \partial^2 I
+    \Delta_{\mathtt{bios}} \sqcap \Delta_{\mathtt{os}} \models I
   \]
 
   \begin{proof}
