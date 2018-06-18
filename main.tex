@@ -8,23 +8,8 @@
 \usepackage[explicit]{titlesec}
 \usepackage{type1cm}
 
-\usepackage[light,math]{iwona}
-\usepackage[light]{noto}
-\usepackage[light]{merriweather}
+\usepackage{lmodern}
 \usepackage{inconsolata}
-\linespread{1.5}
-\DeclareMathSizes{10}{12}{9}{6}
-
-\makeatletter
-\let\scshape\relax % to avoid a warning
-\DeclareRobustCommand\scshape{%
-  \not@math@alphabet\scshape\relax
-  \ifnum\pdf@strcmp{\f@family}{\familydefault}=\z@
-    \fontfamily{NotoSerif-TLF}%
-  \fi
-  \fontshape\scdefault\selectfont}
-\makeatother
-
 \usepackage[dvipsnames]{xcolor}
 
 \usepackage[utf8]{inputenc}
@@ -67,7 +52,7 @@
 \titleformat{\chapter}[display]
   {\normalfont\Large}
   {\flushright\fontsize{90}{0}\textbf{\textcolor{Violet!20}{\thechapter}}}{10pt}
-  {\flushright\fontsize{30}{0}\textbf{#1}\vskip80pt}
+  {\flushright\fontsize{30}{0}\textsc{#1}\vskip80pt}
 \titlespacing*{\chapter}
   {0pt}{-40pt}{0pt}
 
