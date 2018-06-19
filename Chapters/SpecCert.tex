@@ -44,12 +44,62 @@ the proof sketches which follow.
 
 In line with the works we have described in Section~\ref{sec:related:review}, we
 model a hardware architecture which executes several software components as a
-\ac{lts} with controllable and observable transitions.
+\ac{lts}.
+
+\paragraph{States}
 %
-We also introduce the notion of traces of a hardware model.
+The set of states of the \ac{lts} models the possible configurations of the
+hardware components.
 %
-This allows us to model the different classes of security policies discussed
-previously (\ref{subsec:state:secu}).
+This configuration changes over time with respect to the hardware
+specifications and comprises any relevant data such as register values, inner
+memory contents, etc.
+%
+These state transformations occur during the system's transitions.
+
+\paragraph{Transitions}
+%
+We distinguish between two classes of transitions: the software transitions
+which are direct and foreseeable side effects of the execution of a \ac{cpu}
+instruction and the hardware transitions which are not.
+%
+Following the terminology of David Basin \emph{et
+  al.}\,\cite{basin2013enforceable}, software transitions are ``controllable'',
+while hardware transitions are only ``observable''.
+
+We illustrate this definition with the x86 instruction \texttt{mov
+  (\%ecx),\%eax}\,\footnote{Written in AT\&T syntax here.}.
+%
+With respect to the semantics of this instruction, a x86 \ac{cpu}:
+%
+\begin{inparaenum}[(1)]
+\item reads the content of the register \texttt{ecx}
+%
+\item interprets this value as an address and reads the main memory at this
+  address
+%
+\item writes this content into the register \text{eax}
+%
+\item updates the register \texttt{eip} with the address of the next instruction
+  to execute.
+\end{inparaenum}
+
+The execution of this instruction by a \ac{cpu} may result in several sequences
+of transitions.
+%
+First, the four execution steps described above translate into four software
+transitions.
+%
+Between each of these transitions, a hardware transition can occur.
+%
+For instance, one hardware component can initiate a \ac{dma}.
+%
+Also, if the content of \texttt{ecx} is not a valid addres, the \ac{cpu} raises
+an interrupt.
+%
+In this scenario, only one software transition occurs ---when the \ac{cpu} reads
+the content of \texttt{ecx}--- then the following transition models the
+interrupt.
 
 \begin{definition}[Hardware Model]
   \label{def:speccert:model}
@@ -84,69 +134,6 @@ previously (\ref{subsec:state:secu}).
   \]
 \end{definition}
 
-\paragraph{States}
-%
-The state of a hardware architecture models the configuration of its devices at
-a given time.
-%
-This configuration may change over time with respect to the hardware
-specifications and comprises any relevant data such as register values, inner
-memory contents, etc.
-%
-These state transformations occur during the system's transitions.
-
-\paragraph{Transitions}
-%
-We distinguish between two classes of transitions: the software transitions
-which are direct and foreseeable side effects of the execution of a \ac{cpu}
-instruction and the hardware transitions which are not.
-%
-Differentiating between transitions which are controllable and transitions which
-are only observable is not a novel approach.
-%
-David Basin \emph{et al.} have notably emphasized the importance of transitions
-which are only observable in terms of security\,\cite{basin2013enforceable}.
-
-The execution of an instruction can be broken down into sequences of these
-transitions.
-%
-For instance, to execute the x86 instruction\,\footnote{Written in AT\&T syntax
-  here.} \texttt{mov (\%ecx),\%eax}, a x86 \ac{cpu}:
-%
-\begin{itemize}
-\item reads the content of the register \texttt{ecx}
-%
-\item interprets this value as an address and reads the main memory at this
-  address
-%
-\item writes this content into the register \text{eax}
-%
-\item updates the register \texttt{eip} with the address of the next instruction
-  to execute
-\end{itemize}
-
-This translates into four software transitions if the content of \texttt{ecx} is
-a valid address.
-%
-On the contrary, the \ac{cpu} typically raises an interrupt.
-%
-In this scenario, only one software transition occurs, when the \ac{cpu} reads
-the content of \texttt{ecx}.
-%
-The following transition models the interrupt, and is labelled as ``hardware''.
-%
-Hardware transitions are not limited to interrupts raised by a \ac{cpu}.
-%
-They make be provoked by other hardware components as well.
-%
-For instance, \ac{dma} transactions by a network card qualify as hardware
-transitions.
-%
-This allows for taking into account active peripherals whose trustworthiness is
-not guaranteed.
-%
-Finally, and as suggested by David Bosin \emph{et al.}, hardware transitions can
-be leveraged to model a clock, and therefore reasoning about time.
 
 \paragraph{Trace}
 %
@@ -170,16 +157,19 @@ of the next.
   \end{itemize}
 \end{definition}
 
+\paragraph{} % Conclusion de la section
+%
+The resulting model
+
 \section{HSE Mechanisms}
 \label{sec:speccert:hse}
 
 The previous definitions allow us to propose a formal definition for \ac{hse}
 mechanisms, notably based on requirements on states and requirements on
-transitions.
+software transitions.
 %
 Then, we detail two so-called \ac{hse} Laws, whose main purpose is to enforce
-requirements consistency: requirements on transitions should preserve
-requirements on states.
+requirements consistency.
 %
 From a \ac{hse} mechanism definition, we derive a set of compliant traces which
 we use to determine if the \ac{hse} mechanism is correct with respect to a
