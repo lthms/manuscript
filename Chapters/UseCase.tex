@@ -9,33 +9,23 @@
 
 \vspace{1cm}\noindent
 %
-Our motivation to formally specify and verify architectural attacks comes from
-our experience with the x86 hardware architecture.
+Our motivation to formally specify and verify \ac{hse} mechanisms comes from
+various architectural attacks targeting the x86 hardware
+architecture\,\cite{duflot2009smram,wojtczuk2009smram,kallenberg2015racecondition,domas2015sinkhole,kovah2015senter}.
 %
-\TODO{"our experience" fait un peu pédant. Tu n'es pas le seul à t'intéresser au
-  problème...}
+Besides, Intel has introduced several \ac{hse} mechanisms over the past decades:
+hardware-based virtualization (VT-x, VT-d)\,\cite{intel2014manualvt}, dynamic
+root of trust (TXT)\,\cite{intel2015txt}, or applicative enclaves
+(SGX)\,\cite{intel2014manualsgx,costan2016sgxexplained}.
 %
-Over the past decade, the security of the lowest levels of abstraction
-(hardware, firmware, system software) has grown in importance, and several
-critical vulnerabilities which fall in our definition of architectural attacks
-have been disclosed.
+From a market share perspective, x86 \ac{cpu} are widely used for laptops,
+desktops and servers.
 %
-\TODO{ref!, En outre, cette phrase est très générique alors qu'il me semble que
-  ce que tu veux dire c'est que l'architecture x86 en particulier est devenu de
-  plus en plus complexe (et de fait, c'est surement une des architecture les
-  plus complexe). En outre, elle est très populaire sur les laptop, desktop et
-  serveurs}
+For these reasons, we have evaluated our approaches to the x86 hardware
+architecture.
 %
-While our contributions are intended to be applicable to other hardware
-architectures, for purposes of evaluating our work, we have adopted the systemic
-approach to apply them to a x86 real example.
-%
-\TODO{pourquoi "systematic". je
-  dirais plus sobrement, nous avons décidé d'évaluer notre approche sur
-  l'architecture x86, qui représente une cible idéeal pour ce type
-  d'approche. Toutefois, notre approche peut tout à fait s'appliquer à d'autres
-  architecture, par exemple ARM très populaire dans les smartphones et systèmes
-  embarqués.}
+However, our contributions are intended to be applicable to other hardware
+architectures.
 %
 We have chosen to focus on the \ac{hse} mechanism implemented by the BIOS at
 runtime to stay isolated from the rest of the software stack, including the
@@ -44,7 +34,8 @@ system software.
 Because the BIOS is the most privileged piece of software executed by the
 hardware architecture, this \ac{hse} mechanism is of key importance.
 %
-Despite this fact, it has been defeated several times \TODO{REF!}, and
+Despite this fact, it has been the object of two architectural
+attacks\,\cite{duflot2009smram,wojtczuk2009smram,domas2015sinkhole}, and
 therefore, it illustrates perfectly our motivations.
 %
 However, it is important to emphasize that other mainstream architecture
@@ -260,19 +251,11 @@ It has also been repeatedly shown that the various physical interface exposed by
 the computer (\emph{e.g.} USB\,\cite{nohl2014badusb},
 Thunderbolt\,\cite{hudson2015thunderstrike}, PCI\,\cite{chifflier2013uefi})
 could be leveraged to achieve similar goals.
-
+%
 In that respect, the current situation has improved.
 %
 Modern x86 \acp{cpu} provide a feature called I/O MMU \TODO{ref!}, which allows
 for configuring the memory ranges each peripheral can access to.
-%
-In addition, Intel tends to take rogue peripherals into account when it
-conceives new security features.
-%
-\TODO{affirmation un peu gratuite sur Intel. Référence? }
-%
-A good example is the \ac{sgx} technology, whose \ac{tcb} is limited to the
-\ac{cpu} and its Memory Controller\,\cite{costan2016sgxexplained}.
 
 \subsection{Security Properties}
 
@@ -792,8 +775,8 @@ The combination of the SMRAM, the \ac{smi} and the Flash Memory Lock-down
 explains why the \ac{smm} is often introduced as the ``most privileged execution
 mode'' of a x86 \ac{cpu}.
 %
-In a nutshell, the \ac{smm} code can do all the things the system software
-does\TODO{can do?}, including tampering with memories assigned to the system
+In a nutshell, the \ac{smm} code can leverage the same hardware capabilities
+than system software, including tampering with memories assigned to the system
 software.
 %
 On the contrary, the system software cannot modify neither the SMRAM content nor
@@ -830,47 +813,118 @@ copy of the result in its cache.
 Therefore, the next time it needs to read some data at this address, these data
 are retrieved from the cache.
 %
-For cache-friendly programs, the gain in performance can be huge
-\TODO{référence, données quantitative...}.
+Regarding write accesses, Intel x86 \acp{cpu} provide five different caching
+strategies (uncacheable, write combining, write-through, write-back and
+write-protected)\,\cite{intel2014manualcache}.
 %
-This gain is paid in important increase of complexity. \TODO{Il faudrait
-  expliquer un peu plus en détail le fonctionnement du cache, il me semble}
+Fine-grained cache strategy configuration is achieved through several hardware
+mechanisms, including (but not limited to):
 %
-Enforcing coherence between the different levels of cache and the \ac{dram} is
-not trivial \TODO{ref}.
+\begin{itemize}
+\item The \texttt{CR0} register has a flag called \texttt{CD}, which enables
+  caching once set.
+%
+\item The \ac{cpu} has several registers called Memory Type Range Registers
+  (MTRR), to specify a cache strategy for pre-defined memory regions.
+  %
+  Each MTRR
+\item The Page Table Attribute (PAT) allows for configuring a cache strategy at
+  a memory page granularity.
+\end{itemize}
+%
+The most commonly used strategy is write-back strategy.
+%
+It is summarized in Figure~\ref{fig:usecase:writeback}.
+%
+The purpose of the write-back strategy is to reduce the number of write accesses
+forwarded to the system memory.
+%
+To that end, each cache block has a ``dirty bit'' which is set by the cache when
+its value is updated by a write access.
+%
+In case of cache eviction, the cache verifies the value of the ``dirty bit'', so
+it can update the underlying memory cell if necessary.
+%
+Therefore, as long as the cache block is not evicted, the \ac{cpu} does not
+issue write access to the underlying memory.
+%
+The write-back strategy is not suitable for memories of hardware components
+mapped into the \ac{cpu} address space.
+%
+For instance, caching write accesses to a framebuffer does not make sense.
+%
+This is why Intel provides four complementary strategies.
+%
+The uncacheable strategy disables the cache for the given addre
+
+For cache-friendly programs, the gain in performance can be huge.
+%
+For instance, for a Pentium M Intel have stated that an access to L1 cache takes
+3 \ac{cpu} cycles, an access to the L2 cache takes 12 cycles and an access to
+the DRAM takes 240 cycles\,\cite{drepper2007memory}.
 
 \begin{figure}
   \centering
   \begin{tikzpicture}
     \node [draw, circle] (EP) {};%
 
-    \node [draw, below=of EP] (Sel) {Select a cache line};%
+    \node [draw, below=of EP] (Sel) {Select a cache block};%
     \draw [-latex] (EP) -- (Sel);%
 
-    \node [draw, diamond, below=of Sel] (CH) {};%
-    \draw [-latex] (Sel) to node [right] {Cache hit?} (CH);%
+    \node [draw, signal, signal to=east and west, below=of Sel] (CH) {Cache
+      hit?};%
+    \draw [-latex] (Sel) -- (CH);
 
-    \node [right=70pt of CH] (CHbranch) {};%
-    \draw (CH) to node [below] {[Yes]} (CHbranch.center);%
+    \node [below=of CH] (CHbranch) {};%
+    \draw (CH) to node [right] {[Yes]} (CHbranch.center);%
     \node [left=70pt of CH] (nCHbranch) {};%
     \draw [below] (CH) to node {[No]} (nCHbranch.center);
 
-    \node [draw, diamond, below=of nCHbranch.center] (Dirty) {};%
-    \draw [-latex] (nCHbranch.center) to node [left] {Is the cache line marked
-      as dirty?}  (Dirty);
+    \node [draw, signal, signal to=east and west, below=of nCHbranch.center]
+    (Dirty) {Cache block dirty?};%
+    \draw [-latex] (nCHbranch.center) -- (Dirty);%
 
     \node [draw, below=of Dirty, text width=70pt, text badly centered] (WB)
-    {Write the content of the cache line back to the DRAM};%
+    {Write the content of the cache block back to the DRAM};%
     \draw [-latex] (Dirty) to node [right] {[Yes]} (WB);%
 
-    \node [draw, diamond, below=of CHbranch.center] (RxW) {};%
-    \draw [-latex] (CHbranch.center) to node [right] {Read or write access?}
-    (RxW);%
+    \node [draw, below=of WB, text width=80pt, text badly centered] (Rf) {Read
+      data from lower memory and fill the cache block};%
+    \draw [-latex] (WB) -- (Rf);%
 
-    \node [right=50pt of RxW] (R) {};%
-    \draw (RxW) to node [below] {[Read]} (R.center);%
-    \node [left=50pt of RxW] (W) {};%
-    \draw (RxW) to node [below] {[Write]} (W.center);
+    \node [draw, below=of WB, text width=80pt, text badly centered] (Rf) {Read
+      data from lower memory and fill the cache block};%
+    \draw [-latex] (WB) -- (Rf);%
+
+    \node [draw, below=of Rf, text width=80pt, text badly centered] (NotDirty)
+    {Mark the cache block as ``not dirty''};%
+    \draw [-latex] (Rf) -- (NotDirty);%
+
+    \draw (Dirty) to node [below] {[No]} ([xshift=-90pt]Dirty.center);%
+    \draw ([xshift=-90pt]Dirty.center) -- ([xshift=-90pt]Rf.center);%
+    \draw [-latex] ([xshift=-90pt]Rf.center) -- (Rf);%
+    \draw [-latex] (Rf) -- (NotDirty);%
+
+    \node [below=230pt of CHbranch.center] (Join) {};%
+    \node [draw, signal, signal to=east and west, below=5pt of Join] (RxW) {Read
+      or Write?};%
+    \draw [-latex] (CHbranch.center) -- (RxW);%
+    \draw (NotDirty) -| (Join.center);%
+
+    \node [draw, text badly centered, text width=70pt, right=50pt of RxW] (R)
+    {Return data};%
+    \draw [-latex] (RxW) to node [below] {[Read]} (R);%
+    \node [draw, text badly centered, text width=70pt, left=50pt of RxW] (W)
+    {Write new value in cache block};%
+    \draw [-latex] (RxW) to node [below] {[Write]} (W);%
+
+    \node [draw, text badly centered, text width=70pt, below=of W] (MakeDirty)
+    {Mark cache block as dirty};%
+    \draw [-latex] (W) -- (MakeDirty);
+
+    \node [draw, fill=black, below=100pt of RxW, circle] (End) {}; \draw
+    [-latex] (MakeDirty.south) |- (End.west); \draw [-latex] (R.south) |-
+    (End.east);
   \end{tikzpicture}
 
   \caption{The Write-Back cache strategy}
@@ -879,16 +933,6 @@ not trivial \TODO{ref}.
 
 \paragraph{Attack Path}
 %
-Intel x86 \acp{cpu} provide five different caching strategies (uncacheable,
-write combining, write-through, write-back and write-protected). \TODO{ref}
-%
-\TODO{Il faut expliquer ce que font ces différentes stratégies}
-In particular, the write-back strategy aims to reduce the number of write
-accesses to the system memory.
-%
-To that end, \ac{cpu} does not pass write accesses on the system memory if it
-can avoid it. \TODO{C'est à dire? Soit explicite dans tes explications.}
-%
 The SMRAM Cache Poisoning leverages the write-back strategy of the \ac{cpu}
 cache to circumvent the \texttt{D\_LCK} bit protection.
 %
@@ -896,13 +940,14 @@ The attack proceeds as follows:
 
 \begin{enumerate}
 \item Attackers set the cache strategy to be used for the SMRAM addresses to
-  write-back.
-    \TODO{Il faut insister sur le fait qu'il est possible de modifier la stratégie de cache de la SMRAM en dehors du SMM. Il n'est pas nécessaire de disposer de privilèges particuliers. }
+  write-back.  \TODO{Il faut insister sur le fait qu'il est possible de modifier
+    la stratégie de cache de la SMRAM en dehors du SMM. Il n'est pas nécessaire
+    de disposer de privilèges particuliers. }
 
 %
 \item They trigger a \ac{smi}, using the x86 hardware architecture mechanisms at
-  their disposal
-  \TODO{Tu n'as jamais expliqué comment on pouvait déclencher une SMI}
+  their disposal \TODO{Tu n'as jamais expliqué comment on pouvait déclencher une
+    SMI}
 %
 \item The \ac{smm} code is executed in SMM, leading the cache to be filled with
   copies of that code
