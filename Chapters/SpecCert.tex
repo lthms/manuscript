@@ -46,7 +46,7 @@ In line with the works we have described in Section~\ref{sec:related:review}, we
 model a hardware architecture which executes several software components as a
 \ac{lts}.
 
-\paragraph{States}
+\paragraph{States.}
 %
 The set of states of the \ac{lts} models the possible configurations of the
 hardware components.
@@ -57,7 +57,7 @@ memory contents, etc.
 %
 These state transformations occur during the system's transitions.
 
-\paragraph{Transitions}
+\paragraph{Transitions.}
 %
 We distinguish between two classes of transitions: the software transitions
 which are direct and foreseeable side effects of the execution of a \ac{cpu}
@@ -83,7 +83,7 @@ With respect to the semantics of this instruction, a x86 \ac{cpu}:
 \item updates the register \texttt{eip} with the address of the next instruction
   to execute.
 \end{inparaenum}
-
+%
 The execution of this instruction by a \ac{cpu} may result in several sequences
 of transitions.
 %
@@ -134,8 +134,7 @@ interrupt.
   \]
 \end{definition}
 
-
-\paragraph{Trace}
+\paragraph{Trace.}
 %
 Finally, we formally introduce the definition of traces of a hardware model.
 %
@@ -157,29 +156,48 @@ of the next.
   \end{itemize}
 \end{definition}
 
-\paragraph{} % Conclusion de la section
+As we detailed in Subsection~\ref{subsec:state:secu}, security policies are
+modelled as predicates on sets of traces, that is $\powerset (\pathesLTS{Ez})$.
 %
-The resulting model
+Mainstream hardware architectures are not ``safe'' by default, and required
+additional software configuration to enforce security properties.
+%
+For instance, it is legitimate, from a x86 specifications perspective, to enter
+ring 3 mode with a page table which allows for modifying kernel code and data.
+%
+This is why we ultimately seek to model \ac{hse} mechanisms as traces subsets,
+to discard traces legitimate from a hardware specification perspective, yet
+dangerous from a security perspective.
 
 \section{HSE Mechanisms}
 \label{sec:speccert:hse}
 
-The previous definitions allow us to propose a formal definition for \ac{hse}
-mechanisms, notably based on requirements on states and requirements on
-software transitions.
+We now propose a formal definition for \ac{hse} mechanisms, where a \ac{hse}
+mechanism is primarily characterized by a set of trusted software components, a
+set of requirements over hardware states and a set of requirements over software
+transitions.
 %
-Then, we detail two so-called \ac{hse} Laws, whose main purpose is to enforce
-requirements consistency.
+On the one hand, the purpose of the requirements over states is to identify the
+hardware configurations which constrain the execution of untrusted software
+components with respect to a targeted security policy.
 %
-From a \ac{hse} mechanism definition, we derive a set of compliant traces which
-we use to determine if the \ac{hse} mechanism is correct with respect to a
-targeted security policy.
+On the other hand, the purpose of the requirements over software transitions is
+to prevent untrusted software components to reach a hardware configuration
+wherein the requirements over state are not satisfied.
+%
+These requirements allow us to determine a subset of compliant traces, that it
+traces where trusted software components have correctly implemented the \ac{hse}
+mechanism.
+%
+To verify a \ac{hse} mechanism is correct with respect to a targeted security
+policy means proving the set of compliant traces of this mechanism satisfies the
+predicate which models the policy.
 
-\paragraph{Execution Context}
+\paragraph{Definition.}
 %
-One of the specificities of \ac{hse} mechanisms is the sharing of the \ac{cpu}
-interface between the trusted components and the rest of the software stack,
-considered as the adversary.
+In the context of \ac{hse} mechanisms, trusted and untrusted software components
+alike use the same interface to interact with the underlying hardware
+components: the \ac{cpu} instructions set.
 %
 To reason about HSE mechanisms, it is necessary to be able to determine which
 software component is executed at a given time.
@@ -188,11 +206,11 @@ In practice, a subset of states of the hardware architecture is dedicated to
 each software component.
 %
 For instance, the x86 \ac{cpu} has a feature called protection rings where each
-ring can be seen as an execution mode dedicated to a software component.
+ring can be seen as an execution mode dedicated to a class of software
+components.
 %
-Hence, the ring 0 is dedicated to the operating system whereas the userland
-applications are executed when the \ac{cpu} is in ring 3, with a particular page
-table setup.
+The ring 0 is dedicated to the operating system whereas the applications are
+executed when the \ac{cpu} is in ring 3, with a particular page table setup.
 
 \begin{definition}[Hardware-Software Mapping]
   \label{def:hardsoftmap}
@@ -201,23 +219,22 @@ table setup.
   executed.
 \end{definition}
 
-Dealing with multi-core architectures would require additional efforts and
-notations.
+We say a software transition is trusted (respectively untrusted) when it is
+generated from a state assignated to a trusted (respectively untrusted) software
+component.
 %
-One possible solution could be to define an identifier per core and to use this
-identifier in addition to the current hardware state to deduce the software
-component currently executed by the corresponding core.
+A hardware-software mapping is mandatory to define requirements over software
+transitions.
+%
+Indeed, these requirements can only concern trusted software transitions.
+%
+Dealing with multi-core architectures is possible, but requires additional
+efforts.
+%
+One solution is to define a set of core identifiers to act as an additional
+parameter for hardware-software mapping and software transitions.
 %
 However, this is out of the scope of this Chapter.
-
-\paragraph{Definition}
-%
-A \ac{hse} mechanism is a set of requirements on states to characterize safe
-hardware configurations and a set of requirements on software transitions to
-preserve the state requirements through software execution.
-%
-The software components which implement a \ac{hse} mechanism form its the
-\ac{tcb}.
 
 \begin{definition}[HSE Mechanism]
   \label{def:speccert:hse}
@@ -227,39 +244,84 @@ The software components which implement a \ac{hse} mechanism form its the
   %
   \begin{itemize}
   \item $S$ is the set of software components executed by the hardware
-    architecture
+    architecture.
   %
   \item $T \subseteq S$ is the set of trusted software components which
-    implement the \ac{hse} mechanism and form its \ac{tcb}
+    implement the \ac{hse} mechanism and form its \ac{tcb}.
   %
-  \item $\func{context}$ is a hardware-software mapping to determine when the
-    \ac{tcb} is executed
+  \item $\func{context}$ is a hardware-software mapping to determine which
+    software component is currently executed by the \ac{cpu}.
   %
-  \item $\func{inv}$ is a predicate on $H$ to distinguish between safe hardware
-    configurations and potentially vulnerable ones
+  \item $\func{hardware\_req}$ is a predicate on $H$ to distinguish between safe
+    hardware configurations and potentially vulnerable ones.
   %
-  \item $\func{behaviour}$ is a predicate on $H \times L_S$ to distinguish
-    between safe software transitions and potentially harmful ones
+  \item $\func{software\_req}$ is a predicate on $H \times L_S$ to distinguish
+    between safe software transitions and potentially harmful ones.
   \end{itemize}
 \end{definition}
 
-We illustrate this definition with the Flash Memory Lock-down mechanism
+We illustrate this definition with the flash memory lock-down mechanism
 described in Section~\ref{subsec:usecase:hse:smm}.
 %
-As a reminder, the Flash Memory Lock-down mechanism enforces the integrity of
-the \ac{bios} code within the Flash Memory, as follows:
+As a reminder, the flash memory lock-down mechanism enforces the integrity of
+the \ac{bios} code within the flash memory.
+%
+It is implemented by the \ac{pch}.
+%
+As pictured in Figure~\ref{fig:speccert:flash}, the \ac{pch} acts as a proxy
+between the \ac{cpu} and a collection of peripherals, including the flash
+memory.
+%
+as follows:
 %
 \begin{enumerate}
-\item By default, the Flash Memory is locked and its content cannot be modified
+\item By default, the flash memory is locked and its content cannot be modified.
+  %
+  By setting the correct bit of a dedicated register of the \ac{pch}
+  (\texttt{BIOS\_CNTL}), a software component requests to unlock the flash
+  memory.
 %
-\item When a software component (\emph{e.g.} system software) tries to unlock
-  the Flash Memory, the \ac{pch} triggers a \ac{smi}
+\item When a software component (\emph{e.g.} system software) unlocks the flash
+  memory, the \ac{pch} triggers a \ac{smi}.
 %
-\item This forces the \ac{cpu} to enter \ac{smm}
+\item This forces the \ac{cpu} to enter \ac{smm}.
+  %
+  By doing so, the \ac{cpu} stops the execution of the software component which
+  has unlocked the flash memory and starts the execution of the \ac{bios}.
 %
-\item The \ac{smm} code is expected to lock the Flash Memory again, before
-  resuming the execution of the system software
+\item In order to protect the integrity of the flash memory content, the
+  \ac{bios} is expected to lock the flash memory again, before resuming the
+  execution of the system software with the \texttt{rsm} assembly instruction.
 \end{enumerate}
+
+\begin{figure}
+  \centering
+  \begin{tikzpicture}
+    \node [draw, inner sep=12pt, text badly centered] (CPU) {CPU};%
+    \node [draw, below=15pt of CPU, inner sep=25pt, text badly centered] (PCH)
+    {PCH};%
+    \draw (CPU) -- (PCH);%
+
+    \node [draw, inner sep=5pt, below=10pt of PCH, text width=35pt,
+    xshift=-55pt, text badly centered] (Flash) {Flash Memory};%
+    \draw ([xshift=-10pt]PCH.south) |- (Flash.east);%
+
+    \node [draw, text=white, dashed, inner sep=10pt, below=10pt of PCH, text
+    width=25pt, xshift=55pt, text badly centered] (TPM) {TPM};%
+    \draw [dashed] ([xshift=10pt]PCH.south) |- (TPM.west);%
+
+    \node [draw, text=white, dashed, inner sep=10pt, right=20pt of PCH, text
+    width=45pt, text badly centered] (USB) {USB Controller};%
+    \draw [dashed] (PCH) -- (USB);%
+
+    \node [draw, text=white, dashed, inner sep=10pt, left=20pt of PCH, text
+    width=45pt, text badly centered] (PCI) {PCI Controller};%
+    \draw [dashed] (PCH) -- (PCI);%
+  \end{tikzpicture}
+
+  \caption{From the CPU to the flash memory}
+  \label{fig:speccert:flash}
+\end{figure}
 
 \begin{example}[Flash Memory Lock-down Mechanism]
   \label{example:speccert:flashdef}
@@ -267,103 +329,153 @@ the \ac{bios} code within the Flash Memory, as follows:
   %
   The \ac{cpu} executes the \ac{bios} when it is in \ac{smm} (\func{context}).
   %
-  A safe hardware state ($\func{inv}$) is either a state wherein the \ac{bios}
-  is executed, or a state wherein the Flash Memory is locked.
+  A safe hardware state ($\func{hardware\_req}$) is either a state wherein the
+  \ac{bios} is executed, or a state wherein the flash memory is locked.
   %
-  It is expected that the \ac{bios} locks the Flash Memory before using the
-  \texttt{rsm} instruction ($\func{behaviour}$).
+  It is expected that the \ac{bios} locks the flash memory before using the
+  \texttt{rsm} instruction ($\func{software\_req}$).
 \end{example}
 
-\paragraph{HSE Laws}
+\paragraph{HSE Laws.}
 %
-For a \ac{hse} mechanism to be correctly defined, it must obey a few axioms,
-together called the \ac{hse} Laws.
+As it is, our definition of \ac{hse} mechanisms is too permissive.
 %
-The first law says that the state requirements specified by $\func{inv}$ are
-preserved through transitions as long as the \ac{tcb} avoids software
-transformations which do not satisfy $\func{behaviour}$.
+For a \ac{hse} mechanism to be correctly defined, it must also obey a few
+axioms, together called the \ac{hse} Laws.
 %
-The second law says that the $\func{behaviour}$ predicate specifies restrictions
-of software transitions for the \ac{tcb} only.
+The first law says that the $\func{software\_req}$ predicate always holds true
+for transitions generated by untrusted software components.
 %
-The software components which are not part of the \ac{tcb} are considered
-untrusted and we make no assumption on their behaviour.
+That is, the first law enforces that a \ac{hse} mechanism definition does not
+make any assumption regarding untrusted software components.
+%
+The second law says that the requirements over the hardware state specified by
+$\func{hardware\_req}$ are invariant with respect to $\func{software\_req}$.
+%
+As long as the trusted software components which implement the \ac{hse}
+mechanisms only generate software transitions which satisfy the
+$\func{software\_req}$ predicate, the $\func{hardware\_req}$ predicate holds
+true.
+%
+This means the software transitions at the untrusted software components
+disposal cannot achieve putting the system in an unsafe state.
 
 \begin{definition}[\ac{hse} Laws]
   \label{def:laws}
   A \ac{hse} mechanism $\Delta$ has to satisfy the following properties:
-  %
   \begin{enumerate}
-  \item \func{behaviour} preserves \func{inv}:
-    $\forall (h, l, h') \in \mathcal{T}(\Sigma)$,
-    \[
-      \begin{array}{l} \func{inv}(h) \Rightarrow (l \in L_S \Rightarrow
-        \func{behaviour}(h,l)) \Rightarrow \func{inv}(h')
-      \end{array}
-    \]
   %
-  \item $\func{behaviour}$ only restricts the \ac{tcb}:
+  \item Untrusted software transitions satisfy $\func{software\_req}$:
     $\forall (h, l, h') \in \mathcal{T}(\Sigma)$, $\forall x \not\in T$,
     %
     \[
       l \in L_S \Rightarrow \func{context}(h) = x \Rightarrow
-      \func{behaviour}(h, l)
+      \func{software\_req}(h, l)
+    \]
+  %
+  \item $\func{hardware\_req}$ is an invariant with respect to
+    $\func{software\_req}$: $\forall (h, l, h') \in \mathcal{T}(\Sigma)$,
+    \[
+      \begin{array}{l} \func{hardware\_req}(h) \Rightarrow (l \in L_S
+        \Rightarrow \func{software\_req}(h,l)) \Rightarrow
+        \func{hardware\_req}(h')
+      \end{array}
     \]
   \end{enumerate}
 \end{definition}
+
+On the one hand, a \ac{hse} mechanism definition which does not satisfy the
+first law is incorrectly making assumption about ``untrusted'' software
+components.
+%
+This makes these components part of the \ac{tcb} \emph{de facto}, even though
+they do not belong to $\mathcal{T}$.
+%
+Formally defining a \ac{hse} mechanism may be the occasion to uncover such
+implicit assumptions.
+%
+On the other hand, a \ac{hse} mechanism which does not satisfy the second law
+has to be carefully reviewed.
+%
+As it stands, it does not prevent the hardware architecture to reach a state
+wherein the hardware configuration does not satisfy the requirements over
+states, despite the correct implementation of the mechanism by the trusted
+software components.
+%
+In such a condition, the hardware architecture may stop to constrain the
+execution of untrusted software components with respect to the targeted security
+policy.
 
 \begin{example}[Flash Memory Lock-down Inconsistency]
   We can convince ourselves that the informal definition description we have
   discussed in the Example~\ref{example:speccert:flashdef} obeys the second HSE
   Law, but \emph{does not} obey the first one.
   %
-  \paragraph{\func{behaviour} only restricts the \ac{tcb}}
+  \paragraph{Untrusted software transitions satisfy $\func{software\_req}$.}
   %
-  The only software restriction we formulate concerns the use of the
-  \texttt{rsm} instruction.
+  The only software restriction we have formulated concerns the use of the
+  \texttt{rsm} instruction by the \ac{bios}.
   %
-  In particular, we do not forbid the attacker to unlock the Flash Memory.
+  The rest of the software stack can leverage the complete x86 instructions set
+  with no restriction.
+  %
+  In particular, an attacker is free to unlock the flash memory thanks to the
+  \texttt{BIOS\_CNTL} register.
 
-  \paragraph{\func{behaviour} does not preserve \func{inv}}
+  \paragraph{$\func{hardware\_req}$ is not an invariant with respect to
+    $\func{software\_req}$.}
   %
   A \ac{cpu} is either in \ac{smm} or not in \ac{smm}.
   %
   If it is in \ac{smm}, the only way to leave \ac{smm} is to execute the
   \texttt{rsm} instruction, which qualifies as a software transition.
   %
-  If the \ac{cpu} is in \ac{smm}, the \func{behaviour} will hold true for this
-  software transition only if the Flash Memory is already locked.
+  If the \ac{cpu} is in \ac{smm}, the \func{software\_req} hold true for this
+  software transition when the flash memory is locked.
   %
-  As a consequence, it is not possible to leave \ac{smm} with the Flash Memory
-  unlocked.
+  As a consequence, a \ac{bios} which correctly implements this \ac{hse}
+  mechanism locks the flash memory prior to leaving the \ac{smm}.
   %
-  However, if the \ac{cpu} is not in \ac{smm}, and tries to open the Flash
-  Memory, two things happen sequentially.
+  However, if the \ac{cpu} is not in \ac{smm}, and tries to open the flash
+  memory, two things happen sequentially.
   %
-  First, the Flash Memory is effectively opened (software transition)
+  First, the flash memory is effectively opened.
   %
-  Then, the \ac{pch} triggers a \ac{smi}, which eventually forces the \ac{cpu}
-  to enter \ac{smm} (hardware event).
+  This has to be modelled by a software transition.
   %
-  That is, the protection consists in two transitions, and the \func{inv}
-  predicate is not satisfied in between.
+  Then, the \ac{pch} triggers a \ac{smi}, leading the \ac{cpu} to enter
+  \ac{smm}.
+  %
+  A \ac{smi} has to be modelled as a hardware transition.
+  %
+  Between the modification of the \texttt{BIOS\_CNTL} register and the treatment
+  of the \ac{smi} by the \ac{cpu}, the \func{hardware\_req} predicate is not
+  satisfied.
 
-  \paragraph{}
-  %
-  It is because the Flash Memory Lock-down as described here does not satisfy
+  It is because the flash memory lock-down as described here does not satisfy
   the first law that the race condition uncovered by Corey Kallenberg \emph{et
     al.}\,\cite{kallenberg2015racecondition} is possible.
   %
   On the contrary, the \texttt{SMM\_BWP} register semantics allows for defining
   a HSE mechanisms which satisfies both laws, because the register ties together
-  the state of the \acp{cpu} and the Flash Memory state.
+  the state of the \acp{cpu} and the flash memory state.
 \end{example}
 
-\paragraph{Trace Compliance}
+\paragraph{Trace Compliance.}
 %
-We say a trace complies with a \ac{hse} mechanism definition when its initial
-state satisfies the state requirements (\func{inv}) and each software
-transitions of the trace satisfies the software requirements (\func{behaviour}).
+Whether trusted software components are correctly implementing a given \ac{hse}
+mechanism is a safety property: trusted software components shall \emph{never}
+generate a software transition which does not satisfy the requirements of the
+\ac{hse} mechanism.
+%
+Because the purpose of these requirements over software transitions is to
+prevent untrusted software components to reach a hardware configuration wherein
+the requirements over state are not satisfied, so it is required that the
+initial state of the trace satisfies the requirements over state.
+%
+A trace whose initial state satisfies the requirements over state and where
+trusted software components do correctly implement a \ac{hse} mechanism is said
+to complies with this mechanism.
 %
 \begin{definition}[Compliant Traces]
   We write $\mathcal{C}(\Delta)$ for the set of the traces which comply with
@@ -371,23 +483,13 @@ transitions of the trace satisfies the software requirements (\func{behaviour}).
   %
   Given $\rho \in \pathesLTS{Ez}$, then $\rho \in \mathcal{C}(\Delta)$ iff
   \[
-    \func{inv}(\func{init}(\rho)) \wedge \forall (h,l,h') \in
-    \func{trans}(\rho)\text{, }l \in L_S \Rightarrow \func{behaviour}(h, l)
+    \func{hardware\_req}(\func{init}(\rho)) \wedge \forall (h,l,h') \in
+    \func{trans}(\rho)\text{, }l \in L_S \Rightarrow \func{software\_req}(h, l)
   \]
-  % \[
-  %   \begin{array}{lcl}
-  %     \rho \in \mathcal{C}(\Delta)
-  %     & \triangleq
-  %     & \func{inv}(\func{init}(\rho))\ \wedge \\
-  %     &
-  %     & \forall (h,l,h') \in \func{trans}(\rho), l \in L_S \Rightarrow
-  %      %     \func{behaviour}(h, l)
-  %   \end{array}
-  % \]
 \end{definition}
 
 \begin{example}[Memory Flash Lock-down Compliance]
-  We consider the execution to start at the end of the boot sequence, when the
+  We consider the trace to start at the end of the boot sequence, when the
   \ac{bios} gives the control flow to the system software component it has
   selected.
   %
@@ -401,91 +503,55 @@ transitions of the trace satisfies the software requirements (\func{behaviour}).
 
 \begin{lemma}[HSE Invariant Enforcement]
   \label{lemma:speccert:hseinv}
-  We prove that \func{inv} is satisfied throughout compliant traces, that is
+  As intended, \func{hardware\_req} is an invariant of traces which complies
+  with $\Delta$, that is
   %
   \[
     \forall \rho \in \mathcal{C}(\Delta), \forall (h, l, h') \in
-    \func{trans}(\rho), \func{inv}(h) \wedge \func{inv}(h')
+    \func{trans}(\rho), \func{hardware\_req}(h) \wedge \func{hardware\_req}(h')
   \]
 
   \begin{proof}
     By definition of $\mathcal{C}(\Delta)$, we know the initial state of the
-    trace satisfies \func{inv}, and thanks to the first HSE Law, we can conclude
-    the state after the first transition also satisfies \func{inv}.
+    trace satisfies \func{hardware\_req}, and thanks to the second HSE Law, we
+    can conclude the state after the first transition also satisfies
+    \func{hardware\_req}.
     %
     We generalize to the trace by induction.
   \end{proof}
 \end{lemma}
 
-\section{Security Enforcement}
-\label{sec:speccert:security}
+As a consequence, a \ac{hse} mechanism allows for satisfying a given
+set of requirements over hardware configurations throughout the execution of
+a software stack, as long as a set of trusted software components correctly
+implement the mechanism.
 
-\paragraph{Security Policies}
+\paragraph{HSE Mechanism Correctness.}
 %
-We now explain how we model different security policies discussed in
-Section~\ref{subsec:state:secu}.
+It is important to keep in mind that preserving a set of requirements over
+hardware configurations is only a mean to an end.
 %
-We start from the most general definition possible, then discuss how more
-specific security properties can be modelled as a specialization of that general
-definition.
+The true purpose of a \ac{hse} mechanism is to constrain the execution of
+untrusted software components with respect to a targeted security policy.
+
+It is possible to define a \ac{hse} mechanism which satisfies the \ac{hse} Laws,
+yet failed to constrain the execution of untrusted software components with
+respect to a targeted security policy.
+%
+It was the case, for instance, for the protection of the SMRAM by the sole
+\texttt{SMRAMC} register. % TODO: rappel ref
+%
+Even if the content of the SMRAM was correctly protected by the memory
+controller, the hardware architecture was not providing a trusted path for the
+\ac{bios} to access this memory
+region\,\cite{duflot2009smram,wojtczuk2009smram}.
 
 \begin{definition}[Security Policy]
-  \label{def:speccert:secpol}
-  %
-  A security policy is a predicate on sets of traces
-  $\powerset(\pathesLTS{Ez})$.
+  A security policy $P$ is either a predicate on sets of traces, a predicate on
+  traces or a predicate on transitions.
 \end{definition}
 
-Hyperproperties\,\cite{clarkson2010hyperproperties} such as noninterference
-require a definition that general.
-%
-On the contrary, security properties\,\cite{schneider2000enforceable}, that is
-liveness properties (something ``good'' happens eventually) and safety
-properties (nothing ``bad'' happens) can be modelled more straightforwardly.
-
-\begin{definition}[Security Property]
-  A security property is a predicate on traces $\pathesLTS{Ez}$.
-
-  % We write $\partial P$ for the security policy derived from the security
-  % property $P$, such that
-  % %
-  % \[
-  %   \partial P(R) \triangleq \forall \rho \in R, P(\rho)
-  % \]
-\end{definition}
-
-Safety properties focus on avoiding ``bad'' transitions, and therefore their
-definition can be even simpler, if the hardware model allows for distinguishing
-between safe and unsafe transitions solely based on the current state, and not
-the traces past.
-
-\begin{definition}[Safety Property]
-  \label{def:speccert:safetyprop}
-  A safety property is a predicate on transitions $\mathcal{T}(\Sigma)$.
-
-  % We write $\partial^2 P$ for the security policy derived from the safety
-  % property $P$.
-  %  %
-  % A set of trace $R$ satisfies $\partial^2 P$ if and only if every transition
-  % of every trace $\rho \in R$ satisfies $P$, that is
-  %  %
-  % \[
-  %   \partial^2 P(R) \triangleq \forall \rho \in R, \forall (h, ev, h') \in
-  %   \func{trans}(\rho), P(h, ev, h')
-  % \]
-\end{definition}
-
-\paragraph{HSE Mechanism Correctness}
-%
-The main purpose of the \ac{hse} Laws is to verify it is consistent.
-%
-However, they say nothing about the security policy the \ac{hse} mechanism
-supposedly enforce.
-%
-Eventually, we aim to prove that a HSE mechanism is sound ---it succeeds in
-enforcing a security policy--- under the assumption that software components of
-the \ac{tcb} always behave according to the specification given in the HSE
-mechanism definition.
+Formally defining the targeted security policy.
 
 \begin{definition}[Correct HSE Mechanism]
   A \ac{hse} mechanism $\Delta$ is correct with respect to a security policy $P$
@@ -507,20 +573,7 @@ mechanism definition.
   \]
 \end{definition}
 
-It is possible to define a \ac{hse} mechanism which satisfies the \ac{hse} Laws,
-yet is not correct with respect to its targeted security policy.
-%
-It was the case, for instance, for the protection of the SMRAM by the sole
-\texttt{SMRAMC} register.
-%
-The state requirement focused on the SMRAM content, which is correctly protected
-against unprivileged modifications by the memory controller.
-%
-However, this property alone is not strong enough to enforce the BIOS Integrity
-security property (Definition~\ref{def:usecase:biosint}), as evidenced by the
-SMRAM Cache Poisoning attack.
-
-\paragraph{Reasoning about Correctness}
+\paragraph{Reasoning about Correctness.}
 %
 Bla
 
