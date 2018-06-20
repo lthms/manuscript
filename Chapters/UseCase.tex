@@ -816,20 +816,66 @@ misplaced when they disclosed the \emph{SMRAM Cache Poisoning Attack}.
 Interacting with the \ac{dram} remains slow, in regard to the speed of a
 \ac{cpu}.
 %
-To improve performance, Intel \acp{cpu} come with several (often three\TODO{J'ai l'impression que les proc ont maintenant tous 3 niveaux de cache et ce depuis pas mal de temps. Plutôt que often, tu pourrais dire depuis l'archi xxx}) levels
-of caches, from the smaller and quicker, to the bigger and slower. \TODO{Tu pourrais donner un peu plus de détail en t'appuyant sur un schéma d'archi (L1 intégré au coeur, L2, L3, différence cache de données et cache d'instruction...}
+To improve performance, Intel \acp{cpu} come with several (often three\TODO{J'ai
+  l'impression que les proc ont maintenant tous 3 niveaux de cache et ce depuis
+  pas mal de temps. Plutôt que often, tu pourrais dire depuis l'archi xxx})
+levels of caches, from the smaller and quicker, to the bigger and
+slower. \TODO{Tu pourrais donner un peu plus de détail en t'appuyant sur un
+  schéma d'archi (L1 intégré au coeur, L2, L3, différence cache de données et
+  cache d'instruction...}
 %
 When a \ac{cpu} successfully reads the memory at a given address, it keeps a
 copy of the result in its cache.
 %
-Therefore, the next time it needs to read some data at this address, these data are retrieved from the cache.
+Therefore, the next time it needs to read some data at this address, these data
+are retrieved from the cache.
 %
-For cache-friendly programs, the gain in performance can be huge \TODO{référence, données quantitative...}.
+For cache-friendly programs, the gain in performance can be huge
+\TODO{référence, données quantitative...}.
 %
-This gain is paid in important increase of complexity. \TODO{Il faudrait expliquer un peu plus en détail le fonctionnement du cache, il me semble}
+This gain is paid in important increase of complexity. \TODO{Il faudrait
+  expliquer un peu plus en détail le fonctionnement du cache, il me semble}
 %
 Enforcing coherence between the different levels of cache and the \ac{dram} is
 not trivial \TODO{ref}.
+
+\begin{figure}
+  \centering
+  \begin{tikzpicture}
+    \node [draw, circle] (EP) {};%
+
+    \node [draw, below=of EP] (Sel) {Select a cache line};%
+    \draw [-latex] (EP) -- (Sel);%
+
+    \node [draw, diamond, below=of Sel] (CH) {};%
+    \draw [-latex] (Sel) to node [right] {Cache hit?} (CH);%
+
+    \node [right=70pt of CH] (CHbranch) {};%
+    \draw (CH) to node [below] {[Yes]} (CHbranch.center);%
+    \node [left=70pt of CH] (nCHbranch) {};%
+    \draw [below] (CH) to node {[No]} (nCHbranch.center);
+
+    \node [draw, diamond, below=of nCHbranch.center] (Dirty) {};%
+    \draw [-latex] (nCHbranch.center) to node [left] {Is the cache line marked
+      as dirty?}  (Dirty);
+
+    \node [draw, below=of Dirty, text width=70pt, text badly centered] (WB)
+    {Write the content of the cache line back to the DRAM};%
+    \draw [-latex] (Dirty) to node [right] {[Yes]} (WB);%
+
+    \node [draw, diamond, below=of CHbranch.center] (RxW) {};%
+    \draw [-latex] (CHbranch.center) to node [right] {Read or write access?}
+    (RxW);%
+
+    \node [right=50pt of RxW] (R) {};%
+    \draw (RxW) to node [below] {[Read]} (R.center);%
+    \node [left=50pt of RxW] (W) {};%
+    \draw (RxW) to node [below] {[Write]} (W.center);
+  \end{tikzpicture}
+
+  \caption{The Write-Back cache strategy}
+  \label{fig:usecase:writeback}
+\end{figure}
 
 \paragraph{Attack Path}
 %
