@@ -114,47 +114,58 @@ Hence, $s \in \func{fetched}_{\Sigma}(h, l)$ means that an instruction owned by
 $s$ was fetched in order to be executed by the \ac{cpu} during a transition
 labelled with $l$ from a state $h$.
 
-\paragraph{}
-%
 With a hardware-software mapping and an event-software mapping, we give a formal
-definition of a \textit{software execution tampering}.
+definition of a \textit{code injection}.
 
-\begin{definition}[Software Execution Tampering]
+\begin{definition}[Code Injection]
   \label{def:speccert:tempering}
-  A software component $x \in S$ tampers with the execution of another software
-  component $y \in S$ during a transition labelled with $l \in L$ from a state
-  $h \in H$ to a state $h' \in H$, denoted by
-  $h \xrightarrow[x \leadsto y]{l} h'$, when the \ac{cpu} fetches an instruction
-  owned by $x$ while executing $y$, that is
+  A software component $x \in S$ achieves a code injection against another
+  software component $y \in S$ during a transition labelled with $l \in L$ from
+  a state $h \in H$ to a state $h' \in H$, denoted by
+  %
+  \[
+    h \xrightarrow[x \leadsto y]{l} h'
+  \]
+  %
+  when the \ac{cpu} fetches an instruction owned by $x$ while executing $y$,
+  that is
   %
   \[
     h \xrightarrow[x \leadsto y]{l} h' \triangleq x \in
     \func{fetched}_{\Sigma}(h, l) \wedge \func{context}(h) = y
   \]
 
-  We write $h \xrightarrow[x \not\leadsto y]{l} h'$ when $x$ does not tamper
-  with the execution of~$y$.
+  We write $h \xrightarrow[x \not\leadsto y]{l} h'$ when $x$ does not achieve a
+  code injection against~$y$.  with the execution of~$y$.
 \end{definition}
 
-We now give two examples of recent attacks which qualify as software execution
-tampering.
+\begin{example}[Application Code Injection]
+  When the user of a computer starts a new application, the operating system
+  loads the code of this application into the \ac{dram}. Therefore, when the
+  \ac{cpu} starts the execution of the application in ring3, it executes
+  instructions which are owned by the OS.
+\end{example}
 
-\begin{example}[Thinkpwn]
+\begin{example}[Thinkpwn Code Injection]
   The \ac{bios} of certain Lenovo laptops were subject to a trivial attack
-  called Thinkpwn.
+  called Thinkpwn\,\cite{cr4sh2016thinkpwn}.
   %
   Under certain circumstances, the \ac{smm} code was using the content of a
   structure provided by a untrusted source (\emph{e.g.} system software) as a
-  function pointer, without any safety checks.
+  function pointer.
+  %
+  As a consequence, it was possible for a malicious system software to achieve a
+  code injection against the \ac{bios}.
+  %
+  The result was a privilege escalation.
 \end{example}
 
-\begin{example}[Rowhammer]
-  Rowhammer designates a class of security vulnerabilities which leverage a flaw
-  in several \ac{dram}, such that repeated write accesses to a given memory line
-  provoke bit flips in neighbouring lines.
-  %
-  Rowhammer has been shown to be an efficient attack vector, as it can be used
-  by an attacker to modify memory cells it should not be able to access.
+\begin{example}[SMRAM Cache Poisoning]
+  The SMRAM cache poisoning attack\,\cite{duflot2009smram,wojtczuk2009smram} can
+  be used to perform a code injection attack against the \ac{bios}. For
+  instance, Loic Duflot \emph{et al.} have been able to inject the necessary
+  instructions within the cache for the \ac{cpu} to update its \texttt{SMBASE}
+  register.
 \end{example}
 
 \subsection{Isolation Policies}
@@ -168,32 +179,55 @@ software component in the context of a software stack.
 \begin{definition}[Global Execution Isolation Policy]
   \label{def:speccert:global}
   A Global Execution Isolation Policy $I$ is a safety property characterized by
-  a tuple $\langle S, \ge, \func{context} \rangle$, such that
+  a tuple $\langle S, \rightarrowtail, \func{context} \rangle$, such that
   %
   \begin{itemize}
   \item $S$ is a set of software components executed by the hardware
-    architecture
-  \item $\ge$ is a non-strict partial order over $S$, such that given
-    $(x, y) \in S \times S$, $x \ge y$ means $x$ is part of the \ac{tcb} of $y$
+    architecture'
+  \item $\rightarrowtail$ is a binary relation on $S$, such that given
+    $(x, y) \in S \times S$, $x \rightarrowtail y$ means $x$ is authorized to
+    achieve a code injection against $y$. $\rightarrowtail$ has to be
+    %
+    \begin{inparaenum}[(1)]
+    \item anti-symmetric, and
+    %
+    %
+    \item transitive.
+    %
+    \end{inparaenum}
+    %
+    \[
+      \begin{array}{lr}
+        \forall (x, y) \in S \times S,
+        & \\
+        \qquad x \rightarrowtail y \wedge y
+        \rightarrowtail x \Rightarrow x = y
+        & \text{\small (1)} \\
+        %
+        \forall (x, y, z) \in S \times S \times S,
+        & \\
+        \qquad x \rightarrowtail y \wedge y
+        \rightarrowtail z \Rightarrow x \rightarrowtail z
+        & \text{\small (2)}
+      \end{array}
+    \]
+    %
   \item \func{context} is a hardware-software mapping.
   \end{itemize}
 
   A transition labelled with $l \in L$ from $h \in H$ to $h' \in H$ satisfies I
-  when only a software components which are part of the \ac{tcb} of $x$ can
-  tamper with the execution of $x$, that is
+  when code injections which occur during this transition are legitimate
+  authorized by $\rightarrowtail$, that is
   %
   \[
-    \begin{array}{l}
-      I(h, l, h') \triangleq
-      \forall (x, y) \in S \times S \text{, } h \xrightarrow[y
-      \leadsto x]{l} h' \Rightarrow y \ge x
-    \end{array}
+    I(h, l, h') \triangleq \forall (x, y) \in S \times S \text{, } h
+    \xrightarrow[x \leadsto y]{l} h' \Rightarrow x \rightarrowtail y
   \]
 \end{definition}
 
 \begin{corollary}
-  A software component which is not part of the \ac{tcb} of a software component
-  $x$ cannot tamper with the execution of y, that is
+  If a transition satisfies $I$, then no code injection which is not authorized
+  by $\rightarrowtail$ occurs during that transition, that is
   %
   \[
     I(h, l, h') \iff \forall (x, y) \in S \times S \text{, } y \not\ge x
@@ -208,58 +242,93 @@ software component in the context of a software stack.
 \begin{example}[Software Stack Isolation]
   \label{example:speccert:ssisolation}
   Using our definition, we can define a isolation policy for a whole software
-  stack which comprises the \ac{bios}, a system software components and several
-  applications ($S$).
+  stack which comprises the \ac{bios}, an operating system and several
+  applications, that is
   %
-  When the \ac{cpu} is in \ac{smm}, the \ac{bios} is executed, when the \ac{cpu}
-  is not in \ac{smm} and is in ring 0, the system software component is
-  executed, and when the \ac{cpu} is not in \ac{smm} and is in ring 3, one of
-  the applications ---identified by the page tables used by the \ac{cpu}--- is
-  executed (\func{context}).
-  %
-  We give a graphic representation of the considered partial order in
-  Figure~\ref{fig:speccert:partialorder}.
-  %
-  This reads as follows: a software component is part of its own \ac{tcb}, and
-  of the \ac{tcb} of any software component higher in the graph.
+  \[
+    S \triangleq \{ \mathtt{bios}, \mathtt{os}, \mathtt{app}_1, \dots
+    \mathtt{app}_n \}
+  \]
 
+  We define the authorization relation $\rightarrowtail$ using three deductive
+  rules:
+
+  \begin{minipage}[c]{0.3\linewidth}
+    \centering
+    \begin{prooftree}
+      \AxiomC{$x \in S$} \RightLabel{\scriptsize{$\rightarrowtail$-refl}}
+      \UnaryInfC{$x \rightarrowtail x$}
+    \end{prooftree}
+  \end{minipage}
+  %
+  \hfill
+  %
+  \begin{minipage}[c]{0.3\linewidth}
+    \centering
+    \begin{prooftree}
+      \AxiomC{$y \in S$} \RightLabel{\scriptsize{$\rightarrowtail$-bios}}
+      \UnaryInfC{$\mathtt{bios} \rightarrowtail x$}
+    \end{prooftree}
+  \end{minipage}
+  %
+  \hfill
+  %
+  \begin{minipage}[c]{0.3\linewidth}
+    \centering
+    \begin{prooftree}
+      \AxiomC{$0 \le k \le n$} \RightLabel{\scriptsize{$\rightarrowtail$-os}}
+      \UnaryInfC{$\mathtt{os} \rightarrowtail \mathtt{app}_k$}
+    \end{prooftree}
+  \end{minipage}
+
+  \vspace{0.5em}
+  %
+  We prove by case enumeration that $\rightarrowtail$ is anti-symmetric and
+  transitive.
+  %
   According to the definition of the Software Execution Isolation Policy, the
   \ac{bios} can tamper with the execution of the system software component and
   any applications, but applications can only tamper with their own executions.
+
+  The definition of $\func{context}$ shall obey the following logic: when the
+  \ac{cpu} is in \ac{smm}, the \ac{bios} is executed; when the \ac{cpu} is not
+  in \ac{smm} and is in ring 0, the system software component is executed; when
+  the \ac{cpu} is not in \ac{smm} and is in ring 3, one of the applications
+  ---identified by the page tables used by the \ac{cpu}--- is executed.
 \end{example}
 
-\begin{figure}
-  \begin{center}
-    \begin{tikzpicture}
-      \node (A1) {$\mathtt{app}_1$};
-        %
-      \node [right=of A1] (A2) {$\mathtt{app}_2$};
-        %
-      \node [right=of A2] (Aetc) {$\ldots$};
-        %
-      \node [right=of Aetc] (An1) {$\mathtt{app}_{n-1}$};
-        %
-      \node [right=of An1] (An) {$\mathtt{app}_{n}$};
-
-      \node [below=of Aetc] (OS) {$\mathtt{os}$};
-
-      \draw (A1.south) -- (OS.north);
-        %
-      \draw (A2.south) -- (OS.north);
-        %
-      \draw (An1.south) -- (OS.north);
-        %
-      \draw (An.south) -- (OS.north);
-
-      \node [below=of OS] (bios) {$\mathtt{bios}$};
-
-      \draw (OS.south) -- (bios.north);
-    \end{tikzpicture}
-  \end{center}
-  \caption{Representation of the partial order of
-    Example~\ref{example:speccert:ssisolation}.}
-  \label{fig:speccert:partialorder}
-\end{figure}
+% \begin{figure}
+%   \begin{center}
+%     \begin{tikzpicture}
+%       \node (A1) {$\mathtt{app}_1$};
+%        %
+%       \node [right=of A1] (A2) {$\mathtt{app}_2$};
+%        %
+%       \node [right=of A2] (Aetc) {$\ldots$};
+%        %
+%       \node [right=of Aetc] (An1) {$\mathtt{app}_{n-1}$};
+%        %
+%       \node [right=of An1] (An) {$\mathtt{app}_{n}$};
+%
+%       \node [below=of Aetc] (OS) {$\mathtt{os}$};
+%
+%       \draw (A1.south) -- (OS.north);
+%        %
+%       \draw (A2.south) -- (OS.north);
+%        %
+%       \draw (An1.south) -- (OS.north);
+%        %
+%       \draw (An.south) -- (OS.north);
+%
+%       \node [below=of OS] (bios) {$\mathtt{bios}$};
+%
+%       \draw (OS.south) -- (bios.north);
+%     \end{tikzpicture}
+%   \end{center}
+%   \caption{Representation of the authorization relation $\rightarrowtail$
+%   defined in Example~\ref{example:speccert:ssisolation}.}
+%   \label{fig:speccert:partialorder}
+% \end{figure}
 
 \subsection{BIOS Isolation Policy}
 
@@ -274,20 +343,21 @@ global security policy $I$.
 We use this approach to define the \ac{bios} isolation policy we seek to define
 in this Section.
 
-\begin{definition}[Partial Execution Isolation Policies]
+\begin{definition}[Isolation Sub-policies]
   \label{def:speccert:partial}
-  Given $I$ a global execution isolation policy and $U \subseteq S$ a set of
-  software components, we write $I|U$ for the partial execution isolation policy
-  whose purpose is to enforce that all components of $U$ are constrained with
-  respect to $I$, that is
+  Given $I$ an isolation policy and $U \subseteq S$ a set of software
+  components, we write $I|U$ for the isolation sub-policy whose purpose is to
+  enforce that all components of $U$ are constrained with respect to $I$, that
+  is
   %
   \[
     I|U(h, l, h') \triangleq \forall u \in U, \forall x \in S, h \xrightarrow[u
-    \leadsto x]{l} h' \Rightarrow u \ge x
+    \leadsto x]{l} h' \Rightarrow u \rightarrowtail x
   \]
   %
   This safety property is typically enforced by a \ac{hse} mechanism implemented
-  by the \acp{tcb} of the software components of $U$, that is
+  by the software components authorized to perform code injection against the
+  components of $U$, that is
   %
   \[
     T = \{ t \in S\ |\ t \not\in U \wedge \forall u \in U, t \ge u \}
@@ -295,6 +365,7 @@ in this Section.
 \end{definition}
 
 \begin{example}[Sharing of Responsibility]
+  % TODO: this first paragraph should go at the end of the chapter.
   For
   $U_{\mathtt{apps}} = \{ \mathtt{app}_1, \mathtt{app}_2, \ldots,
   \mathtt{app}_{n-1} \mathtt{app}_{n} \}$ the set of applications whose
