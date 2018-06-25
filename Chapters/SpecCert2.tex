@@ -14,14 +14,15 @@ formally specify and verify \ac{hse} mechanisms.
 We now apply this methodology to specify and verify the \ac{hse} mechanism
 implemented by the \ac{bios} on x86 hardware architecture at runtime and
 described in Section~\ref{sec:usecase:hse}.
+%
+The purpose of this \ac{hse} mechanisms is to provide an isolated execution
+environment to the \ac{bios} and relies on the System Management Mode (SMM) and
+the System Management Interrupt (SMI).
 
-First, we formally specify a targeted security policy for this \ac{hse}
+First, we formally specify the targeted security policy for this \ac{hse}
 mechanism.
 %
-The purpose of this security policy is to prevent system software to make the
-\ac{bios} execute an assembly instruction of its choice.
-%
-We take the approach to propose a generic class of security policies we latter
+We take the approach of proposing a generic class of security policies we later
 specialize for our use case (Section~\ref{sec:speccert2:usecase}).
 %
 Then, we define a minimal x86 hardware model we call {\scshape Minx86}, whose
@@ -43,50 +44,47 @@ As we introduce new definitions and theoretical results, we point to the related
 statements in our development, so the interesting reader familiar with Coq can
 read our machine-checked proofs.
 
-\section{Specifying Isolation Policies}
+\section{Specifying BIOS Isolation Policy}
 \label{sec:speccert2:usecase}
 
-We now focus on a class of security policies we call \emph{execution isolation
-  policies}.
+We now focus on a class of security policies we call \emph{isolation policies}.
 %
 Such a policy prevents a software component to tamper with the execution of
-their \acp{tcb}.
+lower levels of the software stack.
 %
 We consider that a software component tampers with the execution of another when
-it is able to make the latter execute an instruction of its choice.
+it is able to make the latter execute an instruction of its choice, that is the
+former achieves a code injection against the latter.
 %
 This is a particular sub-case of the Integrity property
 (Definition~\ref{def:usecase:int}), as we focus on instructions fetches
 exclusively.
 %
-We use it as an illustration to demonstrate how our \ac{hse} mechanism
-definition can be used to reason about enforcement of security policies which
-involves several software components.
-%
-The word ``isolation'' often refers to stronger security properties; for
-instance, the guests isolation of the idealized hypervisor of Gilles Barthe
-\emph{et al.} is a hyperproperty similar to
+It is true than, usually, the word ``isolation'' refers to stronger security
+properties; for instance, the guests isolation of the idealized hypervisor of
+Gilles Barthe \emph{et al.} is a hyperproperty similar to
 non-interference\,\cite{barthe2011virtcert1}.
 %
-However, enforcing such a property is a task mostly tackled by the hypervisor
-itself.
+However, enforcing such a property is a task mostly tackled by system software.
 
-We give a generic definition of software execution tampering
-(\ref{subsec:speccert:tampering}).
+First, we give a definition of code injection (\ref{subsec:speccert:tampering}).
 %
-We leverage it as a foundation for defining global execution policies which
-apply to complete software stacks (\ref{subsec:speccert:globalsec}).
+We leverage it as a foundation for defining isolation policies which apply to
+complete software stacks (\ref{subsec:speccert:globalsec}).
 %
-Because such policies are enforced \emph{via} several \ac{hse} mechanisms, we
-then introduce partial execution policies (\ref{subsec:speccert:partialsec}),
-and \ac{hse} mechanism cooperation (\ref{subsec:speccert:coop}).
+Finally, we introduce isolation sub-policies, and define the \ac{bios} isolation
+policy as an isolation sub-policy (\ref{subsec:speccert:biossec}).
 
 \subsection{Code Injection}
 \label{subsec:speccert:tampering}
-%
+
 A memory location within a hardware architecture is a container which is able to
 store data used by a software component \emph{e.g.}~a general-purpose register
 of a \ac{cpu}, a \ac{dram} memory cell, etc.
+%
+To formally define a code injection, it is necessary to be able to map an
+instruction executed by the \ac{cpu} to the software component which has written
+this instruction into its memory location.
 %
 A hardware model tracks the memory location ownership when the hardware
 architecture state maps each memory location with a software component called
@@ -164,21 +162,21 @@ definition of a \textit{code injection}.
   The SMRAM cache poisoning attack\,\cite{duflot2009smram,wojtczuk2009smram} can
   be used to perform a code injection attack against the \ac{bios}. For
   instance, Loic Duflot \emph{et al.} have been able to inject the necessary
-  instructions within the cache for the \ac{cpu} to update its \texttt{SMBASE}
-  register.
+  instructions inside the cache for the \ac{cpu} so that the \ac{bios} updates
+  the \texttt{SMBASE} register.
 \end{example}
 
 \subsection{Isolation Policies}
 \label{subsec:speccert:globalsec}
 
-We leverage the software execution tampering property to propose a generic
-formalization of \emph{software execution isolation policies}, to determine if a
-given software component is authorized to tamper with the execution of another
-software component in the context of a software stack.
+We leverage the code injection definition to propose a generic formalization of
+\emph{isolation policies}, to determine if a given software component is
+authorized to tamper with the execution of another software component in the
+context of a software stack.
 
-\begin{definition}[Global Execution Isolation Policy]
+\begin{definition}[Isolation Policy]
   \label{def:speccert:global}
-  A Global Execution Isolation Policy $I$ is a safety property characterized by
+  A isolation policy $I$ is a safety property characterized by
   a tuple $\langle S, \rightarrowtail, \func{context} \rangle$, such that
   %
   \begin{itemize}
@@ -186,7 +184,7 @@ software component in the context of a software stack.
     architecture'
   \item $\rightarrowtail$ is a binary relation on $S$, such that given
     $(x, y) \in S \times S$, $x \rightarrowtail y$ means $x$ is authorized to
-    achieve a code injection against $y$. $\rightarrowtail$ has to be
+    tamper with the execution of $y$. $\rightarrowtail$ has to be
     %
     \begin{inparaenum}[(1)]
     \item anti-symmetric, and
@@ -216,8 +214,8 @@ software component in the context of a software stack.
   \end{itemize}
 
   A transition labelled with $l \in L$ from $h \in H$ to $h' \in H$ satisfies I
-  when code injections which occur during this transition are legitimate
-  authorized by $\rightarrowtail$, that is
+  when code injections which occur during this transition are authorized by
+  $\rightarrowtail$, that is
   %
   \[
     I(h, l, h') \triangleq \forall (x, y) \in S \times S \text{, } h
@@ -266,7 +264,7 @@ software component in the context of a software stack.
   \begin{minipage}[c]{0.3\linewidth}
     \centering
     \begin{prooftree}
-      \AxiomC{$y \in S$} \RightLabel{\scriptsize{$\rightarrowtail$-bios}}
+      \AxiomC{$x \in S$} \RightLabel{\scriptsize{$\rightarrowtail$-bios}}
       \UnaryInfC{$\mathtt{bios} \rightarrowtail x$}
     \end{prooftree}
   \end{minipage}
@@ -297,40 +295,8 @@ software component in the context of a software stack.
   ---identified by the page tables used by the \ac{cpu}--- is executed.
 \end{example}
 
-% \begin{figure}
-%   \begin{center}
-%     \begin{tikzpicture}
-%       \node (A1) {$\mathtt{app}_1$};
-%        %
-%       \node [right=of A1] (A2) {$\mathtt{app}_2$};
-%        %
-%       \node [right=of A2] (Aetc) {$\ldots$};
-%        %
-%       \node [right=of Aetc] (An1) {$\mathtt{app}_{n-1}$};
-%        %
-%       \node [right=of An1] (An) {$\mathtt{app}_{n}$};
-%
-%       \node [below=of Aetc] (OS) {$\mathtt{os}$};
-%
-%       \draw (A1.south) -- (OS.north);
-%        %
-%       \draw (A2.south) -- (OS.north);
-%        %
-%       \draw (An1.south) -- (OS.north);
-%        %
-%       \draw (An.south) -- (OS.north);
-%
-%       \node [below=of OS] (bios) {$\mathtt{bios}$};
-%
-%       \draw (OS.south) -- (bios.north);
-%     \end{tikzpicture}
-%   \end{center}
-%   \caption{Representation of the authorization relation $\rightarrowtail$
-%   defined in Example~\ref{example:speccert:ssisolation}.}
-%   \label{fig:speccert:partialorder}
-% \end{figure}
-
 \subsection{BIOS Isolation Policy}
+\label{subsec:speccert:biossec}
 
 A security policy such as the one detailed in
 Example~\ref{example:speccert:ssisolation} is not enforced by one but many HSE
@@ -410,7 +376,10 @@ to formally specify and verify a HSE mechanism, and thus is not exhaustive.
 %
 In its current state of implementation, its scope focuses on the \ac{smm}.
 
-\paragraph{Model Scope}
+\subsection{Model Scope}
+\label{sec:speccert2:scope}
+
+\paragraph{Hardware Features}
 %
 We consider the \ac{cpu} can be either in System Management Mode (\ac{smm}) or
 in an unprivileged mode.
@@ -480,7 +449,7 @@ The SMRAM is dedicated to store the code intended to be executed when the
 \paragraph{Tracking Memory Ownership}
 %
 The \formatLTS{Minx86} definition is parameterized by a hardware-software
-mapping (Definition~\ref{def:hardsoftmap}).
+mapping \func{context} (Definition~\ref{def:hardsoftmap}).
 %
 The memory locations of \formatLTS{Minx86} Computing Platforms are either cache
 lines or memory cells exposed by the \ac{dram} controller or the VGA controller.
@@ -488,8 +457,8 @@ lines or memory cells exposed by the \ac{dram} controller or the VGA controller.
 The memory ownership is updated through transitions according to three rules:
 %
 \begin{enumerate}
-\item When a cache line gets a copy of a DRAM or VGA cell content, the owner of
-  this cell becomes the new owner of this cache line.
+\item When a cache line gets a copy of a \ac{dram} or VGA cell content, the
+  owner of this cell becomes the new owner of this cache line.
 %
 \item When the content of this cache line is written back to a memory cell, the
   new owner of this memory cell is the owner of this cache line.
@@ -499,99 +468,191 @@ The memory ownership is updated through transitions according to three rules:
 %
 \end{enumerate}
 
-Given $S$ a set of software components, the set of states of \formatLTS{Minx86}
-Computing Platform hardware architecture is denoted by
-$\texttt{Archi}_{\set{S}}$ and the set of \formatLTS{Minx86} Computing Platform
-events is denoted by $\texttt{Event}$.
+\begin{definition}[\formatLTS{Minx86}]
+  We write $\formatLTS{Minx86}(\func{context})$ for the hardware model which
+  tracks memory ownership with respect to the \func{context} hardware-software
+  mapping, such that
 %
-Given $context$ a hardware-software mapping, we denote the Computing Platform
-$\formatLTS{Minx86}$ parameterized with $context$\,\footnote{The related
-  definitions and explanations are given on page \pageref{page:minx86def}.} such
-that
-%
-\[
-  \formatLTS{Minx86}(context) \triangleq (minx86\_pre, minx86\_post(context))
-\]
+  \[
+    \formatLTS{Minx86}(\func{context}) \triangleq \langle H(S), L_S(S), L_H(S),
+    \xrightarrow[\func{context}]{} \rangle
+  \]
+  %
+  where $S$ is the image of $\func{context}$, that is the set of software
+  components which form the software stack.
+\end{definition}
 
-\paragraph{Hardware Architecture State}
-%
-$\texttt{Archi}_{\set{S}}$ is defined as the Cartesian product of the set of
-states of the \ac{cpu}, the \ac{cpu}'s cache, the memory controller and the
-hardware memories exposed by both the DRAM controller and the VGA controller.
+\subsection{Hardware States}
+
+$H(S)$ is defined as the Cartesian product of the set of states of the
+\ac{cpu}'s core, the \ac{cpu}'s cache, the memory controller and the memories
+exposed by both the \ac{dram} controller and the VGA controller.
 %
 Each of these sets is defined in order to model the hardware features we have
 previously described.
 %
-We define
-$\texttt{PhysAddr} \triangleq \setdef{\val{pa}_i}{i \leq \val{max\_addr}}$ the
-set of physical addresses the \ac{cpu} uses to perform \IO.
+We use named tuples\,\footnote{See page \pageref{frontmatter:notations}.} to
+define them.
+%
+Thus, $H(S)$ is defined as follows:
+%
+\[
+  \begin{array}{rccll}
+    H(S)
+    & \triangleq
+    & \{
+    & \func{core} :
+    & \texttt{Core} \\
+    % --------------------------------------------------------------------------
+    % setname
+    & % triangleq
+    & ;
+    & \func{cache} :
+    & \texttt{Cache}_S \\
+    % --------------------------------------------------------------------------
+    % setname
+    & % triangleq
+    & ;
+    & \func{mc} :
+    & \texttt{MC} \\
+    % --------------------------------------------------------------------------
+    % setname
+    & % triangleq
+    & ;
+    & \func{mem} :
+    & \texttt{Mem}_S \\
+    % --------------------------------------------------------------------------
+    % setname
+    & % triangleq
+    & \}
+    & % field name
+    & % field type
+  \end{array}
+\]
+
+\paragraph{Address Spaces}
+%
+We define $\texttt{PhysAddr}$ the set of physical addresses the \ac{cpu} uses to
+perform \IO and $\texttt{HardAddr}$ the set of hardware addresses exposed by the
+\ac{dram} and VGA controllers.
+%
+To distinguish between \ac{dram} and VGA addresses, we use two different
+constructors\,\footnote{See page \pageref{frontmatter:notations}.}.
+%
+\[
+  \begin{array}{rcl}
+    \texttt{PhysAddr}
+    & \triangleq
+    & \textsc{Pa} : [0, \val{max\_addr}] \rightarrow
+      \texttt{PhysAddr} \\
+      % --------------------------------------------------------------------------
+      % no type name
+    & % no symbol
+    & \\ % no constructor
+    % --------------------------------------------------------------------------
+    \texttt{HardAddr}
+    & \triangleq
+    & \textsc{Dram} : [0, \val{max\_addr}] \rightarrow
+      \texttt{HardAddr} \\
+      % --------------------------------------------------------------------------
+      % type name
+    & |
+    & \textsc{Vga} : [0, \val{max\_addr}] \rightarrow
+      \texttt{HardAddr}
+  \end{array}
+\]
 %
 The maximal address offset (denoted by $\val{max\_addr}$ here) is specific to
 the \ac{cpu} and may vary in time according to its addressing mode (real mode,
 long mode, etc.), therefore we left its value as a parameter of our model.
-
-%%%%% APPENDIX State %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-To describe the hardware architecture state of \formatLTS{Minx86} Computing
-Platforms, we use record types and maps with the notations listed in Table
-\ref{tab:notation}.
 %
-Given $\set{S}$ a set of software components, the set of states of the hardware
-architecture is denoted by $\texttt{Archi}_{\set{S}}$.
+By convenience, we give the same maximum address to each of address space.
+
+\paragraph{Core}
 %
 \[
-  \texttt{Archi}_{\set{S}} \triangleq
-  \begin{array}{ll}
-    \,\{proc &: \texttt{Proc}          \\
-    ;\,mc    &: \texttt{MC}            \\
-    ;\,mem   &: \texttt{Mem}_{\set{S}} \\
-    ;\,cache &: \texttt{Cache}_{\set{S}}\,\}
+  \begin{array}{rccll}
+    \texttt{Core}
+    & \triangleq
+    & \{
+    & \func{in\_smm} :
+    & \setshortdef{\val{true}, \val{false}} \\
+    % -------------------------------------------------------------------------
+    % typename
+    & %triangleq
+    & ;
+    & \func{pc}:
+    & \texttt{PhysAddr} \\
+    % -------------------------------------------------------------------------
+    % typename
+    & %triangleq
+    & ;
+    & \func{smbase}:
+    & \texttt{PhysAddr} \\
+    % -------------------------------------------------------------------------
+    % typename
+    & %triangleq
+    & ;
+    & \func{smrr}:
+    & \texttt{Smrr} \\
+    % -------------------------------------------------------------------------
+    % typename
+    & %triangleq
+    & ;
+    & \func{strat}:
+    & \texttt{PhysAddr} \rightarrow \texttt{CacheStrat} \\
+    % -------------------------------------------------------------------------
+    % typename
+    & %triangleq
+    & \}
+    & % no field
+    & % no type
   \end{array}
 \]
-%
-$\texttt{Proc}$ denotes the \ac{cpu} set of states, $\texttt{MC}$ the memory
-controller set of states, $\texttt{Mem}_{\set{S}}$ the physical memories set of
-states and $\texttt{Cache}_{\set{S}}$ the cache set of states.
 
-We define $\texttt{CacheStrat} \triangleq \setshortdef{\val{UC}, \val{WB}}$ the
-set of the modelled cache strategies.
+The boolean $\func{in\_smm}$ is a boolean set to $\val{true}$ when the \ac{cpu}
+is in \ac{smm} and to $\val{false}$ when it leaves it.
 %
-The set of states of the \ac{smrr}s is denoted $\texttt{Smrr}$.
-
-\[ \texttt{Smrr} \triangleq
-  \begin{array}{ll}
-    \{\,range &: \set{P}(\texttt{PhysAddr}) \\
-    ;\,smram\_strat &: \texttt{CacheStrat} \}
-  \end{array}
-\]
-
-The set of physical addresses $range$ tells the \ac{cpu} the location of the
-SMRAM and $\func{smram\_strat}$ tells which cache strategy has to be used when
-the \ac{cpu} is in \ac{smm}.
+The physical address $\func{pc}$ models the program counter, a register used to
+store the address of the next instruction to be fetched and executed.
 %
-As we said, the set of states of the \ac{cpu} is denoted $\texttt{Proc}$.
+The physical address $\func{smbase}$ models the register of the same name.
+%
+The map $\func{strat}$ abstracts away the numerous mechanisms of the x86
+microprocessors to determine which cache strategy to use for a given \IO, where
+$\texttt{CacheStrat} \triangleq \setshortdef{\val{UC}, \val{WB}}$ is the set of
+the modelled cache strategies.
+%
+The set of states of the \acp{smrr} is denoted $\texttt{Smrr}$.
 
 \[
-  \texttt{Proc} \triangleq
-  \begin{array}{ll}
-    \{\,in\_smm &: \setshortdef{\val{true}, \val{false}} \\
-    ;\,pc &: \texttt{PhysAddr} \\
-    ;\,smbase &: \texttt{PhysAddr} \\
-    ;\,smrr &: \texttt{Smrr} \\
-    ;\,strat &: [ \texttt{PhysAddr} \rightarrow \texttt{CacheStrat}]\,\}
+  \begin{array}{rccll}
+    \texttt{Smrr}
+    & \triangleq
+    & \{
+    & \func{range} :
+    & \powerset(\texttt{PhysAddr}) \\
+    % -------------------------------------------------------------------------
+    % typename
+    & % triangleq
+    & ;
+    & \func{strat} :
+    & \texttt{CacheStrat} \\
+    % -------------------------------------------------------------------------
+    % typename
+    & % triangleq
+    & \}
+    &
+    &
   \end{array}
 \]
 
-The boolean $in\_smm$ is a boolean set to $\val{true}$ when the \ac{cpu} is in
-\ac{smm} and to $\val{false}$ when it leaves it.
-%
-The physical address $pc$ models the program counter, a register used to store
-the address of the next instruction to be fetched and executed.
-%
-The physical address $smbase$ models the register of the same name.
-%
-The map $strat$ abstracts away the numerous mechanisms of the x86
-microprocessors to determine which cache strategy to use for a given \IO.
+The set of physical addresses $\func{range}$ tells the \ac{cpu} the location of
+the SMRAM and $\func{strat}$ tells which cache strategy has to be used when the
+\ac{cpu} is in \ac{smm}.
 
+\paragraph{Memory Controller}
+%
 The set of states of the \formatLTS{Minx86} Computing Platforms memory
 controller is denoted by $\val{MC}$.
 
@@ -631,8 +692,7 @@ We then define several address spaces:
 
 The maximal address offset (denoted by $\val{max\_addr}$ here) is specific to
 the \ac{cpu} (for the physical addresses), the DRAM controller and the
-VGA controller. By convenience, we give the same values to each of them in our
-model.
+VGA controller.
 
 The memory controller translates physical addresses into hardware addresses and
 forwards the \IO accordingly.
@@ -694,9 +754,13 @@ $\texttt{Mem}_{\set{S}}$ the set of states of the physical memories.
 % indicates if the cache line content has been modified without propagating the
 % underlying hardware memories and the .
 
-We assume $\texttt{Index}$ is the set of cache indexes and
-$index : \texttt{PhysAddr} \rightarrow \texttt{Index}$ the function used by the
-\ac{cpu} to determine which index to use for a given physical address.
+\paragraph{Cache}
+%
+Let $\texttt{Index}$ be the set of cache indexes and
+$\func{index} : \texttt{PhysAddr} \rightarrow \texttt{Index}$ the function used
+by the \ac{cpu} to determine which index to use for a given physical address.
+%
+They are both parameters of our model.
 %
 The cache is divided into several cache lines which contain the cached memory
 content and several additional information required by the cache strategy
@@ -711,17 +775,19 @@ $\texttt{CacheLine}_{\set{S}}$ attaches a software owner to a cache line.
 We do not give more details about the cache line model because the cache
 behavior is out of the scope of this article.
 
-% \[
-%   \texttt{CacheLine}_{\set{S}} \triangleq \begin{array}{ll} \{\,dirty &:
-%     \setshortdef{\val{true},\,\val{false}} \\
-%     ;\,tag
-%     &:
-%     \texttt{PhysAddr}
-%     \\
-%     ;\,owner
-%     &:
-%     \set{S}\,\}
-%   \end{array} \]
+ \[
+   \texttt{CacheLine}_{\set{S}} \triangleq
+   \begin{array}{ll}
+     \{\,dirty
+     &:\setshortdef{\val{true},\,\val{false}} \\
+     % ------------------------------------------------
+     ;\,tag
+     &: \texttt{PhysAddr} \\
+     % ------------------------------------------------
+     ;\,owner
+     &: \set{S}\,\}
+   \end{array}
+ \]
 
 \[
   \texttt{Cache}_{\set{S}} \triangleq [ \texttt{Index} \rightarrow
