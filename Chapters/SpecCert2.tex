@@ -589,10 +589,10 @@ The set of states of the cache line is denoted by $\texttt{CacheLine}(S)$.
 %
 In addition to modeling the hardware specifications, the definition of
 $\texttt{CacheLine}(S)$ attaches a software owner to a cache line.
-
+%
 \[
   \texttt{CacheLine}(S) \triangleq \langle~\func{dirty} :
-  \setshortdef{\var{true}, \var{false}},\quad\func{tag} :
+  \setshortdef{\val{true}, \val{false}},\quad\func{tag} :
   \texttt{PhysAddr},\quad\func{content}: \texttt{Val},\quad\func{owner}:
   S~\rangle
 \]
@@ -601,6 +601,13 @@ The cache is modelled as a mapping between address indexes and cache lines.
 %
 \[
   \texttt{Cache}(S) \triangleq \texttt{Index} \rightarrow \texttt{CacheLine}(S)
+\]
+%
+A cache $c$ is well-formed if every cache line is tagged with a physical address
+whose index corresponds to the cache line index, that is
+%
+\[
+  \forall \var{i} \in \texttt{Index}, \func{index}(c(i).\func{tag}) = i
 \]
 
 \paragraph{Memory Controller}
@@ -657,30 +664,30 @@ forwards the \IO accordingly.
 We model this translation with the function
 %
 \[
-  \func{phys\_to\_hard} : \texttt{MC} \times
+  \func{dispatch} : \texttt{MC} \times
   \setshortdef{\val{true},\,\val{false}} \times \texttt{PhysAddr} \rightarrow
   \texttt{HardAddr}
   %
 \]
 %
 \[
-  \func{phys\_to\_hard}(\var{mc}, \var{in\_smm}, \var{pa}) \triangleq
+  \func{dispatch}(\var{mc}, \var{in\_smm}, \var{pa}) \triangleq
   \begin{cases}
     \textsc{Vga}(i) & \text{if }\var{in\_smm} = \val{false}\text{, }pa \in
     \texttt{pSmram}\text{,} \\
-    & \quad\text{ and } \var{mc}.\func{d\_open} = \var{true}  \\
+    & \quad\text{ and } \var{mc}.\func{d\_open} = \val{true}  \\
     \textsc{Dram}(i) & \text{otherwise}
   \end{cases}
 \]
 %
-where $pa = \textsc{Pa}(i)$.
-%
+\qquad\qquad\qquad\qquad\qquad\qquad where $pa = \textsc{Pa}(i)$.
+
 We emphasize that the same physical address can be translated into two different
 hardware addresses for two memory controller states $m$ and $m'$, hence it is
 possible to have
 %
 \[
-  \func{phys\_to\_hard}(m, b, pa) \neq \func{phys\_to\_hard}(m', b, pa)
+  \func{dispatch}(m, b, pa) \neq \func{dispatch}(m', b, pa)
 \]
 
 \paragraph{Memories}
@@ -760,69 +767,344 @@ That is, we define for each transition label
 \item a postcondition to specify the consequences of the transitions over the
   hardware architecture state.
 \end{inparaenum}
-
-Let \func{pre} be a predicate over \( L \times H(S) \), and \func{post} be a
-predicate over \( L \times H(S) \times H(S) \), then the transition relation of
+%
+Let \func{pre} be a predicate on \( L \times H(S) \), and \func{post} be a
+predicate on \( L \times H(S) \times H(S) \), then the transition relation of
 {\scshape Minx86} is defined as follows:
 %
 \[
   h \xrightarrow[\func{context}]{l} h' \triangleq \func{pre}(l, h) \wedge
   \func{post}(l, h, h')
 \]
-%
-Tables~\ref{}
 
-The set of events which trigger the state-transformations is denoted by
-$\texttt{Event}$.
-%
-As we said in Section \ref{subsec:speccert:computing}, we distinguish hardware
-events denoted by $\texttt{Event}_{Hard}$ and software events denoted by
-$\texttt{Event}_{Soft}$.
-
+% and~\ref{tab:speccert2:hardlab}
 \begin{table}
   \centerline{%
     \begin{tabular}{lp{3cm}p{6cm}}
       \hline
       \multicolumn{1}{c}{\scshape Event}
-    & \multicolumn{1}{c}{\scshape Parameters}
-    & \multicolumn{1}{c}{\scshape Description} \\
+      & \multicolumn{1}{c}{\scshape Parameters}
+      & \multicolumn{1}{c}{\scshape Description} \\
       \hline
-      $Write$ & $pa \in \texttt{PhysAddr}$ & A \ac{cpu} \IO to write at physical address
-                                             $pa$ \\
+      \( \func{Write} \)
+      & \( \var{pa} \in \texttt{PhysAddr} \) \newline
+        \( v \in \texttt{Val} \)
+      & A \ac{cpu} \IO to write at physical address \( \var{pa} \) the value \(
+        v \) \\
       \hline
-      $Read$ & $pa \in \texttt{PhysAddr}$ & A \ac{cpu} \IO to read at physical address $pa \in
-                                            \texttt{PhysAddr}$ \\
+      \( \func{Read} \)
+      & $\var{pa} \in \texttt{PhysAddr}$
+      & A \ac{cpu} \IO to read at physical address \( \var{pa} \). \\
       \hline
-      $SetCacheStrat$ & $pa \in \texttt{PhysAddr}$ \newline $strat \in
-                        \setshortdef{\val{UC}, \val{WB}}$ & Change the cache strategy for $pa$ to
-                                                            $strat$ ($\val{WB}$ means write-back and $\val{UC}$ means uncacheable) \\
+      \( \func{SetCacheStrat} \)
+      & \( \var{pa} \in \texttt{PhysAddr} \) \newline
+        \( \var{strat} \in \texttt{CacheStrat} \)
+      & Change the cache strategy for \( \var{pa} \) to \( \var{strat} \) \\
       \hline
-      $UpdateSmrr$ & $smrr \in \texttt{Smrr}$ & Update the \ac{smrr} content with the
-                                                new value $smrr$ \\
+      \( \func{UpdateSmrr} \)
+      & \( \var{smrr} \in \texttt{Smrr} \)
+      & Update the \ac{smrr} content with the new value \( smrr \) \\
       \hline
-      $Rsm$ & \centering --- & The \ac{cpu} leaves \ac{smm} \\
+      \( \func{Rsm} \)
+      & \centering ---
+      & The \ac{cpu} leaves \ac{smm} \\
       \hline
-      $OpenBitFlip$ & \centering --- & Flip the $d\_open$ bit \\
+      \( \func{OpenBitFlip} \)
+      & \centering ---
+      & Flip the \texttt{d\_open} bit \\
       \hline
-      $LockSmramc$ & \centering --- & Set the $d\_lock$ bit \\
+      \( \func{LockSmramc} \)
+      & \centering ---
+      & Set the \texttt{d\_lock} bit \\
       \hline
-      $NextInstruction\quad$ & $pa \in \texttt{PhysAddr}$ & The program counter register
-                                                            of the \ac{cpu} is set to $pa$ \\
+      \( \func{NextInstruction} \)
+      & \( \var{pa} \in \texttt{PhysAddr} \)
+      & The program counter register of the \ac{cpu} is set to \( \func{pa} \) \\
       \hline
     \end{tabular}
   }
-  \caption{List of labels dedicated to {\scshape Minx86} software transitions}
+  \caption{List of labels dedicated to {\scshape Minx86} software transitions
+    (\( L_S \))}
   \label{tab:speccert2:softlab}
 \end{table}
 
-Table~\ref{tab:softev} lists the software events we consider in the
-$\formatLTS{Minx86}$ Computing Platforms.
+\paragraph{Software Transitions}
 %
-We model the \ac{cpu} \IOs with $Read(pa)$ and $Write(pa)$, the configuration of
-the memory controller with $OpenBitFlip$ and $LockSmramc$, the configuration of
-the cache strategy with $SetCacheStrat(pa,strat)$, the configuration of the
-\ac{smrr} with $UpdateSmrr(smrr)$ the exit of the \ac{smm} with $Rsm$ and the
-update of the \ac{cpu} program counter register with $NextInstruction(pa)$.
+Table~\ref{tab:speccert2:softlab} lists the labels dedicated to software
+transitions in terms of constructors.
+%
+We model the \ac{cpu} \IOs with \( \func{Read}(\var{pa}) \) and
+\( \func{Write}(\var{pa}) \), the configuration of the memory controller with
+\( \func{OpenBitFlip} \) and \( \func{LockSmramc} \), the configuration of the
+cache strategy with \( \func{SetCacheStrat}(\var{pa}, \var{strat}) \), the
+configuration of the \ac{smrr} with \( \func{UpdateSmrr}(\var{smrr}) \) the exit
+of the \ac{smm} with $\func{Rsm}$ and the update of the \ac{cpu} program counter
+register with $\func{NextInstruction}(\var{pa})$.
+
+As an example, the pre and postconditions of the \func{Write} transitions are
+formally defined in Figure~\ref{fig:speccert2:softprepost}.
+%
+They are presented under the following form:
+%
+\begin{prooftree}
+  \AxiomC{\func{pre}(l, h)}%
+  \AxiomC{\func{post}(l, h, h')}%
+  \BinaryInfC{\( h \xrightarrow[\func{context}]{l} h' \)}%
+\end{prooftree}
+%
+For the remainder, we give a informal description of the pre and postconditions.
+%
+The interested readers can always refer to the Coq development in case they want
+to review their definitions.
+
+\begin{figure}[p]
+  {\small
+    \begin{prooftree}
+      \AxiomC{%
+        \(
+        \begin{array}{l}
+          h.\func{core}.\func{strat}(\var{pa}) = \val{WB} \\
+          \wedge~\func{cache\_hit}(h.\func{cache}, \var{pa}) \\
+          \wedge~\var{pa} \not\in h.\func{smrr}.\func{range}
+        \end{array}
+        \) }%
+      \AxiomC{%
+        \( h' = h \left\{ \func{cache}(\func{index}(\var{pa})) \leftarrow
+          h.\func{cache}(\func{index}(\var{pa}))\left\{
+            \begin{array}{c}
+              \func{content} \leftarrow v, \\
+              \func{dirty} \leftarrow \val{true}
+            \end{array}
+          \right\} \right\} \) }%
+      \BinaryInfC{%
+        \( h \xrightarrow[\func{context}]{\func{Write}(\var{pa}, v)} h' \) }
+    \end{prooftree}
+
+    \begin{prooftree}
+      \AxiomC{%
+        \(
+        \begin{array}{l}
+          h.\func{core}.\func{strat}(\var{pa}) = \val{WB} \\
+          \wedge~\neg~\func{cache\_hit}(h.\func{cache}, \var{pa}) \\
+          \wedge~\var{pa} \not\in h.\func{smrr}.\func{range}
+        \end{array}
+        \) }%
+      \AxiomC{%
+        \(
+        \begin{array}{l}
+          \text{let } \var{ha} = \func{dispatch}(h.\func{mc}, h.\func{in\_smm},
+          \var{pa}) \\
+          \text{let } \var{i} = \func{index}(\var{pa}) \\
+          h' = h \left\{
+          \begin{array}{c}
+            \func{mem}(\var{ha})
+            \leftarrow \left<
+            \begin{array}{c}
+              \func{content} = h.\func{cache}(i).\func{content}, \\
+              \func{owner} = h.\func{cache}(i).\func{owner} \\
+            \end{array}
+            \right>, \\
+            \func{cache}(i) \leftarrow \left<
+            \begin{array}{c}
+              \func{content} = v, \func{tag} = \var{pa}, \\
+              \func{owner} = \func{context}(h), \func{dirty} = \val{true}
+            \end{array}
+            \right>
+          \end{array}
+          \right\}
+        \end{array}
+        \) }%
+      \BinaryInfC{%
+        \( h \xrightarrow[\func{context}]{\func{Write}(\var{pa}, v)} h' \) }
+    \end{prooftree}
+
+    \begin{prooftree}
+      \AxiomC{%
+        \(
+        \begin{array}{l}
+          h.\func{core}.\func{smrr}.\func{strat} = \val{WB} \\
+          \wedge~\func{cache\_hit}(h.\func{cache}, \var{pa}) \\
+          \wedge~\var{pa} \in h.\func{smrr}.\func{range} \\
+          \wedge~h.\func{core}.\func{in\_smm} = \val{true}
+        \end{array}
+        \) }%
+      \AxiomC{%
+        \( h' = h \left\{ \func{cache}(\func{index}(\var{pa})) \leftarrow
+          h.\func{cache}(\func{index}(\var{pa}))\left\{
+            \begin{array}{c}
+              \func{content} \leftarrow v, \\
+              \func{dirty} \leftarrow \val{true}
+            \end{array}
+          \right\} \right\} \) }%
+      \BinaryInfC{%
+        \( h \xrightarrow[\func{context}]{\func{Write}(\var{pa}, v)} h' \) }
+    \end{prooftree}
+
+    \begin{prooftree}
+      \AxiomC{%
+        \(
+        \begin{array}{l}
+          h.\func{core}.\func{smrr}.\func{strat} = \val{WB} \\
+          \wedge~\neg~\func{cache\_hit}(h.\func{cache}, \var{pa}) \\
+          \wedge~\var{pa} \in h.\func{smrr}.\func{range} \\
+          \wedge~h.\func{core}.\func{in\_smm} = \val{true}
+        \end{array}
+        \) }%
+      \AxiomC{%
+        \(
+        \begin{array}{l}
+          \text{let } \var{ha} = \func{dispatch}(h.\func{mc}, h.\func{in\_smm},
+          \var{pa}) \\
+          \text{let } \var{i} = \func{index}(\var{pa}) \\
+          h' = h \left\{
+          \begin{array}{c}
+            \func{mem}(\var{ha})
+            \leftarrow \left<
+            \begin{array}{c}
+              \func{content} = h.\func{cache}(i).\func{content}, \\
+              \func{owner} = h.\func{cache}(i).\func{owner} \\
+            \end{array}
+            \right>, \\
+            \func{cache}(i) \leftarrow \left<
+            \begin{array}{c}
+              \func{content} = v, \func{tag} = \var{pa}, \\
+              \func{owner} = \func{context}(h), \func{dirty} = \val{true}
+            \end{array}
+            \right>
+          \end{array}
+          \right\}
+        \end{array}
+        \) }%
+      \BinaryInfC{%
+        \( h \xrightarrow[\func{context}]{\func{Write}(\var{pa}, v)} h' \) }
+    \end{prooftree}
+
+    \begin{prooftree}
+      \AxiomC{%
+        \(
+        \begin{array}{l}
+          h.\func{core}.\func{strat}(\var{pa}) = \val{UC} \\
+          \wedge~\var{pa} \not\in h.\func{smrr}.\func{range}
+        \end{array}
+        \) }%
+      \AxiomC{%
+        \(
+        \begin{array}{l}
+          \text{let } \var{ha} = \func{dispatch}(h.\func{mc}, h.\func{in\_smm},
+          \var{pa}) \\
+          h' = h \left\{
+          \begin{array}{c}
+            \func{mem}(\var{ha})
+            \leftarrow \left<
+            \begin{array}{c}
+              \func{content} = v, \\
+              \func{owner} = \func{context}(h) \\
+            \end{array}
+            \right>
+          \end{array}
+          \right\}
+        \end{array}
+        \) }%
+      \BinaryInfC{%
+        \( h \xrightarrow[\func{context}]{\func{Write}(\var{pa}, v)} h' \) }
+    \end{prooftree}
+
+    \begin{prooftree}
+      \AxiomC{%
+        \(
+        \begin{array}{l}
+          h.\func{core}.\func{smrr}.\func{strat} = \val{UC} \\
+          \wedge~\var{pa} \in h.\func{smrr}.\func{range} \\
+          \wedge~h.\func{core}.\func{in\_smm} = \val{true}
+        \end{array}
+        \) }%
+      \AxiomC{%
+        \(
+        \begin{array}{l}
+          \text{let } \var{ha} = \func{dispatch}(h.\func{mc}, h.\func{in\_smm},
+          \var{pa}) \\
+          h' = h \left\{
+          \begin{array}{c}
+            \func{mem}(\var{ha})
+            \leftarrow \left<
+            \begin{array}{c}
+              \func{content} = v, \\
+              \func{owner} = \func{context}(h) \\
+            \end{array}
+            \right>
+          \end{array}
+          \right\}
+        \end{array}
+        \) }%
+      \BinaryInfC{%
+        \( h \xrightarrow[\func{context}]{\func{Write}(\var{pa}, v)} h' \) }
+    \end{prooftree}
+
+    \begin{prooftree}
+      \AxiomC{%
+        \(
+        \begin{array}{l}
+          \var{pa} \in h.\func{smrr}.\func{range} \\
+          \wedge~h.\func{core}.\func{in\_smm} = \val{false}
+        \end{array}
+        \) }%
+      \AxiomC{%
+        \( h' = h \) }%
+      \BinaryInfC{%
+        \( h \xrightarrow[\func{context}]{\func{Write}(\var{pa}, v)} h' \) }
+    \end{prooftree}
+  }
+
+  \caption{Pre and postconditions for {\scshape Minx86} \( \func{Write} \)
+    transitions}
+  \label{fig:speccert2:softprepost}
+\end{figure}
+
+A software component can always read and write at any physical address.
+%
+As a consequence, the precondition for \( \func{Read}(\var{pa}) \) and
+\( \func{Write}(\var{pa}) \) always holds true.
+%
+The postcondition for \( \func{Read}(\var{pa}) \) and
+\( \func{Write}(\var{pa}) \) requires the memory content and ownership to be
+updated according to the memories and cache state updates.
+%
+The memory controller enforces a simple access control to protect the
+SMRAM content in the DRAM memory by forwarding the related \IO to the VGA
+controller when the \ac{cpu} is not in \ac{smm};
+%
+this is modelled by the \func{dispatch} function.
+%
+To determine the owner of the memory location which sees its content overriden
+during a state transformation, the postcondition uses the hardware-software
+mapping passed as a parameter of {\scshape Minx86}.
+
+A software component can always update the cache strategy used for an \IO.
+%
+The postcondition for \( \func{SetCacheStrat}(pa,strat) \) requires only the
+cache strategy setting for this physical address $\var{pa}$ to change.
+%
+The precondition for \( \func{UpdateSmrr} \) requires the \ac{cpu} to be in
+\ac{smm}.
+%
+The postcondition requires the \ac{smrr} of the \ac{cpu} to be updated with the
+correct value, the rest of the hardware architecture state being left unchanged.
+
+A software component can jump to any physical address, that is the precondition
+for the label \( \func{NextInstruction}(\var{pa}) \) always holds true.
+%
+The postcondition for \( \func{NextInstruction}(\var{pa}) \) requires the
+program counter register to be updated with \( \var{pa} \).
+%
+The \( \func{OpenBitFlip} \) precondition requires the \texttt{SMRAMC} register
+to be unlocked.
+%
+The postcondition requires the \texttt{d\_open} bit to be updated. The
+$\func{LockSmramc}$ precondition requires the \texttt{d\_lock} bit to be
+unset.
+%
+The postcondition requires the $\texttt{d\_open}$ bit to be unset and the
+\texttt{d\_lock} bit to be unset.
 
 \begin{table}
   \bigcentering
@@ -839,10 +1121,13 @@ update of the \ac{cpu} program counter register with $NextInstruction(pa)$.
     & A \ac{smi} is raised and the \ac{cpu} enters \ac{smm} \\
     \hline
   \end{tabular}
-  \caption{List of labels dedicated to {\scshape Minx86} hardware transitions}
+  \caption{List of labels dedicated to {\scshape Minx86} hardware transitions
+    (\( L_H \))}
   \label{tab:speccert2:hardlab}
 \end{table}
 
+\paragraph{Hardware Transitions}
+%
 The other causes of state-transformations are modelled using hardware events.
 %
 Table \ref{tab:hardev} lists the hardware events we consider in the
@@ -891,41 +1176,6 @@ These definitions have been implemented in Coq in the module
 
 We first give the semantics of software events as state-transformers.
 %
-A software component can always read and write at any physical address.
-%
-As a consequence, the precondition for $Read(pa)$ and $Write(pa)$ always holds
-true.
-%
-The postcondition for $Read(pa)$ and $Write(pa)$ requires the memory ownership
-to be updated according to the memories and cache state updates.
-%
-The memory controller enforces a simple access control to protect the
-SMRAM content in the DRAM memory by forwarding the related \IO to the VGA
-controller when the \ac{cpu} is not in \ac{smm}.
-%
-To determine the owner of the memory location which sees its content overriden
-during a state transformation, the postcondition uses the hardware-software
-mapping used to define the Computing Platform.
-
-A software component can always update the cache strategy used for an \IO.
-%
-The postcondition for $SetCacheStrat(pa,strat)$ requires only the cache strategy
-setting for this physical address $pa$ to change.
-%
-The precondition for $UpdateSmrr$ requires the \ac{cpu} to be in \ac{smm}.
-%
-The postcondition requires the \ac{smrr} of the \ac{cpu} to be updated with the
-correct value, the rest of the hardware architecture state being left unchanged.
-
-A software component can jump to any physical address, hence the postcondition
-for $\func{NextInstru\-ction}(pa)$ always holds true.
-%
-The postcondition for $NextInstru\-ction(pa)$ requires the program counter
-register to be updated with $pa$. The $OpenBitFlip$ precondition requires the
-SMRAMC register to be unlocked. The postcondition requires the \texttt{d\_open}
-bit to be updated. The $Lock\-Smramc$ precondition requires the
-$\texttt{d\_lock}$ bit to be unset. The postcondition requires the
-$\texttt{d\_open}$ bit to be unset and the $d\_lock$ bit to be unset.
 
 We now describe the semantics of hardware events as state-transformers.
 %
@@ -1348,3 +1598,130 @@ the main advantage of our approach, as two different use cases can be studied
 against the same hardware model.
 %
 However, the scalability of SpecCert remains to be proven.
+
+%% In case I need that in the future.
+  % {\small
+  % \begin{prooftree}
+  %   \AxiomC{\( \top \)}%
+  %   \AxiomC{%
+  %   \(
+  %   \begin{array}{l}
+  %     \text{if }\func{cache\_hit}(h.\func{cache}, pa) \\
+  %     \text{then }h' = h \{ \func{cache}(\func{index}(\var{pa})) \leftarrow
+%          h.\func{cache}(\func{index}(\var{pa}))\{ \func{content} \leftarrow v,
+%         \func{dirty} \leftarrow \val{true} \}\}\} \\
+%         \text{else if
+%         }h.\func{cache}(\func{index}(\var{pa})).\func{dirty} =
+%         \val{true} \\
+%         \text{then }h' =
+%         h\left\{
+%         \begin{array}{c}
+%           \func{mem}(h.\func{cache}(\func{index}(\var{pa})).\func{tag})
+%           \leftarrow
+%           \left< \begin{array}{c}
+%                    \func{content} =
+%                    h.\func{cache}(\func{index}(\var{pa})).\func{content}, \\
+%                    \func{owner} = h.\func{cache}(\func{index}(\var{pa})).\func{owner}
+%                  \end{array}
+%           \right>, \\
+%           \func{cache}(\func{index}(\var{pa})) \leftarrow
+%           \left<
+%           \begin{array}{c}
+%             \func{content} = v, \func{tag} = \var{pa}, \func{owner} =
+%             \func{context}(h), \func{dirty} = \val{true}
+%           \end{array}
+%           \right>
+%         \end{array}\right\} \\
+%         \text{else } h' = h \left\{
+%         \func{cache}(\func{index}(\var{pa})) \leftarrow
+%         \left<
+%         \begin{array}{c}
+%           \func{content} = v, \func{tag} = \var{pa}, \func{owner} =
+%           \func{context}(h), \func{dirty} = \val{true}
+%         \end{array}
+%         \right>
+%         \right\}
+%       \end{array}
+%       \)}%
+%     \BinaryInfC{\( h \xrightarrow[\func{context}]{\func{Write}(\var{pa}, v)}
+%       h' \)}
+%   \end{prooftree}
+
+%  \begin{prooftree}
+%    \AxiomC{\( \top \)}%
+%    \AxiomC{%
+%      \(
+%      \begin{array}{l}
+%        \text{if }\func{cache\_hit}(h.\func{cache}, pa) \\
+%        \text{then }h' = h \{ \func{cache}(\func{index}(\var{pa})) \leftarrow
+%        h.\func{cache}(\func{index}(\var{pa}))\{ \func{content} \leftarrow v,
+%        \func{dirty} \leftarrow \val{true} \}\}\} \\
+%        \text{else if
+%        }h.\func{cache}(\func{index}(\var{pa})).\func{dirty} =
+%        \val{true} \\
+%        \text{then }h' =
+%        h\left\{
+%        \begin{array}{c}
+%          \func{mem}(h.\func{cache}(\func{index}(\var{pa})).\func{tag})
+%          \leftarrow
+%          \left< \begin{array}{c}
+%                   \func{content} =
+%                   h.\func{cache}(\func{index}(\var{pa})).\func{content}, \\
+%                   \func{owner} = h.\func{cache}(\func{index}(\var{pa})).\func{owner}
+%                 \end{array}
+%          \right>, \\
+%          \func{cache}(\func{index}(\var{pa})) \leftarrow
+%          \left<
+%          \begin{array}{c}
+%            \func{content} = h.\func{mem}(\var{pa}).\func{content}, \func{tag} =
+%            \var{pa}, \\
+%            \func{owner} =
+%            h.\func{mem}(\var{pa}).\func{owner}, \func{dirty} = \val{false}
+%          \end{array}
+%          \right>
+%        \end{array}\right\} \\
+%        \text{else } h' = h \left\{
+%        \func{cache}(\func{index}(\var{pa})) \leftarrow
+%        \left<
+%        \begin{array}{c}
+%          \func{content} = h.\func{mem}(\var{pa}).\func{content}, \func{tag} =
+%          \var{pa}, \\
+%          \func{owner} =
+%          h.\func{mem}(\var{pa}).\func{owner}, \func{dirty} = \val{false}
+%        \end{array}
+%        \right>
+%        \right\}
+%      \end{array}
+%      \)}%
+%    \BinaryInfC{\( h \xrightarrow[\func{context}]{\func{Read}(\var{pa})} h' \)}
+%  \end{prooftree}
+%}
+
+%\begin{minipage}[c]{0.40\linewidth}
+%  \begin{prooftree}
+%    \AxiomC{\( \top \)}%
+%    \AxiomC{\( h' = h \{ \func{core}.\func{strat}(\var{pa}) \leftarrow
+%      \var{strat} \} \)}%
+%    \BinaryInfC{\( h \xrightarrow[\func{context}]{\func{SetCacheStrat}(\var{pa},
+%        \var{strat})} h' \)}
+%  \end{prooftree}
+%\end{minipage}
+%  %
+%\hfill
+%  %
+%\begin{minipage}[c]{0.55\linewidth}
+%  \begin{prooftree}
+%    \AxiomC{\( h.\func{in\_smm} = \val{true} \)}%
+%    \AxiomC{\( h' = h \{ \func{core}.\func{smrr} \leftarrow \var{smrr} \} \)}%
+%    \BinaryInfC{\( h \xrightarrow[\func{context}]{\func{UpdateSmrr}(\var{smrr})}
+%      h' \)}
+%  \end{prooftree}
+%\end{minipage}
+%
+%\begin{minipage}[c]{0.55\linewidth}
+%  \begin{prooftree}
+%    \AxiomC{\( h.\func{in\_smm} = \val{true} \)}%
+%    \AxiomC{\( h' = h \{ \func{in\_smm} \leftarrow \val{false} \} \)}%
+%    \BinaryInfC{\( h \xrightarrow[\func{context}]{\func{Rsm}} h' \)}
+%  \end{prooftree}
+%\end{minipage}

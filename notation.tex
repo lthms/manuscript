@@ -1,10 +1,14 @@
 \chapter{Notations}
 \label{frontmatter:notations}
 
-\paragraph{Conventions}
+\paragraph{Predicates}
 %
-We often define sets of values, and interfaces in particular, in terms of
-functions to construct these values.
+\( \top \) (\emph{top}) is the logical statement which is always true, while \(
+\bot \) (\emph{bottom}) is the logical statement which is always false.
+
+\paragraph{Constructors}
+%
+We often define sets of values in terms of functions to construct these values.
 %
 These functions are called ``constructors,'' and they have mutually exclusive
 images, i.e. it is not possible to construct the same value with two different
@@ -15,7 +19,7 @@ Constructor names begin with a capital letter.
 We adopt a notation similar to Haskell sum types to define sets \emph{via}
 constructors.
 %
-That is, we can define the disjoint union operator $\uplus$ as follows:
+For instance, this is how we define the disjoint union operator $\uplus$:
 %
 \[
   \begin{array}{rcl}
@@ -31,19 +35,35 @@ $a$ inside $A \uplus B$.
 %
 We adopt a notation similar to Haskell record types to manipulate ``named''
 tuples, that is tuples where each component is a field identified by a name.
-
+%
 \[
-  \begin{array}{rccll}
-    A & \triangleq & \{ & \func{field_1}: & T_1 \\
-      &            & ;  & \func{field_2}: & T_2 \\
-      &            & \} &
-  \end{array}
+  T \triangleq \langle~\func{field_1} : A,\quad\func{field_2} : B~\rangle
 \]
 
-For $a \in A$, we write $a.\func{field_1}$ for selecting the value of the
-\func{field_1} field. We write $a \{ \func{field_1} \leftarrow t \}$ for
+For $x \in T$, we write $x.\func{field_1}$ for selecting the value of the
+\func{field_1} field. We write $x \{ \func{field_1} \leftarrow a \}$ for
 updating the value of the field \func{field_1}. As a consequence,
 %
 \[
-  a \{ \func{field_1} \leftarrow t \}.\func{field_1} = t
+  x \{ \func{field_1} \leftarrow a \}.\func{field}_k = \begin{cases}
+    a & \text{if } k = 1 \\
+    x.\func{field}_k & \text{otherwise}
+  \end{cases}
 \]
+%
+We use a similar notation for functions, that is given
+\( f : A \rightarrow B \), \( f \{ x \leftarrow y \} \) is a new function such
+that
+%
+\[
+  \forall z \in A, f \{ x \leftarrow y \}(z) = \begin{cases}
+    y & \text{if } z = x \\
+    f(z) & \text{otherwise}
+  \end{cases}
+\]
+%
+Finally, we ease the definition of nested updates by gathering the nested fields
+on the right side of \( \leftarrow \).
+%
+For instance, we write \( r \{ s(t) \leftarrow u \} \) for
+\( r \{ s \leftarrow r.s \{ t \leftarrow z \} \} \).

@@ -567,9 +567,9 @@ enforced, but the \ac{cpu} does not read its content when it needs it.
   \begin{tikzpicture}
     \node [draw, inner sep=15pt] (Core) {Core};%
     \node [draw, inner sep=7pt, below=5pt of Core] (Cache) {Cache};%
-    \node [draw, inner sep=10pt, dashed, fit=(Core) (Cache)] (CPU) {};%
+    %\node [draw, inner sep=10pt, dashed, fit=(Core) (Cache)] (CPU) {};%
 
-    \node [draw, below=10pt of CPU, inner sep=20pt, text width=50pt, text badly
+    \node [draw, below=10pt of Cache, inner sep=20pt, text width=50pt, text badly
     centered] (MC) {Memory Controller};%
 
     \draw (Core) -- (Cache);%
@@ -586,7 +586,7 @@ enforced, but the \ac{cpu} does not read its content when it needs it.
     {\small SMRAM} ([yshift=25pt]DRAM.south east);%
   \end{tikzpicture}
 
-  \caption{From the CPU to the SMRAM}
+  \caption{From the \ac{cpu}'s core to the SMRAM}
   \label{fig:speccert:smram}
 \end{figure}
 
