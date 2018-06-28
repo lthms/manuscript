@@ -101,7 +101,7 @@ With this mapping, it becomes possible to determine the owner of an instruction
 fetched by the \ac{cpu} in order to be decoded and executed.
 
 \begin{definition}[Transition-Software Mapping]
-  \label{def:minx86:transsoft}
+  \label{def:speccert2:transsoft}
   A transition-software mapping
   $\func{fetched}_{\Sigma}: H \times L \rightarrow \powerset(S)$ is a function
   which takes an initial hardware state, a transition label and returns the set
@@ -238,7 +238,7 @@ context of a software stack.
 \end{corollary}
 
 \begin{example}[Software Stack Isolation]
-  \label{example:speccert:ssisolation}
+  \label{example:speccert2:isolation}
   Using our definition, we can define a isolation policy for a whole software
   stack which comprises the \ac{bios}, an operating system and several
   applications, that is
@@ -280,64 +280,47 @@ context of a software stack.
 \label{subsec:speccert:biossec}
 
 A security policy such as the one detailed in
-Example~\ref{example:speccert:ssisolation} is not enforced by one but many HSE
+Example~\ref{example:speccert2:isolation} is not enforced by one but many HSE
 mechanisms.
 %
-We can break it down to more specific security policies, by designating sets of
-software components whose executions have to be constrained with respect to the
-global security policy $I$.
+We can break it down to more specific security policies
 %
+For instance, w
 We use this approach to define the \ac{bios} isolation policy we seek to define
 in this Section.
 
-\begin{definition}[Isolation Sub-policies]
-  \label{def:speccert:partial}
-  Given $I$ an isolation policy and $U \subseteq S$ a set of software
-  components, we write $I|U$ for the isolation sub-policy whose purpose is to
-  enforce that all components of $U$ are constrained with respect to $I$, that
-  is
+\begin{definition}[BIOS Isolation Sub-policy]
+  \label{def:speccert:biospol}
+  Given $I$ an isolation policy, we write $I_{\mathtt{bios}}$ for the isolation
+  sub-policy, whose purpose is to enforce that only the \ac{bios} can tamper
+  with its own execution, that is
   %
   \[
-    I|U(h, l, h') \triangleq \forall u \in U, \forall x \in S, h \xrightarrow[u
-    \leadsto x]{l} h' \Rightarrow u \rightarrowtail x
-  \]
-  %
-  This safety property is typically enforced by a \ac{hse} mechanism implemented
-  by the software components authorized to perform code injection against the
-  components of $U$, that is
-  %
-  \[
-    T = \{ t \in S\ |\ t \not\in U \wedge \forall u \in U, t \ge u \}
+    I_{\mathtt{bios}}(h, l, h') \triangleq \forall x \in S, h \xrightarrow[x
+    \leadsto \mathtt{bios}]{l} h' \Rightarrow x = \mathtt{bios}
   \]
 \end{definition}
 
-\begin{example}[Sharing of Responsibility]
-  % TODO: this first paragraph should go at the end of the chapter.
-  For
-  $U_{\mathtt{apps}} = \{ \mathtt{app}_1, \mathtt{app}_2, \ldots,
-  \mathtt{app}_{n-1} \mathtt{app}_{n} \}$ the set of applications whose
-  executions have to be constrained, the related \ac{tcb} is the set
-  $T_{\mathtt{apps}}~=~\{ \mathtt{bios}, \mathtt{os} \}$.
-  %
-  $I|U_{\mathtt{apps}}$ states that one application can only tamper with its own
-  execution.
-  %
-  The responsibility to constrain the execution of applications cannot fall
-  entirely on system software.
-  %
-  For instance, the \ac{bios} executed while the \ac{cpu} is in \ac{smm} has to
-  be careful not to tamper with the page tables previously configured by the
-  system software component.
-
-  On a similar basis, for $U_{\mathtt{os}} = \{ \mathtt{os} \}$, the related
-  \ac{tcb} is the set $T_{\mathtt{bios}}~=~\{ \mathtt{bios} \}$.
-  %
-  Only the \ac{bios} is responsible for constraining the system software
-  execution.
-  %
-  $I|U_{\mathtt{os}}$ states that a system software component can tamper with
-  the applications it manages, with its own execution, but not the \ac{bios}'s.
-\end{example}
+%\begin{example}[BIOS Isolation Sub-policies]
+%  \label{example:speccert2:subpolicies}
+%
+%  % TODO: this first paragraph should go at the end of the chapter.
+%  For
+%  $U_{\mathtt{apps}} = \{ \mathtt{app}_1, \mathtt{app}_2, \ldots,
+%  \mathtt{app}_{n-1} \mathtt{app}_{n} \}$ the set of applications whose
+%  executions have to be constrained, the related \ac{tcb} is the set
+%  $T_{\mathtt{apps}}~=~\{ \mathtt{bios}, \mathtt{os} \}$.
+%  %
+%  $I|U_{\mathtt{apps}}$ states that one application can only tamper with its own
+%  execution.
+%  %
+%  The responsibility to constrain the execution of applications cannot fall
+%  entirely on system software.
+%  %
+%  For instance, the \ac{bios} executed while the \ac{cpu} is in \ac{smm} has to
+%  be careful not to tamper with the page tables previously configured by the
+%  system software component.
+%\end{example}
 
 \section{A Minimal x86 Hardware Model}
 \label{sec:speccert2:minx86}
@@ -378,7 +361,7 @@ It is the most privileged execution mode of x86 processors.
 When a \ac{cpu} receives a special hardware interrupt called System Management
 Interrupt (SMI), it halts its current execution and reconfigures itself to a
 specified state from which it executes the code stored in memory at the address
-$\mathtt{SMBASE} + \texttt{0x8000}$.
+$\mathtt{SMBASE} + \val{0x8000}$.
 %
 In practice, the SMBASE value points to the base of a memory region called the
 SMRAM.
@@ -430,10 +413,10 @@ The SMRAM is dedicated to store the code intended to be executed when the
 \paragraph{Tracking Memory Ownership}
 %
 The \formatLTS{Minx86} definition is parameterized by a hardware-software
-mapping \func{context} (Definition~\ref{def:hardsoftmap}).
+mapping \func{context} (Definition~\ref{def:speccert:hardsoft}).
 %
-The memory locations of \formatLTS{Minx86} Computing Platforms are either cache
-lines or memory cells exposed by the \ac{dram} controller or the VGA controller.
+The memory locations of \formatLTS{Minx86} are either cache lines or memory
+cells exposed by the \ac{dram} controller or the VGA controller.
 %
 The memory ownership is updated through transitions according to three rules:
 %
@@ -778,7 +761,7 @@ predicate on \( L \times H(S) \times H(S) \), then the transition relation of
 \]
 
 % and~\ref{tab:speccert2:hardlab}
-\begin{table}
+\begin{table}[t]
   \centerline{%
     \begin{tabular}{lp{3cm}p{6cm}}
       \hline
@@ -840,7 +823,7 @@ cache strategy with \( \func{SetCacheStrat}(\var{pa}, \var{strat}) \), the
 configuration of the \ac{smrr} with \( \func{UpdateSmrr}(\var{smrr}) \) the exit
 of the \ac{smm} with $\func{Rsm}$ and the update of the \ac{cpu} program counter
 register with $\func{NextInstruction}(\var{pa})$.
-
+%
 As an example, the pre and postconditions of the \func{Write} transitions are
 formally defined in Figure~\ref{fig:speccert2:softprepost}.
 %
@@ -1106,19 +1089,19 @@ unset.
 The postcondition requires the $\texttt{d\_open}$ bit to be unset and the
 \texttt{d\_lock} bit to be unset.
 
-\begin{table}
+\begin{table}[t]
   \bigcentering
   \begin{tabular}{lp{9cm}}
     \hline
     \multicolumn{1}{c}{\scshape Event}
     & \multicolumn{1}{c}{\scshape Description} \\
     \hline
+    \(\func{ReceiveSMI}\)
+    & A \ac{smi} is raised and the \ac{cpu} enters \ac{smm} \\
+    \hline
     \(\func{Fetch}\)
     & A \ac{cpu} \IO to fetch the instruction stored at the physical address
       contained in the program counter register \\
-    \hline
-    \(\func{ReceiveSMI}\)
-    & A \ac{smi} is raised and the \ac{cpu} enters \ac{smm} \\
     \hline
   \end{tabular}
   \caption{List of labels dedicated to {\scshape Minx86} hardware transitions
@@ -1127,179 +1110,203 @@ The postcondition requires the $\texttt{d\_open}$ bit to be unset and the
 \end{table}
 
 \paragraph{Hardware Transitions}
-%
-The other causes of state-transformations are modelled using hardware events.
-%
-Table \ref{tab:hardev} lists the hardware events we consider in the
-$\formatLTS{Minx86}$ Computing Platforms.
-%
-$Fetch$ models the \IO to fetch the instruction pointed by the program counter
-register.
-%
-$ReceiveSmi$ models a System Management Interrupt being risen and handled by the
-\ac{cpu}.
+Table~\ref{tab:speccert2:hardlab} lists the labels dedicated to hardware
+transitions in terms of constructors.
 
-We define $minx86\_fetched$ an event-software mapping for $\formatLTS{Minx86}$
-Computing Platforms (see Definition \ref{def:evsoft}).
-%
-The $minx86\_fetched$ function maps a state-transformation to the set of
-software components which own an instruction fetched during this
-state-transformation.
-%
-In the case of \formatLTS{Minx86}, there is only one event which implies
-fetching instructions: $Fetch$.
-%
-Let $o$ be the owner of the instruction pointed by the program counter register
-in the formula
-%
-\[
-  minx86\_fetched(h, ev) \triangleq
-  \begin{cases}
-    \setshortdef{o} & \text{if }ev = Fetch \\
-    \emptyset       & \text{otherwise} \\
-  \end{cases}
-\]
-%
-We can determine $o$ because $\formatLTS{Minx86}$ tracks the memory location
-ownership.
+\begin{figure}
+  \centering
+  \begin{prooftree}
+    \AxiomC{\( h.\func{core}.\func{in\_smm} = \val{false} \)}%
+    \AxiomC{\( h' = h \left\{
+        \begin{array}{c}
+          \func{core}.\func{in\_smm} \leftarrow \val{true}, \\
+          \func{core}.\func{pc} \leftarrow h.\func{core}.\func{smbase} + \val{0x8000}
+        \end{array}
+      \right\} \)}%
+    \BinaryInfC{\( h \xrightarrow[\func{context}]{\func{ReceiveSMI}} h' \)}
+  \end{prooftree}
 
-\label{page:minx86def} Given $context$ a hardware-software mapping (see
-Definition \ref{def:hardsoftmap}), the precondition predicate of the Computing
-Platform $\formatLTS{Minx86}(context)$ is named $min\-x86\_pre$ and the
-postcondition predicate is named $min\-x86\_post(con\-text)$.
-%
-We give an informal description of the $min\-x86\_pre$ and
-$minx\-86\_post(context)$ for each event.
-%
-These definitions have been implemented in Coq in the module
-\emph{Spec\-Cert.x86.Transi\-tion}.
+  \caption{Pre and postconditions for {\scshape Minx86} \func{ReceiveSMI}
+    transitions}
+  \label{fig:speccert2:receiveSMI}
+\end{figure}
 
-We first give the semantics of software events as state-transformers.
+\func{ReceiveSMI} models a System Management Interrupt being raised and handled
+by the \ac{cpu}.
 %
-
-We now describe the semantics of hardware events as state-transformers.
+Its precondition requires the \ac{cpu} not to be in \ac{smm} because \ac{smm} is
+non-reentrant.
 %
-$\func{Fetch}$ models the fetching of an instruction by the \ac{cpu}.
+The postcondition of \func{ReceiveSMI} requires the program counter to be set to
+$\texttt{SMBASE} + \val{0x8000}$ and the \ac{cpu} is in \ac{smm}.
+%
+Both the pre and postcondition of \func{ReceiveSMI} are formally defined in
+Figure~\ref{fig:speccert2:receiveSMI}.
+%
+$\func{Fetch}$ models the \IO to fetch the instruction pointed by the program
+counter register.
 %
 As a consequence, the definition of its precondition and postcondition are the
-same as $Read(pa)$ with $pa$ being the program register value.
+same as $\func{Read}(\var{pa})$ with $\var{pa}$ being the program register
+value, that is
 %
-$ReceiveSmi$ precondition requires the \ac{cpu} not to be in \ac{smm} because
-\ac{smm} is non-reentrant.
+\[
+  h \xrightarrow[\func{context}]{\func{Read}(h.\func{pc})} h' \Rightarrow h
+  \xrightarrow[\func{context}]{\func{Fetch}} h'
+\]
 %
-The postcondition of $ReceiveSmi$ requires the program counter to be set with
-the $smbase + \val{0x8000}$ (where $smbase$ is the value of the SMBASE register
-of the \ac{cpu}) and the \ac{cpu} is in \ac{smm}.
+We distinguish between \func{Read} and \func{Fetch} because a software component
+does not always decide the value of the program counter register of the Core.
+%
+For instance, the value of the program counter is updated during a
+\func{ReceiveSMI} transition.
 
-% \begin{table}[h]
-%   \centerline{%
-%   \begin{tabular}{clc}
-%      \hline
-%      \textbf Notation  & \multicolumn{1}{c}{\textbf Description} \\
-%      \hline
-%      $\set{S}$ & Set of software components \\
-%      \hline
-%      $\set{H}$ & Set of states of the hardware architecture \\
-%      \hline
-%      $\set{E}$ & Set of states of events of the hardware architecture \\
-%      \hline
-%      $\shortLTS{Ez}$ & Semantic of events as state-transformers (Computing
-%                        Platform) \\
-%      \hline
-%      $\transition{h}{ev}{h'}$ & State-transformation according to
-%                                 $\shortLTS{Ez}$ \\
-%      \hline
-%      $\pathesLTS{Ez}$ & Set of sequences of $\shortLTS{Ez}$ state-transformations
-%                         (Traces) \\
-%      \hline
-%      $P$ & Predicate on trace to model a EM-enforceable security policy \\
-%      \hline
-%      $\Delta$ & Requirements on states and state-transformation (\ac{hse} mechanism)
-%      \\
-%      \hline
-%    \end{tabular}
-%  }
-%    \caption{SpecCert CheatSheet}
-%  \end{table}
+\paragraph{Transition-Software Mapping}
+%
+We define \(\textsc{Minx86}\func{\_fetched}\) a transition-software mapping for
+$\formatLTS{Minx86}$ (Definition~\ref{def:speccert2:transsoft}).
+%
+The \(\textsc{Minx86}\func{\_fetched}\) function maps an initial state of a
+transition and the label of this transition with the set of software components
+which own an instruction fetched during this transition.
+%
+In the case of \formatLTS{Minx86}, there is only one event which implies
+fetching instructions: \func{Fetch}.
+%
+Either the instruction is fetched from the cache (in case of cache hit, and with
+respect to the \ac{smrr} and \ac{cpu} cache strategy configuration) or from the
+hardware components memories (\ac{dram} and VGA).
+%
+The formal definition of \(\textsc{Minx86}\func{\_fetched}\) is given in
+Figure~\ref{fig:speccert2:fetchedformal}.
+
+\begin{figure}
+  \centering \small
+  \begin{prooftree}
+    \AxiomC{\( h.\func{core}.\func{pc} \not\in
+      h.\func{core}.\func{smrr}.\func{range} \)}%
+    \AxiomC{\( h.\func{core}.\func{strat}(h.\func{core}.\func{pc}) = \val{WB}
+      \)}%
+    \AxiomC{\( \func{cache\_hit}(h.\func{cache}, h.\func{core}.\func{pc}) \)}%
+    \TrinaryInfC{\( \textsc{Minx86}\func{\_fetched}(h, \func{Fetch}) =
+      \setshortdef{h.\func{cache}(\func{index}(h.\func{core}.\func{pc})).\func{owner}}
+      \)}
+  \end{prooftree}
+
+  \begin{prooftree}
+    \AxiomC{\( h.\func{core}.\func{pc} \not\in
+      h.\func{core}.\func{smrr}.\func{range} \)}%
+    \AxiomC{\( \neg~\func{cache\_hit}(h.\func{cache}, h.\func{core}.\func{pc})
+      \)}%
+    \BinaryInfC{\( \textsc{Minx86}\func{\_fetched}(h, \func{Fetch}) =
+      \setshortdef{h.\func{mem}(\func{dispatch}(h.\func{mem},
+        h.\func{core}.\func{in\_smm}, \var{pa}))} \)}
+  \end{prooftree}
+
+  \begin{prooftree}
+    \AxiomC{\(
+      \begin{array}{l}
+        h.\func{core}.\func{in\_smm} = \val{true} \\
+        \wedge~ h.\func{core}.\func{pc} \in
+        h.\func{core}.\func{smrr}.\func{range}
+      \end{array}
+      \)}%
+    \AxiomC{\( h.\func{core}.\func{smrr}.\func{strat} = \val{WB} \)}%
+    \AxiomC{\( \func{cache\_hit}(h.\func{cache}, h.\func{core}.\func{pc}) \)}%
+    \TrinaryInfC{\( \textsc{Minx86}\func{\_fetched}(h, \func{Fetch}) =
+      \setshortdef{h.\func{cache}(\func{index}(h.\func{core}.\func{pc})).\func{owner}}
+      \)}
+  \end{prooftree}
+
+  \begin{prooftree}
+    \AxiomC{\( h.\func{core}.\func{pc} \in
+      h.\func{core}.\func{smrr}.\func{range} \)}%
+    \AxiomC{\( h.\func{core}.\func{in\_smm} = \val{true} \)}%
+    \AxiomC{\( \neg~\func{cache\_hit}(h.\func{cache}, h.\func{core}.\func{pc})
+      \)}%
+    \TrinaryInfC{\( \textsc{Minx86}\func{\_fetched}(h, \func{Fetch}) =
+      \setshortdef{h.\func{mem}(\func{dispatch}(h.\func{mem},
+        h.\func{core}.\func{in\_smm}, h.\func{core}.\func{pc})).\func{owner}}
+      \)}
+  \end{prooftree}
+
+  \begin{prooftree}
+    \AxiomC{\( h.\func{core}.\func{pc} \in
+      h.\func{core}.\func{smrr}.\func{range} \)}%
+    \AxiomC{\( h.\func{core}.\func{in\_smm} = \val{false} \)}%
+    \BinaryInfC{\( \textsc{Minx86}\func{\_fetched}(h, \func{Fetch}) = \emptyset
+      \)}
+  \end{prooftree}
+
+  \begin{prooftree}
+    \AxiomC{\( l \neq \func{Fetch} \)}%
+    \UnaryInfC{\( \textsc{Minx86}\func{\_fetched}(h, l) = \emptyset \)}
+  \end{prooftree}
+
+  \caption{Formal definition of \( \textsc{Minx86}\func{\_fetched} \)}
+  \label{fig:speccert2:fetchedformal}
+\end{figure}
 
 \section{Specifying and Verifying a BIOS HSE Mechanism}
 \label{sec:speccert2:verif}
 
-In \cite{intel2014manual}, Intel states ``the main benefit of \ac{smm} is that
-it offers a distinct and easily isolated processor environment that operates
-transparently to the operating system or executive and software applications''.
+We consider the execution of the software stack described in
+Example~\ref{example:speccert2:isolation} after the end of the boot sequence,
+when the OS manages the execution of several applications.
 %
-For the \ac{smm} processor environment to be isolated, the code executed when
-the \ac{cpu} is in \ac{smm} needs to implement a \ac{hse} mechanism.
+Our objective is to give a formal definition for the \ac{hse} mechanism
+implemented by the \ac{bios} (denoted by \( \Delta_{\mathtt{bios}} \)) to remain
+isolated from the rest of the software stack.
 %
-In this section, we formalize and verify this mechanism against the model we
-have previously introduced.
+We have formally define this security policy with $I_{\mathtt{bios}}$
+(Definition~\ref{def:speccert:biospol}).
+%
+\( \Delta_{\mathtt{bios}} \) relies on the \ac{smm} and the \ac{smrr} of x86
+\ac{cpu} and the \texttt{SMRAMC} register of the memory controller.
 
-\paragraph{Specializing {\scshape Minx86}}
-%
-We consider three software components: the boot sequence code, the \ac{smm} code
-and the OS code.
-%
-During the boot sequence, only the boot sequence code is executed and it loads
-both the OS code and the \ac{smm} code into memory.
-%
-At the end of the boot sequence, the OS kernel is executed.
-%
-This OS kernel will schedule different applications.
-%
-Because applications are less privileged than the OS kernel, we will not
-distinguish them from the kernel code.
-%
-Thus, in the following, OS code refers to both OS kernel and application codes.
+\subsection{Defining a Hardware-Software Mapping}
 
-At tracetime, both the OS code and the \ac{smm} code can be executed.
+{\scshape Minx86} is parameterized with a hardware-software mapping
+\func{context} (Definition~\ref{def:speccert:hardsoft}).
 %
-Our objective is to evaluate the security provided by the hardware to isolate
-\ac{smm} code from OS code.
+This mapping is necessary for the model to track memory ownership, as
+exemplified by the postconditions of \func{Write} transitions in
+Figure~\ref{fig:speccert2:softprepost}.
 %
-Thus, we define
+The specification of \func{context} in our use case has already been discussed
+in Example~\ref{example:speccert2:isolation}, but the {\scshape Minx86} is not
+precise enough to give a concrete definition which matches this specification.
 %
-\[
-  \set{S} \triangleq \setshortdef{\val{smm}, \val{os}}
-\]
+That is, we cannot distinguish between OS and applications execution.
+%
+In the context of our use case this is not an issue, because we can distinguish
+between the execution of the \ac{bios} and the execution of the rest of the
+software stack.
+%
+Therefore, we axiomatize the definition of \func{context} with two rules:
+%
+\begin{description}
+\item [\func{context}-bios:] If the \ac{cpu} is in \ac{smm}, it executes the
+  \ac{bios}
+  \[
+    h.\func{in\_smm} = \val{true} \Rightarrow \func{context}(h) = \mathtt{bios}
+  \]
+\item [\func{context}-untrusted:] If the \ac{cpu} is not in \ac{smm}, it
+  executes another component of the software stack
+  \[
+    h.\func{in\_smm} = \val{false} \Rightarrow \func{context}(h) \in
+    \setshortdef{\mathtt{os}, \mathtt{app}_1, \dots, \mathtt{app}_n}
+  \]
+\end{description}
 
-We assume the \ac{smm} is dedicated to the \ac{smm} code.
-%
-Let
-$cpu\_in\_smm : \texttt{Archi}_{\set{S}} \rightarrow \setshortdef{\val{true},
-  \val{false}}$ be the function which returns $\val{true}$ if the \ac{cpu} is in
-\ac{smm} and $\val{false}$ otherwise.
-%
-We define $smm\_context$ a hardware-software mapping such that
-%
-\[
-  smm\_context(h) \triangleq
-  \begin{cases}
-    \val{smm} & \text{if } \func{cpu\_in\_smm}(h) = \val{true} \\
-    \val{os} & \text{otherwise}
-  \end{cases}
-\]
-%
-Let $\formatLTS{Smmx86}$ be the Computing Platform such as
-%
-\[
-  \formatLTS{Smmx86} \triangleq \formatLTS{Minx86}(smm\_context)
-\]
+For the sake of readability, we abusively write
+\( \func{context}(h) = \mathtt{untrusted} \) when the \ac{cpu} executes a
+software component which is not the \ac{bios}.
 
-We assume that both the OS code and the \ac{smm} code have been loaded in
-distinct memory regions. In particular, all the \ac{smm} code has been loaded in
-SMRAM.
-%
-Our objective is to enforce a security policy which prevents the OS code to
-tamper with the \ac{smm} code execution.
-%
-This way, the \ac{smm} (which is the most privileged execution mode of the
-\ac{cpu}) cannot be used to perform an escalation privilege.
+\subsection{HSE Definition}
 
-\paragraph{HSE Definition}
-%
-We define $\Delta_{Smm}$ to model the \ac{hse} mechanism applied by the \ac{smm}
-code such that
+We define $\Delta_{\mathtt{bios}}$ to model the \ac{hse} mechanism applied by
+the \ac{smm} code such that
 $\Delta_{Smm} = (inv_{Smm}, behavior_{Smm}, \setshortdef{\val{smm}},
 smm\_context)$ (see Definition \ref{def:hse}).
 
