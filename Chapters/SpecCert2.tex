@@ -438,7 +438,7 @@ The memory ownership is updated through transitions according to three rules:
   mapping, such that
 %
   \[
-    \formatLTS{Minx86}(\func{context}) \triangleq \langle H(S), L_S(S), L_H(S),
+    \formatLTS{Minx86}(\func{context}) \triangleq \langle H(S), L_S, L_H,
     \xrightarrow[\func{context}]{} \rangle
   \]
   %
@@ -1303,80 +1303,147 @@ For the sake of readability, we abusively write
 \( \func{context}(h) = \mathtt{untrusted} \) when the \ac{cpu} executes a
 software component which is not the \ac{bios}.
 
-\subsection{HSE Definition}
+\subsection{BIOS HSE Definition}
 
 We define $\Delta_{\mathtt{bios}}$ to model the \ac{hse} mechanism applied by
-the \ac{smm} code such that
-$\Delta_{Smm} = (inv_{Smm}, behavior_{Smm}, \setshortdef{\val{smm}},
-smm\_context)$ (see Definition \ref{def:hse}).
+the \ac{bios}, such that
+\[
+  \Delta_{\mathtt{bios}} = \langle S, \setshortdef{\mathtt{bios}},
+  \func{context}, \func{hardware\_req}, \func{bios\_req} \rangle
+\]
+%
+As \func{context} has already been specified, only \func{hardware\_req} and
+\func{bios\_req} remain.
+%
+Once we have properly introduced both, we verify our definition of
+\( \Delta_{\mathtt{bios}} \) satisfies the \ac{hse} laws
+(Definition~\ref{def:speccert:laws}).
 
-In order to enforce the \ac{smm} security policy, we have identified six
-requirements on states.
-\begin{itemize}
+\paragraph{Hardware Requirements}
+%
+Given \( h \in H(S) \), \( h \) satisfies \func{hardware\_req}, we have
+identified six requirements on states.
+%
+\begin{enumerate}
 \item When the \ac{cpu} executes the \ac{smm} code, the program counter register
   value needs to be an address in SMRAM.
-\item The SMBASE register was correctly set during the boot sequence to point to
-  the base of the SMRAM.
-\item The SMRAM contains only \ac{smm} code.
+  \[
+    h.\func{core}.\func{pc} \in \texttt{pSmram}
+  \]
+  %
+\item The \texttt{SMBASE} register was correctly set during the boot sequence to
+  point to the base of the SMRAM.
+  \[
+    h.\func{core}.\func{smbase} = \textsc{Pa}(\val{smram\_base})
+  \]
+  %
+\item All the memory locations within the SMRAM are owned by the \ac{bios}.
+  \[
+    \forall \var{ha} \in \texttt{hSmram}, h.\func{mem}(\var{ha}).\func{owner} =
+    \mathtt{bios}
+  \]
+  %
 \item For a physical address in SMRAM, in case of cache hit, the related cache
   line content must be owned by the \ac{smm} code.
+  \[
+    \forall \var{pa} \in \texttt{pSmram}, \func{cache\_hit}(h.\func{cache},
+    \var{pa}) \Rightarrow h.\func{cache}(\func{index}(\var{pa})).\func{owner} =
+    \mathtt{bios}
+  \]
+  %
 \item In order to protect the content of the SMRAM inside the DRAM memory, the
   boot sequence code has locked the SMRAMC controller. This ensures that an OS
   cannot set the \texttt{d\_open} bit any longer and only a \ac{cpu} in \ac{smm}
   can modify the content of the SMRAM.
+  \[
+    h.\func{mc}.\func{d\_lock} = \val{true}
+  \]
+  %
 \item The range of memory declared with the \ac{smrr} needs to overlap with the
   SMRAM.
-\end{itemize}
+  \[
+    \texttt{pSmram} \subseteq h.\func{core}.\func{smrr}.\func{range}
+  \]
+\end{enumerate}
 
-%%%%%% APPENDIX INV %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+\paragraph{Software Requirements}
+%
 We now define $\func{behavior_{Smm}}$.
 %
 We only define two restrictions.
 %
-First, we force the \ac{smm} code execution to remain confined within the SMRAM.
+First, we force the \ac{bios} execution to remain confined within the SMRAM.
 %
-The reason is simple: the OS code can tamper with the memory outside the SMRAM.
+The reason is simple: the OS can tamper with the memory outside the SMRAM.
 %
 As a consequence, jumping outside the SMRAM is the best way to fail the security
 policy.
 %
-Secondly, we prevent the \ac{smm} code to update the \ac{smrr} registers as it
-is the responsability of the boot sequence code to correctly set them.
-
+Secondly, we prevent the \ac{bios} to update the \ac{smrr} registers;
+%
+the latter should have been properly configured during the boot sequence, and
+there is no need to further update them.
+%
 \[
-  \func{behavior_{Smm}}(h, ev) \triangleq
-  \begin{array}{l}
-    \func{smm\_context}(h) = \val{smm} \\
-    \quad \Rightarrow ((e =
-    NextInstruction(pa)
-    \Rightarrow pa \in \texttt{pSmram}) \\
-    \qquad \wedge\,(e \neq UpdateSmrr(smrr))) \\
+  \begin{array}{rcl}
+    \func{bios\_req}(h, l)
+    & \triangleq
+    & \func{context}(h) = \val{bios} \\
+    % no func name
+    & %no triangleq
+    & \Rightarrow ((\forall \var{pa} \in \texttt{PhysAddr}, \\
+    % no func name
+    & %no triangleq
+    & \qquad\qquad l = \func{NextInstruction}(\var{pa})
+      \Rightarrow \var{pa} \in \texttt{pSmram}) \\
+      % no func name
+    & %no triangleq
+    & \qquad\wedge~(\forall \var{smrr} \in \texttt{Smrr}, l \neq \func{UpdateSmrr}(\var{smrr})))
   \end{array}
 \]
 
-For $\Delta_{Smm}$ to be a \ac{hse} mechanism, we need to prove the two \ac{hse}
-Laws (see Definition \ref{def:laws}).
+\paragraph{HSE Laws}
 %
-The first law states the state requirements modelled with $inv_{Smm}$ are
-preserved through state-transformations if the transformations which do not
-satisfy $behavior_{Smm}$ are discarded.
+For $\Delta_{\mathtt{bios}}$ to be a \ac{hse} mechanism, we need to prove it
+satisfies the two \ac{hse} Laws.
+
+The first law states that the \( \func{bios\_req} \) is always satisfied when a
+software component which is not the \ac{bios} is executed by the hardware
+architecture.
 %
-We prove this by enumeration of $ev \in \texttt{Event}$ and
-$h \in \texttt{Archi}_{Smm}$, we check that each requirement described
-previously is preserved by $\Delta_{Smm}$.
+In such a case, it would mean our \ac{hse} mechanism does not rely on hypotheses
+which involve untrusted software components.
 %
-We use those intermediary results to conclude.
+By definition of \func{bios\_req}, \( \func{context}(h) = \mathtt{bios} \) is an
+antecedent of the requirements over \func{NextInstruction} and
+\func{UpdateSmrr}.
+
+The second law states the state requirements are invariant with respect to the
+software requirements.
 %
-The second law states that the $behavior_{Smm}$ predicate specifies
-state-trans\-formation requirements for the \ac{tcb} only.
+We prove this by case enumeration of \( l \in L_S \uplus L_H \) and
+\( h \in H(S) \), we check that each requirement described
+previously is preserved by \func{bios\_req}.
 %
-In this use case, it means $behavior_{Smm}$ should always hold true when the OS
-code is executed by the hardware architecture.
+In practice, these proofs turned out to be the more demanding, especially for
+requirements 3 and 4.
 %
-By definition of $behavior_{Smm}$, $smm\_context(h) = \val{smm}$ is an
-antecedent of the conditional.
+For \func{Write} and \func{Read} transitions, the following cases have to be
+considered:
+%
+\begin{itemize}
+\item Whether the \ac{cpu}'s core is in \ac{smm} or not;
+\item Whether the targeted physical address falls into the \ac{smrr} range or
+  not;
+\item Which cache strategy to use for this transition;
+\item In case of cache hit, whether the occupied cache line is tagged ``dirty''
+  or not, and whether its tag (a physical address) belongs to the SMRAM or not.
+\end{itemize}
+%
+Once each requirement has been shown to be preserved during a transition, we can
+conclude for \func{hardware\_req} as a whole.
+
+\subsection{BIOS HSE Mechanism Correctness}
 
 Let $smm\_secure\_transformation$ be a predicate which holds true when a
 state-transformation does not imply the OS code to tamper with the execution of

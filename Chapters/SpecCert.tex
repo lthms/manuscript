@@ -239,8 +239,8 @@ However, this is out of the scope of this Chapter.
 \begin{definition}[HSE Mechanism]
   \label{def:speccert:hse}
   A \ac{hse} mechanism $\Delta$ is a tuple
-  $\langle S, T, \func{context}, \func{inv}, \func{behaviour} \rangle$, such
-  that
+  $\langle S, T, \func{context}, \func{hardware\_req}, \func{software\_req}
+  \rangle$, such that
   %
   \begin{itemize}
   \item $S$ is the set of software components executed by the hardware
@@ -361,7 +361,7 @@ This means the software transitions at the untrusted software components
 disposal cannot achieve putting the system in an unsafe state.
 
 \begin{definition}[\ac{hse} Laws]
-  \label{def:laws}
+  \label{def:speccert:laws}
   A \ac{hse} mechanism $\Delta$ has to satisfy the following properties:
   \begin{enumerate}
   %
