@@ -1368,7 +1368,7 @@ identified six requirements on states.
 
 \paragraph{Software Requirements}
 %
-We now define $\func{behavior_{Smm}}$.
+We now define $\func{bios\_req}$.
 %
 We only define two restrictions.
 %
@@ -1445,41 +1445,78 @@ conclude for \func{hardware\_req} as a whole.
 
 \subsection{BIOS HSE Mechanism Correctness}
 
-Let $smm\_secure\_transformation$ be a predicate which holds true when a
-state-transformation does not imply the OS code to tamper with the execution of
-\ac{smm} code.
-\[ \begin{array}{l}
-     smm\_secure\_transformation(h, ev) \triangleq \\
-     \qquad \neg software\_tampering(smm\_context, minx86\_execute, h, ev,
-     \val{os}, \val{smm})
-   \end{array} \]
+Our objective is to prove that \( \Delta_{\mathtt{bios}} \) is correct with
+respect to \( I_{\mathtt{bios}} \).
+%
+Because \( I_{\mathtt{bios}} \) is a security policy modelled with a predicate
+on transitions, we know thanks to Theorem~\ref{theorem:speccert:correcthse} that
+%
+\[
+  \begin{array}{l}
+    \forall (h, l, h') \in \mathcal{T}(\textsc{Minx86}(\func{context})), \\
+    \qquad \func{hardware\_req}(h) \\
+    \qquad \Rightarrow (l \in L_S \Rightarrow \func{bios\_req}(h, l)) \\
+    \qquad \Rightarrow I_{\mathtt{bios}}(h, l, h')
+  \end{array}
+\]
+%
+is a sufficient condition for
+\( \Delta_{\mathtt{bios}} \models I_{\mathtt{bios}} \).
 
- We prove that this predicate holds true for a state-transformation with respect
- to the \ac{hse} mechanism. With this result, we can prove the \ac{hse}
- mechanism is sound (see Definition \ref{def:sound}).
+From the security policy perspective, only the \func{Fetch} label is relevant.
+%
+Unfolding the definitions previously introduced in this Chapter and its
+predecessor leaves us to prove that
+%
+\[
+  \begin{array}{l}
+    \forall (h, h') \in H(S) \times H(S) \text{ such that } (h, \func{Fetch}, h')
+    \in \mathcal{T}(\textsc{Minx86}(\func{context})), \\
+    \qquad \func{hardware\_req}(h) \wedge h.\func{in\_smm} = \val{true}
+    \Rightarrow \func{fetched}_{\textsc{Minx86}}(h, \func{Fetch}) =
+    \setshortdef{\mathtt{bios}}
+  \end{array}
+\]
+%
+Once again, the proof relies on cases enumeration.
+%
+In particular, the requirement 1 constrains the value of the program counter
+register.
+%
+As a consequence, we know we can rely on the requirements 3 and 4 which
+constrains the ownership of memory location related to the SMRAM.
 
-\begin{lemma}[Invariants Enforce Security]
-  $\forall \transitionLTS{Smmx86}{h}{ev}{h'}$,
-  \[ \begin{array}{l}
-       inv_{Smm}(h) \\
-       \qquad \Rightarrow (ev \in \texttt{Event}_{Soft} \Rightarrow
-       behavior_{Smm}(h,ev) \\
-       \qquad\qquad \Rightarrow smm\_secure\_transformation(h, ev)
-     \end{array} \]
-
-  \begin{proof}
-    By enumeration of $ev \in \texttt{Event}$ and
-    $h \in \texttt{Archi}_{\set{S}}$.
-  \end{proof}
-\end{lemma}
-
-\begin{theorem}[$\Delta_{Smm}$ is Sound]
-  \[ sound(\Delta_{Smm}, smm\_security) \]
-  \begin{proof}
-    The "Invariants Enforce Security" lemma applies for one transition and the
-    first \ac{hse} law allows to reason by induction on traces.
-  \end{proof}
-\end{theorem}
+As a side note, we emphasize that these proofs validate the SMRAM cache
+poisoning countermeasure.
+%
+Without the \acp{smrr}, it is not possible to conclude about the correctness of
+\( \Delta_{\mathtt{bios}} \) if the hardware model takes the cache into account.
+%
+We consider two scenarios.
+%
+On the one hand, the \ac{hse} mechanism definition takes the cache into account
+too.
+%
+In these conditions, it is not possible to prove it satisfies the second law.
+%
+Indeed, the cache poisoning attack violates the requirement 4.
+%
+On the other hand, the \ac{hse} mechanism definition does not take the cache
+into account.
+%
+As a consequence, it is possible to prove it satisfies the second law.
+%
+However, it is not possible to prove it is correct with respect to
+$I_{\mathtt{bios}}$.
+%
+Indeed, we cannot discard the case where a cache line tagged with a physical
+address which belongs to the SMRAM is owned by an untrusted software component.
+%
+A model checker would be able to exhibit a trace which corresponds to the SMRAM
+cache poisoning attack.
+%
+We could also prove in a theorem prover that a given trace does not satisfies
+$I_{\mathtt{bios}}$.
 
 \section{HSE Mechanisms Concurrent Implementation}
 \label{subsec:speccert:coop}
