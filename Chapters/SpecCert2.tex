@@ -167,7 +167,7 @@ definition of a \textit{code injection}.
 \end{example}
 
 \subsection{Isolation Policies}
-\label{subsec:speccert:globalsec}
+\label{subsec:speccert2:globalsec}
 
 We leverage the code injection definition to propose a generic formalization of
 \emph{isolation policies}, to determine if a given software component is
@@ -1512,34 +1512,59 @@ $I_{\mathtt{bios}}$.
 Indeed, we cannot discard the case where a cache line tagged with a physical
 address which belongs to the SMRAM is owned by an untrusted software component.
 %
-A model checker would be able to exhibit a trace which corresponds to the SMRAM
-cache poisoning attack.
+In this scenario, we could even exhibit a trace which complies the \ac{hse}
+mechanism, but does not satisfies the security policy.
+
+\section{Perspectives on Concurrent HSE Mechanisms}
+\label{subsec:speccert2:coop}
+
+We have proven that \( \Delta_{\mathtt{bios}} \models I_{\mathtt{bios}} \), that
+is \( \Delta_{\mathtt{bios}} \) is correct with respect to
+\( I_{\mathtt{bios}} \).
 %
-We could also prove in a theorem prover that a given trace does not satisfies
-$I_{\mathtt{bios}}$.
-
-\section{HSE Mechanisms Concurrent Implementation}
-\label{subsec:speccert:coop}
-
-In practice, a global execution isolation policy is enforced thanks to several
-\ac{hse} mechanisms in charge of enforcing one partial execution isolation
-policy.
+As we discussed in Subsection~\ref{subsec:speccert2:globalsec}, the \ac{bios}
+isolation policy fall within a more general isolation policy \( I \) whose scope
+is the complete software stack.
 %
-We model the requirement to implement both \ac{hse} mechanisms concurrently as a
-third \ac{hse} mechanism, constructed by a dedicated operator $\sqcap$.
+In practice, \( I \) is enforced \emph{via} several \ac{hse} mechanisms,
+including \( \Delta_{\mathtt{bios}} \).
+%
+As a consequence, these mechanisms have to be implemented concurrently.
 
-\begin{definition}[HSE Mechanisms Concurrent Implementation]
-  Given two HSE mechanism $\Delta_1$ and $\Delta_2$, such that
+We first introduce a \ac{hse} mechanism composition operator \( \sqcap \)
+(\ref{subsec:speccert2:compo}).
+%
+We then illustrate how we can leverage this operator to reason about \( I \)
+(\ref{subsec:speccert2:isolationenforcement}).
+%
+Finally, we discuss the notion of \ac{hse} mechanisms compatibility
+(\ref{subsec:speccert2:compat}).
+
+\subsection{HSE Mechanisms Composition}
+\label{subsec:speccert2:compo}
+
+We model the concurrent implementation of two \ac{hse} mechanisms \( \Delta_1 \)
+and \( \Delta_2 \) as a third \ac{hse} mechanism \( \Delta_1 \sqcap \Delta_2 \).
+%
+For convenience, the \( \sqcap \) operator imposes two restrictions over
+\ac{hse} mechanisms: they shall share the same set of software components and
+the same hardware-software mapping.
+%
+It is possible to define a more generic and flexible composition operator, but
+it is out of the scope of this Section.
+
+\begin{definition}[Concurrent HSE Mechanisms]
+  Given two HSE mechanism \( \Delta_1 \) and \( \Delta_2 \), such that
 %
   \[
     \begin{array}{rcl}
       \Delta_1
       & =
-      & \langle S, T_1, \func{context}, \func{inv}_1, \func{behaviour}_1
+      & \langle S, T_1, \func{context}, \func{hardware\_req}_1, \func{software\_req}_1
         \rangle \\
       \Delta_2
       & =
-      & \langle S, T_2, \func{context}, \func{inv}_2, \func{behaviour}_2
+      & \langle S, T_2, \func{context}, \func{hardware\_req}_2, \func{software\_req}_2
         \rangle
     \end{array}
   \]
@@ -1549,23 +1574,67 @@ third \ac{hse} mechanism, constructed by a dedicated operator $\sqcap$.
 %
   \[
     \Delta_1 \sqcap \Delta_2 \triangleq \langle S, T_1 \cup T_2, \func{context},
-    \func{inv}_{1\wedge2}, \func{behaviour}_{1\wedge2} \rangle
+    \func{hardware\_req}_{1\wedge2}, \func{software\_req}_{1\wedge2} \rangle
   \]
 %
   where
   \[
     \begin{array}{rcl}
-      \func{inv}_{1\wedge2}(h)
+      \func{hardware\_req}_{1\wedge2}(h)
       & \triangleq
-      & \func{inv}_1(h) \wedge \func{inv}_2(h) \\
-      \func{behaviour}_{1\wedge2}(h,l)
+      & \func{hardware\_req}_1(h) \wedge \func{hardware\_req}_2(h) \\
+      \func{software\_req}_{1\wedge2}(h,l)
       & \triangleq
-      & \func{behaviour}_1(h,l) \wedge \func{behaviour}_2(h,l)
+      & \func{software\_req}_1(h,l) \wedge \func{software\_req}_2(h,l)
     \end{array}
   \]
 \end{definition}
 
-\begin{lemma}[Compliant Traces of Intersection]
+\paragraph{Properties}
+%
+We now discuss two properties of \( \sqcap \) which emphasize that its
+definition matches legitimate expectations.
+%
+Firstly, \( \sqcap \) forms a commutative monoid, meaning it is both associative
+and commutative.
+%
+As a consequence, the order in which we construct a ``global'' \ac{hse}
+mechanism from a list of sub-mechanisms is not important.
+%
+Secondly, the set of compliant traces of the composition of two mechanisms is
+the intersection of the sets of compliant traces of these mechanisms.
+%
+In other word, to comply with the composition of two \ac{hse} mechanisms, a
+trace has to comply with each mechanism individually.
+
+\begin{lemma}[Commutative Monoid]
+  We write $\Delta_\top$ for the \ac{hse} mechanism whose requirements over
+  states and software transitions are always satisfied.
+  %
+  \( \sqcap \) forms a commutative monoid with the set of \ac{hse} mechanisms
+  which share both the same set of software components and the same
+  hardware-software mapping, whose identity element is \( \Delta_\top \).
+
+  Indeed, \( \sqcap \) satisfies the following properties:
+
+  \begin{description}
+  \item [Associativity:]
+    \( (\Delta_1 \sqcap \Delta_2) \sqcap \Delta_3 = \Delta_1 \sqcap (\Delta_2
+    \sqcap \Delta_3) \)
+    %
+  \item [Identity Element:] \( \Delta \sqcap \Delta_\top = \Delta \)
+    %
+  \item [Commutativity:]
+    \( \Delta_1 \sqcap \Delta_2 = \Delta_2 \sqcap \Delta_1 \)
+  \end{description}
+
+  \begin{proof}
+    \( \sqcap \) forms a monoid because it is defined with operators which
+    themselves form monoids.
+  \end{proof}
+\end{lemma}
+
+\begin{lemma}[Compliant Traces, Composition and Intersection]
   \label{lemma:speccert:compinter}
   The set of compliant traces of the intersection of $\Delta_1$ and $\Delta_2$
   is the intersection of the sets of compliant traces of $\Delta_1$ and
@@ -1576,8 +1645,8 @@ third \ac{hse} mechanism, constructed by a dedicated operator $\sqcap$.
   \]
 
   \begin{proof}
-    We leverage the definition of $\wedge$ and $\Rightarrow$ to turn a statement
-    of the form
+    The main idea of the proof is to leverage the definition of $\wedge$ and
+    $\Rightarrow$ to turn a statement of the form
     %
     \[
       (P \wedge P') \wedge (R \Rightarrow Q \wedge Q')
@@ -1589,53 +1658,63 @@ third \ac{hse} mechanism, constructed by a dedicated operator $\sqcap$.
       (P \wedge (R \Rightarrow Q)) \wedge (P' \wedge (R \Rightarrow Q'))
     \]
     %
-    and vice versa, where $P$ and $P'$ are statements about the initial states
-    of traces and \func{inv}, $R$ is the premise filtering software transitions,
-    and $Q$ and $Q'$ are statements about \func{behaviour}.
+    and vice versa.
+    %
+    In our case, $P$ and $P'$ are statements about the initial states of traces
+    and \func{hardware\_req}, $R$ is the premise filtering software transitions,
+    and $Q$ and $Q'$ are statements about \func{software\_req}.
   \end{proof}
 \end{lemma}
 
-\begin{example}[Global Execution Policy Enforcement]
-  We consider two HSE mechanisms: $\Delta_\mathtt{bios}$ implemented by the
-  \ac{bios} to constrain the execution of the system software component, and
-  $\Delta_\mathtt{os}$ primarily implemented by the system software component to
-  constrain the execution of the applications, that is
-  %
-  \[
-    \begin{array}{cl}
-      \Delta_{\mathtt{bios}}
-      & \models I|U_{\mathtt{os}} \\
-      \Delta_{\mathtt{os}} & \models
-                             I|U_{\mathtt{apps}}
-    \end{array}
-  \]
+\subsection{Software Stack Isolation Policy Enforcement}
+\label{subsec:speccert2:isolationenforcement}
 
-  We can prove that any execution which complies with $\Delta_\mathtt{bios}$ and
-  $\Delta_\mathtt{os}$ satisfies the software execution isolation policy $I$,
-  that is
-  %
-  \[
-    \Delta_{\mathtt{bios}} \sqcap \Delta_{\mathtt{os}} \models I
-  \]
+\[
+  I_\mathtt{os}(h, l, h') \triangleq \forall x \in S, h
+  \xrightarrow[\mathtt{app}_k \leadsto x]{l} h' \Rightarrow x = \mathtt{app}_k
+\]
 
-  \begin{proof}
-    By definition of correct \ac{hse} mechanism, we need to prove that the set
-    of traces which comply with
-    $\Delta_{\mathtt{bios}} \sqcap \Delta_{\mathtt{os}}$ has to satisfy the
-    security policy derived from our isolation policy $I$.
-    %
-    With Lemma~\ref{lemma:speccert:compinter}, we know that the set of compliant
-    traces of $\Delta_{\mathtt{bios}} \sqcap \Delta_{\mathtt{os}}$ is the
-    intersection of the sets of compliant traces of $\Delta_{\mathtt{bios}}$ and
-    $\Delta_{\mathtt{os}}$.
-    %
-    We know that the transitions of these traces satisfy respectively
-    $I|U_{\mathtt{os}}$ and $I|U_{\mathtt{bios}}$.
-    %
-    This is enough to conclude, based on the definitions of global and partial
-    execution isolation policies.
-  \end{proof}
-\end{example}
+We consider two HSE mechanisms: $\Delta_\mathtt{bios}$ implemented by the
+\ac{bios} to isolate itself from the rest of the software stack and
+$\Delta_\mathtt{os}$ primarily implemented by the OS to constrain the execution
+of the applications, that is
+  %
+\[
+  \begin{array}{cl}
+    \Delta_{\mathtt{bios}}
+    & \models I_{\mathtt{os}} \\
+    \Delta_{\mathtt{os}} & \models
+                           I_{\mathtt{apps}}
+  \end{array}
+\]
+
+We can prove that any execution which complies with $\Delta_\mathtt{bios}$ and
+$\Delta_\mathtt{os}$ satisfies the software execution isolation policy $I$, that
+is
+  %
+\[
+  \Delta_{\mathtt{bios}} \sqcap \Delta_{\mathtt{os}} \models I
+\]
+
+\begin{proof}
+  By definition of correct \ac{hse} mechanism, we need to prove that the set of
+  traces which comply with $\Delta_{\mathtt{bios}} \sqcap \Delta_{\mathtt{os}}$
+  has to satisfy the security policy derived from our isolation policy $I$.
+  %
+  With Lemma~\ref{lemma:speccert:compinter}, we know that the set of compliant
+  traces of $\Delta_{\mathtt{bios}} \sqcap \Delta_{\mathtt{os}}$ is the
+  intersection of the sets of compliant traces of $\Delta_{\mathtt{bios}}$ and
+  $\Delta_{\mathtt{os}}$.
+  %
+  We know that the transitions of these traces satisfy respectively
+  $I|U_{\mathtt{os}}$ and $I|U_{\mathtt{bios}}$.
+  %
+  This is enough to conclude, based on the definitions of global and partial
+  execution isolation policies.
+\end{proof}
+
+\subsection{HSE Mechanisms Compatibility}
+\label{subsec:speccert2:compat}
 
 \section{Conclusion}
 \label{sec:speccert:discuss}
