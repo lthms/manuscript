@@ -1537,8 +1537,8 @@ We first introduce a \ac{hse} mechanism composition operator \( \sqcap \)
 We then illustrate how we can leverage this operator to reason about \( I \)
 (\ref{subsec:speccert2:isolationenforcement}).
 %
-Finally, we discuss the notion of \ac{hse} mechanisms compatibility
-(\ref{subsec:speccert2:compat}).
+%Finally, we discuss the notion of \ac{hse} mechanisms compatibility
+%(\ref{subsec:speccert2:compat}).
 
 \subsection{HSE Mechanisms Composition}
 \label{subsec:speccert2:compo}
@@ -1595,11 +1595,11 @@ it is out of the scope of this Section.
 We now discuss two properties of \( \sqcap \) which emphasize that its
 definition matches legitimate expectations.
 %
-Firstly, \( \sqcap \) forms a commutative monoid, meaning it is both associative
-and commutative.
+Firstly, \( \sqcap \) forms a commutative monoid, and as a consequence is both
+associative and commutative.
 %
-As a consequence, the order in which we construct a ``global'' \ac{hse}
-mechanism from a list of sub-mechanisms is not important.
+This means the order in which we construct a ``composite'' \ac{hse} mechanism
+from a list of sub-mechanisms is not important.
 %
 Secondly, the set of compliant traces of the composition of two mechanisms is
 the intersection of the sets of compliant traces of these mechanisms.
@@ -1669,31 +1669,40 @@ trace has to comply with each mechanism individually.
 \subsection{Software Stack Isolation Policy Enforcement}
 \label{subsec:speccert2:isolationenforcement}
 
+Our objective is to prove that by implementing the \ac{hse} mechanism previously
+defined and verified, the \ac{bios} participates in enforcing \( I \).
+%
+We can do that by finding a complementary \ac{hse} mechanism \( \Delta' \) such
+that their composition is correct with respect to \( I \), that is
+%
+\[
+  \exists \Delta', \Delta_{\mathtt{bios}} \sqcap \Delta' \models I
+\]
+
+We now show that any \ac{hse} mechanism whose purpose is to constrain the
+execution of applications with respect to \( I \) verifies this property.
+%
+We formally specify this additional security policy
+%
 \[
   I_\mathtt{os}(h, l, h') \triangleq \forall x \in S, h
   \xrightarrow[\mathtt{app}_k \leadsto x]{l} h' \Rightarrow x = \mathtt{app}_k
 \]
+%
+Such a \ac{hse} mechanism is principally implemented by the OS \emph{via} the
+memory paging and ring level features of x86.
+%
+The \ac{bios} is required to cooperate, at least by not modifying with the page
+tables set up by the OS.
 
-We consider two HSE mechanisms: $\Delta_\mathtt{bios}$ implemented by the
-\ac{bios} to isolate itself from the rest of the software stack and
-$\Delta_\mathtt{os}$ primarily implemented by the OS to constrain the execution
-of the applications, that is
-  %
+We can prove that given any \ac{hse} mechanism \( \Delta_{\mathtt{os}} \) which
+is correct with respect to \( I_{\mathtt{os}} \), then
+\( \Delta_{\mathtt{bios}} \sqcap \Delta_{\mathtt{os}} \) is correct with respect
+to \( I \).
+%
 \[
-  \begin{array}{cl}
-    \Delta_{\mathtt{bios}}
-    & \models I_{\mathtt{os}} \\
-    \Delta_{\mathtt{os}} & \models
-                           I_{\mathtt{apps}}
-  \end{array}
-\]
-
-We can prove that any execution which complies with $\Delta_\mathtt{bios}$ and
-$\Delta_\mathtt{os}$ satisfies the software execution isolation policy $I$, that
-is
-  %
-\[
-  \Delta_{\mathtt{bios}} \sqcap \Delta_{\mathtt{os}} \models I
+  \forall \Delta_{\mathtt{os}}, \Delta_{\mathtt{os}} \models I_{\mathtt{os}}
+  \Rightarrow \Delta_{\mathtt{bios}} \sqcap \Delta_{\mathtt{os}} \models I
 \]
 
 \begin{proof}
@@ -1713,28 +1722,30 @@ is
   execution isolation policies.
 \end{proof}
 
-\subsection{HSE Mechanisms Compatibility}
-\label{subsec:speccert2:compat}
+The definition of a correct \( \Delta_{\mathtt{os}} \) remains out of the scope
+of this manuscript, but we wanted to emphasize that the verification work does
+not necessarily ends once \ac{hse} mechanisms are defined and verified
+separately.
+
+% TODO: ? Should we?
+%\subsection{On HSE Mechanisms Compatibility}
+%\label{subsec:speccert2:compat}
 
 \section{Conclusion}
 \label{sec:speccert:discuss}
 
-Our effort has been originally motivated by the disclosure of several
-vulnerabilities targeting multiple x86 \ac{hse} mechanisms for the past few
-years\,\cite{wojtczuk2009smram,duflot2009smram,rutkowska2008remap,domas2015sinkhole,kallenberg2015racecondition}.
+Throughout this Chapter, we have applied our three-steps methodology for
+formally specifying and verifying \ac{hse} mechanisms against a hardware
+architecture model to a real world example.
 %
-These attacks do not benefit from a software implementation error but rather
-from a flaw in the hardware specifications themselves.
-%
-The result of our work is a three-steps methodology for formally specifying and
-verifying \ac{hse} mechanisms against a hardware architecture model.
-%
-We believe each aspect is important.
+Our goal was to illustrate our methodology can benefit both hardware designers
+and software developers.
 
-First, the hardware architecture model can be used as a formal specification.
+First, the hardware architecture model can be used as a formal specification by
+software developers.
 %
 The main benefit of a formal specification is to avoid any ambiguity such as the
-one we have found in \cite{intel2009mch}.
+one we have found in \cite{intel2009mch} (as published in 2009).
 %
 One can read at Section 3.8.3.8, page 102 that ``the OPEN bit must be reset
 before the LOCK bit is set''.
@@ -1747,7 +1758,7 @@ not specified if the first statement is true\,\footnote{If we had to actually
   implement the \ac{hse} mechanism, we would have to assume the first was the
   correct one.}  \formatLTS{Minx86} as a formal specification does not suffer
 from the same flaw.
-
+%
 Secondly, a formal specification of a \ac{hse} mechanism will help software
 developers when the time comes to implement it.
 %
@@ -1761,26 +1772,14 @@ well-defined security property.
 %
 Even if the proofs only apply to an abstract model, we believe it is a valuable
 improvement.
-
+%
 Lastly, the verification process of a \ac{hse} mechanism specification against a
 hardware architecture model may help to highlight hidden flaws in the hardware
 specifications assumptions.
 %
-We take the example of the SMRAM cache poisonning
+To illustrate that, we have taken the example of the SMRAM cache poisonning
 attack\,\cite{wojtczuk2009smram,duflot2009smram}, which has motivated the
 introduction of the \ac{smrr}.
-%
-If an attacker can set the proper cache strategy (WB) for the SMRAM physical
-addresses, then the code inside the SMRAM is loaded into the cache as soon as
-the \ac{cpu} in \ac{smm} is executing it.
-%
-From this point forward ---because the access control is enforced at the memory
-controller level--- nothing prevents the attacker to tamper with it.
-%
-The next time the \ac{cpu} enters in \ac{smm}, it executes the code stored in
-the cache. With a \ac{smrr}-less version of \formatLTS{Minx86}, we were not able
-to conclude our \ac{hse} mechanism was sound: such a scenario draws attention of
-the SpecCert user who is forced to investigate.
 
 From our point of view, the clear separation between the hardware model, the
 security properties and the \ac{hse} mechanisms to enforce those properties are
@@ -1788,23 +1787,28 @@ the main advantage of our approach, as two different use cases can be studied
 against the same hardware model.
 %
 However, the scalability of SpecCert remains to be proven.
+%
+In particular, the complexity of the hardware architecture makes monolithic
+model impracticable in practice.
+%
+The next Part of this thesis focuses on this problematic.
 
 %% In case I need that in the future.
-  % {\small
-  % \begin{prooftree}
-  %   \AxiomC{\( \top \)}%
-  %   \AxiomC{%
-  %   \(
-  %   \begin{array}{l}
-  %     \text{if }\func{cache\_hit}(h.\func{cache}, pa) \\
-  %     \text{then }h' = h \{ \func{cache}(\func{index}(\var{pa})) \leftarrow
-%          h.\func{cache}(\func{index}(\var{pa}))\{ \func{content} \leftarrow v,
-%         \func{dirty} \leftarrow \val{true} \}\}\} \\
-%         \text{else if
-%         }h.\func{cache}(\func{index}(\var{pa})).\func{dirty} =
-%         \val{true} \\
-%         \text{then }h' =
-%         h\left\{
+% {\small
+% \begin{prooftree}
+%   \AxiomC{\( \top \)}%
+%   \AxiomC{%
+%   \(
+%   \begin{array}{l}
+%     \text{if }\func{cache\_hit}(h.\func{cache}, pa) \\
+%     \text{then }h' = h \{ \func{cache}(\func{index}(\var{pa})) \leftarrow
+%           %       h.\func{cache}(\func{index}(\var{pa}))\{ \func{content} \leftarrow
+%           %       v,
+%           %       \func{dirty} \leftarrow \val{true} \}\}\} \\
+%           %       \text{else if }h.\func{cache}(\func{index}(\var{pa})).\func{dirty}
+%           %       =
+%           %       \val{true} \\
+%           %       \text{then }h' = h\left\{
 %         \begin{array}{c}
 %           \func{mem}(h.\func{cache}(\func{index}(\var{pa})).\func{tag})
 %           \leftarrow
@@ -1833,15 +1837,15 @@ However, the scalability of SpecCert remains to be proven.
 %         \right\}
 %       \end{array}
 %       \)}%
-%     \BinaryInfC{\( h \xrightarrow[\func{context}]{\func{Write}(\var{pa}, v)}
+%       \BinaryInfC{\( h \xrightarrow[\func{context}]{\func{Write}(\var{pa}, v)}
 %       h' \)}
-%   \end{prooftree}
+%     \end{prooftree}
 
-%  \begin{prooftree}
-%    \AxiomC{\( \top \)}%
-%    \AxiomC{%
-%      \(
-%      \begin{array}{l}
+%     \begin{prooftree}
+%       \AxiomC{\( \top \)}%
+%       \AxiomC{%
+%       \(
+%       \begin{array}{l}
 %        \text{if }\func{cache\_hit}(h.\func{cache}, pa) \\
 %        \text{then }h' = h \{ \func{cache}(\func{index}(\var{pa})) \leftarrow
 %        h.\func{cache}(\func{index}(\var{pa}))\{ \func{content} \leftarrow v,
@@ -1883,35 +1887,38 @@ However, the scalability of SpecCert remains to be proven.
 %        \right\}
 %      \end{array}
 %      \)}%
-%    \BinaryInfC{\( h \xrightarrow[\func{context}]{\func{Read}(\var{pa})} h' \)}
-%  \end{prooftree}
-%}
+%      \BinaryInfC{\( h \xrightarrow[\func{context}]{\func{Read}(\var{pa})} h'
+%      \)}
+%    \end{prooftree}
+%  }
 
-%\begin{minipage}[c]{0.40\linewidth}
-%  \begin{prooftree}
-%    \AxiomC{\( \top \)}%
-%    \AxiomC{\( h' = h \{ \func{core}.\func{strat}(\var{pa}) \leftarrow
-%      \var{strat} \} \)}%
-%    \BinaryInfC{\( h \xrightarrow[\func{context}]{\func{SetCacheStrat}(\var{pa},
+%    \begin{minipage}[c]{0.40\linewidth}
+%      \begin{prooftree}
+%        \AxiomC{\( \top \)}%
+%        \AxiomC{\( h' = h \{ \func{core}.\func{strat}(\var{pa}) \leftarrow
+%        \var{strat} \} \)}%
+%        \BinaryInfC{\( h
+%        \xrightarrow[\func{context}]{\func{SetCacheStrat}(\var{pa},
 %        \var{strat})} h' \)}
-%  \end{prooftree}
-%\end{minipage}
+%      \end{prooftree}
+%    \end{minipage}
 %  %
-%\hfill
+%    \hfill
 %  %
-%\begin{minipage}[c]{0.55\linewidth}
-%  \begin{prooftree}
-%    \AxiomC{\( h.\func{in\_smm} = \val{true} \)}%
-%    \AxiomC{\( h' = h \{ \func{core}.\func{smrr} \leftarrow \var{smrr} \} \)}%
-%    \BinaryInfC{\( h \xrightarrow[\func{context}]{\func{UpdateSmrr}(\var{smrr})}
-%      h' \)}
-%  \end{prooftree}
-%\end{minipage}
+%    \begin{minipage}[c]{0.55\linewidth}
+%      \begin{prooftree}
+%        \AxiomC{\( h.\func{in\_smm} = \val{true} \)}%
+%        \AxiomC{\( h' = h \{ \func{core}.\func{smrr} \leftarrow \var{smrr} \}
+%        \)}%
+%        \BinaryInfC{\( h
+%        \xrightarrow[\func{context}]{\func{UpdateSmrr}(\var{smrr})} h' \)}
+%      \end{prooftree}
+%    \end{minipage}
 %
-%\begin{minipage}[c]{0.55\linewidth}
-%  \begin{prooftree}
-%    \AxiomC{\( h.\func{in\_smm} = \val{true} \)}%
-%    \AxiomC{\( h' = h \{ \func{in\_smm} \leftarrow \val{false} \} \)}%
-%    \BinaryInfC{\( h \xrightarrow[\func{context}]{\func{Rsm}} h' \)}
-%  \end{prooftree}
-%\end{minipage}
+%    \begin{minipage}[c]{0.55\linewidth}
+%      \begin{prooftree}
+%        \AxiomC{\( h.\func{in\_smm} = \val{true} \)}%
+%        \AxiomC{\( h' = h \{ \func{in\_smm} \leftarrow \val{false} \} \)}%
+%        \BinaryInfC{\( h \xrightarrow[\func{context}]{\func{Rsm}} h' \)}
+%      \end{prooftree}
+%    \end{minipage}

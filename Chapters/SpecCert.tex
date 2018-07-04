@@ -656,14 +656,18 @@ easier to reason about, as shown by the following theorem.
 In this Chapter, we present our formal definition of \ac{hse} mechanisms, in the
 form of requirements over a hardware model.
 %
-This approach allows for reuse the same model to define and verify several
+This approach allows for reusing the same model to define and verify several
 \ac{hse} mechanisms.
 %
-This makes sense, especially because these multiple mechanisms will be
-implemented concurrently, and may interfere with each other.
-%
+We believe this is an essential property, especially because in practice, these
+multiple mechanisms will be implemented concurrently, and may interfere with
+each other.
+
 Throughout this Chapter, we have tried to illustrate our definitions with
-real-world examples.
+real-world examples, as our effort has been originally motivated by the
+disclosure of several vulnerabilities targeting multiple x86 \ac{hse} mechanisms
+for the past few
+years\,\cite{wojtczuk2009smram,duflot2009smram,rutkowska2008remap,domas2015sinkhole,kallenberg2015racecondition}.
 %
 All being told, our approach can be summarized to a three-step methodology for
 specifying and verifying \ac{hse} mechanisms against hardware architecture
@@ -679,3 +683,11 @@ models, that is
 \item verifying that the \ac{hse} mechanism is correct with respect to the
   targeted security policy.
 \end{inparaenum}
+%
+We believe this methodology would benefit both hardware designers and software
+developers.
+%
+In the next Chapter, we apply our proposal to a real world example: the \ac{hse}
+mechanism implemented by the \ac{bios} to remain isolated from the rest of the
+software stack after the end of the boot sequence
+(Section~\ref{sec:usecase:hse}).
