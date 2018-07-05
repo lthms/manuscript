@@ -68,9 +68,63 @@ At the time of writing this thesis\,\footnote{Spring 2018.}, the \emph{Intel 64
 %
 Executed on the computer used to write the present thesis, the GNU/Linux
 command-line application \texttt{lshw} lists about 30 hardware components, which
-come with their own documentation, often in the form of large data sheet.
+come with their own documentation, often in the form of large datasheet.
 %
 \TODO{Donne quelques exemples de composants, sans être exaustif}
+
+\begin{figure}
+  \centering
+  \begin{tikzpicture}
+    \node [draw, inner sep=15pt] (Core) {Core};%
+    \node [draw, inner sep=8pt, below=5pt of Core] (Cache) {Caches};%
+    \draw (Core) -- (Cache);%
+    \node [draw, below=15pt of Cache, inner sep=30pt] (MCH) {MCH};%
+    \draw (Cache) -- (MCH);%
+
+    \node [draw, inner sep=8pt, right=15pt of MCH, yshift=-20pt, text badly
+    centered, text width=45pt] (DRAM) {DRAM Controller};%
+    \node [draw, inner sep=8pt, right=15pt of MCH, yshift=20pt, text badly
+    centered, text width=45pt] (Display) {Display Controller};%
+
+    \draw (MCH.east) |- (Display.west);%
+    \draw (MCH.east) |- (DRAM.west);%
+
+    \node [draw, inner sep=8pt, left=15pt of MCH, text width=50pt, text badly
+    centered] (PCIe) {PCI Express Controller};%
+
+    \draw (PCIe) -- (MCH);%
+
+    \node [draw, below=30pt of MCH, inner sep=40pt, text badly centered] (PCH)
+    {PCH};%
+
+    \draw (MCH) -- (PCH);%
+
+    \node [draw, inner sep=5pt, below=10pt of PCH, text width=35pt,
+    xshift=-55pt, text badly centered] (Flash) {Flash Memory};%
+    \draw ([xshift=-10pt]PCH.south) |- (Flash.east);%
+
+    \node [draw, inner sep=10pt, below=10pt of PCH, text width=25pt,
+    xshift=55pt, text badly centered] (TPM) {TPM};%
+    \draw ([xshift=10pt]PCH.south) |- (TPM.west);%
+
+    \node [draw, inner sep=10pt, yshift=25pt, left=20pt of PCH, text width=45pt, text badly
+    centered] (USB) {USB Controller};%
+
+    \node [draw, inner sep=10pt, yshift=-25pt, left=20pt of PCH, text width=45pt, text badly
+    centered] (PCI) {PCI Controller};%
+
+    \draw (PCH.west) |- (USB.east);%
+    \draw (PCH.west) |- (PCI.east);%
+
+    \node [draw, inner sep=10pt, right=20pt of PCH, text badly centered, text width=50pt] (HD)
+    {Hard Drive Controller};%
+
+    \draw (PCH) -- (HD);%
+  \end{tikzpicture}
+
+  \caption{From the CPU to the flash memory}
+  \label{fig:speccert:flash}
+\end{figure}
 
 A x86 computing platform is built upon two key components: \acp{cpu} and memory
 (\ref{subsec:usecase:cpumem}).
