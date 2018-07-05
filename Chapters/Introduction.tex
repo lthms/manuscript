@@ -9,10 +9,6 @@
 
 \vspace{1cm}\noindent
 %
-\TODO{Attention, software, hardware et firmware sont normalement indénombrable
-  en anglais. Il faut que tu identifies les manières idiomatique d'utiliser ces
-  termes.}
-%
 To manage complexity, computing platforms are commonly built as successions of
 abstraction layers, from the hardware components to high-level software
 applications.
@@ -349,21 +345,39 @@ focus.
 To specify a HSE mechanism, we have to model the hardware architecture and the
 scale of the task represents an important challenge.
 %
-Because architectural attacks often come from unsuspected places \TODO{Donner un
-  exemple, par exemple le cache, qui n'est pas un mécanisme de sécurité}, it is
-necessary to consider the whole computing platform. At the same time, some
-components are individually complex.
+Architectural attacks may com from unsuspected places, with no apparent link
+with the considered security mechanism.
 %
-\TODO{Donner un exemple avec des données qualitative/quantitative.}
+For instance, the SENTER Sandman attack\,\cite{kovah2015senter} leveraged a
+dedicated execution mode of x86 \acp{cpu} to disable the protection of the flash
+memory wherein the \ac{bios} code is stored.
 %
-In addition, new hardware components are frequently released, and the same
+As a consequence, it is necessary to consider the whole computing platform.
+%
+At the same time, some components are individually complex:
+%
+the Intel Architectures Software Developer Manual\,\cite{intel2014manual} is
+4842 pages long;
+%
+the Memory Controller Hub datasheet\,\cite{intel2009mch} is 430 long;
+%
+the Platform Controller Hub datasheet\,\cite{intel2012pch} is 988 pages long.
+%
+In addition, new hardware components and new versions of already existing
+components are frequently released.
+%
+Also, the same
 hardware component can be found in different hardware architecture to play a
-similar role. \TODO{Détail un peu tes idées. Ne fais pas trop d'implicite. De
-  nouveaux mécanismes hardware -> refaire la preuve. Le même mécanisme pour
-  différente plateforme (exemple?) -> conséquence?}
+similar role.
+%
+For instance, the Trusted Platform Module (TPM) can be found in a vast variety
+of products.
 %
 As a consequence, the more modular our models and proofs are, the more
 practicable our approach becomes.
+%
+Otherwise, each modification of the hardware architecture can have an important
+impact on the proofs already written.
 
 \paragraph{}
 %
@@ -417,11 +431,9 @@ in line with the two challenges we tackle in this thesis, that is:
 \item formally specifying and verifying \ac{hse} mechanisms against a hardware
   model, and
 %
-\item defining hardware models which can remain exploitable in presence of large
-  architecture hardware. \TODO{C'est peut-être s'avancer un peu que de prétendre
-    qu'on vise le passage à l'échelle. On s'attaque surtout à la modularité qui
-    permettra peut-être de s'attaquer à des modèles complexes (mais c'est
-    indirect)}
+\item modularly defining hardware models in terms of compositions of
+  sub-components, with the objective of scaling to realistic ---that is, large
+  and complex--- hardware architectures.
 \end{inparaenum}
 
 In Chapter~\ref{chapter:speccert}, we present a generic formalism to specify and
