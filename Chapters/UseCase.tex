@@ -122,7 +122,7 @@ come with their own documentation, often in the form of large datasheet.
     \draw (PCH) -- (HD);%
   \end{tikzpicture}
 
-  \caption{From the CPU to the flash memory}
+  \caption{High-level view of the x86 hardware architecture}
   \label{fig:speccert:flash}
 \end{figure}
 
@@ -131,30 +131,30 @@ A x86 computing platform is built upon two key components: \acp{cpu} and memory
 %
 The \ac{cpu} communicates with peripherals to interact with the outside world
 (\emph{e.g.} another computing platform, a user) (\ref{subsec:usecase:perif}).
-%
-\TODO{Ajouter un schéma d'archi x86 big picture (attention à ne pas être trop
-  générique).}
 
 \subsection{Processors and Memory}
 \label{subsec:usecase:cpumem}
 
-A computer platform goal is to execute programs to perform arbitrary tasks.
+A computing platform goal is to execute programs to perform arbitrary tasks.
 %
-To that end, it relies on one or more \acp{cpu}.
+To that end, it relies on one or more \acp{cpu}, whose purpose is to take
+so-called ``instructions'' as input, and manipulates its internal states and
+data stored in memories, as output.
 %
-\TODO{II faudrait décrire un peu plus précisement l'architecture x86 : CPU,
-  coeur physique, coeur logique. }
+For x86 \acp{cpu}, the execution of programs instructions is performed by a
+component called a core.
 %
-A \ac{cpu} takes so-called ``instructions'' as input, and manipulates its
-internal states and data stored in a memory, as output.
+The latest generation of Intel \acp{cpu} for desktop computers (called Coffee
+Lake) contains between four and six ``physical'' cores.
 %
-A program is a sequence of instructions, often stored in the same memory as the
-data it manipulates.
+Intel has also developed a technology called Hyper-Threading,\thomasrk{ref} so
+that each physical core exposes several ``logical'' cores which work in
+parallel.
 %
-\TODO{Dire explicitement que des fois ce n'est pas le cas par exemple cache
-  instruction vs cache donnée, exécution d'un programme en ROM}
+A program is a sequence of instructions, stored in the same memory as the data
+it manipulates.
 %
-Overall, a \ac{cpu} basically repeats the following task, over and over:
+Overall, a core basically repeats the following task, over and over:
 
 \begin{enumerate}
 \item Read the content of its (internal) \emph{program counter} register, and
@@ -165,11 +165,8 @@ Overall, a \ac{cpu} basically repeats the following task, over and over:
 \item Decode the instruction, that is identified the desired operation to
   perform
 %
-\item Act accordingly, by modifying its internal state, and interacting with the
-  memory.
-  %
-  \TODO{et/ou les périphérique, même s'ils sont de plus en plus abstrait sous
-    forme de mémoire}
+\item Act accordingly, by modifying its internal state, and interacting with
+  memories and features exposed by other hardware components
 %
 \item Update the content of its \emph{program counter} register according to the
   semantics of the instruction it has executed. Most of the time, it increases
@@ -177,37 +174,40 @@ Overall, a \ac{cpu} basically repeats the following task, over and over:
   (\emph{e.g.} with jump instructions).
 \end{enumerate}
 
-From the \ac{cpu} perspective, the memory is abstracted into a contiguous array
-of storage cells, identified by an address.
-%
-A \ac{cpu} can interact with the memory by reading or writing to a given
-address.
-%
-In reality, a hardware architecture contains several memories of various
-natures.
-%
-The \ac{dram} remains the most important, and is often called the \emph{system
-  memory}, but it is not the only memory present in a hardware architecture.
-%
-Peripherals expose memories too; the latter are used as communication channels
-between them and the \acp{cpu}.
-%
-That is, to ``receives a message'' from a peripheral, a \ac{cpu} reads the
-content of the memory it exposed, while it can ``send a message'' by writing to
-the same memory.
-%
-\TODO{Tu pourrais aussi citer la ROM du BIOS, peut-être donner un petit exemple
-  de code qui interagit avec un périphérique}.
-
-\paragraph{}
-%
 Historically, x86 \acp{cpu} were using two distinct memory spaces to communicate
 either with the \ac{dram} or with the peripherals, \emph{via} two families of
 instructions. \TODO{Cites les explicitement "in/out vs. mov/push/pop..."}
 %
 Nowadays, the memories exposed by the peripherals are mapped within the same
-address space, and accessed with the same instructions.
+address space.
 %
+Memories are abstracted into a single, contiguous array of storage cells
+identified by physical addresses, and accessed \emph{via} the same instructions.
+%
+The \ac{cpu} contains two dedicated component, called the Memory Controller Hub
+and the Platform Controller Hub, which dispatch these requests to peripherals.
+%
+The peripherals which require low access time are connected to the \ac{mch}: the
+\ac{dram}, the display controller, a PCI Express Controller, etc.
+%
+The remaining ones are connected to the \ac{pch}.
+%
+The \ac{dram} remains the most important, and is often called the \emph{system
+  memory}, but it is not the only memory present in a hardware architecture.
+%
+Notably, the \ac{bios} code is stored in a dedicated memory called the flash
+memory.
+%
+Peripherals expose memories too; the latter are used as communication channels
+between them and the \acp{cpu}.
+%
+To ``receives a message'' from a peripheral, a \ac{cpu} reads the content of the
+memory it exposed, while it can ``send a message'' by writing to the same
+memory.
+%
+\TODO{Tu pourrais aussi citer la ROM du BIOS, peut-être donner un petit exemple
+  de code qui interagit avec un périphérique}.
+
 That is, when a \ac{cpu} read or write to an address, the access is
 transparently dispatched either to the \ac{dram} or to a peripheral.
 %

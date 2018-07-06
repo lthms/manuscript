@@ -14,7 +14,7 @@ default: fast
 fast:
 	@echo -en "\e[33m[ ] Compiling\e[0m"
 	@./.build.sh
-	@echo -en "\r\e[32m[*] Compiling\e[0m"
+	@echo -e "\r\e[32m[*] Compiling\e[0m"
 
 latexmk:
 	latexmk main.tex -shell-escape -pdf -quiet
