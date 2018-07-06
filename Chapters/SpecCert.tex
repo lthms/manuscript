@@ -30,7 +30,7 @@ execution (Section~\ref{sec:speccert:hardware}).
 %
 This model acts as a foundation for the two other components: \ac{hse}
 mechanisms (Section~\ref{sec:speccert:hse}) and security policies
-(Section~\ref{sec:speccert:security}) are expressed against a hardware model.
+\TODO{broken link}(Section~\ref{sec:speccert:security}) are expressed against a hardware model.
 
 For the reader familiar with Coq, we present an implementation of our formalism
 in Appendix~\ref{appendix:speccert}.
@@ -73,12 +73,12 @@ We illustrate this definition with the x86 instruction \texttt{mov
 With respect to the semantics of this instruction, a x86 \ac{cpu}:
 %
 \begin{inparaenum}[(1)]
-\item reads the content of the register \texttt{ecx}
+\item reads the content of the register \texttt{ecx},
 %
 \item interprets this value as an address and reads the main memory at this
-  address
+  address,
 %
-\item writes this content into the register \text{eax}
+\item writes this content into the register \texttt{eax},
 %
 \item updates the register \texttt{eip} with the address of the next instruction
   to execute.
@@ -134,7 +134,7 @@ interrupt.
   \]
 \end{definition}
 
-\paragraph{Trace.}
+\paragraph{Traces.}
 %
 Finally, we formally introduce the definition of traces of a hardware model.
 %
