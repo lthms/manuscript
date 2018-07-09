@@ -148,11 +148,11 @@ of the next.
   and we consider the following functions:
   %
   \begin{itemize}
-  \item $\func{init} : \pathesLTS{Ez} \rightarrow S$ maps a trace with its
+  \item $\func{init} : \pathesLTS{Ez} \rightarrow H$ maps a trace to its
     initial state
   \item
     $\func{trans} : \pathesLTS{Ez} \rightarrow \powerset(\mathcal{T}(\Sigma))$
-    maps a trace with the set of transitions
+    maps a trace to the set of transitions which occured during the trace
   \end{itemize}
 \end{definition}
 
@@ -185,7 +185,7 @@ On the other hand, the purpose of the requirements over software transitions is
 to prevent untrusted software components to reach a hardware configuration
 wherein the requirements over state are not satisfied.
 %
-These requirements allow us to determine a subset of compliant traces, that it
+These requirements allow us to determine a subset of compliant traces, that is
 traces where trusted software components have correctly implemented the \ac{hse}
 mechanism.
 %
@@ -214,9 +214,9 @@ executed when the \ac{cpu} is in ring 3, with a particular page table setup.
 
 \begin{definition}[Hardware-Software Mapping]
   \label{def:speccert:hardsoft}
-  A hardware-software mapping $\func{con\-text} : H \rightarrow S$ is a function
-  which takes a hardware state and returns the software component currently
-  executed.
+  Given $S$ a set of software components, a hardware-software mapping
+  $\func{con\-text} : H \rightarrow S$ is a function which takes a hardware
+  state and returns the software component currently executed.
 \end{definition}
 
 We say a software transition is trusted (respectively untrusted) when it is
@@ -369,7 +369,7 @@ disposal cannot achieve putting the system in an unsafe state.
     $\forall (h, l, h') \in \mathcal{T}(\Sigma)$, $\forall x \not\in T$,
     %
     \[
-      l \in L_S \Rightarrow \func{context}(h) = x \Rightarrow
+      l \in L_S \wedge \func{context}(h) = x \Rightarrow
       \func{software\_req}(h, l)
     \]
   %
