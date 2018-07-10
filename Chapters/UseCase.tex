@@ -1,5 +1,5 @@
 %!TEX root = ../main.tex
-\chapter{Intel x86 Hardware and BIOS Background}
+\chapter{Intel x86 Architecture and BIOS Background}
 \label{chapter:usecase}
 
 \endquote{``\emph{You’re building your own maze, in a way, and you might just
@@ -54,7 +54,7 @@ Once the role of the \ac{bios} has been established, we detail \ac{hse}
 mechanisms it implements, and several architectural attacks which have defeated
 these \ac{hse} mechanisms in the past (Section~\ref{sec:usecase:hse}).
 
-\section{Hardware Architecture Overview}
+\section{Introduction to x86 Architecture Security}
 \label{sec:usecase:architecture}
 
 Describing hardware architectures in depth is challenging, because they tend to
@@ -69,8 +69,12 @@ At the time of writing this thesis\,\footnote{Spring 2018.}, the \emph{Intel 64
 Executed on the computer used to write the present thesis, the GNU/Linux
 command-line application \texttt{lshw} lists about 30 hardware components, which
 come with their own documentation, often in the form of large datasheet.
-%
-\TODO{Donne quelques exemples de composants, sans être exaustif}
+\thomasrk{Donne quelques exemples de composants, sans être exaustif}
+
+\subsection{Basics of x86 Architecture}
+
+A simplified x86 hardware architecture is pictured in
+Figure~\ref{fig:speccert:x86arch}.
 
 \begin{figure}
   \centering
@@ -107,211 +111,245 @@ come with their own documentation, often in the form of large datasheet.
     xshift=55pt, text badly centered] (TPM) {TPM};%
     \draw ([xshift=10pt]PCH.south) |- (TPM.west);%
 
-    \node [draw, inner sep=10pt, yshift=25pt, left=20pt of PCH, text width=45pt, text badly
-    centered] (USB) {USB Controller};%
+    \node [draw, inner sep=10pt, yshift=25pt, left=20pt of PCH, text width=45pt,
+    text badly centered] (USB) {USB Controller};%
 
-    \node [draw, inner sep=10pt, yshift=-25pt, left=20pt of PCH, text width=45pt, text badly
-    centered] (PCI) {PCI Controller};%
+    \node [draw, inner sep=10pt, yshift=-25pt, left=20pt of PCH, text
+    width=45pt, text badly centered] (PCI) {PCI Controller};%
 
     \draw (PCH.west) |- (USB.east);%
     \draw (PCH.west) |- (PCI.east);%
 
-    \node [draw, inner sep=10pt, right=20pt of PCH, text badly centered, text width=50pt] (HD)
-    {Hard Drive Controller};%
+    \node [draw, inner sep=10pt, right=20pt of PCH, text badly centered, text
+    width=50pt] (HD) {Hard Drive Controller};%
 
     \draw (PCH) -- (HD);%
+
+    \node [inner sep=10pt, dashed, fit=(MCH) (Core), draw] (CPU) {};%
   \end{tikzpicture}
 
   \caption{High-level view of the x86 hardware architecture}
-  \label{fig:speccert:flash}
+  \label{fig:speccert:x86arch}
 \end{figure}
 
-A x86 computing platform is built upon two key components: \acp{cpu} and memory
-(\ref{subsec:usecase:cpumem}).
-%
-The \ac{cpu} communicates with peripherals to interact with the outside world
-(\emph{e.g.} another computing platform, a user) (\ref{subsec:usecase:perif}).
+\paragraph{Processor.}
 
-\subsection{Processors and Memory}
-\label{subsec:usecase:cpumem}
+The main component of the architecture is the \emph{processor}.
+%
+Nowadays, it contains two or more \emph{cores}, which are responsible for
+executing software components programs.
+%
+Many x86 processors also feature a technology called
+\emph{HyperThreading}\thomasrk{ref}, where one physical core embeds several
+logical cores.
+%
+Thanks to multicore processors and multithreading cores, a single Intel
+processor can executed several software component at the same time.
+%
+A program is a sequence of assembly instructions.
+%
+These instructions are divided into two parts: an opcode, which determines the
+operation to perform, and some operands.
+%
+\TODO{Cette phrase est maladroite. x86 n'est plus la
+seule archi a utiliser plusieurs coeurs. Je dirais directement un CPU est
+aujourd'hui composé de plusieurs unités d'exécution indépendantes qu'on appelle
+des coeurs. Ces composants sont eux même constitués de différents blocs qui
+forme un pipeline d'exécution (fetch décode ALU, etc.) Ces coeurs peuvent être
+physiquement indépendants (i.e des unités qui possèdent leurs propres pipeline
+indépendant) ou bien virtuel. Dans ce cas (hyperthreading). Dans ce cas la
+micro-architecture partage les blocs d'un même coeur et offre l'illusion aux
+composants logiciels qu'ils peuvent s'exécuter sur différents coeurs
+indépendants. Chaque coeur virtuel possède un état qui lui est propre (compteur
+ordinal, etc.) mais partage les blocs d'exécution avec les autres coeurs
+virtuels d'un même coeur physique). Mettre quelques schéma pour illustrer ces
+concepts.}
+%
+Intel has assigned \emph{mnemonics} ---symbolic names--- to opcodes.
+%
+For instance, the opcode \texttt{0x24} was assigned the mnemonics \texttt{add}.
+%
+The instruction \texttt{add} takes two memory locations as operands:
+\texttt{src} and \text{dst}.
+%
+When a core executes this instruction, it computes the addition of the contents
+of \texttt{src} and \texttt{dst} and replaces the content of \texttt{dst} with
+the result.
+%
+% A core basically repeats the following tasks:
+%%
+% \begin{enumerate}
+% \item Read the content of its (internal) \emph{program counter} register, and
+%   interpret it as the address of the next instruction.
+%%
+% \item Fetch the content of this address.
+%%
+% \item Decode the instruction, that is identified the desired operation to
+%   perform
+%%
+% \item Act accordingly, by modifying its internal state, and interacting with
+%   memories and features exposed by other hardware components
+%%
+% \item Update the content of its \emph{program counter} register according to
+%   the semantics of the instruction it has executed. Most of the time, it
+%   increases it to fetch the next instruction, but it can also set it to an
+%   arbitrary value (\emph{e.g.} with jump instructions).
+% \end{enumerate}
 
-A computing platform goal is to execute programs to perform arbitrary tasks.
+\paragraph{Memories and Cores \IOs.}
 %
-To that end, it relies on one or more \acp{cpu}, whose purpose is to take
-so-called ``instructions'' as input, and manipulates its internal states and
-data stored in memories, as output.
+The Intel x86 instructions set contains hundreds of mnemonics\thomasrk{ref}.
 %
-For x86 \acp{cpu}, the execution of programs instructions is performed by a
-component called a core. \TODO{Cette phrase est maladroite. x86 n'est plus la seule archi a utiliser plusieurs coeurs. Je dirais directement un CPU est aujourd'hui composé de plusieurs unités d'exécution indépendantes qu'on appelle des coeurs. Ces composants sont eux même constitués de différents blocs qui forme un pipeline d'exécution (fetch décode ALU, etc.) Ces coeurs peuvent être physiquement indépendants (i.e des unités qui possèdent leurs propres pipeline indépendant) ou bien virtuel. Dans ce cas (hyperthreading). Dans ce cas la micro-architecture partage les blocs d'un même coeur et offre l'illusion aux composants logiciels qu'ils peuvent s'exécuter sur différents coeurs indépendants. Chaque coeur virtuel possède un état qui lui est propre (compteur ordinal, etc.) mais partage les blocs d'exécution avec les autres coeurs virtuels d'un même coeur physique). Mettre quelques schéma pour illustrer ces concepts.}.
+Together, they allow software developers to modify the hardware architecture
+state, from the internal processor registers to the peripherals.
 %
-The latest generation of Intel \acp{cpu} for desktop computers (called Coffee
-Lake) contains between four and six ``physical'' cores.
+Interactions between a core and the rest of the hardware architecture are called
+\IOs, for Input/Output: a core receives data during an input and it sends data
+during an output.
 %
-Intel has also developed a technology called Hyper-Threading,\thomasrk{ref} so
-that each physical core exposes several ``logical'' cores which work in
-parallel.
+The main target of cores \IOs is the \ac{dram}.
 %
-A program is a sequence of instructions, stored in the same memory as the data
-it manipulates.
+\ac{dram}, also called the \emph{system memory}, exposes an array of contiguous,
+addressable memory cells.
 %
-Overall, a core basically repeats the following task, over and over:
+These memory cells contains the instructions executed by the cores, \emph{and}
+the data they manipulate.
+%
+Therefore, the semantics of a memory cell will be decided by a core depending on
+the context, and the binary sequence can interpreted as an instruction or an
+operand of an arithmetic operation.
 
-\begin{enumerate}
-\item Read the content of its (internal) \emph{program counter} register, and
-  interpret it as the address of the next instruction.
+Although \ac{dram} is the primary source of memory within the hardware
+architecture, it is not the only one.
 %
-\item Fetch the content of this address from memory.
+Other hardware components expose additional memory region.
 %
-\item Decode the instruction, that is identified the desired operation to
-  perform
+For instance, a x86 processor integrates a display controller which exposes a
+framebuffer to the cores.
 %
-\item Act accordingly, by modifying its internal state, and interacting with
-  memories and features exposed by other hardware components
+By writing to the framebuffer, a core changes the pictures displayed by the
+computer screen.
 %
-\item Update the content of its \emph{program counter} register according to the
-  semantics of the instruction it has executed. Most of the time, it increases
-  it to fetch the next instruction, but it can also set it to an arbitrary value
-  (\emph{e.g.} with jump instructions).
-\end{enumerate}
+In practice, the processor handles \IOs with high-speed hardware components
+(\emph{eg.} \ac{dram}, display controller, etc.).
+%
+In addition, it is connected to a companion chipset, called the
+\ac{pch}\thomasrk{ref}, which handles slower hardware components (\emph{eg.}
+hard drives, USB devices, etc.).
+%
+In previous iterations of the architecture, the processor was connected to a
+\emph{northbrige} (low-latency), which was itself connected to a
+\emph{southbridge} (slower \IOs).
 
-Historically, x86 \acp{cpu} were using two distinct memory spaces to communicate
-either with the \ac{dram} or with the peripherals, \emph{via} two families of
-instructions. \TODO{Cites les explicitement "in/out vs. mov/push/pop..."}
+Historically, x86 \acp{cpu} uses two distinct memory spaces to communicate
+either with the \ac{dram} or with the other hardware components.
 %
-Nowadays, the memories exposed by the peripherals are mapped within the same
-address space.
-%
-Memories are abstracted into a single, contiguous array of storage cells
-identified by physical addresses, and accessed \emph{via} the same instructions.
-%
-The \ac{cpu} contains two dedicated component, called the Memory Controller Hub
-and the Platform Controller Hub, which dispatch these requests to peripherals. \TODO{faire une figure et renvoyer à la figure}
-%
-The peripherals which require low access time are connected to the \ac{mch}: the
-\ac{dram}, the display controller, a PCI Express Controller, etc.
-%
-The remaining ones are connected to the \ac{pch}.
-%
-The \ac{dram} remains the most important, and is often called the \emph{system
-  memory}, but it is not the only memory present in a hardware architecture.
-%
-Notably, the \ac{bios} code is stored in a dedicated memory called the flash
+On the one hand, most of the x86 instructions modify the content of the system
 memory.
 %
-Peripherals expose memories too; the latter are used as communication channels
-between them and the \acp{cpu}.
+For instance, operands of the \texttt{add} instruction discussed previously can
+be addresses of the system memory.
 %
-To ``receives a message'' from a peripheral, a \ac{cpu} reads the content of the
-memory it exposed, while it can ``send a message'' by writing to the same
-memory.
+On the other hand, software developers use two dedicated instructions
+---\texttt{in} and \texttt{out}--- to target the memories exposed by other
+software components.
 %
-\TODO{Tu pourrais aussi citer la ROM du BIOS, peut-être donner un petit exemple
-  de code qui interagit avec un périphérique}.
+In addition to this approach, x86 \acp{cpu} are also capable of handling
+\emph{memory-mapped} \IOs, where the memories exposed by the peripherals are
+mapped within the system memory address space.
+%
+That is, the system memory manipulating by the cores is no longer formed by the
+\ac{dram} only.
+%
+As a consequence, when a core reads from or write to the system memory, the
+processor and the \ac{pch} dispatches its request to the correct hardware
+component.
+%
+The mapping between a so-called \emph{physical address} manipulated by the
+processor and its concrete memory location is called the \emph{memory map}.
+%
+The memory map is configurable, that is it can be changed dynamically \emph{via}
+a set of configuration registers exposed by the processor and the \ac{pch}.
+%
+The two approaches are complementary.
+%
+As an example, PCI devices exposes a so-called configuration space, which is a
+dedicated memory region whose locations have a well-specified
+semantics\thomasrk{Figure}.
+%
+To read from and write to a given PCI device configuration space, a core
+primarily relies on two configuration registers called
+\texttt{PCI\_CONFIG\_ADDRESS} and \texttt{PCI\_CONFIG\_DATA}.
+%
+PCI devices are identified in the hardware architecture with a tuple
+\( \langle \mathrm{bus}, \mathrm{device}, \mathrm{function} \rangle \) (denoted
+by \texttt{bus:device:function}).
+%
+To read from or write to the configuration space of the device identified by the
+tuple \texttt{b:d:f} at the offset \texttt{o}, the value
+\[
+  \mathtt{0x80000000}\,|\,\texttt{b} <\!\!< 16\,|\,\texttt{d} <\!\!<
+  11\,|\,\texttt{f} <\!\!< 8\,|\,\texttt{o}
+\]
+%
+where \(\cdot\,|\,\cdot\) is the binary OR operator, and \(\cdot <\!\!< \cdot\)
+is the logical shift left operator.
+%
+\IOs which target the \texttt{PCI\_CONFIG\_DATA} register are dispatched to a
+PCI device according to the current value of Once the
+\texttt{PCI\_CONFIG\_ADDRESS}.
+%
+The PCI specification states that the offset \texttt{0x10} of the PCI
+configuration spaces is dedicated to so-called \texttt{BAR} (Base Address
+Registers)\thomasrk{figure}.
+%
+Using the \texttt{BAR} of a given device, it becomes possible to remap its
+configuration space within the system memory address space.
 
-That is, when a \ac{cpu} read or write to an address, the access is
-transparently dispatched either to the \ac{dram} or to a peripheral.
+It should be noted that cores do not manipulate physical addresses directly.
 %
-The first component to intervene in the decision process is the Memory
-Controller (formally known as the \emph{northbridge}, and that is now integrated
-to the \ac{cpu} die).
+On the contrary, they manipulate \emph{virtual} addresses.
 %
-The Memory Controller is connected to the \ac{dram} and to peripherals which
-require small latency, such as a graphic card or a ethernet controller.
+The processor translates virtual addresses to corresponding physical addresses
+thanks to two complementary and configurable features: segmentation and
+pagination\thomasrk{ref}.
 %
-\TODO{Ethernet controler? A vérifier...}
-%
-If a given memory access does not target one of its peripherals or the
-\ac{dram}, the Memory Controller forwards the memory access to the \ac{pch}
-(formally known as the \emph{southbridge}).
-%
-The \ac{pch} acts as a proxy for the remaining peripherals.
+As such, determining which hardware component will handle a core \IO targeting a
+given virtual address requires to have a complete knowledge of the x86 remapping
+and virtual memory mechanisms and of their exact configurations at a given time.
 
-\paragraph{} \TODO{Pas de paragraph sans titre. Soit tu revois ton découpage en
-  sous-section, soit tu découpe dès le début ta sous-section en plusieurs
-  paragraph avec des titres}
+\paragraph{Peripherals \IOs.}
 %
-One important property of x86 hardware architecture is that the memory map,
-which is the correspondence between the addresses used by the \ac{cpu} and the
-storage cells scattered among the hardware architecture, is dynamically
-configurable.
+Cores are not the only active hardware components present within a typical x86
+hardware architecture.
 %
-\TODO{Il serait bien d'evoquer ici rapidement la mémoire virtuelle. pagination
-  plus segmentation.}
+For instance, several hardware components can also read from or write to the
+\ac{dram} using a technology called \ac{dma}.
+%
+Hardware components can also interact with the processor by sending hardware
+interrupts of various nature.
+%
+For instance, when a user presses a key of its keyboard, the lattes sends an
+interrupt (\texttt{\#IRQ1}).
+%
+Interrupt handlers, that is programs executed by the core when it receives
+interrupts, are configurable \emph{via} a so-called \ac{idt}\thomasrk{ref}.
+%
+Each line of the \ac{idt} corresponds to a given interrupt whose semantics is
+specified by Intel.
+%
+When a core received an interrupt, it saves its current context inside the
+\ac{dram}, then starts executing the corresponding interrupt handler.
+%
+Not all x86 interrupts come from a hardware component.
+%
+Several are used by the core itself, for instance to recover from errors.
+%
+For instance, if a core is not able to translates a virtual address into a
+proper address, it raises a so-called Page Fault (denoted by \texttt{\#PF} or
+\texttt{\#IRQ14}).
 
-As such, determining which hardware component will receive a given memory access
-is far from being trivial.
-%
-\TODO{j'aime pas trop "far from being trivial". En outre, il faudrait donner un
-  peu plus d'info pour juger objectivement si c'est difficile ou non.}
-
-\subsection{Peripherals}
-\label{subsec:usecase:perif}
-
-It is worth mentioning that, since 2008, Intel embeds the Management Engine, a
-processor \emph{inside} the memory controller.
-
-\TODO{Commencer à parler du ME avant de parler des périphériques simples me
-  semble contre-intuitif. Je décrirai les interactions "standard" avec les
-  périphériques. Puis je parlerai de DMA. Enfin j'aborderai ME (avec des
-  références!). Par ordre croissant de complexité. En outre, ta description du
-  CPU et de la mémoire est factuelle et descriptive (tu décris comment çà
-  marche). Alors que pour les périphériques, tu te lances directe dans une
-  analyse de sécurité avant d'avoir décrit leur fonctionnement et le lien avec
-  le reste. En outre, tu n'as pas encore parlé des propriétés et mécanismes de
-  sécurité.  }
-%
-The Management Engine executes a complete software stack, and is capable of
-interacting with the \ac{dram} as well as other hardware components.
-%
-Intel leverages the Management Engine to provide out-of-band management
-solution, which means it can interact with the rest of the world without the
-cooperation of the main \ac{cpu}.
-%
-Although the Management Engine supposedly operates in a transparent manner from
-the \ac{cpu} perspective, we emphasize that a Management Engine vulnerability, a
-scenario which is not without precedent, potentially defeats any security
-measures implemented at the \ac{cpu} level.
-%
-\TODO{Il y a maintenant une litterature abondante (y compris dans le domaine
-  académique) sur le sujet. As te lire, on a l'impression que c'est toi qui a
-  analysé le problème. Tu devrais présenter cela de manière plus impersonnelle
-  et en citant des ref! En outre, pourquoi parle tu du ME? Quel est le lien avec
-  le reste?}
-
-The security threat posed by the Management Engine is not an isolated case.
-%
-On the contrary, x86 hardware architectures contain several \emph{active}
-peripherals.
-%
-We say a peripheral is active if it can autonomously read and write to the
-system memory, \emph{via} \ac{dma}.
-%
-This feature brings an important performance improvement, but it also opens an
-important surface of attacks.
-
-Historically, peripherals have been part of the \ac{tcb} of every x86 \ac{hse}
-mechanisms, with important consequences on the computing platform security.
-%
-\TODO{Tu n'as pas défini avant la TCB, il me semble.}
-%
-For instance, Loic Duflot \emph{et al.} have been able to take control of a
-network card. They exploit some vulnerability in the network card firmware,
-which process network packets\,\cite{duflot2010network}.
-%
-Because the network card can perform \ac{dma}, they were able to tamper with the
-system software code and data.
-%
-It has also been repeatedly shown that the various physical interface exposed by
-the computer (\emph{e.g.} USB\,\cite{nohl2014badusb},
-Thunderbolt\,\cite{hudson2015thunderstrike}, PCI\,\cite{chifflier2013uefi})
-could be leveraged to achieve similar goals.
-%
-In that respect, the current situation has improved.
-%
-Modern x86 \acp{cpu} provide a feature called I/O MMU \TODO{ref!}, which allows
-for configuring the memory ranges each peripheral can access to.
-
-\subsection{Security Properties}
+\subsection{HSE Mechanisms Targeted Security Policies}
 
 From a security perspective, the attack surface on x86 computing platform is
 large.
@@ -400,6 +438,54 @@ side-channel attacks therefore additional software-based security enforcement
 mechanisms.
 %
 \TODO{Je pense qu'il manque un verbe à cette phrase.}
+
+\subsection{Security Challenges and Attack Paths}
+
+\paragraph{Privilege Escalation.}
+%
+
+\paragraph{Malicious Hardware Components.}
+%
+Historically, peripherals have been part of the \ac{tcb} of every x86 \ac{hse}
+mechanisms, with important consequences on the computing platform security.
+%
+\TODO{Tu n'as pas défini avant la TCB, il me semble.}
+%
+For instance, it has also been repeatedly shown that the various physical
+interface exposed by the computer (\emph{e.g.} USB\,\cite{nohl2014badusb},
+Thunderbolt\,\cite{hudson2015thunderstrike}, PCI\,\cite{chifflier2013uefi})
+could be leveraged to take the control of a given computing platform, because
+peripherals connected \emph{via} these interfaces could perform \ac{dma}.
+%
+In 2010, Loic Duflot \emph{et al.} have shown it was possible to take control of
+certain network card.
+%
+They exploit some vulnerability in the network card firmware, which process
+network packets, to that end\,\cite{duflot2010network}.
+%
+This attack path did not require a physical access to the target.
+
+In that respect, the current situation of x86 systems has improved.
+%
+Modern \acp{cpu} provide a feature called \IO MMU\thomasrk{ref!}, which allows
+for configuring the memory ranges each peripheral can access to.
+%
+A well-configured \IO MMU drastically limits the impact of a rogue peripherals.
+%
+However, it is worth mentioning that, since 2008, Intel embeds the Management
+Engine, a processor \emph{inside} the \ac{pch}\thomasrk{ref}.
+%
+The Management Engine executes a complete software stack, and is capable of
+interacting with the \ac{dram} as well as other hardware components.
+%
+Intel leverages the Management Engine to provide out-of-band management
+solution, which means it can interact with the rest of the world without the
+cooperation of the main \ac{cpu}.
+%
+Although the Management Engine supposedly operates in a transparent manner from
+the \ac{cpu} perspective, we emphasize that a Management Engine vulnerability, a
+scenario which is not without precedent, potentially defeats any security
+measures implemented at the \ac{cpu} level.
 
 \section{BIOS Overview}
 \label{sec:usecase:firmware}
@@ -1049,7 +1135,7 @@ arbitrary instructions.
 %
 Both leave the content of the SMRAM in \ac{dram} intact.
 %
-Both leverage legitimate hardware features. 
+Both leverage legitimate hardware features.
 
 \TODO{Il faudrait ajouter ici une transition vers la suite}
 
