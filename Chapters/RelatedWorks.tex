@@ -1,3 +1,4 @@
+%!TEX root = ../main.tex
 \chapter{State of the Art of Formal Verification}
 \label{chapter:relatedwork}
 
@@ -8,8 +9,8 @@
 
 \vspace{1cm}\noindent
 %
-Our interest in formally verify hardware architecture in order to improve their
-security is in line with an ongoing effort.
+Our interest in formally verify \TODO{Ou interest in formally verifying? ou alors "our interest in the formal verification of hardware architecture to improve their security"} hardware architecture in order to improve their
+security is in line with an ongoing effort \TODO{de qui?}. 
 %
 In 2011, Nachiketh Potlapally\,\cite{potlapally2011hardwaresecurity}, who was
 working at Intel at the time, suggested that formal methods for security
@@ -44,7 +45,7 @@ model is therefore an important step of the process (\ref{subsec:state:secu}).
 Many approaches have been proposed for formally verifying systems of varying
 sizes and natures (\ref{subsec:state:approaches}).
 
-\subsection{Reasoning about Systems}
+\subsection{Reasoning about Systems} \TODO{Je trouve le titre peu explicite (contrairement aux autres sous-section.}
 \label{subsec:state:reason}
 
 We are interested in hardware or software systems primarily identified by
@@ -59,18 +60,18 @@ We are interested in hardware or software systems primarily identified by
 For instance, the state of a \ac{cpu} is characterized by the value of its
 internal registers, while its interface is a instructions set.
 %
-Modelling such a system $C$ is usually done by defining a \ac{lts}
+Modelling such a system $C$ \TODO{remarque mineur "a system C" fait bizarre. Je suppose que tu voulais dire "a component C".} is usually done by defining a \ac{lts}
 $M \triangleq \langle S, L, \rightarrow \rangle$.
 %
-$S$ is a set of abstract states which describe the concrete states of $C$.
+$S$ is a set of abstract states which describe the concrete states of $C$. \TODO{C'est quoi un état concret? C'est quoi un état abstrait?}
 %
 $L$ is a set of labels to distinguish between transitions caused by different
 operations of $C$.
 %
 Finally, $\rightarrow$ is a transition relation, such that for
-$(p, q) \in S \times S$ and $l \in L$,
+$(p, q) \in S \times S$ and $l \in L$, 
 %
-\[ p \xrightarrow{l} q \]
+$ p \xrightarrow{l} q $ 
 %
 means it is possible for the system whose state corresponds to $p$ to shift in a
 new state which corresponds to $q$ if the operation $l$ is invoked.
@@ -80,24 +81,29 @@ from one formalism to another.
 %
 In the meantime, the underlying principles remain the same.
 
+\TODO{Je trouve cette sous-section trop vague. Pas de référence. En outre, on ne voit pas trop à quoi elle correspond. Je crois comprendre qu'il s'agit de modéliser le système. Du coup, la question qui se pose est : existe-t-il d'autres modèles que les LTS dans la litérature? Pourquoi ce choix? Peut-on comparer les différentes approches? C'est typiquement ce qu'on attend de la partie état de l'art. Par une vague définission d'un LTS. Je pense que tout le monde voit à peut prêt ce qu'est un LTS. Donc même si rappeler la définition n'est pas un mal, faire une sous-section juste pour çà est trop léger. Tu pourrais en outre donner quelques détail sur "its exact definition often vary
+from one formalism to another." Comparer ces approches, te positionner...}
+
 \subsection{Specifying Security Policies}
 \label{subsec:state:secu}
 
 Once a system $C$ is modelled with a model $M$, we can reason about the
-correctness of $C$ with respect to certain properties, by formalizing these
+correctness of $C$ with respect to certain properties. We first have to formalize these
 properties as a statement about $M$, then we exhibit a proof that this statement
 is true.
 %
-This statement is based on the system executions, modelled as sequences of
+This statement is based on the system executions, modelled \TODO{"modelled ou modeled"?} as sequences of
 transitions of $M$.
 %
 We denote $\Sigma(M)$ the set of all the possible executions of $C$, as modelled
 in $M$.
 
+\TODO{Remarque générale sur cette section : il manque pleins de référence. Les notions de propriétés, safety, liveness et hyperpropriétés ont été définis dans des ouvrages ou articles de références.}
+
 \paragraph{Properties and Hyperproperties}
 %
 Certain security properties can be modelled \emph{via} a predicate $P$ on
-executions.
+executions. \TODO{On each execution? D'ailleurs, ne parle-t-on pas plutot de "trace d'exécution"}
 %
 In such a condition, the statement describing the security property is of the
 forms
@@ -112,34 +118,34 @@ properties (something ``good'' eventually happens).
 For safety properties, a common approach is to distinguish between secure states
 and insecure states, secure transitions and insecure transitions, and to require
 that for an execution which starts from a secure state put the system in an
-insecure state and no insecure transition occurs.
+insecure state and no insecure transition occurs. \TODO{Il y a a mon avis des erreurs dans cette phrase. "to require that an execution which starts ... put. Ou alors for an execution ... to put. En outre "from a secure state ... in a secure state". Pourquoi "insecure state". Au final, cela fait une phrase très (trop longue). Tu devrais utiliser une énumération par exemple pour aléger un peu. ou faire plusieurs phrases.}
 %
 For instance, the BIOS Integrity security property
-(Definition~\ref{def:usecase:biosint}) is a safety property security property.
+(Definition~\ref{def:usecase:biosint}) is a safety property. \TODO{Tu devrais expliquer un peu mieux pourquoi}
 %
 As for liveness properties, they usually require to use a temporal logic which
-provides a modal operator to reason about ``eventually''.
+provides a modal operator to reason about ``eventually''. \TODO{Donne un peu plus de détail. Parle de LTL par exemple. Explique un peu (donne une formule et explique ce qu'elle veut dire) Cite!}
 %
 For instance, the BIOS Availability security property
-(Definition~\ref{def:usecase:biosav}) is a liveness property
+(Definition~\ref{def:usecase:biosav}) is a liveness property. \TODO{Idem, explique pourquoi}
 
 Other security (hyper)properties cannot be defined using such a predicate, and
 requires to consider the set of executions as a whole. As a consequence, the
 security statement is of the form
-executions\,\cite{clarkson2010hyperproperties}, that is
+executions\,\cite{clarkson2010hyperproperties} \TODO{Je ne comprends pas l'expression "is of the form executions"}, that is
 %
 \[
   P(\Sigma(M))
 \]
 %
 A notable security property whose definition requires to consider couple of
-executions is noninterference\,\cite{goguen1982security} of information flow
+executions is noninterference\,\cite{goguen1982security}, which is used in information flow
 analysis.
 %
 A system enforces noninterference if its observable behaviour does not depends
 on secret inputs, which informally translates to ``a system enforces
 noninterference if, given two arbitrary executions with the same public inputs,
-the system's observable behaviour remains the same''.
+the system's observable behaviour remains the same''. \TODO{Tu devrais continuer en donnant un exemple de formalisation du problème et en montrant (intuitivement) que c'est bien une propriété d'ensemble de traces.}
 
 \paragraph{Modelling for Security}
 %
