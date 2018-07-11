@@ -34,7 +34,7 @@ system software.
 Because the BIOS is the most privileged piece of software executed by the
 hardware architecture, this \ac{hse} mechanism is of key importance.
 %
-Despite this fact, it has been the object of two architectural
+Despite this fact, it has been the object of two architectural \TODO{ici tu dis "2" alors que plus loin tu dis "several". Je laisserai "several" partout. Inutile d'être précis, on ne connait surement pas toutes les attaques}
 attacks\,\cite{duflot2009smram,wojtczuk2009smram,domas2015sinkhole}, and
 therefore, it illustrates perfectly our motivations.
 %
@@ -142,7 +142,7 @@ so-called ``instructions'' as input, and manipulates its internal states and
 data stored in memories, as output.
 %
 For x86 \acp{cpu}, the execution of programs instructions is performed by a
-component called a core.
+component called a core. \TODO{Cette phrase est maladroite. x86 n'est plus la seule archi a utiliser plusieurs coeurs. Je dirais directement un CPU est aujourd'hui composé de plusieurs unités d'exécution indépendantes qu'on appelle des coeurs. Ces composants sont eux même constitués de différents blocs qui forme un pipeline d'exécution (fetch décode ALU, etc.) Ces coeurs peuvent être physiquement indépendants (i.e des unités qui possèdent leurs propres pipeline indépendant) ou bien virtuel. Dans ce cas (hyperthreading). Dans ce cas la micro-architecture partage les blocs d'un même coeur et offre l'illusion aux composants logiciels qu'ils peuvent s'exécuter sur différents coeurs indépendants. Chaque coeur virtuel possède un état qui lui est propre (compteur ordinal, etc.) mais partage les blocs d'exécution avec les autres coeurs virtuels d'un même coeur physique). Mettre quelques schéma pour illustrer ces concepts.}.
 %
 The latest generation of Intel \acp{cpu} for desktop computers (called Coffee
 Lake) contains between four and six ``physical'' cores.
@@ -185,7 +185,7 @@ Memories are abstracted into a single, contiguous array of storage cells
 identified by physical addresses, and accessed \emph{via} the same instructions.
 %
 The \ac{cpu} contains two dedicated component, called the Memory Controller Hub
-and the Platform Controller Hub, which dispatch these requests to peripherals.
+and the Platform Controller Hub, which dispatch these requests to peripherals. \TODO{faire une figure et renvoyer à la figure}
 %
 The peripherals which require low access time are connected to the \ac{mch}: the
 \ac{dram}, the display controller, a PCI Express Controller, etc.
@@ -213,7 +213,7 @@ transparently dispatched either to the \ac{dram} or to a peripheral.
 %
 The first component to intervene in the decision process is the Memory
 Controller (formally known as the \emph{northbridge}, and that is now integrated
-to the \ac{cpu} Die).
+to the \ac{cpu} die).
 %
 The Memory Controller is connected to the \ac{dram} and to peripherals which
 require small latency, such as a graphic card or a ethernet controller.
@@ -1035,15 +1035,12 @@ target the SMRAM.
 %
 Because the SMRAM size and location remain specific to each architecture, this
 means it requires an additional step of configurations to tell the cache where
-the SMRAM is.
+the SMRAM is. \TODO{to specifiy the location and the size of the SMRAM?}
 %
-As a consequence, the complexity of the \ac{hse} mechanism implemented by the
-\ac{bios} at runtime, which was already involving three different hardware
-components, has increased.
 
 \paragraph{}
 %
-The SMRAM Cache Poisoning attack is a textbook case of architectural attacks.
+The SMRAM Cache Poisoning attack is a textbook case \TODO{attention, tic de langage, cela fait plusieurs fois que tu utilises "textbook case"... -> perfectly illustrate?} of architectural attacks.
 %
 It is interesting to notice that six years later, Christopher Domas has
 disclosed another x86 vulnerability called Sinkhole\,\cite{domas2015sinkhole},
@@ -1052,12 +1049,14 @@ arbitrary instructions.
 %
 Both leave the content of the SMRAM in \ac{dram} intact.
 %
-Both leverage legitimate hardware features.
+Both leverage legitimate hardware features. 
+
+\TODO{Il faudrait ajouter ici une transition vers la suite}
 
 \subsection{SENTER Sandman}
 \label{subsec:usecase:hse:sandman}
 
-In 2015, Xeno Kovah \emph{et al.} have shown it was possible to leverage the
+In 2015, Xeno Kovah \emph{et al.} have shown \TODO{attention à l'utilisation des temps. Au passé, si tu parles d'une action révolu, utilise le preterit ; "in 2015 Keno showed". L'utilisation du past perfect est très particulière en anglais. Je pense notamment que lorsque tu date précisemment un événement, le preterit s'impose. } it was possible to leverage the
 Intel TXT technology to circumvent the Flash Memory Lock-down
 protection\,\cite{kovah2015senter}.
 
@@ -1077,6 +1076,9 @@ components and the \ac{bios} code.
 With TXT, the goal was to reduce it to the \ac{cpu} itself, which was acting as
 a minimal loader for the system software.
 
+\TODO{Ce paragraphe décrivant TXT est à revoir. 1) TXT n'est pas décrit suffisamment précisemment pour qu'on comprenne ce qu'il fait réellement. 2) la partie finale à partir de "The motivation behin TXT ..." est redondante avec le début. On a compris qu'il s'agissait de réduire la TCB, tu le dis dès le début. Ce que l'on ne comprend pas, c'est pourquoi et comment cela réduit la TCB. ". "system software can
+initiate an isolated execution environment" est trop vague. Il faudrait 1) expliquer le but au début (réduire la TCB) et ensuite 2) expliquer succinctement comment çà marche }
+
 \paragraph{Attack Path}
 %
 The \texttt{SENTER} instruction family had the undesirable side effect of
@@ -1090,7 +1092,7 @@ However, this totally contradicts the security model of the \ac{smm} code.
 Without \ac{smi}, the \ac{bios} Availability property cannot be enforced.
 %
 In addition, the Flash Memory Lock-down mechanism is deprived of one of its key
-hardware features.
+hardware features. \TODO{La description de l'attaque est trop succinte. Il faut répeter que sans SMI, d'après le mécanisme de lock down, cela veut dire que la flash est inscriptible mais qu'on ne passe pas en SMM du coup n'importe quel logiciel peut modifier le contenu de la flash. C'est un manuscript de thèse. Il en faut pas faire (trop) de digression mais il faut être (très) pédagogique. Tu n'est pas à une page près!}
 
 \paragraph{Countermeasure}
 %
@@ -1106,10 +1108,10 @@ the hardware architecture.
 \subsection{Speed Racer}
 \label{subsec:usecase:hse:speed}
 
-There is at least another attack which has defeated the Flash Memory Lock-down
+There is at least another attack which has defeated the Flash Memory Lock-down \TODO{attention à l'utilisation des majuscule (remarque récurrente...)}
 protection.
 %
-In 2015, Corey Kallenberg \emph{et al.} have shown that the scenario detailed
+In 2015, Corey Kallenberg \emph{et al.} have shown \TODO{attention à l'utilisation des temps. Je ne ferais plus cette remarque. Vérifie et corrige partout si nécessaire.} that the scenario detailed
 previously, such that setting \texttt{BIOSWE} was triggering a \ac{smi} to
 suspend the execution of the system software, suffered from a race condition in
 the presence of a second \ac{cpu}\,\cite{kallenberg2015racecondition}.
@@ -1135,7 +1137,7 @@ The attack proceeds as follows:
 \item At the same time, another \ac{cpu} set the \texttt{BIOSWE} bit.
 %
 \item A \ac{smi} is triggered, but by the time it propagates to the first
-  \ac{cpu}, the latter may have successfully tampered with the Flash Memory
+  \ac{cpu}, the latter \TODO{"the latter" me parait un peu confusant. Tu veux dire le premier CPU? Peu-être faudrait-il donner des noms à ces deux CPU (d'ailleurs s'agit-il de CPU ou de coeur?)} may have successfully tampered with the Flash Memory
   content.
 %
 \end{enumerate}
@@ -1152,7 +1154,7 @@ targets the Flash Memory \emph{unless all processors are in \ac{smm}}.
 \section{Conclusion}
 \label{sec:usecase:conclusion}
 
-In this Chapter, we have detailed in depth the relevant x86 hardware mechanisms
+In this Chapter, we have detailed in depth \TODO{in depth me semble un peu exagéré} the relevant x86 hardware mechanisms
 involved in the \ac{hse} mechanism implemented by the \ac{bios} at runtime to
 stay isolated from the system software.
 %
@@ -1162,4 +1164,4 @@ the threats they pose.
 We have used the SMRAM Cache Poisoning Attack as a recurring application use
 case for our contributions, because it has motivated our will to formally
 specify and verify \ac{hse} mechanisms, and it is a good illustration of
-architectural attacks.
+architectural attacks. \TODO{Je tournerais cette phrase au futur. Tu as décris cet exemple et tu vas l'utiliser comme use case pour illustrer ton approche.}
