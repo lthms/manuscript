@@ -18,10 +18,10 @@ hardware-based virtualization (VT-x, VT-d)\,\cite{intel2014manualvt}, dynamic
 root of trust (TXT)\,\cite{intel2015txt}, or applicative enclaves
 (SGX)\,\cite{intel2014manualsgx,costan2016sgxexplained}.
 %
-From a market share perspective, x86 \ac{cpu} are widely used for laptops,
+From a market share perspective, x86 \acp{cpu} are widely used for laptops,
 desktops and servers.
 %
-For these reasons, we have evaluated our approaches to the x86 hardware
+For these reasons, we have evaluated our approaches against the x86 hardware
 architecture.
 %
 However, our contributions are intended to be applicable to other hardware
@@ -75,6 +75,11 @@ come with their own documentation, often in the form of large datasheet.
 
 A simplified x86 hardware architecture is pictured in
 Figure~\ref{fig:speccert:x86arch}.
+%
+We now describe how the different hardware components are integrated together to
+form a typical x86 computing platform, from the processor which executes
+software components to various peripherals which allows the system to interact
+with the rest of the world.
 
 \begin{figure}
   \centering
@@ -132,18 +137,38 @@ Figure~\ref{fig:speccert:x86arch}.
   \label{fig:speccert:x86arch}
 \end{figure}
 
-\paragraph{Processor.}
-
+\paragraph{Processor, Architecture and Microarchitecture.}
+%
 The main component of the architecture is the \emph{processor}.
 %
-Nowadays, it contains two or more \emph{cores}, which execute software
-components programs independently thanks to a so-called \emph{pipeline}.
+It embeds several execution units called \emph{cores}.
 %
-A program is a sequence of assembly instructions.
+They are responsible for executing sequences of assembly instructions which form
+software components programs.
 %
-These instructions are divided into two parts: an opcode, which determines the
-operation to perform, and some operands.
+The concrete hardware implementation of the processor is often referred as the
+Intel microarchitecture, by opposition to the Intel architecture which describes
+the expected behavior and properties of a x86 system as seen by software
+developers.
 %
+While the microarchitecture is often modified, the architecture has remained
+backward compatible for decades\thomasrk{ref introduction to intel archi}.
+%
+The microarchitecture implements optimization such as
+multithreading\thomasrk{ref}, instruction pipelining\thomasrk{ref}, predictive
+branching\thomasrk{ref}, out-of-order execution\thomasrk{ref} and many others.
+%
+It is expected that these optimizations do not violate properties of the
+architecture.
+%
+For instance, x86 \acp{cpu} may start executing the wrong branch of a
+conditional jump, due to their predictive branching technology.
+%
+This scenario is called \emph{branch misprediction}.
+%
+Misprediction recovery requires to revert the \ac{cpu} back to its state before
+the jump.
+
 % GUILLAUME : Je dirais directement un CPU est aujourd'hui composé de plusieurs
 % unités d'exécution indépendantes qu'on appelle des coeurs. Ces composants sont
 % eux même constitués de différents blocs qui forme un pipeline d'exécution
@@ -155,31 +180,6 @@ operation to perform, and some operands.
 % virtuel possède un état qui lui est propre (compteur ordinal, etc.) mais
 % partage les blocs d'exécution avec les autres coeurs virtuels d'un même coeur
 % physique). Mettre quelques schéma pour illustrer ces concepts.
-%
-Intel has assigned \emph{mnemonics} ---symbolic names--- to opcodes.
-%
-For instance, the opcode \texttt{0x24} was assigned the mnemonics \texttt{add}.
-%
-The instruction \texttt{add} takes two memory locations as operands:
-\texttt{src} and \text{dst}.
-%
-To execute instructions such as \texttt{add}, a core comprises several hardware
-components specialized in very specific tasks (\emph{eg.} fetch the instruction,
-decode the instruction, general-purpose or configuration registers, etc.).
-%
-They are connected together to form a \emph{pipeline}.
-%
-Cores (and pipelines) are independent from each other.
-%
-Many x86 processors also feature a technology called
-\emph{HyperThreading}\thomasrk{ref}, where one physical core embeds several
-logical cores.
-%
-Two logical cores share the pipeline of their physical core, but the hardware
-implementation supposedly keeps them isolated.
-%
-Thanks to multicore processors and multithreading cores, a single Intel
-processor can executed several software component at the same time.
 %
 % A core basically repeats the following tasks:
 %%
