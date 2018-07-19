@@ -84,11 +84,7 @@ with the rest of the world.
 \begin{figure}
   \centering
   \begin{tikzpicture}
-    \node [draw, inner sep=15pt] (Core) {Core};%
-    \node [draw, inner sep=8pt, below=5pt of Core] (Cache) {Caches};%
-    \draw (Core) -- (Cache);%
-    \node [draw, below=15pt of Cache, inner sep=30pt] (MCH) {MCH};%
-    \draw (Cache) -- (MCH);%
+    \node [draw, inner sep=25pt] (MCH) {Processor};%
 
     \node [draw, inner sep=8pt, right=15pt of MCH, yshift=-20pt, text badly
     centered, text width=45pt] (DRAM) {DRAM Controller};%
@@ -129,8 +125,6 @@ with the rest of the world.
     width=50pt] (HD) {Hard Drive Controller};%
 
     \draw (PCH) -- (HD);%
-
-    \node [inner sep=10pt, dashed, fit=(MCH) (Core), draw] (CPU) {};%
   \end{tikzpicture}
 
   \caption{High-level view of the x86 hardware architecture}
