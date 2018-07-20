@@ -1223,18 +1223,119 @@ Loic Duflot \emph{et al.}\,\cite{duflot2009smram} and Rafal Wojtczuk \emph{et
 misplaced when they disclosed the \emph{SMRAM Cache Poisoning Attack}.
 
 \paragraph{Cache Memory}
-
+%
 Interacting with the \ac{dram} remains slow, in regard to the speed of a
 \ac{cpu}.
 %
-To improve performance, Intel \acp{cpu} come with several (often three\TODO{J'ai
-  l'impression que les proc ont maintenant tous 3 niveaux de cache et ce depuis
-  pas mal de temps. Plutôt que often, tu pourrais dire depuis l'archi xxx})
-levels of caches, from the smaller and quicker, to the bigger and
-slower. \TODO{Tu pourrais donner un peu plus de détail en t'appuyant sur un
-  schéma d'archi (L1 intégré au coeur, L2, L3, différence cache de données et
-  cache d'instruction...}
+To improve performance, Intel \acp{cpu} come with several levels of caches, from
+the smaller and quicker, to the bigger and slower.
 %
+For instance, Intel Core i7, i5 and i3 processors have three levels of cache
+%
+More precisely, each core is assigned two levels of cache called L1 and L2.
+%
+The L1 cache has the particularity to be divided into an cache of instructions
+(used when the core read from memory instructions to execute) and a cache of
+data.
+%
+The L3 cache is shared by the different cores of the processor.
+%
+As a reference, the Figure~\ref{fig:usecase:l1-l3caches}... TODO.
+%
+Caches are mostly transparent to the software components.
+%
+For instance, the cache coherence is mostly enforced by the hardware alone, with
+the notable exception of multiprocessor (not multicore) systems, for which
+``maintenance of cache consistency may, in rare circumstances, require
+intervention by system software.''
+%
+Intel has developed a dedicated protocol called MESIF to that
+end\thomasrk{ref?}, whose implementation may differ from one product to another.
+
+\begin{figure}
+  \begin{center}
+    \begin{tikzpicture}
+      \node [draw, inner sep=10pt, rectangle, text width=100pt, text badly
+      centered] (l3-1) {L3 slice};%
+      \node [draw, inner sep=10pt, rectangle, text width=100pt, text badly
+      centered, right=25pt of l3-1] (l3-2) {L3 slice};%
+      \node [draw, inner sep=10pt, rectangle, text width=100pt, text badly
+      centered, below=10pt of l3-2] (l3-3) {L3 slice};%
+      \node [draw, inner sep=10pt, rectangle, text width=100pt, text badly
+      centered, left=25pt of l3-3] (l3-4) {L3 slice};%
+      \node [draw, dashed, inner sep=10pt, fit=(l3-1) (l3-2) (l3-3) (l3-4)] (l3)
+      {};%
+
+      \draw (l3-1) -- (l3-2);%
+      \draw (l3-2) -- (l3-3);%
+      \draw (l3-3) -- (l3-4);%
+      \draw (l3-4) -- (l3-1);%
+
+      % core 1
+      \node [draw, text width=100pt, inner sep=10pt, text badly centered,
+      above=of l3-1] (l2-1) {Cache L2};%
+      \draw (l3-1) -- (l2-1);%
+
+      \node [above=20pt of l2-1] (l1-1) {};%
+      \node [draw, right=0pt of l1-1.center, text badly centered, text
+      width=50pt, inner sep=5pt] (l1-1-i) {Cache L1 {\small (Instruction)}};%
+      \node [draw, left=0pt of l1-1.center, text badly centered, text
+      width=50pt, inner sep=5pt] (l1-1-d) {Cache L1 {\small (Data)}};%
+      \node [draw, text width=100pt, text badly centered, inner sep=10pt,
+      minimum height=40pt, above=20pt of l1-1] (unit-1) {Execution Unit};%
+
+      \node [draw, dashed, inner sep=10pt, fit=(unit-1) (l2-1)] (c-1) {};%
+
+      % core 2
+      \node [draw, text width=100pt, inner sep=10pt, text badly centered,
+      above=of l3-2] (l2-2) {Cache L2};%
+      \draw (l3-2) -- (l2-2);%
+
+      \node [above=20pt of l2-2] (l1-2) {};%
+      \node [draw, right=0pt of l1-2.center, text badly centered, text
+      width=50pt, inner sep=5pt] (l1-2-i) {Cache L1 {\small (Instruction)}};%
+      \node [draw, left=0pt of l1-2.center, text badly centered, text
+      width=50pt, inner sep=5pt] (l1-2-d) {Cache L1 {\small (Data)}};%
+      \node [draw, text width=100pt, text badly centered, inner sep=10pt,
+      minimum height=40pt, above=20pt of l1-2] (unit-2) {Execution Unit};%
+
+      \node [draw, dashed, inner sep=10pt, fit=(unit-2) (l2-2)] (c-2) {};%
+
+      % core 3
+      \node [draw, text width=100pt, inner sep=10pt, text badly centered,
+      below=of l3-3] (l2-3) {Cache L2};%
+      \draw (l3-3) -- (l2-3);%
+
+      \node [below=20pt of l2-3] (l1-3) {};%
+      \node [draw, right=0pt of l1-3.center, text badly centered, text
+      width=50pt, inner sep=5pt] (l1-3-i) {Cache L1 {\small (Instruction)}};%
+      \node [draw, left=0pt of l1-3.center, text badly centered, text
+      width=50pt, inner sep=5pt] (l1-3-d) {Cache L1 {\small (Data)}};%
+      \node [draw, text width=100pt, text badly centered, inner sep=10pt,
+      minimum height=40pt, below=20pt of l1-3] (unit-3) {Execution Unit};%
+
+      \node [draw, dashed, inner sep=10pt, fit=(unit-3) (l2-3)] (c-3) {};%
+
+      % core 3
+      \node [draw, text width=100pt, inner sep=10pt, text badly centered,
+      below=of l3-4] (l2-4) {Cache L2};%
+      \draw (l3-4) -- (l2-4);%
+
+      \node [below=20pt of l2-4] (l1-4) {};%
+      \node [draw, right=0pt of l1-4.center, text badly centered, text
+      width=50pt, inner sep=5pt] (l1-4-i) {Cache L1 {\small (Instruction)}};%
+      \node [draw, left=0pt of l1-4.center, text badly centered, text
+      width=50pt, inner sep=5pt] (l1-4-d) {Cache L1 {\small (Data)}};%
+      \node [draw, text width=100pt, text badly centered, inner sep=10pt,
+      minimum height=40pt, below=20pt of l1-4] (unit-4) {Execution Unit};%
+
+      \node [draw, dashed, inner sep=10pt, fit=(unit-4) (l2-4)] (c-4) {};%
+    \end{tikzpicture}
+  \end{center}
+  \caption{Typical caches organization of a x86 processor}
+  \label{fig:usecase:l1-l3caches}
+\end{figure}
+
 When a \ac{cpu} successfully reads the memory at a given address, it keeps a
 copy of the result in its cache.
 %
@@ -1283,7 +1384,9 @@ For instance, caching write accesses to a framebuffer does not make sense.
 %
 This is why Intel provides four complementary strategies.
 %
-The uncacheable strategy disables the cache for the given addre
+The uncacheable strategy disables the cache for the given address, while write
+combining, write-through, write-back and write-protected are similar strategies
+such that write accesses are directly forwarded to the underlying memory.
 
 For cache-friendly programs, the gain in performance can be huge.
 %
