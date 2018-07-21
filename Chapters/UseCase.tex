@@ -69,10 +69,10 @@ At the time of writing this thesis\,\footnote{Spring 2018.}, the \emph{Intel 64
   and IA-32 Architectures Software Developer’s Manual} is 4842 pages long.
 %
 Executed on the computer used to write the present thesis, the GNU/Linux
-command-line application \texttt{lshw} lists about 30 hardware components, which
-come with their own documentation, often in the form of large datasheet.
-%
-\thomasrk{Donne quelques exemples de composants, sans être exaustif}
+command-line application \texttt{lshw} lists about 30 hardware components
+---including a hard drive, a keyboard, a trackpad, an audio controller, an
+integrated graphic card, etc.--- which come with their own documentation, often
+in the form of large datasheet.
 
 \subsection{Basics of x86 Architecture}
 
@@ -90,9 +90,9 @@ with the rest of the world.
     \node [draw, inner sep=25pt] (MCH) {Processor};%
 
     \node [draw, inner sep=8pt, right=15pt of MCH, yshift=-20pt, text badly
-    centered, text width=45pt] (DRAM) {DRAM Controller};%
+    centered, text width=65pt] (DRAM) {DRAM Controller};%
     \node [draw, inner sep=8pt, right=15pt of MCH, yshift=20pt, text badly
-    centered, text width=45pt] (Display) {Display Controller};%
+    centered, text width=65pt] (Display) {Display Controller};%
 
     \draw (MCH.east) |- (Display.west);%
     \draw (MCH.east) |- (DRAM.west);%
@@ -107,7 +107,7 @@ with the rest of the world.
 
     \draw (MCH) -- (PCH);%
 
-    \node [draw, inner sep=5pt, below=10pt of PCH, text width=35pt,
+    \node [draw, inner sep=5pt, below=10pt of PCH, text width=55pt,
     xshift=-55pt, text badly centered] (Flash) {Flash Memory};%
     \draw ([xshift=-10pt]PCH.south) |- (Flash.east);%
 
@@ -115,11 +115,11 @@ with the rest of the world.
     xshift=55pt, text badly centered] (TPM) {TPM};%
     \draw ([xshift=10pt]PCH.south) |- (TPM.west);%
 
-    \node [draw, inner sep=10pt, yshift=25pt, left=20pt of PCH, text width=45pt,
+    \node [draw, inner sep=10pt, yshift=25pt, left=20pt of PCH, text width=65pt,
     text badly centered] (USB) {USB Controller};%
 
     \node [draw, inner sep=10pt, yshift=-25pt, left=20pt of PCH, text
-    width=45pt, text badly centered] (PCI) {PCI Controller};%
+    width=65pt, text badly centered] (PCI) {PCI Controller};%
 
     \draw (PCH.west) |- (USB.east);%
     \draw (PCH.west) |- (PCI.east);%
@@ -374,8 +374,7 @@ configuration space within the system memory address space.
 
 \begin{figure}
   \begin{center}
-    \def\svgwidth{0.8\textwidth}
-    \resizebox{0.6\textwidth}{!}{%
+    \def\svgwidth{0.8\textwidth} \resizebox{0.6\textwidth}{!}{%
       \input{Figures/PCI-config-space.pdf_tex}}
   \end{center}
   \caption{Standard registers of PCI Type 0 (Non-Bridge) Configuration Space
@@ -544,7 +543,12 @@ reasons.
 Firstly, security checks can have an important impact over performance.
 %
 Partly for this reason, the hardware components have long been assumed
-trustworthy\thomasrk{ref marion}.
+trustworthy.
+%
+A good demonstration of this fact is the Address Translation Services mechanism
+introduced by the PCI standard, whose purpose is to allow PCI devices to bypass
+security mechanisms designed to reduce their
+privileges\,\cite{daubignard2017protip}.
 %
 This has not been without consequences from a security
 perspective\,\cite{nohl2014badusb,hudson2015thunderstrike,chifflier2013uefi}.
