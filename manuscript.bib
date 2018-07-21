@@ -1,6 +1,88 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                          REFERENCES EXAMPLES                             %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@article{skochinsky2014intel,
+  title={Intel ME Secrets},
+  author={Skochinsky, Igor},
+  journal={Code Blue},
+  year={2014}
+}
+@article{abramson2006vtd,
+  title={Intel Virtualization Technology for Directed I/O.},
+  author={Abramson, Darren and Jackson, Jeff and Muthrasanallur, Sridhar and Neiger, Gil and Regnier, Greg and Sankaran, Rajesh and Schoinas, Ioannis and Uhlig, Rich and Vembu, Balaji and Wiegert, John},
+  journal={Intel technology journal},
+  volume={10},
+  number={3},
+  year={2006}
+}
+@book{salihun2006bios,
+  title={BIOS Disassembly Ninjutsu Uncovered (Uncovered series)},
+  author={Salihun, Darmawan},
+  year={2006},
+  publisher={A-List Publishing}
+}
+@inproceedings{zimmer2007uefi,
+  title={Platform Trust Beyond BIOS Using the Unified Extensible Firmware Interface.},
+  author={Zimmer, Vincent},
+  booktitle={Security and Management},
+  pages={400--405},
+  year={2007}
+}
+@book{zimmer2017uefi,
+  title={{Beyond BIOS: Developing with the Unified Extensible Firmware Interface}},
+  author={Zimmer, Vincent and Rothman, Michael and Marisetty, Suresh},
+  year={2017},
+  publisher={Walter de Gruyter GmbH \& Co KG}
+}
+@article{bulygin2014summary,
+  title={Summary of attacks against BIOS and secure boot},
+  author={Bulygin, Yuriy and Loucaides, J and Furtak, Andrew and Bazhaniuk, O and Matrosov, A},
+  journal={Proceedings of the DefCon},
+  year={2014}
+}
+@article{sandhu1994access,
+  title={Access control: principle and practice},
+  author={Sandhu, Ravi S and Samarati, Pierangela},
+  journal={IEEE communications magazine},
+  volume={32},
+  number={9},
+  pages={40--48},
+  year={1994},
+  publisher={IEEE}
+}
+@article{saltzer1975leastprivilege,
+  title={The protection of information in computer systems},
+  author={Saltzer, Jerome H and Schroeder, Michael D},
+  journal={Proceedings of the IEEE},
+  volume={63},
+  number={9},
+  pages={1278--1308},
+  year={1975},
+  publisher={IEEE}
+}
+@book{kumar2009active,
+  title={Active platform management demystified: unleashing the power of intel VPro (TM) technology},
+  author={Kumar, Arvind},
+  year={2009},
+  publisher={Intel Press}
+}
+@misc{turley2014introx86,
+  title={{White Paper Introduction to Intel{\textregistered} Architecture}},
+  year={2014},
+  author={Turley, J}
+}
+@inproceedings{milenkovic2002branchprediction,
+  title={Demystifying Intel branch predictors},
+  author={Milenkovic, Milena and Milenkovic, Aleksandar and Kulick, Jeffrey},
+  booktitle={Workshop on Duplicating, Deconstructing and Debunking},
+  year={2002}
+}
+@article{marr2002hypertheading,
+  title={{Hyper-Threading Technology in the Netburst{\textregistered} Microarchitecture}},
+  author={Marr, Debbie and Binns, Frank and Hill, D and Hinton, Glenn and Koufaty, D and others},
+  journal={14th Hot Chips},
+  year={2002}
+}
 @misc{cr4sh2016thinkpwn,
   author={Oleksiuk, Dmytro},
   title={ThinkPwn},
@@ -174,6 +256,42 @@ month={May}
   pages={47--96},
   year={2005}
 }
+@report{hp2016surestart,
+  title={{HP Sure Start: Automatic Firmware Intrusion Detection and Repair
+System}},
+  author={HP Inc.},
+  url={http://h10032.www1.hp.com/ctg/Manual/c0516390},
+  year={2016}
+}
+@article{rosenbaum2012secboot,
+  title={{A Tour Beyond BIOS into UEFI Secure Boot}},
+  author={Rosenbaum, Lee and Zimmer, Vincent},
+  year={2012}
+}
+@article{coker2011remoteattestation,
+  title={Principles of remote attestation},
+  author={Coker, George and Guttman, Joshua and Loscocco, Peter and Herzog, Amy and Millen, Jonathan and O’Hanlon, Brian and Ramsdell, John and Segall, Ariel and Sheehy, Justin and Sniffen, Brian},
+  journal={International Journal of Information Security},
+  volume={10},
+  number={2},
+  pages={63--81},
+  year={2011},
+  publisher={Springer}
+}
+@article{regenscheid2018nist800193,
+  title={Platform Firmware Resiliency Guidelines},
+  author={Regenscheid, Andrew},
+  journal={NIST Special Publication},
+  volume={800},
+  pages={193},
+  year={2018}
+}
+@article{rutkowska2015intel,
+  title={Intel x86 considered harmful},
+  author={Rutkowska, Joanna},
+  journal={the Invisible Things Lab},
+  year={2015}
+}
 @inproceedings{sinha2015moat,
   title={Moat: Verifying confidentiality of enclave programs},
   author={Sinha, Rohit and Rajamani, Sriram and Seshia, Sanjit and Vaswani, Kapil},
@@ -189,6 +307,14 @@ month={May}
   volume={2016},
   pages={86},
   year={2016}
+}
+@misc{johnson2015patentsgx,
+  title={Technique for supporting multiple secure enclaves},
+  author={Johnson, Simon P and Savagaonkar, Uday R and Scarlata, Vincent R and McKeen, Francis X and Rozas, Carlos V},
+  year={2015},
+  month=March,
+  publisher={Google Patents},
+  note={US Patent 8,972,746}
 }
 @inproceedings{barthe2014virtcert3,
   title={System-level non-interference for constant-time cryptography},
@@ -435,8 +561,7 @@ month={May}
 @inproceedings{kallenberg2014failure,
 	title = {{Setup For Failure: Defeating Secure Boot}},
 	author = {{Corey Kallenberg} and {Sam Cornwell} and {Xeno Kovah} and {John Butterworth}},
-	date = {2014-04},
-	file = {Setup For Failure Defeating UEFI Secure Boot.pdf:/home/lethom/.mozilla/firefox/smvozhv6.default/zotero/storage/36BIEUBA/Setup For Failure Defeating UEFI Secure Boot.pdf:application/pdf}
+	date = {2014-04}
 }
 @article{kallenberg2015racecondition,
   title={Speed Racer: Exploiting an Intel Flash Protection Race Condition},
@@ -498,6 +623,12 @@ month={May}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                             DOCUMENTATION                                %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@article{fog2012microarchitecture,
+  title={The microarchitecture of Intel, AMD and VIA CPUs: An optimization guide for assembly programmers and compiler makers},
+  author={Fog, Agner},
+  journal={Copenhagen University College of Engineering},
+  year={2012}
+}
 @book{intel2015txt,
   title = {{Intel Trusted Execution Technology (Intel TXT)}},
   year = 2015,
@@ -509,6 +640,28 @@ month={May}
 	author = {{Intel}},
 	year = {2014},
         month = {October},
+}
+@book{uefi2017specs,
+	title = {{Unified Extensible Firmware Interface (UEFI) Specification, Version 2.7 Errata A}},
+	author = {{UEFI Forum}},
+	year = {2017},
+        month = {August},
+}
+@article{duflot2010acpi,
+  title={{ACPI and SMI handlers: some limits to trusted computing}},
+  author={Duflot, Lo{\"\i}c and Grumelard, Olivier and Levillain, Olivier and Morin, Benjamin},
+  journal={Journal in computer virology},
+  volume={6},
+  number={4},
+  pages={353--374},
+  year={2010},
+  publisher={Springer}
+}
+@book{uefi2017acpi,
+	title = {{Advanced Configuration and Power Interface (ACPI) Specification, Version 6.2 Errata A}},
+	author = {{UEFI Forum}},
+	year = {2017},
+        month = {September},
 }
 @inbook{intel2014manualcache,
 	title = {Intel 64 and {IA}32 Architectures Software Developer Manual},
@@ -536,6 +689,15 @@ month={May}
   title={{Intel 5100 Memory Controller Hub Chipset}},
   author = {Intel},
   date = {2009-07},
+}
+@article{thomadakis2011nehalem,
+  title={The architecture of the Nehalem processor and Nehalem-EP SMP platforms},
+  author={Thomadakis, Michael E},
+  journal={Resource},
+  volume={3},
+  number={2},
+  year={2011},
+  publisher={Citeseer}
 }
 @book{intel2012pch,
   title={{Intel 7 Series / C216 Chipset Family Platform Controller Hub (PCH)}},
