@@ -1,0 +1,121 @@
+%% Creator: Inkscape inkscape 0.92.2, www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'Figures/PCI-config-space.pdf' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%%
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+%%
+\begingroup%
+  \makeatletter%
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}%
+    \renewcommand\transparent[1]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \newcommand*\fsize{\dimexpr\f@size pt\relax}%
+  \newcommand*\lineheight[1]{\fontsize{\fsize}{#1\fsize}\selectfont}%
+  \ifx\svgwidth\undefined%
+    \setlength{\unitlength}{916.44390597bp}%
+    \ifx\svgscale\undefined%
+      \relax%
+    \else%
+      \setlength{\unitlength}{\unitlength * \real{\svgscale}}%
+    \fi%
+  \else%
+    \setlength{\unitlength}{\svgwidth}%
+  \fi%
+  \global\let\svgwidth\undefined%
+  \global\let\svgscale\undefined%
+  \makeatother%
+  \begin{picture}(1,0.96972309)%
+    \lineheight{1}%
+    \setlength\tabcolsep{0pt}%
+    \put(0,0){\includegraphics[width=\unitlength,page=1]{Figures/PCI-config-space.pdf}}%
+    \put(0.69842204,0.89734893){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Vendor ID}\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=2]{Figures/PCI-config-space.pdf}}%
+    \put(0.23377536,0.89734893){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Device ID}\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=3]{Figures/PCI-config-space.pdf}}%
+    \put(0.69842204,0.84072012){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Command}\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=4]{Figures/PCI-config-space.pdf}}%
+    \put(0.23377536,0.84072012){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Status}\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=5]{Figures/PCI-config-space.pdf}}%
+    \put(0.81458375,0.78263927){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Revision ID}\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=6]{Figures/PCI-config-space.pdf}}%
+    \put(0.34993704,0.78263927){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Class Code}\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=7]{Figures/PCI-config-space.pdf}}%
+    \put(0.11761368,0.72310642){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{BIST}\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=8]{Figures/PCI-config-space.pdf}}%
+    \put(0.34993704,0.72310642){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Header Type}\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=9]{Figures/PCI-config-space.pdf}}%
+    \put(0.58226038,0.72310642){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Lat. Timer}\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=10]{Figures/PCI-config-space.pdf}}%
+    \put(0.81458375,0.72310642){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Cache Line S.}\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=11]{Figures/PCI-config-space.pdf}}%
+    \put(0.4660987,0.52127552){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Base Address Registers}\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=12]{Figures/PCI-config-space.pdf}}%
+    \put(0.4660987,0.31654051){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Cardbus CIS Pointer}\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=13]{Figures/PCI-config-space.pdf}}%
+    \put(0.69842204,0.25845965){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Subsystem Vendor ID}\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=14]{Figures/PCI-config-space.pdf}}%
+    \put(0.23377536,0.25845965){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Subsystem ID}\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=15]{Figures/PCI-config-space.pdf}}%
+    \put(0.4660987,0.20037885){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Expansion ROM Base Address}\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=16]{Figures/PCI-config-space.pdf}}%
+    \put(0.81458375,0.142298){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Cap. Pointer}\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=17]{Figures/PCI-config-space.pdf}}%
+    \put(0.34993704,0.142298){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Reserved}\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=18]{Figures/PCI-config-space.pdf}}%
+    \put(0.4660987,0.08421719){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Reserved}\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=19]{Figures/PCI-config-space.pdf}}%
+    \put(0.11761368,0.02613634){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Max Lat.}\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=20]{Figures/PCI-config-space.pdf}}%
+    \put(0.34993704,0.02613634){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Min Gnt.}\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=21]{Figures/PCI-config-space.pdf}}%
+    \put(0.58226038,0.02613634){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Interrupt Pin}\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=22]{Figures/PCI-config-space.pdf}}%
+    \put(0.81458375,0.02613634){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}\textbf{Interrupt Line}\end{tabular}}}}%
+    \put(0.91622519,0.94816965){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}0\end{tabular}}}}%
+    \put(0.4660987,0.94816965){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}15\end{tabular}}}}%
+    \put(0.42253806,0.94816965){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}16\end{tabular}}}}%
+    \put(0.00145202,0.94816965){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}31\end{tabular}}}}%
+    \put(0.94526562,0.90202445){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}00h\end{tabular}}}}%
+    \put(0.94526562,0.84394359){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}04h\end{tabular}}}}%
+    \put(0.94526562,0.78586279){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}08h\end{tabular}}}}%
+    \put(0.94526562,0.72778194){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}0Ch\end{tabular}}}}%
+    \put(0.94526562,0.66970112){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}10h\end{tabular}}}}%
+    \put(0.94526562,0.61162027){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}14h\end{tabular}}}}%
+    \put(0.94526562,0.55353944){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}18h\end{tabular}}}}%
+    \put(0.94526562,0.49545854){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}1Ch\end{tabular}}}}%
+    \put(0.94526562,0.43737768){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}20h\end{tabular}}}}%
+    \put(0.94526562,0.37929683){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}24h\end{tabular}}}}%
+    \put(0.94526562,0.32121603){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}28h\end{tabular}}}}%
+    \put(0.94526562,0.26313517){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}2Ch\end{tabular}}}}%
+    \put(0.94526562,0.20505432){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}30h\end{tabular}}}}%
+    \put(0.94526562,0.14697352){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}34h\end{tabular}}}}%
+    \put(0.94526562,0.08889271){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}38h\end{tabular}}}}%
+    \put(0.94526562,0.03081186){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}3Ch\end{tabular}}}}%
+  \end{picture}%
+\endgroup%
