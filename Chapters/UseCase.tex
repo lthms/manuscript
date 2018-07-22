@@ -162,12 +162,11 @@ It is expected that these optimizations do not violate properties of the
 architecture.
 %
 For instance, the predictive branching implemented by x86 \acp{cpu} increases
-performance implement when the latter regularly executes the same branching
-instruction, \emph{e.g.} inside a loop.
+performance, \emph{e.g.} inside a loop.
 %
-A core will eagerly choose one branch ---based on the past execution--- before
-it has executed all the computations required to determine the correct execution
-path.
+In presence of a conditional jump, a core will eagerly choose one branch
+---based on the past execution--- before it has executed all the computations
+required to determine the correct execution path.
 %
 Most of the time, it chooses the correct branch.
 %
@@ -197,8 +196,8 @@ At the end of the last loop step, the register \texttt{rax} will have the value
 According to the semantics of \texttt{jle}, the core should execute the
 \texttt{movq~\$0,~\%rax} (l.6) next.
 %
-From a microarchitectural point of view, the branch prediction technology may
-have tried to optimized the execution of the program, by eagerly jumping to the
+From a microarchitectural point of view, the branch prediction technology can
+decide to optimize the execution of the program, by eagerly jumping to the
 \texttt{loop} label and continuing the execution of the program \emph{before}
 \texttt{\%rax} has been updated to \( 11 \).
 %
@@ -208,9 +207,9 @@ have tried to optimized the execution of the program, by eagerly jumping to the
 
 Intel microarchitecture blurs the frontier between hardware and software.
 %
-Indeed, an important part is not implemented as hardware circuit, but rather
-under the form of \emph{microcode} programs\,\cite[Section
-2.14]{costan2016sgxexplained}.
+Indeed, an important part of the microarchitecture is not implemented as
+hardware circuit, but rather under the form of \emph{microcode}
+programs\,\cite[Section 2.14]{costan2016sgxexplained}.
 %
 That is, the processor is a programmable device, whose behavior ---including the
 semantics of several x86 instructions it
@@ -282,7 +281,7 @@ instruction to execute or as an operand of an arithmetic operation.
 Although \ac{dram} is the primary source of memory within the hardware
 architecture, it is not the only one.
 %
-Other hardware components expose additional memory region.
+Other hardware components expose additional memory regions.
 %
 For instance, a x86 processor integrates a display controller which exposes a
 framebuffer to the cores.
@@ -321,7 +320,7 @@ In addition to this approach, x86 \acp{cpu} are also capable of handling
 \emph{memory-mapped} \IOs, where the memories exposed by the peripherals are
 mapped within the system memory address space.
 %
-That is, the system memory manipulating by the cores is no longer formed by the
+That is, the system memory manipulated by the cores is no longer formed by the
 \ac{dram} only.
 %
 As a consequence, when a core reads from or write to the system memory, the
@@ -337,7 +336,7 @@ a set of configuration registers exposed by the processor and the \ac{pch}.
 The two approaches are complementary.
 %
 As an example, PCI devices exposes a so-called configuration space, which is a
-dedicated memory region whose locations have a well-specified semantics (see
+dedicated memory region with a specific semantics (see
 Figure~\ref{fig:usecase:pciconfig}).
 %
 The \ac{pch} exposes two registers which allows for interacting with these
@@ -362,7 +361,7 @@ where \(\cdot\,|\,\cdot\) is the bit-wise OR operator, and
 First, the core updates the register \texttt{PCI\_CONFIG\_ADDRESS} with this
 value.
 %
-Then, the \ac{pch} forwards \IOs targeting the register
+Then, the \ac{pch} forwards P-\IOs targeting the register
 \texttt{PCI\_CONFIG\_DATA}.
 %
 The PCI specification states that the offset \texttt{0x10} of the PCI
@@ -395,7 +394,7 @@ and virtual memory mechanisms and of their exact configurations at a given time.
 
 \paragraph{Peripherals \IOs.}
 %
-Cores are not the only active hardware components present within a typical x86
+Cores are not the only active hardware components present inside a typical x86
 hardware architecture.
 %
 For instance, several hardware components can also read from or write to the
@@ -485,12 +484,12 @@ They allow for administrating a computer \emph{via} the network, without the
 need for a physical access.
 %
 In practice, the software components responsible for implementing the
-out-of-band management features are not executed on the main processor: the ASF
+out-of-band management features are not executed by the main processor: the ASF
 technology was implemented by the network card\,\cite{duflot2010network}, and
 since 2008 x86 \acp{cpu} embed a so-called Management
 Engine\,\cite{ruan2014me,skochinsky2014intel}.
 %
-As of 2018, the Management Engine is located within the \ac{pch}.
+In 2018, the Management Engine is located inside the \ac{pch}.
 %
 ASF-capable network cards and the Management Engine require important
 capabilities to implement their features.
@@ -500,11 +499,11 @@ image, provoke the reboot of the computing platform and force the main \ac{cpu}
 to execute the software components within the image it has
 downloaded\,\cite{kumar2009active}.
 %
-As of 2018, it becomes harder and harder to completely disable the Management
-Engine on a typical x86 computing platform.
+It becomes harder and harder to completely disable the Management Engine on a
+typical x86 computing platform.
 %
-The Management Engine will notably the reboot of the platform if it cannot
-initialize correctly.
+The Management Engine will notably provoke the reboot of the platform if it
+cannot initialize correctly.
 
 \subsection{HSE Mechanisms Targeted Security Policies}
 
@@ -521,9 +520,9 @@ This allows for cooperation, \emph{e.g.} when a network card receives a TCP
 packet, it copies its content to a predefined address in \ac{dram}, then
 notifies the operating system by sending an interrupt to the core.
 %
-This also raises a significant challenges from a security perspective.
+This also raises a significant challenge from a security perspective.
 
-\paragraph{Principle of Least Privilege}
+\paragraph{Principle of Least Privilege.}
 %
 Hardware and software components come from various places and can be of various
 quality.
@@ -534,8 +533,7 @@ to threaten the security of the system.
 In this context, the principle of least
 privilege\,\cite{saltzer1975leastprivilege} applies: a given component should
 only be able to leverage capabilities it needs to work according to its purpose,
-where a ``capability'' refers to the right to perform an \IO targeting a given
-component.
+where a ``capability'' refers to the right to perform a given \IO.
 %
 In practice, the implementation of this principle is challenging, for various
 reasons.
@@ -550,7 +548,7 @@ introduced by the PCI standard, whose purpose is to allow PCI devices to bypass
 security mechanisms designed to reduce their
 privileges\,\cite{daubignard2017protip}.
 %
-This has not been without consequences from a security
+Other examples showed it is not without consequences from a security
 perspective\,\cite{nohl2014badusb,hudson2015thunderstrike,chifflier2013uefi}.
 %
 Secondly, the ``least privilege'' may vary from one execution to another.
@@ -569,7 +567,7 @@ mechanisms.
 % given computing platform, because peripherals connected \emph{via} these
 % interfaces could perform \ac{dma}.
 
-\paragraph{Access Control}
+\paragraph{Access Control.}
 %
 The x86 hardware architecture provides many \ac{hse} mechanisms to determine
 which \IO each component of the system can or cannot perform.
@@ -586,10 +584,13 @@ within the hardware architecture.
 Actions comprise reading from and writing to a memory location; from a core
 perspective, it is also common to distinguish between reading a data and reading
 an instruction.
+
+The \ac{mmu} is a good example of a hardware feature involved in a \ac{hse}
+mechanism.
 %
-For instance, thanks to the \ac{mmu}, an operating system can attribute ranges
-of \ac{dram} to user applications it manages and isolates its code and data from
-these applications.
+Thanks to the \ac{mmu}, an operating system can attribute ranges of \ac{dram} to
+user applications it manages and isolates its code and data from these
+applications.
 %
 The \ac{mmu} alone is not sufficient, because its scope does not cover its
 configuration.
@@ -600,11 +601,16 @@ software component to modify the \ac{mmu} configuration.
 As a consequence, an additional hardware feature has to be used: the protection
 rings\,\cite[Volume 3, Section 5.5]{intel2014manual}.
 %
-Indeed, ring 3 imposes several restrictions to software components, including
-the capability to modify the \texttt{CR3} register which identifies the base of
-the page table hierarchy the \ac{mmu} uses.
+The x86 cores can operate in 4 different so-called rings, from 0 to 3, where
+ring~0 is the most privileged and ring~3 the least.
 %
-Finally, the scope of the \ac{mmu} is limited to the software component executed
+Ring~3 imposes several restrictions to software components, including the
+capability to modify the \texttt{CR3} register which identifies the base of the
+page table hierarchy the \ac{mmu} uses.
+%
+This is why ring~3 is commonly dedicated to the execution of applications.
+%
+The scope of the \ac{mmu} is limited to the software component executed
 by a core at a given time.
 %
 To impose an access control policy to hardware components as well, an operating
@@ -637,13 +643,13 @@ For instance, if the access control policy refer to virtual addresses \( v \),
 modifying the \ac{mmu} configuration results in modifying the content associated
 with \( v \).
 
-\paragraph{Availability}
+\paragraph{Availability.}
 %
 Another class of security policies targeted by \ac{hse} mechanism is
 availability security policies.
 %
 They focus on ensuring given software components are executed over time, without
-the need of cooperation from untrusted software components.
+the need for cooperation from untrusted software components.
 %
 For instance, a user application which contains an infinite loop should not be
 able to prevent the execution of the operating system, and by extension other
@@ -654,11 +660,8 @@ exceptions.
 %
 Going back to the example of user applications, an operating system can leverage
 one of the numerous hardware timers (\emph{e.g.} APIC timer\,\cite[Volume 3,
-Subsection 10.5.4]{intel2014manual}) at its disposal to periodically suspend the
-execution of applications.
-%
-That is, hardware timers are the foundation of preemptive multi-tasking
-strategies.
+Subsection 10.5.4]{intel2014manual}) at its disposal to periodically preempt a
+core, \emph{i.e.} implement preemptive multi-tasking.
 
 % \TODO{Beaucoup de confusion dans ce paragraphe. 1) si tu parles de information
 % flow et que tu dis que tu ne peux pas traiter la noninterference, tu vas te
@@ -748,12 +751,12 @@ strategies.
 
 The \ac{bios} plays a significant role in Intel x86 computing platform.
 %
-It is the first piece of software executed by the \ac{cpu}, and initiates both
-the hardware architecture and the system software execution during the boot
-sequence (\ref{subsec:usecase:firm:boot}).
+It is the first piece of software executed by the \ac{cpu}, which initializes
+the hardware components and initiates the execution of the software stack during
+the boot sequence (\ref{subsec:usecase:firm:boot}).
 %
 At runtime, it remains active to perform various tasks, including and not
-limited to platform-specific events, device emulation, or \ac{bios} update
+limited to platform-specific events, device emulation, or \ac{bios} updates
 management (\ref{subsec:usecase:firm:runtime}).
 %
 As such, it can only operate properly if certain security requirements are met
@@ -770,11 +773,11 @@ computing platform.
 When the \ac{cpu} is powered up, it is programmed to fetch the code stored at a
 hard-coded address within the flash memory.
 %
-The first task of the \ac{bios} is to initiate the hardware
+The first task of the \ac{bios} is to initialize the hardware
 architecture\,\cite{salihun2006bios}.
 %
-Once the hardware components of the computing platform have been initialized,
-the \ac{bios} searches for a system software component to load into memory.
+Then, the \ac{bios} searches for a system software component to load into
+memory.
 %
 Historically, ``legacy'' \acp{bios} were looking for a Master Boot Record (MBR)
 at the beginning of mass storage devices (\emph{e.g.} hard drive, USB stick).
@@ -999,7 +1002,7 @@ stack.
   of this memory.
 \end{description}
 
-Restraining the authorized software components to modify the content of the
+Limiting the set of authorized software components to modify the content of the
 flash memory to the \ac{bios} alone allows for preserving the isolation of the
 \ac{bios} across reboots.
 %
@@ -1010,7 +1013,11 @@ rebooting the platform.
 \subsection{HSE Mechanisms Implemented by the BIOS}
 \label{subsec:usecase:hse:smm}
 
-\paragraph{System Management Mode}
+The isolation of the \ac{bios} at runtime, as detailed in the previous
+subsection, directly involves three different hardware components: the
+processor, the \ac{dram} and the \ac{pch}.
+
+\paragraph{System Management Mode.}
 %
 To handle several software components with different level of privileges, Intel
 \acp{cpu} provide several execution modes.
@@ -1052,7 +1059,7 @@ Chapter 34]{intel2014manual}, introduced in the Intel manual as follows:
 The \ac{smm} is the foundation of the \ac{bios} execution at runtime, but it is
 not sufficient.
 
-\paragraph{System Management RAM}
+\paragraph{System Management RAM.}
 %
 The SMRAM is the name given by Intel to a memory region located inside the
 \ac{dram}, and dedicated to the \ac{smm}.
@@ -1076,8 +1083,8 @@ This design has been made to help \ac{bios} initialize the SMRAM content.
 %
 Once the \ac{smm} code ---the \ac{bios} code intended to be executed at runtime
 in \ac{smm}--- has been correctly loaded into the SMRAM, and prior to giving the
-\ac{cpu} control flow to the system software, the \ac{bios} has to lock the
-SMRAM.
+\ac{cpu} control flow to a system software component, the \ac{bios} has to lock
+the SMRAM.
 %
 % \TODO{expliquer ce que veut dire invisible -> la mémoire n'est plus mappé dans
 % la plage d'adresse et soit le processeur accède à une autre mémoire soit il y
@@ -1103,7 +1110,7 @@ by performing a complete reboot of the platform.
 This leaves no opportunity to the system software to tamper with the SMRAM
 content.
 
-\paragraph{System Management Interrupt}
+\paragraph{System Management Interrupt.}
 
 The \ac{smi} is a hardware interrupt which makes the \ac{cpu} ``enters''
 \ac{smm}.
@@ -1145,7 +1152,7 @@ Finally, the \ac{pch} exposes a register called \texttt{APM\_CNT} that a system
 software component can write to in order to make the \ac{pch} triggers a
 \ac{smi}\,\cite{intel2012pch}.
 
-\paragraph{Flash Memory Lock-down}
+\paragraph{Flash Memory Lock-down.}
 %
 The content of the flash memory has to be protected from arbitrary tampering,
 similarly to the SMRAM protection.
@@ -1250,7 +1257,7 @@ Loic Duflot \emph{et al.}\,\cite{duflot2009smram} and Rafal Wojtczuk \emph{et
   al.}\,\cite{wojtczuk2009smram} independently showed that this belief was
 misplaced when they disclosed the SMRAM Cache Poisoning Attack.
 
-\paragraph{Cache Memory}
+\paragraph{Cache Memory.}
 %
 Interacting with the \ac{dram} remains slow, in regard to the speed of a
 \ac{cpu}.
@@ -1510,7 +1517,7 @@ the DRAM takes 240 cycles\,\cite{drepper2007memory}.
   \label{fig:usecase:writeback}
 \end{figure}
 
-\paragraph{Attack Path}
+\paragraph{Attack Path.}
 %
 The SMRAM Cache Poisoning leverages the write-back strategy of the \ac{cpu}
 cache to circumvent the \texttt{D\_LCK} bit protection.
@@ -1554,7 +1561,7 @@ memory accesses.
 However, the composition of the cache and the memory controller breaks the BIOS
 Integrity property.
 
-\paragraph{Countermeasure}
+\paragraph{Countermeasure.}
 %
 The solution implemented by Intel to prevent further exploitation of this
 vulnerability was to modify the behaviour of the cache, when the memory accesses
@@ -1584,7 +1591,7 @@ In 2015, Xeno Kovah \emph{et al.} showed it was possible to leverage the Intel T
 technology to circumvent the flash memory lock-down
 protection\,\cite{kovah2015senter}.
 
-\paragraph{Intel TXT}
+\paragraph{Intel TXT.}
 %
 The Intel Trusted eXecution Technology (TXT)\cite{intel2015txt} is a recent
 feature of some x86 \acp{cpu}, whose purpose is to attest the integrity of the
@@ -1619,7 +1626,7 @@ in an attestation protocol has a reliable solution to detect the attack.
 On the other hand, only an error within the implementation of the TXT
 instructions can lead to a similar scenario\,\cite{wojtczuk2011txtbug}.
 
-\paragraph{Attack Path}
+\paragraph{Attack Path.}
 %
 The flash memory lock-down mechanism was based under the assumption that
 unlocking the flash memory would force the execution of the \ac{bios}, so that
@@ -1645,7 +1652,7 @@ component from a corrupted \ac{bios} executed in \ac{smm}.
 % thèse. Il en faut pas faire (trop) de digression mais il faut être (très)
 % pédagogique. Tu n'est pas à une page près!}
 
-\paragraph{Countermeasure}
+\paragraph{Countermeasure.}
 %
 Recent x86 \acp{cpu} do not disable \ac{smi} when using the \texttt{SENTER}
 instructions.
@@ -1674,7 +1681,7 @@ previously, such that setting \texttt{BIOSWE} was triggering a \ac{smi} to
 suspend the execution of the system software, suffered from a race condition if
 two cores cooperate\,\cite{kallenberg2015racecondition}.
 
-\paragraph{Attack Path}
+\paragraph{Attack Path.}
 %
 On a typical x86 hardware architecture, all the x86 cores of the platform will
 \emph{eventually} enter \ac{smm} when a \ac{smi} is triggered.
@@ -1701,7 +1708,7 @@ The attack proceeds as follows:
 %
 \end{enumerate}
 
-\paragraph{Countermeasure}
+\paragraph{Countermeasure.}
 %
 To prevent this race condition, Intel has introduced a new configuration bit to
 the \texttt{BIOS\_CNTL} register: the \texttt{SMM\_BWP} (\ac{smm} \ac{bios}
