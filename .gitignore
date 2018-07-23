@@ -3,6 +3,7 @@
 *.vo
 .*.aux
 # latex garbage
+*.synctex.gz
 *.thm
 *.aux
 main-blx.bib
@@ -24,3 +25,5 @@ main-blx.bib
 *.ind
 plan.tex
 _minted*/
+#mac os X gargabe
+.DS_Store
