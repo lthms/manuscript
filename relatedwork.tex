@@ -1,0 +1,75 @@
+\documentclass[oneside,a4paper]{memoir}
+
+% ABOUT THIS FILE
+% ---------------
+%
+% The goal of this document is to prepare the next (and final?) version of the
+% chapter 3.
+
+\usepackage{geometry}
+\usepackage{paralist}
+\usepackage{hyperref}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+%\usepackage[sc]{mathpazo}    % Palatino with smallcaps
+%\usepackage[scaled]{helvet}  % Helvetica, scaled 95%
+%\usepackage{eulervm}
+\usepackage{inconsolata}
+
+\usepackage[dvipsnames]{xcolor}
+\usepackage{xargs}
+\usepackage{todonotes}
+\newcommandx{\thomasrk}[2][1=]{\todo[linecolor=Plum,backgroundcolor=Plum!25,bordercolor=Plum,#1]{#2}}
+
+\usepackage{acro}
+\input{abbrev}
+
+\begin{document}
+\chapter{State of the Art of Formal Verification}
+
+% 1. Start with a generic definition of formal verification%
+Formal verification consists in proving the correctness of a system,
+characterized by a mathematical model, with respect to certain properties,
+defined as logic formula.
+%
+The result of decades of academic researches and industrial investments is a
+large collection of complementary
+formalisms\,\cite{berthomieu1991petri,mcmillan1989compositional,baeten2005processalgebra,emmi2008interfaceautomata,hoare1969hoare,reynolds2002separation}
+to model systems and defined properties of interest, and
+tools\,\cite{cuoq2012framac,coq,cimatti2002nusmv,jackson2012alloy} to assist and
+automate the verification process.
+%
+This allowed for applying formal verification to a broad variety of computer
+science domains, including cryptographic
+protocols\,\cite{goubault2000crypto,meadows2003crypto},
+compilers\,\cite{leroy2012compcert}, system software
+component\,\cite{klein2009sel4,gu2016certikos} or hardware
+designs\,\cite{lie2003xom,kaivola2009formalintel,reid2016armv8}.
+%
+With regard to \ac{hse} mechanisms, they fall between two domains that are
+hardware design verification and low-level software components verification.
+%
+On the one hand, hardware designs verification often focus on properties
+transparent to the executed software components (\emph{e.g.} cache
+coherency\,\cite{stern1995cachecoherence}, linearizability of SGX
+instructions\,\cite{leslie2015sgx}, hardware-based memory
+isolation\,\cite{lie2003xom}).
+%
+Security gap in interactions of multiple platform components are less regarded
+due to their increasing complexity\,\cite{potlapally2011hardwaresecurity}, yet
+they are responsible for architectural attacks we want to avoid.
+%
+On the other hand, low-level software components such as
+seL4\,\cite{klein2009sel4} or CertiKOS\,\cite{gu2016certikos} use the features
+exposed by these components, and are verified against \emph{ad hoc} hardware
+models, whose scope is often limited to necessary hardware features.
+%
+%For our part, we would rather characterize a set of sufficient requirements over
+%low-level software components, such that any software implementation which satisfy these
+%requirements and is executed by the hardware architecture proves to be correct
+%with respect to a targeted property.
+
+\bibliographystyle{unsrt}%
+\bibliography{manuscript}
+\end{document}

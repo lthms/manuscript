@@ -9,8 +9,9 @@
 
 \vspace{1cm}\noindent
 %
-Our interest in formally verify \TODO{Ou interest in formally verifying? ou alors "our interest in the formal verification of hardware architecture to improve their security"} hardware architecture in order to improve their
-security is in line with an ongoing effort \TODO{de qui?}. 
+Our interest in the formal verification of hardware architectures in order to
+improve their security is in line with an ongoing effort by manufacturers and
+researchers.
 %
 In 2011, Nachiketh Potlapally\,\cite{potlapally2011hardwaresecurity}, who was
 working at Intel at the time, suggested that formal methods for security
@@ -45,7 +46,8 @@ model is therefore an important step of the process (\ref{subsec:state:secu}).
 Many approaches have been proposed for formally verifying systems of varying
 sizes and natures (\ref{subsec:state:approaches}).
 
-\subsection{Reasoning about Systems} \TODO{Je trouve le titre peu explicite (contrairement aux autres sous-section.}
+\subsection{Reasoning about Systems} \TODO{Je trouve le titre peu explicite
+  (contrairement aux autres sous-section.}
 \label{subsec:state:reason}
 
 We are interested in hardware or software systems primarily identified by
@@ -60,18 +62,20 @@ We are interested in hardware or software systems primarily identified by
 For instance, the state of a \ac{cpu} is characterized by the value of its
 internal registers, while its interface is a instructions set.
 %
-Modelling such a system $C$ \TODO{remarque mineur "a system C" fait bizarre. Je suppose que tu voulais dire "a component C".} is usually done by defining a \ac{lts}
-$M \triangleq \langle S, L, \rightarrow \rangle$.
+Modelling such a system $C$ \TODO{remarque mineur "a system C" fait bizarre. Je
+  suppose que tu voulais dire "a component C".} is usually done by defining a
+\ac{lts} $M \triangleq \langle S, L, \rightarrow \rangle$.
 %
-$S$ is a set of abstract states which describe the concrete states of $C$. \TODO{C'est quoi un état concret? C'est quoi un état abstrait?}
+$S$ is a set of abstract states which describe the concrete states of
+$C$. \TODO{C'est quoi un état concret? C'est quoi un état abstrait?}
 %
 $L$ is a set of labels to distinguish between transitions caused by different
 operations of $C$.
 %
 Finally, $\rightarrow$ is a transition relation, such that for
-$(p, q) \in S \times S$ and $l \in L$, 
+$(p, q) \in S \times S$ and $l \in L$,
 %
-$ p \xrightarrow{l} q $ 
+$ p \xrightarrow{l} q $
 %
 means it is possible for the system whose state corresponds to $p$ to shift in a
 new state which corresponds to $q$ if the operation $l$ is invoked.
@@ -81,29 +85,40 @@ from one formalism to another.
 %
 In the meantime, the underlying principles remain the same.
 
-\TODO{Je trouve cette sous-section trop vague. Pas de référence. En outre, on ne voit pas trop à quoi elle correspond. Je crois comprendre qu'il s'agit de modéliser le système. Du coup, la question qui se pose est : existe-t-il d'autres modèles que les LTS dans la litérature? Pourquoi ce choix? Peut-on comparer les différentes approches? C'est typiquement ce qu'on attend de la partie état de l'art. Par une vague définission d'un LTS. Je pense que tout le monde voit à peut prêt ce qu'est un LTS. Donc même si rappeler la définition n'est pas un mal, faire une sous-section juste pour çà est trop léger. Tu pourrais en outre donner quelques détail sur "its exact definition often vary
-from one formalism to another." Comparer ces approches, te positionner...}
+\TODO{Je trouve cette sous-section trop vague. Pas de référence. En outre, on ne
+  voit pas trop à quoi elle correspond. Je crois comprendre qu'il s'agit de
+  modéliser le système. Du coup, la question qui se pose est : existe-t-il
+  d'autres modèles que les LTS dans la litérature? Pourquoi ce choix? Peut-on
+  comparer les différentes approches? C'est typiquement ce qu'on attend de la
+  partie état de l'art. Par une vague définission d'un LTS. Je pense que tout le
+  monde voit à peut prêt ce qu'est un LTS. Donc même si rappeler la définition
+  n'est pas un mal, faire une sous-section juste pour çà est trop léger. Tu
+  pourrais en outre donner quelques détail sur "its exact definition often vary
+  from one formalism to another." Comparer ces approches, te positionner...}
 
 \subsection{Specifying Security Policies}
 \label{subsec:state:secu}
 
 Once a system $C$ is modelled with a model $M$, we can reason about the
-correctness of $C$ with respect to certain properties. We first have to formalize these
-properties as a statement about $M$, then we exhibit a proof that this statement
-is true.
+correctness of $C$ with respect to certain properties. We first have to
+formalize these properties as a statement about $M$, then we exhibit a proof
+that this statement is true.
 %
-This statement is based on the system executions, modelled \TODO{"modelled ou modeled"?} as sequences of
-transitions of $M$.
+This statement is based on the system executions, modelled \TODO{"modelled ou
+  modeled"?} as sequences of transitions of $M$.
 %
 We denote $\Sigma(M)$ the set of all the possible executions of $C$, as modelled
 in $M$.
 
-\TODO{Remarque générale sur cette section : il manque pleins de référence. Les notions de propriétés, safety, liveness et hyperpropriétés ont été définis dans des ouvrages ou articles de références.}
+\TODO{Remarque générale sur cette section : il manque pleins de référence. Les
+  notions de propriétés, safety, liveness et hyperpropriétés ont été définis
+  dans des ouvrages ou articles de références.}
 
 \paragraph{Properties and Hyperproperties}
 %
 Certain security properties can be modelled \emph{via} a predicate $P$ on
-executions. \TODO{On each execution? D'ailleurs, ne parle-t-on pas plutot de "trace d'exécution"}
+executions. \TODO{On each execution? D'ailleurs, ne parle-t-on pas plutot de
+  "trace d'exécution"}
 %
 In such a condition, the statement describing the security property is of the
 forms
@@ -118,55 +133,85 @@ properties (something ``good'' eventually happens).
 For safety properties, a common approach is to distinguish between secure states
 and insecure states, secure transitions and insecure transitions, and to require
 that for an execution which starts from a secure state put the system in an
-insecure state and no insecure transition occurs. \TODO{Il y a a mon avis des erreurs dans cette phrase. "to require that an execution which starts ... put. Ou alors for an execution ... to put. En outre "from a secure state ... in a secure state". Pourquoi "insecure state". Au final, cela fait une phrase très (trop longue). Tu devrais utiliser une énumération par exemple pour aléger un peu. ou faire plusieurs phrases.}
+insecure state and no insecure transition occurs. \TODO{Il y a a mon avis des
+  erreurs dans cette phrase. "to require that an execution which starts
+  ... put. Ou alors for an execution ... to put. En outre "from a secure state
+  ... in a secure state". Pourquoi "insecure state". Au final, cela fait une
+  phrase très (trop longue). Tu devrais utiliser une énumération par exemple
+  pour aléger un peu. ou faire plusieurs phrases.}
 %
 For instance, the BIOS Integrity security property
-(Definition~\ref{def:usecase:biosint}) is a safety property. \TODO{Tu devrais expliquer un peu mieux pourquoi}
+(Definition~\ref{def:usecase:biosint}) is a safety property. \TODO{Tu devrais
+  expliquer un peu mieux pourquoi}
 %
 As for liveness properties, they usually require to use a temporal logic which
-provides a modal operator to reason about ``eventually''. \TODO{Donne un peu plus de détail. Parle de LTL par exemple. Explique un peu (donne une formule et explique ce qu'elle veut dire) Cite!}
+provides a modal operator to reason about ``eventually''. \TODO{Donne un peu
+  plus de détail. Parle de LTL par exemple. Explique un peu (donne une formule
+  et explique ce qu'elle veut dire) Cite!}
 %
 For instance, the BIOS Availability security property
-(Definition~\ref{def:usecase:biosav}) is a liveness property. \TODO{Idem, explique pourquoi}
+(Definition~\ref{def:usecase:biosav}) is a liveness property. \TODO{Idem,
+  explique pourquoi}
 
 Other security (hyper)properties cannot be defined using such a predicate, and
 requires to consider the set of executions as a whole. As a consequence, the
-security statement is of the form
-executions\,\cite{clarkson2010hyperproperties} \TODO{Je ne comprends pas l'expression "is of the form executions"}, that is
+security statement is of the form executions\,\cite{clarkson2010hyperproperties}
+\TODO{Je ne comprends pas l'expression "is of the form executions"}, that is
 %
 \[
   P(\Sigma(M))
 \]
 %
 A notable security property whose definition requires to consider couple of
-executions is noninterference\,\cite{goguen1982security}, which is used in information flow
-analysis.
+executions is noninterference\,\cite{goguen1982security}, which is used in
+information flow analysis.
 %
 A system enforces noninterference if its observable behaviour does not depends
 on secret inputs, which informally translates to ``a system enforces
 noninterference if, given two arbitrary executions with the same public inputs,
-the system's observable behaviour remains the same''. \TODO{Tu devrais continuer en donnant un exemple de formalisation du problème et en montrant (intuitivement) que c'est bien une propriété d'ensemble de traces.}
+the system's observable behaviour remains the same''. \TODO{Tu devrais continuer
+  en donnant un exemple de formalisation du problème et en montrant
+  (intuitivement) que c'est bien une propriété d'ensemble de traces.}
 
 \paragraph{Modelling for Security}
 %
-The definition of a security property might \TODO{pourquoi "might"? "can?'} be based on information that are not
-available to the system $C$.
+The definition of a security property might \TODO{pourquoi "might"? "can?'} be
+based on information that are not available to the system $C$.
 %
-For instance, a x86 hardware architecture does not track information flows \TODO{Je trouve cette histoire de information flow très casse gueule. Comme tu viens de l'évoquer au dessus l'analyse des flux d'information repose sur des hyperpropriétés. Or il ne me semble pas que c'est ce que tu fais par la suite. En fait, tu trace simplement qui est le dernier à avoir écrit dans une zone mémoire, ce qui n'est pas tout à fait la même chose. En outre, à ce niveau du manuscript, le lecteur ne verra surement pas où tu veux en venir (je comprend car je connais ton approche...) }, but
-it is supposed to enforce the BIOS Integrity security property, whose definition
-requires to be able to tell which software components has been the source of the
-result of a read access by the SMM code. \TODO{Il faut expliquer un peu plus pour que le lecteur qui ne connaisse pas tes travaux puisse comprendre. En outre, je pense que cette problématique (ajouter dans le modèle des informations qui sont utile pour vérifier la propriété de sécurité mais qui ne sont pas accessible à l'implémentation, est une technique générique. A mon avis tu dois pouvoir trouver des ref à ce sujet. Par exemple en analyse statique, tu peux typiquement mettre ces informations dans l'environnement.} 
+For instance, a x86 hardware architecture does not track information flows
+\TODO{Je trouve cette histoire de information flow très casse gueule. Comme tu
+  viens de l'évoquer au dessus l'analyse des flux d'information repose sur des
+  hyperpropriétés. Or il ne me semble pas que c'est ce que tu fais par la
+  suite. En fait, tu trace simplement qui est le dernier à avoir écrit dans une
+  zone mémoire, ce qui n'est pas tout à fait la même chose. En outre, à ce
+  niveau du manuscript, le lecteur ne verra surement pas où tu veux en venir (je
+  comprend car je connais ton approche...) }, but it is supposed to enforce the
+BIOS Integrity security property, whose definition requires to be able to tell
+which software components has been the source of the result of a read access by
+the SMM code. \TODO{Il faut expliquer un peu plus pour que le lecteur qui ne
+  connaisse pas tes travaux puisse comprendre. En outre, je pense que cette
+  problématique (ajouter dans le modèle des informations qui sont utile pour
+  vérifier la propriété de sécurité mais qui ne sont pas accessible à
+  l'implémentation, est une technique générique. A mon avis tu dois pouvoir
+  trouver des ref à ce sujet. Par exemple en analyse statique, tu peux
+  typiquement mettre ces informations dans l'environnement.}
 %
 As a consequence, if we want to verify the x86 hardware architecture correctness
 with respect to the BIOS Integrity security property, we need a ``information
-flow aware'' model. \TODO{Encore une fois "information flow aware'' model. est casse gueule et flou}
+flow aware'' model. \TODO{Encore une fois "information flow aware'' model. est
+  casse gueule et flou}
 
 This raises questions about model reusability.
 %
 The x86 hardware architecture includes many different \ac{hse} mechanisms.
 %
-Defining a specific hardware model for each of them is not an option, yet the security properties they
-aim to enforce may heavily differ in terms of model requirements. \TODO{et donc? Je vois ce que tu voudrais dire, mais tu ne le dis pas. Il faut être explicite. En outre, attention, tu es dans l'état de l'art. Or on est en train de tendre vers une description de ton approche. Il faut montrer comment les travaux de l'état de l'art traite ou ne traite pas ce problème. Se positionner!}
+Defining a specific hardware model for each of them is not an option, yet the
+security properties they aim to enforce may heavily differ in terms of model
+requirements. \TODO{et donc? Je vois ce que tu voudrais dire, mais tu ne le dis
+  pas. Il faut être explicite. En outre, attention, tu es dans l'état de
+  l'art. Or on est en train de tendre vers une description de ton approche. Il
+  faut montrer comment les travaux de l'état de l'art traite ou ne traite pas ce
+  problème. Se positionner!}
 
 \subsection{Verification Approaches}
 \label{subsec:state:approaches}
@@ -174,14 +219,21 @@ aim to enforce may heavily differ in terms of model requirements. \TODO{et donc?
 The last step of the formal verification is exhibiting a proof.
 %
 There are two main approaches to achieve this: model checking and theorem
-proving. \TODO{Je ne suis pas un spécialiste des MF mais ce n'est pas un peu réducteur de dire que les deux seules manière de prouver qqc sont le model checking et la preuve de programme? Quid de l'interprétation abstraite? Des problèmes que l'on peut résoudre directement avec un solveur SAT? Peut-être faudrait-il nuancer le propos (les principales approches utilisées dans le cadre xxx) Préciser qu'il y en a d'autres mais quelles sont plus spécifiques/restrictives}
+proving. \TODO{Je ne suis pas un spécialiste des MF mais ce n'est pas un peu
+  réducteur de dire que les deux seules manière de prouver qqc sont le model
+  checking et la preuve de programme? Quid de l'interprétation abstraite? Des
+  problèmes que l'on peut résoudre directement avec un solveur SAT? Peut-être
+  faudrait-il nuancer le propos (les principales approches utilisées dans le
+  cadre xxx) Préciser qu'il y en a d'autres mais quelles sont plus
+  spécifiques/restrictives}
 %
 For each approach, we give a small overview of its core principles.
 %
 In addition, we illustrate their verification process \emph{via} a common,
 minimal example: an airlock system.
 %
-This system is a device made of two doors, and an intermediary chamber. \TODO{Un petit schema serait le bienvenu...}
+This system is a device made of two doors, and an intermediary chamber. \TODO{Un
+  petit schema serait le bienvenu...}
 %
 To pass through the airlock system, it is necessary to open the first door,
 enter the chamber, wait for the first door to close, then open the second door.
@@ -201,8 +253,8 @@ These properties are defined it terms of predicate on the system's executions,
 usually thanks to a temporal logic.
 %
 A temporal logic includes a set of modal operators, such as \emph{globally} (the
-property is always true), or \emph{eventually} (the property becomes true at
-one point in the future).
+property is always true), or \emph{eventually} (the property becomes true at one
+point in the future).
 %
 The main advantage of model checkers is automation.
 %
@@ -235,12 +287,12 @@ potentially describes an attack path.
   The state of our airlock system comprises two variables, \texttt{door1} and
   \texttt{door2}, which can be either \texttt{open} or \texttt{close}.
   %
-  Because NuSMV does not \TODO{does not have?} a native support for labelled transitions, we embed the
-  labels inside the state.
+  Because NuSMV does not \TODO{does not have?} a native support for labelled
+  transitions, we embed the labels inside the state.
   %
   The value of the variable \texttt{action} at the beginning of the transition
-  determines the effect on this transition \TODO{"on this transition" ou "of this transition"?} to the variables \texttt{door1} and
-  \texttt{door2}.
+  determines the effect on this transition \TODO{"on this transition" ou "of
+    this transition"?} to the variables \texttt{door1} and \texttt{door2}.
 
   We now continue with the \texttt{ASSIGN} section.
 
@@ -256,12 +308,14 @@ potentially describes an attack path.
   after a given transition.
   %
   This is in this statement that we specify a given door cannot be opened unless
-  both doors are close. \TODO{Cette phrase n'est pas très élégante, tu devrais plutôt donner les numéro de lignes}
+  both doors are close. \TODO{Cette phrase n'est pas très élégante, tu devrais
+    plutôt donner les numéro de lignes}
 
   Our airlock system is now completely modelled.
   %
   We can specify the safety property we are interested in using the
-  \emph{globally} modal operator, denoted \texttt{G} in NuSMV. \TODO{tu devrais donner la formule LTL équivalente, pour t'abstraire de l'implémentation}
+  \emph{globally} modal operator, denoted \texttt{G} in NuSMV. \TODO{tu devrais
+    donner la formule LTL équivalente, pour t'abstraire de l'implémentation}
 
   \inputminted[firstline=33,lastline=33]{coq}{Listings/Airlock1.nusmv}
 
@@ -278,8 +332,8 @@ potentially describes an attack path.
   specification.
   %
   For instance, if we slightly modify the NuSMV model of our airlock system so
-  that it is no longer required for the second door to be closed in order to open
-  the first door, then the model checker generates the following
+  that it is no longer required for the second door to be closed in order to
+  open the first door, then the model checker generates the following
   counter-example:
 
   \inputminted[linenos=false]{coq}{Listings/Airlock-counter.nusmv}
@@ -303,8 +357,8 @@ in terms of effort for real world systems.
   language to write specifications ({\scshape Gallina}) and a tactic language to
   write proofs ({\scshape Ltac}).
   %
-  We can \TODO{use?} {\scshape Gallina} to describe the system in terms of states and actions to
-  update this state.
+  We can \TODO{use?} {\scshape Gallina} to describe the system in terms of
+  states and actions to update this state.
 
   \inputminted[firstline=1,lastline=14]{coq}{Listings/Airlock.v}
 
@@ -313,8 +367,8 @@ in terms of effort for real world systems.
   airlock system's state (opening the first or second door, closing the first or
   second door).
 
-  {\scshape Gallina} includes a special type, called \texttt{Prop}, to write logical
-  propositions which can be either true or false.
+  {\scshape Gallina} includes a special type, called \texttt{Prop}, to write
+  logical propositions which can be either true or false.
   %
   We can define the transition relation of our airlock system using
   \texttt{Prop.}
@@ -336,8 +390,8 @@ in terms of effort for real world systems.
   The security property of our airlock system is a safety property: at any time,
   at least one door is close.
   %
-  This property is a predicate on the system state, which we can define in {\scshape
-    Gallina} \emph{via} the \texttt{Prop} type.
+  This property is a predicate on the system state, which we can define in
+  {\scshape Gallina} \emph{via} the \texttt{Prop} type.
 
   \inputminted[firstline=35,lastline=38]{coq}{Listings/Airlock.v}
 
@@ -347,8 +401,8 @@ in terms of effort for real world systems.
   We can express that in the form of a \emph{lemma}, that is a logical statement
   for each we exhibit a proof.
   %
-  We write the proof with {\scshape Ltac}, and trust Coq to refuse it in case it is
-  incorrect.
+  We write the proof with {\scshape Ltac}, and trust Coq to refuse it in case it
+  is incorrect.
   %
   The proof is written in terms of {\scshape Ltac} tactics.
   %
@@ -372,7 +426,8 @@ in terms of effort for real world systems.
   (\texttt{inversion}).
 \end{example}
 
-\TODO{So? Quelle est la conclusion de cette section? Pourquoi va-tu choisir dans ton approche de faire du Coq?}
+\TODO{So? Quelle est la conclusion de cette section? Pourquoi va-tu choisir dans
+  ton approche de faire du Coq?}
 
 \section{Design Methods Easing the Verification}
 \label{sec:related:ease}
@@ -681,8 +736,8 @@ inconsistencies which otherwise could damage the value of the verification
 process.
 
 From this perspective, it is interesting to emphasis that, if not all model
-defined in {\scshape Gallina} within the Coq proof assistant are executable, it is
-possible to leverage the extraction mechanism to that end.
+defined in {\scshape Gallina} within the Coq proof assistant are executable, it
+is possible to leverage the extraction mechanism to that end.
 %
 That is, a model which can be extracted can also be executed.
 
@@ -889,7 +944,7 @@ system call is ``secure.’’
 
 % \begin{table}
 %   \centerline{%
-%     \begin{tabular}{lcp{7cm}}
+%   \begin{tabular}{lcp{7cm}}
 %      \multicolumn{1}{c}{\bf Target}
 %      & \bf Approach
 %      & \multicolumn{1}{c}{\bf Hypotheses} \\
@@ -905,7 +960,7 @@ system call is ``secure.’’
 %      \item Simplified hardware model
 %      \end{asparaitem} \\
 %    \end{tabular}}
-%\end{table}
+%  \end{table}
 
 The main characteristic of \ac{hse} mechanisms is that they are the result of
 both hardware and software components, in presence of a larger system with
