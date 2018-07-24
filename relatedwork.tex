@@ -1,6 +1,9 @@
 \documentclass[oneside,a4paper]{memoir}
 \setsecnumdepth{subsection}
 
+\usepackage[chapter]{minted}
+\usemintedstyle{bw}
+
 % ABOUT THIS FILE
 % ---------------
 %
@@ -72,67 +75,6 @@ backgroundcolor=PineGreen!2}
 \begin{document}
 \chapter{State of the Art of Formal Verification}
 
-% Formal verification consists in proving the correctness of a system,
-% characterized by a mathematical model, with respect to certain properties,
-% defined as logic formula.
-%%
-% The result of decades of academic researches and industrial investments is a
-% large collection of complementary
-% formalisms\,\cite{berthomieu1991petri,mcmillan1989compositional,baeten2005processalgebra,emmi2008interfaceautomata,hoare1969hoare,reynolds2002separation}
-% to model systems and defined properties of interest, and
-% tools\,\cite{cuoq2012framac,coq,cimatti2002nusmv,jackson2012alloy} to assist
-% and automate the verification process.
-%%
-% This allowed for applying formal verification to a broad variety of computer
-% science domains, including cryptographic
-% protocols\,\cite{goubault2000crypto,meadows2003crypto},
-% compilers\,\cite{leroy2012compcert}, system software
-% component\,\cite{klein2009sel4,gu2016certikos} or hardware
-% designs\,\cite{lie2003xom,kaivola2009formalintel,reid2016armv8}.
-%%
-% With regard to \ac{hse} mechanisms, they fall between two domains that are
-% hardware design verification and low-level software components verification.
-%%
-% On the one hand, hardware designs verification often focus on properties
-% transparent to the executed software components (\emph{e.g.} cache
-% coherency\,\cite{stern1995cachecoherence}, linearizability of SGX
-% instructions\,\cite{leslie2015sgx}, hardware-based memory
-% isolation\,\cite{lie2003xom}).
-%%
-% Security gap in interactions of multiple platform components are less subject
-% to formal verification, due to their increasing
-% complexity\,\cite{potlapally2011hardwaresecurity}.
-%%
-% Yet they are responsible for architectural attacks we want to avoid.
-%%
-% On the other hand, low-level software components such as
-% seL4\,\cite{klein2009sel4} or CertiKOS\,\cite{gu2016certikos} use the features
-% exposed by these components, and are verified against \emph{ad hoc} hardware
-% models, whose scope is often limited to necessary hardware features.
-%%
-%% For our part, we would rather characterize a set of sufficient requirements
-%% over low-level software components, such that any software implementation
-%% which satisfy these requirements and is executed by the hardware architecture
-%% proves to be correct with respect to a targeted property.
-%%
-% We steer a middle course between these approaches.
-%%
-% For our part, we would rather characterize sets of requirements over low-level
-% software components, such that satisfying these requirements is sufficient to
-% ensure the hardware architecture enforces a certain property.
-%%
-% As a first step, we can verify the correctness of these requirements against a
-% hardware model.
-%%
-% The long term goal of this approach is to focus the verification of low-level
-% software components on proving they satisfy these requirements.
-%%
-% As such, our approach relates to previous research works such as
-% RockSalt\,\cite{morrisett2012rocksalt} (validation of arbitrary programs
-% against a verified software-based fault isolation\,\cite{wahbe1994sfi} policy)
-% or Moat\,\cite{sinha2015moat} (verification of SGX
-% enclave\,\cite{costan2016sgxexplained} programs with respect to
-% confidentiality).
 %
 % The rest of this Chapter proceeds as follow.
 %%
@@ -196,6 +138,8 @@ Finally, we give an overview of related works
 
 \section{Transition Systems}
 \label{sec:sota:formalisms}
+
+\subsection{Definition}
 
 The formal verification of discrete systems, such as computing systems, commonly
 rely on some sort of \emph{transition systems} to describe the behavior of the
@@ -308,29 +252,190 @@ systems.
 %
 For instance, the Kripke structure\,\cite{kripke1971semantical} is a notorious
 variation of (labeled) transition systems used in model
-checking\,\cite{clarke1999model}, while Petri net\,\cite{peterson1981petri},
-process algebra\,\cite{bergstra1984process} or interface
-automata\,\cite{de2001interface} are better suited to model concurrent systems.
+checking\,\cite{clarke1999model}.
 
-\subsection{Operational Semantics}
+\subsection{Specifying Security Policies}
+\label{sec:sota:security}
 
-\subsection{Denotational Semantics}
+\paragraph{Traces}
+%
+\begin{itemize}
+\item Paper ``hypeproperties'' as a reference and starting point
+\end{itemize}
+
+\paragraph{Adversary}
+%
+\begin{itemize}
+\item Combinatronics of system actions (Pip, VirtCert)
+\item Additional rule to model more powerful attacker (Moat, XOM + bus snooping)
+\end{itemize}
+
+\section{Beyond Transition Systems}
+
+\subsection{Sequential versus Concurrent Systems}
+
+\begin{itemize}
+\item Airlock System problem
+\item Hoare Logic
+\end{itemize}
 
 \subsection{Compositional Modeling}
 
-\section{Specifying Security Policies}
-\label{sec:sota:security}
+Petri net\,\cite{peterson1981petri}, process algebra\,\cite{bergstra1984process}
+or interface automata\,\cite{de2001interface} are better suited to model
+concurrent systems.
 
-\section{A Tour of Large Verified Systems}
-\label{sec:sota:relatedwork}
+\subsection{Assume-Guarantee Reasoning}
 
-\subsection{Hardware Systems}
+\section{Introduction to Theorem Proving}
 
-\paragraph{Intel.}
+A theorem prover is a computer program to write machine-checked proofs in a
+particular logic.
+%
+It comprises a formal language to express statement, a set of axioms, and a
+collection of inference rules to derive new formulas from the axioms.
+%
+A theorem prover underlying logic is more expressive than what model checkers
+offer, but they lack automation for nontrivial problems.
+%
+They do not excuse users from \emph{writing proofs}, which can be very important
+in terms of effort for real world systems.
 
-\paragraph{ARM.}
+\subsection{By Example: Coq and the Airlock System}
 
-\paragraph{XOM.}
+The Coq theorem prover\,\cite{coq} includes two languages: a rich functional
+language to write specifications ({\scshape Gallina}) and a tactic language to
+write proofs ({\scshape Ltac}).
+  %
+We can use {\scshape Gallina} to describe the system in terms of states and
+actions to update this state.
+
+\inputminted[firstline=1,lastline=14]{coq}{Listings/Airlock.v}
+
+This reads as follows: a door is either open or close; a airlock system is made
+of two doors; we consider four actions which imply an update of the airlock
+system's state (opening the first or second door, closing the first or second
+door).
+
+{\scshape Gallina} includes a special type, called \texttt{Prop}, to write
+logical propositions which can be either true or false.
+  %
+We can define the transition relation of our airlock system using \texttt{Prop.}
+  %
+In practice, this is done by enumerating the cases where the statement is true,
+and the remaining cases are considered to be false.
+
+\inputminted[firstline=16,lastline=33]{coq}{Listings/Airlock.v}
+
+This reads as follows: we distinguish between four classes of transitions, one
+per actions.
+  %
+On the one hand, a transition which implies to open a door (case one and three)
+requires the both doors to be closed.
+  %
+On the other hand, a transition which implies to close a door (case two and
+four) requires the door to be closed.
+
+The security property of our airlock system is a safety property: at any time,
+at least one door is close.
+  %
+This property is a predicate on the system state, which we can define in
+{\scshape Gallina} \emph{via} the \texttt{Prop} type.
+
+\inputminted[firstline=35,lastline=38]{coq}{Listings/Airlock.v}
+
+For the airlock to be secure, this means the \texttt{secure\_airlock} predicate
+must hold true before and after each transition.
+  %
+We can express that in the form of a \emph{lemma}, that is a logical statement
+for each we exhibit a proof.
+  %
+We write the proof with {\scshape Ltac}, and trust Coq to refuse it in case it
+is incorrect.
+  %
+The proof is written in terms of {\scshape Ltac} tactics.
+  %
+Each tactic corresponds to a reasoning rule.
+  %
+For instance, the \texttt{right} tactic refers to the fact that given two
+statements $P$ and $Q$, then if $Q$ is true, then $P \vee Q$ is also
+true. Tactics updates the proof obligation (initially the lemma statement), and
+the goal of a Coq user is to bring back this proof obligation to something that
+has already been proven.
+
+\inputminted[firstline=40,lastline=57]{coq}{Listings/Airlock.v}
+
+This reads as follows: we prove that, given any ``secure state'', that is a
+airlock for which the \texttt{secure\_airlock} holds true, any action which
+implies a system's state update, the \texttt{secure\_airlock} also holds true
+for the system's state after the transition.
+  %
+The proof is conducted by enumeration of possible actions (\texttt{induction}),
+and by definition of \texttt{Transition} (\texttt{inversion}).
+
+\thomasrk[inline]{So? Quelle est la conclusion de cette section? Pourquoi va-tu
+  choisir dans ton approche de faire du Coq?}
+
+% \section{A Tour of Large Verified Systems}
+% \label{sec:sota:relatedwork}
+
+% \subsection{Hardware Systems}
+
+% \paragraph{Intel.}
+
+% \paragraph{ARM.}
+
+% \paragraph{XOM.}
+
+\section{Where this Thesis Stands}
+
+\subsection{Specifying and Verifying Hardware-based Security Enforcement
+  Mechanisms}
+
+Formal verification consists in proving the correctness of a system,
+characterized by a mathematical model, with respect to certain properties,
+defined as logic formula.
+%
+By definition, \ac{hse} mechanisms fall between two domains that are hardware
+design verification and low-level software components verification.
+
+On the one hand, hardware designs verification often focus on properties
+transparent to the executed software components (\emph{e.g.} cache
+coherency\,\cite{stern1995cachecoherence}, linearizability of SGX
+instructions\,\cite{leslie2015sgx}, hardware-based memory
+isolation\,\cite{lie2003xom}).
+%
+Security gap in interactions of multiple platform components are less subject to
+formal verification, due to their increasing
+complexity\,\cite{potlapally2011hardwaresecurity}.
+%
+Yet they are responsible for architectural attacks we want to avoid.
+%
+On the other hand, low-level software components such as
+seL4\,\cite{klein2009sel4} or CertiKOS\,\cite{gu2016certikos} use the features
+exposed by these components, and are verified against \emph{ad hoc} hardware
+models, whose scope is often limited to necessary hardware features.
+%
+We steer a middle course between these approaches.
+%
+We would rather characterize sets of requirements over low-level software
+components, such that satisfying these requirements is sufficient to ensure the
+hardware architecture enforces a certain property.
+%
+As a first step, we can verify the correctness of these requirements against a
+hardware model.
+%
+The long term goal of this approach is to focus the verification of low-level
+software components on proving they satisfy these requirements.
+%
+As such, our approach relates to previous research works such as
+RockSalt\,\cite{morrisett2012rocksalt} (validation of arbitrary programs against
+a verified software-based fault isolation\,\cite{wahbe1994sfi} policy) or
+Moat\,\cite{sinha2015moat} (verification of SGX
+enclave\,\cite{costan2016sgxexplained} programs with respect to
+confidentiality).
+
+\subsection{Compositional Verification of Hardware Architecture}
 
 \bibliographystyle{unsrt}%
 \bibliography{manuscript}
