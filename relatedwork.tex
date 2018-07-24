@@ -10,6 +10,8 @@
 \usepackage{geometry}
 \usepackage{paralist}
 \usepackage{hyperref}
+\usepackage{amssymb}
+\usepackage{amsmath}
 
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
@@ -20,9 +22,49 @@
 \usepackage{todonotes}
 \newcommandx{\thomasrk}[2][1=]{\todo[linecolor=Plum,backgroundcolor=Plum!25,bordercolor=Plum,#1]{#2}}
 
+\usepackage{mdframed} % or, "mdframed"
+\usepackage[amsthm,framed]{ntheorem}
+
+\definecolor{statementline}{HTML}{b7e2d6}
+
+\theoremstyle{break}
+\theorembodyfont{\fontshape\rmdefault\selectfont}
+
+\mdfdefinestyle{quoted}{
+hidealllines=true,
+leftmargin=-15pt,
+rightmargin=-15pt,
+leftline=true,
+innertopmargin=10pt,
+innerbottommargin=10pt,
+innerrightmargin=15pt,
+linewidth=5pt,
+linecolor=gray!40,
+backgroundcolor=gray!3,
+usetwoside=false,
+skipabove=\topsep,
+skipbelow=\topsep}
+
+\mdfdefinestyle{definition}{
+style=quoted,
+linecolor=Violet!20,
+backgroundcolor=Violet!2}
+
+\mdfdefinestyle{statement}{
+style=quoted,
+linecolor=PineGreen!30,
+backgroundcolor=PineGreen!2}
+
+\newmdtheoremenv[style=definition]{definition}{Definition}[chapter]
+\newmdtheoremenv{notation}{Notation}[chapter]
+\newmdtheoremenv[style=quoted]{example}{Example}[chapter]
+\newmdtheoremenv[style=statement]{corollary}{Corollary}[chapter]
+\newmdtheoremenv[style=statement]{lemma}{Lemma}[chapter]
+\newmdtheoremenv[style=statement]{theorem}{Theorem}[chapter]
+
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, positioning, arrows, intersections, fit,
-  matrix, shapes.symbols}
+  matrix, shapes, shapes.symbols}
 
 \usepackage{acro}
 \input{abbrev}
@@ -152,8 +194,123 @@ Finally, we give an overview of related works
 % and we conclude this Chapter by positioning our contributions in that respect
 % (Section~\ref{...}).
 
-\section{Introduction to Formal Verification for Security}
+\section{Transition Systems}
 \label{sec:sota:formalisms}
+
+The formal verification of discrete systems, such as computing systems, commonly
+rely on some sort of \emph{transition systems} to describe the behavior of the
+target.
+%
+More precisely, the system is characterized by a set of \emph{states} and by a
+set of \emph{atomic} state-transformation, called \emph{transitions}.
+%
+Transitions occur when the system interacts with its environment (\emph{e.g.} a
+hardware circuit receives a clock signal, a hardware controller receives a
+message from a bus, an operating system handles a syscall).
+%
+Additionally, \emph{labeled} transition systems distinguish between classes of
+transitions \emph{via} the use of labels (\emph{e.g.} one label per syscall).
+
+To the best of our knowledge, the more straightforward definition of a labeled
+transition system, as used by Vijayaraghavan \emph{et al.} in their work on
+modular verification of multiprocessor hardware
+designs\,\cite{vijayaraghavan2015modular}, is a tuple
+\( \langle S, L, R \rangle \), such that \( S \) is a set of states, \( L \) is
+a set of labels, and \( R \subseteq S \times L \times S \) is the transition
+relation.
+
+\begin{example}[Airlock System]
+  Figure~\ref{fig:sota:airlock-lts} illustrates an instantiation of this
+  definition for a simple airlock system.
+  %
+  An airlock system is a device made of two doors, and an intermediary chamber.
+  %
+  To get across a airlock system, a user requests the opening of the first door,
+  enters the chamber, waits for the system to close the first door and open the
+  second door, and exits the chamber.
+
+  \begin{itemize}
+  \item A door of the system can be either \( \mathtt{open} \) or
+    \( \mathtt{close} \).
+    %
+    The set of states of the airlock system reflects the combinatronics of the
+    doors states.
+  \item A transition is characterized by the opening (\( \mathtt{Open}_i\), with
+    \( i \in \{1, 2\} \)) and closing (\( \mathtt{Close}_i \), with
+    \( i \in \{1, 2\} \)) of a door of the system.
+    %
+  \item The system does not allow the simultaneous opening of both doors, as
+    stated by the definition of \( R \) which does not contains a transition
+    which leads to the state \( (\mathtt{open}, \mathtt{open}) \).
+  \end{itemize}
+\end{example}
+
+\begin{figure}
+  \begin{center}
+    % the mathematical definition
+    \begin{minipage}[c]{0.55\linewidth}
+      \[
+        \begin{array}{rcl}
+          S & \triangleq & \{ \mathtt{open}, \mathtt{close} \}^2 \\
+          L & \triangleq & \{ \mathtt{Open}_1, \mathtt{Close}_1, \mathtt{Open}_2,
+                           \mathtt{Close}_2 \} \\
+          R & \triangleq & \{ (\mathtt{close}, \mathtt{close}), \mathtt{Open_1},
+                           (\mathtt{open}, \mathtt{close}), \\
+            & & \ (\mathtt{close}, \mathtt{close}), \mathtt{Open_2},
+                (\mathtt{close}, \mathtt{open}), \\
+            & & \ (\mathtt{open}, \mathtt{close}), \mathtt{Close_1},
+                (\mathtt{close}, \mathtt{close}), \\
+            & & \ (\mathtt{close}, \mathtt{open}), \mathtt{Close_2},
+                (\mathtt{close}, \mathtt{close}) \}
+        \end{array}
+      \]
+    \end{minipage}
+    \hfill
+    % a tikzpicture to illustrate the resulting automata
+    \begin{minipage}[c]{0.40\linewidth}
+      \begin{center}
+        \begin{tikzpicture}
+          \node [draw, circle split, text width=30pt, text badly centered] (cc)
+          {\( \mathtt{close} \) \nodepart{lower} \( \mathtt{close} \)};%
+          \node [right=of cc] (x) {};%
+          \node [draw, circle split, above=of x, text width=30pt, text badly
+          centered] (oc) {\( \mathtt{open} \) \nodepart{lower}
+            \( \mathtt{close} \)};%
+          \node [draw, circle split, below=of x, text width=30pt, text badly
+          centered] (co) {\( \mathtt{close} \) \nodepart{lower}
+            \( \mathtt{open} \)};%
+          \node [draw, circle split, right=of x, text width=30pt, text badly
+          centered] (oo) {\( \mathtt{open} \) \nodepart{lower}
+            \( \mathtt{open} \)};%
+
+          \draw [-latex] (cc) edge [bend left] node [xshift=-5pt, left]
+          {\( \mathtt{Open}_1 \)} (oc);%
+          \draw [-latex] (oc) edge [bend left] node [xshift=5pt, right]
+          {\( \mathtt{Close}_1 \)} (cc);%
+
+          \draw [-latex] (cc) edge [bend left] node [xshift=5pt, right]
+          {\( \mathtt{Open}_2 \)} (co);%
+          \draw [-latex] (co) edge [bend left] node [xshift=-5pt, left]
+          {\( \mathtt{Close}_2 \)} (cc);%
+
+        \end{tikzpicture}
+      \end{center}
+    \end{minipage}
+
+    \caption{An simple airlock system modeled as a labeled transition system}
+    \label{fig:sota:airlock-lts}
+  \end{center}
+\end{figure}
+
+There are many modeling structures one can use to characterize transition
+systems, with each variant better suited to tackle a particular class of
+systems.
+%
+For instance, the Kripke structure\,\cite{kripke1971semantical} is a notorious
+variation of (labeled) transition systems used in model
+checking\,\cite{clarke1999model}, while Petri net\,\cite{peterson1981petri},
+process algebra\,\cite{bergstra1984process} or interface
+automata\,\cite{de2001interface} are better suited to model concurrent systems.
 
 \subsection{Operational Semantics}
 
