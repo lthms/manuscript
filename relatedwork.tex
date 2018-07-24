@@ -1,4 +1,5 @@
 \documentclass[oneside,a4paper]{memoir}
+\setsecnumdepth{subsection}
 
 % ABOUT THIS FILE
 % ---------------
@@ -12,9 +13,6 @@
 
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-%\usepackage[sc]{mathpazo}    % Palatino with smallcaps
-%\usepackage[scaled]{helvet}  % Helvetica, scaled 95%
-%\usepackage{eulervm}
 \usepackage{inconsolata}
 
 \usepackage[dvipsnames]{xcolor}
@@ -22,53 +20,160 @@
 \usepackage{todonotes}
 \newcommandx{\thomasrk}[2][1=]{\todo[linecolor=Plum,backgroundcolor=Plum!25,bordercolor=Plum,#1]{#2}}
 
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, positioning, arrows, intersections, fit,
+  matrix, shapes.symbols}
+
 \usepackage{acro}
 \input{abbrev}
 
 \begin{document}
 \chapter{State of the Art of Formal Verification}
 
-% 1. Start with a generic definition of formal verification%
-Formal verification consists in proving the correctness of a system,
-characterized by a mathematical model, with respect to certain properties,
-defined as logic formula.
+% Formal verification consists in proving the correctness of a system,
+% characterized by a mathematical model, with respect to certain properties,
+% defined as logic formula.
+%%
+% The result of decades of academic researches and industrial investments is a
+% large collection of complementary
+% formalisms\,\cite{berthomieu1991petri,mcmillan1989compositional,baeten2005processalgebra,emmi2008interfaceautomata,hoare1969hoare,reynolds2002separation}
+% to model systems and defined properties of interest, and
+% tools\,\cite{cuoq2012framac,coq,cimatti2002nusmv,jackson2012alloy} to assist
+% and automate the verification process.
+%%
+% This allowed for applying formal verification to a broad variety of computer
+% science domains, including cryptographic
+% protocols\,\cite{goubault2000crypto,meadows2003crypto},
+% compilers\,\cite{leroy2012compcert}, system software
+% component\,\cite{klein2009sel4,gu2016certikos} or hardware
+% designs\,\cite{lie2003xom,kaivola2009formalintel,reid2016armv8}.
+%%
+% With regard to \ac{hse} mechanisms, they fall between two domains that are
+% hardware design verification and low-level software components verification.
+%%
+% On the one hand, hardware designs verification often focus on properties
+% transparent to the executed software components (\emph{e.g.} cache
+% coherency\,\cite{stern1995cachecoherence}, linearizability of SGX
+% instructions\,\cite{leslie2015sgx}, hardware-based memory
+% isolation\,\cite{lie2003xom}).
+%%
+% Security gap in interactions of multiple platform components are less subject
+% to formal verification, due to their increasing
+% complexity\,\cite{potlapally2011hardwaresecurity}.
+%%
+% Yet they are responsible for architectural attacks we want to avoid.
+%%
+% On the other hand, low-level software components such as
+% seL4\,\cite{klein2009sel4} or CertiKOS\,\cite{gu2016certikos} use the features
+% exposed by these components, and are verified against \emph{ad hoc} hardware
+% models, whose scope is often limited to necessary hardware features.
+%%
+%% For our part, we would rather characterize a set of sufficient requirements
+%% over low-level software components, such that any software implementation
+%% which satisfy these requirements and is executed by the hardware architecture
+%% proves to be correct with respect to a targeted property.
+%%
+% We steer a middle course between these approaches.
+%%
+% For our part, we would rather characterize sets of requirements over low-level
+% software components, such that satisfying these requirements is sufficient to
+% ensure the hardware architecture enforces a certain property.
+%%
+% As a first step, we can verify the correctness of these requirements against a
+% hardware model.
+%%
+% The long term goal of this approach is to focus the verification of low-level
+% software components on proving they satisfy these requirements.
+%%
+% As such, our approach relates to previous research works such as
+% RockSalt\,\cite{morrisett2012rocksalt} (validation of arbitrary programs
+% against a verified software-based fault isolation\,\cite{wahbe1994sfi} policy)
+% or Moat\,\cite{sinha2015moat} (verification of SGX
+% enclave\,\cite{costan2016sgxexplained} programs with respect to
+% confidentiality).
 %
-The result of decades of academic researches and industrial investments is a
-large collection of complementary
-formalisms\,\cite{berthomieu1991petri,mcmillan1989compositional,baeten2005processalgebra,emmi2008interfaceautomata,hoare1969hoare,reynolds2002separation}
-to model systems and defined properties of interest, and
-tools\,\cite{cuoq2012framac,coq,cimatti2002nusmv,jackson2012alloy} to assist and
-automate the verification process.
+% The rest of this Chapter proceeds as follow.
+%%
+% First, we give an opinionated introduction to the formal verification of
+% hardware and software components with respect to security properties, with
+% respect to our objectives (Section~\ref{?}).
+%%
+% Then, we give a review of several industrial and academic projects which
+% implements these approaches (Section~\ref{?}).
+%%
+% Finally,
+
+Formal verification consists in proving the correctness of a system ---the
+\emph{Implementation}--- with respect to certain properties.
 %
-This allowed for applying formal verification to a broad variety of computer
-science domains, including cryptographic
-protocols\,\cite{goubault2000crypto,meadows2003crypto},
-compilers\,\cite{leroy2012compcert}, system software
-component\,\cite{klein2009sel4,gu2016certikos} or hardware
-designs\,\cite{lie2003xom,kaivola2009formalintel,reid2016armv8}.
+To that end, a verifier
 %
-With regard to \ac{hse} mechanisms, they fall between two domains that are
-hardware design verification and low-level software components verification.
+\begin{inparaenum}[(1)]
+\item defines a formal description of the system ---the \emph{Specification}---,
+  %
+\item exhibits a proof that a formal description of the system satisfies a
+  statement (defined in an arbitrary logic) which encodes the property with
+  respect to which the correctness shall be proven, and
+  %
+\item exhibits a proof of correspondence between the implementation and the
+  specification.
+\end{inparaenum}
 %
-On the one hand, hardware designs verification often focus on properties
-transparent to the executed software components (\emph{e.g.} cache
-coherency\,\cite{stern1995cachecoherence}, linearizability of SGX
-instructions\,\cite{leslie2015sgx}, hardware-based memory
-isolation\,\cite{lie2003xom}).
+In this context, the terms ``implementation'' and ``specification'' refer to a
+subjective relation between two layers of abstraction: the specification is more
+abstract than its implementation, and formal verification proofs can be
+organized in an arbitrary number of abstraction layers
 %
-Security gap in interactions of multiple platform components are less regarded
-due to their increasing complexity\,\cite{potlapally2011hardwaresecurity}, yet
-they are responsible for architectural attacks we want to avoid.
+The definition of a specification shall ease the construction of the proof of
+correctness, while the correspondence proof allows for extending the properties
+of the specification to the implementation.
 %
-On the other hand, low-level software components such as
-seL4\,\cite{klein2009sel4} or CertiKOS\,\cite{gu2016certikos} use the features
-exposed by these components, and are verified against \emph{ad hoc} hardware
-models, whose scope is often limited to necessary hardware features.
+The instantiation of the terms ``formal description'', ``correspondence proof'',
+``properties'' or ``correctness proof'' may considerably vary from one system to
+another.
 %
-%For our part, we would rather characterize a set of sufficient requirements over
-%low-level software components, such that any software implementation which satisfy these
-%requirements and is executed by the hardware architecture proves to be correct
-%with respect to a targeted property.
+Similarly, the nature of the proofs and their construction greatly depend on the
+tools used by the verifier.
+%
+For our part, we want to construct correctness proofs of a hardware architecture
+specification, with respect to security properties, and using the Coq theorem
+prover (as explained in Chapter~\ref{chap:introduction}).
+%
+The rest of this Chapter is organized with this objective in mind
+
+First, we describe popular formalisms used to define formal descriptions of
+hardware specifications (Section~\ref{sec:sota:formalisms}).
+%
+Then, we focus on the encoding of security properties as logic statements
+(Section~\ref{sec:sota:security}).
+%
+Finally, we give an overview of related works
+(Section~\ref{sec:sota:relatedwork}).
+% and we conclude this Chapter by positioning our contributions in that respect
+% (Section~\ref{...}).
+
+\section{Introduction to Formal Verification for Security}
+\label{sec:sota:formalisms}
+
+\subsection{Operational Semantics}
+
+\subsection{Denotational Semantics}
+
+\subsection{Compositional Modeling}
+
+\section{Specifying Security Policies}
+\label{sec:sota:security}
+
+\section{A Tour of Large Verified Systems}
+\label{sec:sota:relatedwork}
+
+\subsection{Hardware Systems}
+
+\paragraph{Intel.}
+
+\paragraph{ARM.}
+
+\paragraph{XOM.}
 
 \bibliographystyle{unsrt}%
 \bibliography{manuscript}
