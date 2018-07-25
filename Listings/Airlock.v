@@ -21,7 +21,7 @@ Inductive Transition
                (Airlock Open Close)
 | closeFirstDoor (second:  door)
   : Transition (Airlock Open second)
-               OpenFirstDoor
+               CloseFirstDoor
                (Airlock Close second)
 | openSecondDoor
   : Transition (Airlock Close Close)
@@ -29,7 +29,7 @@ Inductive Transition
                (Airlock Close Open)
 | closeSecondDoor (first:  door)
   : Transition (Airlock first Open)
-               OpenSecondDoor
+               CloseSecondDoor
                (Airlock first Close).
 
 Definition secure_airlock
