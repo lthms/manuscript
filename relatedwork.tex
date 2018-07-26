@@ -28,6 +28,7 @@
 
 \usepackage{mdframed} % or, "mdframed"
 \usepackage[amsthm,framed]{ntheorem}
+\newcommand{\powerset}{\raisebox{.15\baselineskip}{\Large\ensuremath{\wp}}}
 
 \definecolor{statementline}{HTML}{b7e2d6}
 
@@ -287,7 +288,7 @@ intuitive classification of properties, such that:
 %
 \begin{itemize}
 \item \emph{Safety properties}\,\cite{lamport1977proving,lamport1985logical}
-  characterize that nothing ``bad'' shall \emph{ever} happens.
+  characterize that nothing ``bad'' shall \emph{never} happens.
 \item \emph{Liveness properties}\,\cite{lamport1985logical,alpern1985liveness}
   characterize that something ``good'' shall \emph{eventually} happens.
 \end{itemize}
@@ -296,7 +297,7 @@ We discussed in Subsection~\ref{subsec:usecase:targetedsec} the two classes of
 security policies commonly targeted by x86 \ac{hse} mechanisms.
 %
 An access control policy is a safety property: no unauthorized action by a
-subject targeting on object shall ever happen.
+subject targeting on object shall never happen.
 %
 An availability policy is a liveness property: the system shall eventually
 satisfy the service
@@ -314,13 +315,80 @@ For instance, traces labeled transition system will interleave a label between
 each state\,\cite{vijayaraghavan2015modular}, to characterize the nature of the
 transition which led to the transformation of a state of the sequence with its
 successor.
+%
+Afterwards, we write \( \Sigma(M) \) for the set of traces of a specification
+\( M \).
 
 Simplest properties can be defined in terms of sets of
-traces\,\cite{schneider2000enforceable,basin2013enforceable}.
+traces\,\cite{schneider2000enforceable,basin2013enforceable}\,\thomasrk{cite
+  ``Recognizing Safety and Liveness'' by Alpern}.
+%
+We assume a specification \( M \) whose set of states is \( S \) and whose
+traces only contain states.
+%
+On the one hand, a safety property \( P \in \powerset(\Sigma(M)) \) is
+formalized with an invariant \( \iota \) on trace element (\emph{i.e.} on
+\( S \) in the case of the specification \( M \)). \( M \) is correct with
+respect to \( P \) when
+%
+\[
+  \forall \rho \in \Sigma(M)\text{, } \rho_0 \in \iota \wedge \rho_{[1..]} \in
+  P,
+\]
+%
+where \( \rho_0 \) is the first element of the trace, and \( \rho_{[1..]} \) is
+the trace obtained by removing the first element of \( \rho \).
+%
+On the other hand, a liveness property is formalized by a predicate on trace
+element which has te be satisfied. This time, \( M \) is correct with respect to
+\( P \) when
+%
+\[
+  \rho \in \Sigma(M)\text{, } \rho_0 \in p \vee \rho_{[1..]} \in P
+\]
+%
+where \( \rho_{[1..]} \) is the trace obtained by removing the first element of
+\( \rho \).
 
-Linear Temporal Logic
+Not all security policies can be formalized with a predicate on traces.
+%
+For instance, \emph{noninterference} \thomasrk{ref} is a confidentiality policy
+which requires that so-called public inputs handled by a given system always
+produce the same output, regardless of concurrent secret inputs.
+%
+In this context, considering each trace independently does not make sense.
+%
+To witness a violation of the security policy requires to compare two traces
+together.
+%
+Such properties are called \emph{hyperproperties}\,\cite{marr2002hypertheading},
+and are characterized by sets of sets of traces.
+%
+Verifying a system with respect to a hyperproperty is harder in the general
+case, but certain hyperproperties, called \( k \)-safety properties, can be
+reduced to an invariant.
+%
+For instance, we assume \( M \) handles inputs which can be either secret or
+public.
+%
+Let \( \equiv \) be the binary relation, such that two states \( s \) and
+\( r \) satisfies this relation (\( s \equiv r \)) when they characterize two
+instances of the system which have handled the same public inputs and produced
+the same visible behavior.
+%
+Similarly to Banerjee \emph{et al.} \thomasrk{Stack-based access control for
+  secure information flow} or Barthe \emph{et al.}\,\cite{barthe2011virtcert1},
+we can prove \( M \) enforces noninterference if for any public input \( l \) by
+constructing a proof that
+%
+\[
+  \forall (s, r) \in S \times S, s \equiv r \Rightarrow (s \xrightarrow{l} s'
+  \wedge r \xrightarrow{l} r') \Rightarrow s' \equiv r',
+\]
+where \( s \xrightarrow{l} s' \) is a transition of the system from a state
+\( s \) to a state \( s' \) to handle the input \( l \).
 
-Invariant on states
+% Linear Temporal Logic?
 
 \paragraph{Adversary}
 %
