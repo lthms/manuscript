@@ -269,6 +269,8 @@ Each formal system (\emph{e.g.} higher-order logic\,\cite{leivant1994hol})
 relies on a set of axioms, that are formulas known to be true, and inference
 rules which allows for deriving new formulas.
 
+\paragraph{Propositions and Inference Rules.}
+%
 The statement that a proposition \( P \) is true is commonly denoted by
 \( \vdash P \).
 %
@@ -340,10 +342,11 @@ represented as follows:
   \label{fig:sota:inference}
 \end{figure}
 
-Verifying the correctness of a proof can be challenging.
+Constructing a proof and verifying its correctness quickly becomes challenging.
 %
-The promise of theorem provers is to handle this tasks, supposedly in a more
-reliable way than humans.
+Theorem provers such as Coq\,\cite{coq} or HOL/Isabelle\thomasrk{cite} provide
+facilities to write proofs, and verify these proofs (supposedly in a more
+reliable way than humans).
 %
 Therefore, the quality of a theorem prover is measured by its capacity to reject
 ill-formed proofs.
@@ -358,6 +361,82 @@ the proof-checking process.
 This greatly diminishes the risk to have inconsistencies in the proof checker,
 although this happened in the
 past\,\cite{claret2015falso,griffioen1998comparison}.
+%
+Another common approach is to rely on an algorithm whose correctness has been
+formally established to handle a well-defined class of problem.
+%
+This allows for automating the verification process.
+%
+Abstract interpretation \thomasrk{cite} and model checking \thomasrk{cite} are
+two notorious instances of this approach.
+
+\paragraph{Formal Systems.}
+%
+Choosing a formal language is a key part of the verification process of a
+system.
+%
+It decides the expressiveness of the statements that can be proven, and the
+tools verifiers can leverage to construct their proofs.
+
+The most common formal system is the first-order logic\thomasrk{cite},
+characterized by:
+%
+\begin{itemize}
+\item \emph{Terms}, which represents objects.
+\item \emph{Logical operators}, such as conjunction \( \wedge \), disjunction
+  \( \vee \), implication \( \Rightarrow \), negation \( \neg \).
+\item \emph{Predicates}, that is parameterized formulas that can be true or
+  false with respect to the applied terms.
+\item \emph{Quantifiers}, such as \( \forall \) (all values) or \( \exists \)
+  (there exists a value).
+\end{itemize}
+
+First-order logic quantifiers can only be applied on sets of terms (\emph{e.g.}
+natural numbers, booleans, states of a airlock system).
+%
+Higher-order logic \thomasrk{ref} does not suffer the same limitation, so it
+becomes possible to express statements such as \emph{for all sets with a total
+  order \( < \), for all pair of values \( \alpha, \beta \), then either
+  \( \alpha < \beta \) or \( \beta < \alpha \) or \( \alpha = \beta \)}.
+%
+Therefore, higher order logics are more expressive than first-order logic, but
+they come with a cost in terms of automation.
+%
+On the one hand, \emph{Interactive} theorem provers (\emph{e.g.}
+Coq\,\cite{coq}, HOL/Isabelle\thomasrk{ref}, or more recently
+Lean\thomasrk{ref}) are based on higher-logic.
+%
+\emph{Automated} theorem provers (\emph{e.g.} Vampire\thomasrk{ref},
+Z3\thomasrk{ref}) are based on first-order logic.
+
+Finally, modal logic \thomasrk{ref} is a formal system which extends first-order
+logic with modal operators.
+%
+Temporal logics form the most popular family of modal logics, such as Temporal
+Linear Logic (LTL)\thomasrk{ref}.
+%
+They allow for reasoning about propositions over time.
+%
+Examples of LTL modular operators are \( \square P \) (\( P \) is always true),
+\( \Diamond P \) (\( P \) will eventually become true), \( \bigcirc P \)
+(\( P \) will be true after the next transition of the system).
+%
+Another popular temporal logic is Computation Logic Tree (CTL)\thomasrk{ref},
+which considers trees of possible futures (by opposition to a \emph{linear}
+future).
+%
+CTL modal operator includes \( \mathbf{A} P \) (\( P \) is true for all possible
+futures) and \( \mathbf{E} P \) (there exists at least one path where \( P \)
+becomes true).
+%
+Temporal logic formulas are commonly verified thanks to model checkers,
+\emph{e.g.}  NuSMV\thomasrk{ref}, SPIN\thomasrk{ref}, or TLA+\thomasrk{ref}.
+%
+Other approaches can be used to that end ---for instance Gilles Barthe \emph{et
+  al.} have encoded \( \square \) and \( \Diamond \) in
+Coq\,\cite{barthe2011virtcert1})--- model checkers have the benefit of
+automation and counter-example generation.
+
 
 \subsection{Specifying Security Policies}
 \label{sec:sota:security}
@@ -613,8 +692,6 @@ constructing a proof that
 \]
 where \( s \xrightarrow{l} s' \) is a transition of the system from a state
 \( s \) to a state \( s' \) to handle the input \( l \).
-
-% Linear Temporal Logic?
 
 \paragraph{Adversary}
 %
