@@ -259,7 +259,7 @@ checking\,\cite{clarke1999model}, while Petri net\,\cite{peterson1981petri},
 process algebra\,\cite{bergstra1984process} or interface
 automata\,\cite{de2001interface} are better suited to model concurrent systems.
 
-\subsection{Introduction to Deductive Reasoning}
+\subsection{Introduction to Formal Methods}
 
 Theorem prover rely on formal systems in which formulas (also called
 propositions) of a formal language represent statements which can either be true
@@ -693,7 +693,7 @@ constructing a proof that
 where \( s \xrightarrow{l} s' \) is a transition of the system from a state
 \( s \) to a state \( s' \) to handle the input \( l \).
 
-\paragraph{Adversary}
+\subsection{Adversary}
 %
 \begin{itemize}
 \item Combinatronics of system actions (Pip, VirtCert)
@@ -701,6 +701,148 @@ where \( s \xrightarrow{l} s' \) is a transition of the system from a state
 \end{itemize}
 
 \subsection{Related Works}
+
+Formal verification of hardware and software systems is a large and prolific
+research field, with important applications in the industry.
+%
+The interest has grown in the use of formal methods to improve the security of
+computer systems\,\cite{chong2016report}.
+%
+We give an overview of formal verification projects which
+%
+\begin{inparaenum}[(1)]
+\item have a clear focus on security, and
+\item target two domains related to \ac{hse} mechanisms, that is hardware
+  architectures (XOM\,\cite{lie2003xom}, ARMv8\,\cite{reid2016armv8}), and
+  system software components (VirtCert, seL4).
+\end{inparaenum}
+%
+For each project, we detail the modeling structure used to define the
+specification of the targeted system, the verified properties and the
+verification approach leveraged by the authors.
+
+\paragraph{XOM}
+%
+The \ac{xom} microprocessor architecture maintains separate so-called
+\emph{compartments} for applications\,\thomasrk{ref xom}.
+%
+With mainstream microprocessor architectures, the system software is responsible
+for both memory allocation and access control.
+%
+It relies on configurable \ac{cpu} mechanisms, such as a \ac{mmu}, to implement
+the latter.
+%
+On the contrary, a \ac{xom} \ac{cpu} keeps track of each memory location owner,
+thanks to a tagging mechanism, and prevents an application to access a memory
+location it does not own.
+
+In 2003, David Lie \emph{et al.} have modelled the \ac{xom}
+architecture\,\cite{lie2003xom} using the Mur$\varphi$ model
+checker\thomasrk{ref murphi}.
+%
+This model is a transition systems defined in terms of states and rules to
+update these states.
+%
+There are two kinds of rules: the \ac{xom} instructions set, and some additional
+capabilities given to the attacker.
+%
+As for the transitions set, it is defined in terms of pre and postconditions.
+%
+On the one hand, the precondition is parameterized by the current state and the
+labeled event.
+%
+If the pre-condition is satisfied for a given hardware state and labeled events,
+then it means that event can occur in this state.
+%
+On the other hand, the post condition is parameterized by the initial state, the
+labeled event and the resulting state.
+%
+It determines the consequences of that event, in terms of state update.
+
+The security properties targeted by the \ac{xom} architecture are enforceable
+security properties, and the authors rely on Mur$\varphi$ to perform the state
+exploration of their model.
+%
+The main advantage of a model checker, in this context, is to be able to print a
+counter-example, that is a trace it has found not to satisfy the targeted
+security property, in case of failure.
+%
+From a security perspective, a counter-example describes an attack path, that is
+the execution steps to reproduce in order to defeat the security enforcement.
+%
+Hence, the authors have been able to show with their model that the \ac{xom}
+architecture was subject to several replay attacks, and they leveraged their
+model to validate their countermeasures.
+%
+However, the state explosion problem obliges the authors to simplify their
+model, in order to reduce the state combinatory.
+
+\paragraph{ARMv8}
+%
+ARM Specification Language
+
+\paragraph{VirtCert}
+%
+Between 2011 and 2014, Gilles Barthe \emph{et al.} have worked on an idealized
+model of a hypervisor.
+%
+This model is defined in terms of state, actions and a semantics of actions as
+state-trans\-formers.
+%
+In their context, the state mixes information about both hardware components
+(\ac{cpu} execution mode, registers, memory content, etc.) and software
+components (list of guests, current active guest, memory mapping for the
+hypervisor and the guests, etc.).
+%
+The actions are the hypercalls exposed by the hypervisor for the guests to use.
+%
+The semantics of actions as state-transformers, that is the set of possible
+transitions for the modelled system, is defined in terms of pre and
+postconditions.
+
+First, they have shown that their ideal hypervisor was
+%
+\begin{inparaenum}[(1)]
+\item ensuring strong isolation between guests, and
+%
+\item eventually processing every request performed by the
+  guests\,\cite{barthe2011virtcert1}.
+\end{inparaenum}
+%
+Then, they have incorporated the \ac{cpu} cache to their
+model\,\cite{barthe2012virtcert2}.
+%
+Cache-based attacks, where attackers are able to infer information they should
+not have access to by leveraging their knowledge of micro-architectural
+implementation specificity, are a very important threat to virtualization
+platforms.
+%
+The authors have shown their ideal hypervisor could prevent such attack, at the
+cost of flushing the cache before each context switch.
+%
+They have taken their approach a step further, by focusing on constant-time
+cryptography\,\cite{barthe2014virtcert3}.
+
+The verification scope of VirtCert is large, and cover many security aspects
+primordial for virtualization platforms.
+%
+Moreover, there have been an important specification and formalization effort
+required to take into consideration the different security properties.
+%
+Some of them, like constant-time cryptography implementations, are
+hyperpoperties, notably harder to reason with.
+
+\paragraph{seL4}
+%
+Certified microkernel.
+
+\paragraph{RockSalt}
+%
+Application checker
+
+\paragraph{Moat}
+%
+Application checker
 
 \section{Beyond Transition Systems}
 
@@ -717,107 +859,7 @@ where \( s \xrightarrow{l} s' \) is a transition of the system from a state
 
 \subsection{Related Works}
 
-\section{Introduction to Theorem Proving}
-
-A theorem prover is a computer program to write machine-checked proofs in a
-particular logic, which is in the general case more expressive than what a model
-checkers offers.
-%
-However, they lack automation for nontrivial problems, as they do not excuse
-users from \emph{writing proofs}.
-%
-The task can be very important in terms of effort for real world systems.
-
-\subsection{By Example: Coq and the Airlock System}
-
-To illustrate how we can leverage the formal system of a theorem prover to
-formally verify a transition system, we
-%
-The Coq theorem prover\,\cite{coq} includes two languages: a rich functional
-language to write specifications ({\scshape Gallina}) and a tactic language to
-write proofs ({\scshape Ltac}).
-  %
-We can use {\scshape Gallina} to describe the system in terms of states and
-actions to update this state.
-
-\inputminted[firstline=1,lastline=14]{coq}{Listings/Airlock.v}
-
-This reads as follows: a door is either open or close; a airlock system is made
-of two doors; we consider four actions which imply an update of the airlock
-system's state (opening the first or second door, closing the first or second
-door).
-
-{\scshape Gallina} includes a special type, called \texttt{Prop}, to write
-logical propositions which can be either true or false.
-%
-We can define the transition relation of our airlock system using \texttt{Prop.}
-%
-In practice, this is done by enumerating the cases where the statement is true,
-and the remaining cases are considered to be false.
-
-\inputminted[firstline=16,lastline=33]{coq}{Listings/Airlock.v}
-
-This reads as follows: we distinguish between four classes of transitions, one
-per actions.
-%
-On the one hand, a transition which implies to open a door (case one and three)
-requires the both doors to be closed.
-%
-On the other hand, a transition which implies to close a door (case two and
-four) requires the door to be closed.
-
-The security property of our airlock system is a safety property: at any time,
-at least one door is close.
-%
-This property is a predicate on the system state, which we can define in
-{\scshape Gallina} \emph{via} the \texttt{Prop} type.
-
-\inputminted[firstline=35,lastline=38]{coq}{Listings/Airlock.v}
-
-For the airlock to be secure, this means the \texttt{secure\_airlock} predicate
-must hold true before and after each transition.
-%
-We can express that in the form of a \emph{lemma}, that is a logical statement
-for each we exhibit a proof.
-%
-We write the proof with {\scshape Ltac}, and trust Coq to refuse it in case it
-is incorrect.
-%
-The proof is written in terms of {\scshape Ltac} tactics.
-%
-Each tactic corresponds to an inference rule.
-%
-For instance, the \texttt{right} tactic refers to the fact that given two
-statements $P$ and $Q$, then if $Q$ is true, then $P \vee Q$ is also
-true. Tactics updates the proof obligation (initially the lemma statement), and
-the goal of a Coq user is to bring back this proof obligation to something that
-has already been proven.
-
-\inputminted[firstline=40,lastline=57]{coq}{Listings/Airlock.v}
-
-This reads as follows: we prove that, given any ``secure state'', that is a
-airlock for which the \texttt{secure\_airlock} holds true, any action which
-implies a system's state update, the \texttt{secure\_airlock} also holds true
-for the system's state after the transition.
-%
-The proof is conducted by enumeration of possible actions (\texttt{induction}),
-and by definition of \texttt{Transition} (\texttt{inversion}).
-
-\thomasrk[inline]{So? Quelle est la conclusion de cette section? Pourquoi va-tu
-  choisir dans ton approche de faire du Coq?}
-
-% \section{A Tour of Large Verified Systems}
-% \label{sec:sota:relatedwork}
-
-% \subsection{Hardware Systems}
-
-% \paragraph{Intel.}
-
-% \paragraph{ARM.}
-
-% \paragraph{XOM.}
-
-\section{Where this Thesis Stands}
+\section{Conclusion: Where this Thesis Stands}
 
 \subsection{Specifying and Verifying Hardware-based Security Enforcement
   Mechanisms}
