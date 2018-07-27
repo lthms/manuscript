@@ -344,7 +344,7 @@ represented as follows:
 
 Constructing a proof and verifying its correctness quickly becomes challenging.
 %
-Theorem provers such as Coq\,\cite{coq} or HOL/Isabelle\thomasrk{cite} provide
+Theorem provers such as Coq\,\cite{coq} or Isabelle/HOL\,\cite{nipkow2002isabelle} provide
 facilities to write proofs, and verify these proofs (supposedly in a more
 reliable way than humans).
 %
@@ -367,8 +367,8 @@ formally established to handle a well-defined class of problem.
 %
 This allows for automating the verification process.
 %
-Abstract interpretation \thomasrk{cite} and model checking \thomasrk{cite} are
-two notorious instances of this approach.
+Abstract interpretation\,\cite{cousot1977absint} and model
+checking\,\cite{clarke2018modelc} are two notorious instances of this approach.
 
 \paragraph{Formal Systems.}
 %
@@ -378,7 +378,7 @@ system.
 It decides the expressiveness of the statements that can be proven, and the
 tools verifiers can leverage to construct their proofs.
 
-The most common formal system is the first-order logic\thomasrk{cite},
+The most common formal system is the first-order logic\,\cite{smullyan2012fol},
 characterized by:
 %
 \begin{itemize}
@@ -394,26 +394,27 @@ characterized by:
 First-order logic quantifiers can only be applied on sets of terms (\emph{e.g.}
 natural numbers, booleans, states of a airlock system).
 %
-Higher-order logic \thomasrk{ref} does not suffer the same limitation, so it
-becomes possible to express statements such as \emph{for all sets with a total
-  order \( < \), for all pair of values \( \alpha, \beta \), then either
+Higher-order logic\,\cite{leivant1994hol} does not suffer the same limitation,
+so it becomes possible to express statements such as \emph{for all sets with a
+  total order \( < \), for all pair of values \( \alpha, \beta \), then either
   \( \alpha < \beta \) or \( \beta < \alpha \) or \( \alpha = \beta \)}.
 %
 Therefore, higher order logics are more expressive than first-order logic, but
 they come with a cost in terms of automation.
 %
-On the one hand, \emph{Interactive} theorem provers (\emph{e.g.}
-Coq\,\cite{coq}, HOL/Isabelle\thomasrk{ref}, or more recently
-Lean\thomasrk{ref}) are based on higher-logic.
+On the one hand, \emph{Interactive} theorem provers (\emph{e.g.}  Coq,
+Isabelle/HOL, or more recently Lean\,\cite{de2015lean} are based on higher-order
+logic.
 %
-\emph{Automated} theorem provers (\emph{e.g.} Vampire\thomasrk{ref},
-Z3\thomasrk{ref}) are based on first-order logic.
+\emph{Automated} theorem provers (\emph{e.g.}
+Vampire\,\cite{riazanov2002vampire}, Z3\,\cite{de2008z3}) are based on
+first-order logic.
 
-Finally, modal logic \thomasrk{ref} is a formal system which extends first-order
-logic with modal operators.
+Finally, modal logic\,\cite{chagrov1997modal} is a formal system which extends
+first-order logic with modal operators.
 %
 Temporal logics form the most popular family of modal logics, such as Temporal
-Linear Logic (LTL)\thomasrk{ref}.
+Linear Logic (LTL)\,\cite{sistla1985ltl}.
 %
 They allow for reasoning about propositions over time.
 %
@@ -421,16 +422,17 @@ Examples of LTL modular operators are \( \square P \) (\( P \) is always true),
 \( \Diamond P \) (\( P \) will eventually become true), \( \bigcirc P \)
 (\( P \) will be true after the next transition of the system).
 %
-Another popular temporal logic is Computation Logic Tree (CTL)\thomasrk{ref},
-which considers trees of possible futures (by opposition to a \emph{linear}
-future).
+Another popular temporal logic is Computation Logic Tree
+(CTL)\,\cite{clarke1981ctl}, which considers trees of possible futures (by
+opposition to a \emph{linear} future).
 %
 CTL modal operator includes \( \mathbf{A} P \) (\( P \) is true for all possible
 futures) and \( \mathbf{E} P \) (there exists at least one path where \( P \)
 becomes true).
 %
 Temporal logic formulas are commonly verified thanks to model checkers,
-\emph{e.g.}  NuSMV\thomasrk{ref}, SPIN\thomasrk{ref}, or TLA+\thomasrk{ref}.
+\emph{e.g.}  NuSMV\,\cite{cimatti2002nusmv}, SPIN\,\cite{holzmann1997spin} or
+TLA+\,\cite{lamport2002tla}.
 %
 Other approaches can be used to that end ---for instance Gilles Barthe \emph{et
   al.} have encoded \( \square \) and \( \Diamond \) in
