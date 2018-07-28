@@ -6,7 +6,6 @@
 
 % ABOUT THIS FILE
 % ---------------
-%
 % The goal of this document is to prepare the next (and final?) version of the
 % chapter 3.
 
@@ -436,9 +435,8 @@ TLA+\,\cite{lamport2002tla}.
 %
 Other approaches can be used to that end ---for instance Gilles Barthe \emph{et
   al.} have encoded \( \square \) and \( \Diamond \) in
-Coq\,\cite{barthe2011virtcert1})--- model checkers have the benefit of
+Coq\,\cite{barthe2011virtcert1}--- model checkers have the benefit of
 automation and counter-example generation.
-
 
 \subsection{Specifying Security Policies}
 \label{sec:sota:security}
@@ -695,12 +693,27 @@ constructing a proof that
 where \( s \xrightarrow{l} s' \) is a transition of the system from a state
 \( s \) to a state \( s' \) to handle the input \( l \).
 
-\subsection{Adversary}
+%\subsection{Adversary Model}
 %
-\begin{itemize}
-\item Combinatronics of system actions (Pip, VirtCert)
-\item Additional rule to model more powerful attacker (Moat, XOM + bus snooping)
-\end{itemize}
+%An \emph{adversary model} (or \emph{threat model}) characterizes what attackers
+%can and cannot do inside a system.
+%%
+%Security guarantees shall always be defined with respect to a certain adversary
+%model, to define the limits of the system security enforcement mechanisms.
+%%
+%That is, attackers which can leverage capabilities outside of the adversary
+%model are likely to defeat the security policies.
+%%
+%Adversary model is a theoretical tool commonly used in the verification of
+%cryptographic protocol, with a well-identified hierarchy of archetypes
+%(\emph{e.g.} the Dolev–Yao model allows attackers to intercept, modify, generate
+%any messages, but require necessary secret to encrypt and decrypt
+%messages\,\thomasrk{ref}).
+
+%\begin{itemize}
+%\item Combinatronics of system actions (Pip, VirtCert)
+%\item Additional rule to model more powerful attacker (Moat, XOM + bus snooping)
+%\end{itemize}
 
 \subsection{Related Works}
 
@@ -846,20 +859,175 @@ Application checker
 %
 Application checker
 
-\section{Beyond Transition Systems}
+\section{Compositional Security}
 
-\subsection{Sequential versus Concurrent Systems}
+Traditional transition systems, such as the ones presented in the previous
+section, impose to model the complete system all at once.
+%
+This raises important challenges for complex systems.
+%
+Model checkers and similar automated tools remain subject to the so-called
+\emph{state explosion problem}\,\cite{clarke2012model} despite improvements to
+algorithms.
+%
+State explosion problem imposes modeling compromises, \emph{e.g.}  verification
+of cache coherency protocols with a fixed number of cores and limited address
+space\thomasrk{ref}.
+%
+Theorem provers allows for modeling \emph{parameterized} systems, so that it
+becomes possible, for example, to construct a proof which holds for an arbitrary
+number of similar components\thomasrk{ref}.
+%
+This approach does not apply to complete hardware architectures, built up from
+smaller ---yet complex--- components.
+%
+A comprehensive hardware model in terms of hardware components would undoubtedly
+make the construction of the proof unbearable for any non-trivial properties,
+yet is a requirement to prevent compositional attacks.
 
-\begin{itemize}
-\item Airlock System problem
-\item Hoare Logic
-\end{itemize}
+Compositional verification is a promising (family of) approach(es) to overcome
+the challenges posed by the scale of complex and large systems\thomasrk{ref
+  wing}, including hardware architectures.
+%
+In this approach, the verification work is divided into two steps.
+%
+First, each component is verified in isolation.
+%
+Then, the composition of these components in order to ensure it does not create
+compositional attacks.
 
-\subsection{Compositional Modeling}
+\subsection{Compositional Modeling Structures}
 
-\subsection{Assume-Guarantee Reasoning}
+\paragraph{I/O and Interface Automaton}
+%
+I/O automata\,\cite{lynch1988ioautomata} are labeled transition systems which
+distinguish between three classes of transitions, modeled with three disjoints
+sets of labels:
+%
+\begin{inparaenum}[(1)]
+\item input actions (denoted by \( \mathrm{in}(S) \) for an automaton \( S \)),
+  %
+\item output actions (denoted by \( \mathrm{out}(S) \)), and
+  %
+\item internal actions (denoted by \( \mathrm{int}(S) \)).
+  %
+\end{inparaenum}
+%
+They together form the signature of a given automaton (denoted by
+\( \mathrm{act}(S) \)).
+%
+Its transition relation \( R(S) \) is a subset of
+\( \mathrm{state}(S) \times \mathrm{act}(S) \times state(S) \), where
+\( \mathrm{state}(S) \) is the set of states of \( S \).
+%
+I/O automata are expected to be \emph{input enabled}, that is it cannot delay
+the treatment of its inputs.
+%
+This translates as follows: for every state \( p \) and input actions \( \pi \),
+it exists a state \( q \) such that \( (p, \pi, q) \in R(S) \).
+
+Composition of I/O automaton is achieved \emph{via} input and output actions.
+%
+More precisely, when one automaton perform an output action \( pi \) during a
+transition, all automata having \( \pi \) as input action perform \( \pi \)
+simultaneously.
+%
+Although by definition, I/O automata are required to be input enabled, in
+practice the component they model will correctly behave (for a certain
+definition of ``correct'') only if certain requirements are met regarding the
+inputs they have to handle.
+%
+Interface automata\,\cite{de2001interfaceautomata} are similar to IO/ automata,
+except they are not require to be input enabled.
+%
+As a consequence, the definition of an interface automaton captures its
+requirements over the rest of the system.
+
+\paragraph{Process algebra}
+%
+Another popular approach which enables compositional modeling of complex systems
+is process algebra.
+%
+Process algebra has been developed in order to reason about programs executed in
+parallel.
+%
+It is a formal system to describe interacting systems, together with a semantic
+theory for verifying them.
+%
+In process algebras such as Calculus of Communication
+Systems\,\cite{milner1980ccs} or the Communicating Sequential
+Processes\,\cite{hoare1978csp}, two concurrent threads can run in parallel, and
+synchronization is achieved by sending messages rather than \emph{via} some
+shared memory.
+%
+Compare to I/O or interface automata, process algebras eases the description of
+systems interactions.
+%
+Indeed, the behavior of each process is defined in the form of a program.
+
+\paragraph{Algebraic Effects}
+
+\subsection{Compositional Verification}
+
+\paragraph{Assume-Guarantee}
+%
+Assume-Guarantee reasoning has been firstly introduced by
+Pnueli\,\cite{pnueli1985ag}.
+%
+At its simplest, Assume-Guarantee reasoning is about proving a component \( C \)
+guarantee the property \( G \) under the assumptions that an assumption \( A \)
+is satisfied, then proving the rest of the system \( S' \) satisfies \( A \).
+%
+This allows for concluding the system as a whole, that is the composition of
+\( C \) with \( S' \) (denoted by \( C || S' \)) guarantee \( G \).
+
+\paragraph{Interface Refinement}
+%
+Bisimulation of process algebra
+%
+Compositional Model Checking
 
 \subsection{Related Works}
+
+\paragraph{Kami}
+%
+Interface refinement approach, inspired by process algebra (except, method call
+rather than message passing)
+%
+% Old version, to be amended
+In in {\scshape Kami}, a transition of $M$ is denoted
+%
+\[ p \xrightarrow[a]{i} (v, q) \]
+%
+where $p \in S$ is the state of the component before the operation $i \in I$ is
+called by an other component;
+%
+$a$ is a sequence of actions performed by the component in order to compute the
+result of $i$;
+%
+$v$ is the result of this call, for the other component to use, and $q$ is the
+modified state of the component.
+%
+Actions, in this context, are either local manipulations of the component's
+state or calls of operations of the interface $O$.
+
+A component $M$ can be composed with another component $M'$ to form a larger
+component $M + M'$, for instance when the interface exposed by $M'$ is the
+interface used by $M$.
+%
+To reason about $M + M'$, it is possible to define an abstract module $M''$,
+verify $M + M''$ with respect to a given property, then prove that $M'$ is
+equivalent to $M''$.
+
+\paragraph{\texttt{Coq.io}}
+%
+Algebraic Effects, reasoning on program with effects under hypotheses with
+respect to outer environment behavior, but no way to verify these hypotheses
+
+\paragraph{Interface-Confined Adversaries}
+%
+Logic of Program that overcomes limitation of Coq.io, but to the best of our
+knowledge, no implementation.
 
 \section{Conclusion: Where this Thesis Stands}
 

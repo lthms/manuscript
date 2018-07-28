@@ -300,17 +300,24 @@ protected against arbitrary write accesses from system software.
 %
 This protection relies on a particular hardware interrupt.
 %
-This did not prevent Intel to introduce TXT, a novel security mechanism which
-had the particular side effect of disabling this hardware interrupt.
+This did not prevent Intel to introduce TXT\,\cite{intel2015txt}, a novel
+security mechanism which had the particular side effect of disabling this
+hardware interrupt\,\cite{kovah2015senter}.
+%
+This corresponds to the class of compositional
+attacks\,\cite{wing2003compositionalattack}.
 
-\begin{definition}[Architectural Attack]
-  We call Architectural Attacks the class of security vulnerabilities, where
-  each component is working as expected, yet their composition creates an attack
-  path untrusted software components can leverage to defeat a \ac{hse} mechanism
-  implemented to constrain its execution.
+\begin{definition}[Compositional Attack]
+  Compositional attacks is the class of security vulnerabilities, where each
+  component is working as expected in isolation, yet their composition creates
+  an attack path which prevent end-to-end security enforcement.
 \end{definition}
 
-Architectural attacks are due to a flaw in the specifications of the computing
+In the context of \ac{hse} mechanisms, this means it is possible for untrusted
+software components to leverage one hardware components to defeat a \ac{hse}
+mechanism implemented to constrain its execution.
+%
+Compositional attacks are due to a flaw in the specifications of the computing
 platform.
 %
 As such, they precede implementation errors, and their countermeasures often
@@ -322,7 +329,7 @@ whole.
 \section{Formal Verification of HSE mechanisms}
 \label{sec:intro:verif}
 
-The important impact of previously disclosed architectural attacks have
+The important impact of previously disclosed compositional attacks have
 motivated our will to formally specify HSE mechanisms.
 %
 We believe this would benefit both hardware designers and software developers.
@@ -332,7 +339,7 @@ foundation for a systemic approach to verify hardware specifications.
 %
 For each novel hardware feature introduced, it would be necessary to check that
 the previous proofs hold, meaning this feature does not introduce any
-architectural attack.
+compositional attack.
 %
 Secondly, it provides unambiguous specifications to firmware and system software
 developers, in the form of a list of requirements to comply with.
@@ -345,7 +352,7 @@ focus.
 To specify a HSE mechanism, we have to model the hardware architecture and the
 scale of the task represents an important challenge.
 %
-Architectural attacks may com from unsuspected places, with no apparent link
+Compositional attacks may com from unsuspected places, with no apparent link
 with the considered security mechanism.
 %
 For instance, the SENTER Sandman attack\,\cite{kovah2015senter} leveraged a
@@ -389,7 +396,7 @@ Because of its predominant position on the personal computer market, the x86
 hardware architecture has been intensively studied.
 %
 Our decision to explore this research field was based on our experience with
-several architectural attacks which have affected x86-based computing platform
+several compositional attacks which have affected x86-based computing platform
 x86 hardware architecture.
 %
 We have implemented our proofs of concepts in the Coq proof assistant.
@@ -421,7 +428,7 @@ Our works fall within a context where the security of lower levels of
 abstraction (\emph{e.g.} hardware components, firmware) grows in importance.
 %
 In Chapter~\ref{chapter:usecase}, we describe in more detail the x86 hardware
-architecture, and a selection of representative architectural attacks which have
+architecture, and a selection of representative compositional attacks which have
 been disclosed over the past decade.
 %
 In Chapter~\ref{chapter:relatedwork}, we revisit existing works and approaches

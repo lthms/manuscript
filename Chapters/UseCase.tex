@@ -10,7 +10,7 @@
 \vspace{1cm}\noindent
 %
 Our motivation to formally specify and verify \ac{hse} mechanisms comes from
-various architectural attacks targeting the x86 hardware
+various compositional attacks targeting the x86 hardware
 architecture\,\cite{duflot2009smram,wojtczuk2009smram,kallenberg2015racecondition,domas2015sinkhole,kovah2015senter}.
 %
 Besides, Intel has introduced several \ac{hse} mechanisms over the past decades:
@@ -35,7 +35,7 @@ system software.
 Because the BIOS is the most privileged piece of software executed by the
 hardware architecture, this \ac{hse} mechanism is of key importance.
 %
-Despite this fact, it has been the object of several architectural
+Despite this fact, it has been the object of several compositional
 attacks\,\cite{duflot2009smram,wojtczuk2009smram,domas2015sinkhole}, and
 therefore, it illustrates perfectly our motivations.
 %
@@ -53,7 +53,7 @@ We then focus on the key role played by the \ac{bios}, and the security model it
 requires so it can play this role (Section~\ref{sec:usecase:firmware}).
 %
 Once we have established the role of the \ac{bios}, we detail \ac{hse}
-mechanisms it implements, and several architectural attacks which have defeated
+mechanisms it implements, and several compositional attacks which have defeated
 these \ac{hse} mechanisms in the past (Section~\ref{sec:usecase:hse}).
 
 \section{Introduction to x86 Architecture Security}
@@ -1214,7 +1214,7 @@ code execution, \emph{i.e} intercept or mask \acp{smi}.
 
 
 
-\section{BIOS HSE Mechanism and Architectural Attacks}
+\section{BIOS HSE Mechanism and Compositional Attacks}
 \label{sec:usecase:hse}
 
 To stay isolated from the rest of the software stack at runtime, the \ac{bios}
@@ -1224,7 +1224,7 @@ dedicated execution mode of x86 \acp{cpu} (\ref{subsec:usecase:hse:smm}).
 The \ac{smm} provides the necessary features to enforce its isolation from the
 rest of the software stack.
 %
-Despite the key importance of \ac{smm}, several architectural attacks have been
+Despite the key importance of \ac{smm}, several compositional attacks have been
 disclosed over the past decade.
 %
 In this section, we detail three attacks which have defeated the three security
@@ -1543,7 +1543,7 @@ The attack proceeds as follows:
   of the \ac{smm} code inside its cache.
 \end{enumerate}
 %
-This attack is a perfect illustration of an architectural attack:
+This attack is a perfect illustration of an compositional attack:
 %
 both the Memory Controller and the \ac{cpu} cache work as expected.
 %
@@ -1568,7 +1568,7 @@ physical addresses that belong to the SMRAM.
 
 \paragraph{}
 %
-The SMRAM Cache Poisoning attack is a textbook case of architectural attacks.
+The SMRAM Cache Poisoning attack is a textbook case of compositional attacks.
 %
 It is interesting to notice that six years later, Christopher Domas has
 disclosed another x86 vulnerability called Sinkhole\,\cite{domas2015sinkhole},
@@ -1717,10 +1717,10 @@ In this Chapter, we have detailed the relevant x86 hardware mechanisms involved
 in the \ac{hse} mechanism implemented by the \ac{bios} at runtime to stay
 isolated from the system software.
 %
-In addition, we have presented three architectural attacks, to better illustrate
+In addition, we have presented three compositional attacks, to better illustrate
 the threats they pose.
 %
 The rest of this manuscript will use the SMRAM Cache Poisoning Attack as a
 recurring application use case for our contributions, because it has motivated
 our will to formally specify and verify \ac{hse} mechanisms, and it is a good
-illustration of architectural attacks.
+illustration of compositional attacks.
