@@ -1012,8 +1012,41 @@ Historically, compositional verification is the answer of model
 checking\,\cite{mcmillan1989compositional} and concurrent programs
 verification\,\cite{jones1983tentative} communities to the state explosion
 problem.
+%
+It can be divided into to complementary approaches: compositional minimization
+and compositional reasoning.
 
-\paragraph{Assume-Guarantee.}
+\paragraph{Compositional Minimization.}
+%
+Components of a larger system are primarily identified by the interface they
+expose to their pairs, that is the set of operation they can carry out for the
+rest of the system.
+%
+They also ``hide'' the components they are connected to, and use in order to
+handles their input.
+%
+In this context, two components which expose the same interface can be freely
+interchange on the condition that they exhibit an equivalent behavior with
+respect to their interface.
+%
+There are many different formalization of what ``equivalent behavior'' actually
+means.
+%
+For instance, in the context of process algebras, trace equivalence or
+bisimulation are two possible definition of equivalent
+behavior\,\cite{fokkink2013pa}.
+
+Using a behavior equivalence approach, it becomes possible to reason about one
+component by abstracting away the part of the systems it interacts with simpler
+specifications.
+%
+This is referred to as compositional minimization \thomasrk{ref?} in model
+checking.
+%
+The goal is to reduce the complexity of a model, with smaller yet provably
+equivalent components.
+
+\paragraph{Compositional Reasoning.}
 %
 At its simplest, assume-guarantee\,\cite{pnueli1985ag} ---or
 rely-guarantee\,\cite{jones1983tentative}--- reasoning is about proving a
@@ -1039,34 +1072,6 @@ generating the appropriate assumptions.
 %
 The \( L* \) algorithm has latter been adopted to other modeling structure, for
 instance for interface automata\,\cite{emmi2008assume}.
-
-\paragraph{Behavior Equivalence.}
-%
-Components of a larger system are primarily identified by the interface they
-expose to their pairs, that is the set of operation they can carry out for the
-rest of the system.
-%
-They also ``hide'' the components they are connected to, and use in order to
-handles their input.
-%
-In this context, two components which expose the same interface can be freely
-interchange on the condition that they exhibit an equivalent behavior with
-respect to their interface.
-%
-There are many different formalization of what ``equivalent behavior'' actually
-means.
-%
-For instance, in the context of process algebras, trace equivalence or
-bisimulation are two possible definition of equivalent
-behavior\,\cite{fokkink2013pa}.
-
-Using a behavior equivalence approach, it becomes possible to reason about one
-component by abstracting away the part of the systems it interacts with simpler
-specifications.
-%
-This is related to the compositional minimization approach \thomasrk{ref?} in
-model checking, whose goal is to reduce the complexity of a model, with smaller
-yet provably equivalent components.
 
 \subsection{Related Works}
 
@@ -1143,7 +1148,7 @@ We steer a middle course between these approaches.
 %
 We would rather characterize sets of requirements over low-level software
 components, such that satisfying these requirements is sufficient to ensure the
-hardware architecture enforces a certain property.
+hardware architecture enforces a certain property\,\cite{letan2016speccert}.
 %
 As a first step, we can verify the correctness of these requirements against a
 hardware model.
@@ -1159,6 +1164,53 @@ enclave\,\cite{costan2016sgxexplained} programs with respect to
 confidentiality).
 
 \subsection{Compositional Verification of Hardware Architecture}
+
+Our formal definition of \ac{hse} mechanism assume there exists a formal model
+of the hardware architecture.
+%
+The proof of concept of our approach we have implemented in the Coq theorem
+prover\,\cite{letan2016speccertcode} convinced us that such a model cannot be
+monolithic.
+%
+Otherwise, it would make the proof burden hard to bear.
+%
+Compositional verification is a very important domain research for the
+verification of large, realistic model.
+%
+However, it is a discipline mostly dominated by automated verification, like
+model checking for instance.
+
+With FreeSpec\,\cite{letan2018freespeccode}, we aim to provide a generic
+compositional reasoning framework for Coq.
+%
+FreeSpec leverages programs with effects and effects handler to model
+component-based system, and introduces so-called abstract specification in order
+to enable compositional reasoning inspired by the assume-guarantee paradigm.
+%
+In doing so, FreeSpec is at the intersection of several research domains.
+%
+Our work is in the continuity of \texttt{Coq.io}\,\cite{claret2015coqio}, but
+our abstract specifications are more generic and expressive than the scenarios.
+%
+We have shown how programs with effects and effects handlers can be used to
+modularly verify a complex system made of inter-connected components, \emph{via}
+the notion of interface as rendez-vous point.
+%
+The principle of our approach is similar to what {\scshape Kami} achieves, but
+is not hardware specific.
+%
+In addition, our abstract specifications allows for compositional verification,
+while {\scshape Kami} focus on refinement proofs.
+%
+To the best of our knowledge, the closest related research is the work of Deepak
+Garg \emph{et al.}\,\cite{garg2010compositional}.
+%
+Probably the main difference between our two approaches is that they rely on a
+dedicated programming language, while our programs with effects and effects
+handler are regular {\scshape Gallina} development.
+%
+As a consequence, we can use the full interactive proof development environment
+of Coq in order to write and machine-check our proofs.
 
 \bibliographystyle{unsrt}%
 \bibliography{manuscript}
