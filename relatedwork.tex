@@ -736,7 +736,7 @@ For each project, we detail the modeling structure used to define the
 specification of the targeted system, the verified properties and the
 verification approach leveraged by the authors.
 
-\paragraph{XOM}
+\paragraph{XOM.}
 %
 The \ac{xom} microprocessor architecture maintains separate so-called
 \emph{compartments} for applications\,\thomasrk{ref xom}.
@@ -792,11 +792,11 @@ model to validate their countermeasures.
 However, the state explosion problem obliges the authors to simplify their
 model, in order to reduce the state combinatory.
 
-\paragraph{ARMv8}
+\paragraph{ARMv8.}
 %
 ARM Specification Language
 
-\paragraph{VirtCert}
+\paragraph{VirtCert.}
 %
 Between 2011 and 2014, Gilles Barthe \emph{et al.} have worked on an idealized
 model of a hypervisor.
@@ -847,15 +847,15 @@ required to take into consideration the different security properties.
 Some of them, like constant-time cryptography implementations, are
 hyperpoperties, notably harder to reason with.
 
-\paragraph{seL4}
+\paragraph{seL4.}
 %
 Certified microkernel.
 
-\paragraph{RockSalt}
+\paragraph{RockSalt.}
 %
 Application checker
 
-\paragraph{Moat}
+\paragraph{Moat.}
 %
 Application checker
 
@@ -898,7 +898,7 @@ compositional attacks.
 
 \subsection{Compositional Modeling Structures}
 
-\paragraph{I/O and Interface Automaton}
+\paragraph{Input-Output Automata.}
 %
 I/O automata\,\cite{lynch1988ioautomata} are labeled transition systems which
 distinguish between three classes of transitions, modeled with three disjoints
@@ -943,7 +943,13 @@ except they are not require to be input enabled.
 As a consequence, the definition of an interface automaton captures its
 requirements over the rest of the system.
 
-\paragraph{Process algebra}
+Another popular modeling structure is the Moore Machine.
+%
+Moore Machines play a key role in compositional model
+checking\,\cite{mcmillan1989compositional}, because they can be translated into
+a regular Kripke structure.
+
+\paragraph{Process algebras.}
 %
 Another popular approach which enables compositional modeling of complex systems
 is process algebra.
@@ -965,23 +971,51 @@ systems interactions.
 %
 Indeed, the behavior of each process is defined in the form of a program.
 
-\paragraph{Algebraic Effects}
+\paragraph{Algebraic Effects.}
+%
+Modeling side-effects in pure programming language, such as Haskell or {\scshape
+  Gallina}, is usually achieve thanks to
+Monads\,\cite{wadler1990comprehending,jones2005io}, \emph{e.g.} the State Monad
+to seamlessly write computations which manipulates a global state, or the List
+Monad to abstract non-determinism,
+%
+However, Monads have a reputation not to compose very
+well\,\cite{hyland2006combining}, despite construction such as Monad
+Transformers\,\cite{liang1995mtl}.
+%
+Algebraic effects and handlers are a generic approach overcoming this challenge,
+with many different implementations (\emph{e.g.} Eff\,\cite{bauer2015effects},
+{\scshape Idris}\,\cite{brady2013idris}, or
+Haskell\,\cite{kiselyov2013extensible}).
+%
+In this context, \emph{effects} are characterized by a set of operations,
+\emph{e.g.} \texttt{get} and \texttt{set} for global state manipulation.
+%
+These operations are expected to produce a value whose type is known by
+definition.
+%
+For instance, \texttt{get} produces a value of the same type as the global
+state.
+%
+On the one hand, programs compose effects operations together.
+%
+On the other hand, handlers
 
 \subsection{Compositional Verification}
 
-\paragraph{Assume-Guarantee}
+\paragraph{Assume-Guarantee.}
 %
 Assume-Guarantee reasoning has been firstly introduced by
 Pnueli\,\cite{pnueli1985ag}.
 %
 At its simplest, Assume-Guarantee reasoning is about proving a component \( C \)
-guarantee the property \( G \) under the assumptions that an assumption \( A \)
+guarantees the property \( G \) under the assumptions that an assumption \( A \)
 is satisfied, then proving the rest of the system \( S' \) satisfies \( A \).
 %
 This allows for concluding the system as a whole, that is the composition of
-\( C \) with \( S' \) (denoted by \( C || S' \)) guarantee \( G \).
+\( C \) with \( S' \) (denoted by \( C || S' \)) guarantees \( G \).
 
-\paragraph{Interface Refinement}
+\paragraph{Interface Refinement.}
 %
 Bisimulation of process algebra
 %
@@ -989,7 +1023,7 @@ Compositional Model Checking
 
 \subsection{Related Works}
 
-\paragraph{Kami}
+\paragraph{Kami.}
 %
 Interface refinement approach, inspired by process algebra (except, method call
 rather than message passing)
@@ -1019,12 +1053,12 @@ To reason about $M + M'$, it is possible to define an abstract module $M''$,
 verify $M + M''$ with respect to a given property, then prove that $M'$ is
 equivalent to $M''$.
 
-\paragraph{\texttt{Coq.io}}
+\paragraph{\texttt{Coq.io}.}
 %
 Algebraic Effects, reasoning on program with effects under hypotheses with
 respect to outer environment behavior, but no way to verify these hypotheses
 
-\paragraph{Interface-Confined Adversaries}
+\paragraph{Interface-Confined Adversaries.}
 %
 Logic of Program that overcomes limitation of Coq.io, but to the best of our
 knowledge, no implementation.
