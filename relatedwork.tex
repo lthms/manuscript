@@ -878,8 +878,8 @@ Theorem provers allows for modeling \emph{parameterized} systems, so that it
 becomes possible, for example, to construct a proof which holds for an arbitrary
 number of similar components\thomasrk{ref}.
 %
-This approach does not apply to complete hardware architectures, built up from
-smaller ---yet complex--- components.
+This approach does not address all the challenges posed by the scale of complete
+hardware architectures, built up from smaller ---yet complex--- components.
 %
 A comprehensive hardware model in terms of hardware components would undoubtedly
 make the construction of the proof unbearable for any non-trivial properties,
@@ -895,8 +895,16 @@ First, each component is verified in isolation.
 %
 Then, the composition of these components in order to ensure it does not create
 compositional attacks.
+%
+This requires to use adapted modeling structures when it comes to defining a
+specification (\ref{subsec:sota:compmod}).
+%
+It also requires dedicated verification approaches, which enable ``divide and
+conquer'' strategies to reduce the burden of verifying the system
+(\ref{subsec:sota:compverif}).
 
 \subsection{Compositional Modeling Structures}
+\label{subsec:sota:compmod}
 
 \paragraph{Input-Output Automata.}
 %
@@ -996,30 +1004,58 @@ definition.
 %
 For instance, \texttt{get} produces a value of the same type as the global
 state.
+
+On the one hand, programs with effects are pure computations which compose
+effects results together.
 %
-On the one hand, programs compose effects operations together.
-%
-On the other hand, handlers
+On the other hand, handlers models the environment which realizes these effects,
+computes their results, and manipulates programs control flows.
 
 \subsection{Compositional Verification}
+\label{subsec:sota:compverif}
+
+Historically, compositional verification is the answer of model
+checking\,\cite{mcmillan1989compositional} and concurrent programs
+verification\,\cite{jones1983tentative} communities to the state explosion
+problem.
+%
 
 \paragraph{Assume-Guarantee.}
 %
-Assume-Guarantee reasoning has been firstly introduced by
-Pnueli\,\cite{pnueli1985ag}.
+At its simplest, assume-guarantee\,\cite{pnueli1985ag} ---or
+rely-guarantee\,\cite{jones1983tentative}--- reasoning is about proving a
+component \( C \) guarantees the property \( G \) under the assumptions that an
+assumption \( A \) is satisfied, then proving the rest of the system \( S' \)
+satisfies \( A \).
 %
-At its simplest, Assume-Guarantee reasoning is about proving a component \( C \)
-guarantees the property \( G \) under the assumptions that an assumption \( A \)
-is satisfied, then proving the rest of the system \( S' \) satisfies \( A \).
+This allows for concluding about the correctness of the system as a whole, that
+is the composition of \( C \) with \( S' \) (denoted by \( C || S' \))
+guarantees \( G \).
+
+First assume-guarantee systems have been developed for model checkers, where
+assumptions and guarantees were defined with different temporal logic,
+\emph{e.g.} LTL and CTL.
 %
-This allows for concluding the system as a whole, that is the composition of
-\( C \) with \( S' \) (denoted by \( C || S' \)) guarantees \( G \).
+The main obstacle to the adoption of the assume-guarantee paradigm is the
+necessity for the user to provide additional inputs to the checker, in addition
+to the model and its properties to verify.
+%
+The \( L* \) learning algorithm, originally proposed by
+Augluin\,\cite{angluin1987lstart}, addresses this issue by automatically
+generating the appropriate assumptions.
+%
+The \( L* \) algorithm has latter been adopted to other modeling structure, for
+instance for interface automata\,\cite{emmi2008assume}.
 
 \paragraph{Interface Refinement.}
 %
-Bisimulation of process algebra
+In practice, components of a larger system are often primarily identified by the
+interface they expose to their pairs, that is the set of operation they can
+carry out for the rest of the system.
 %
-Compositional Model Checking
+% Bisimulation of process algebra
+%
+% Compositional Model Checking
 
 \subsection{Related Works}
 
