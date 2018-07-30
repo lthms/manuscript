@@ -685,8 +685,7 @@ We give an overview of formal verification projects which
 \begin{inparaenum}[(1)]
 \item have a clear focus on security, and
 \item target two domains related to \ac{hse} mechanisms, that is hardware
-  architectures (XOM\,\cite{lie2003xom}, ARMv8\,\cite{reid2016armv8}), and
-  system software components (VirtCert, seL4).
+  architectures, and system software components.
 \end{inparaenum}
 %
 For each project, we detail the modeling structure used to define the
@@ -707,44 +706,58 @@ hardware features such as a \ac{mmu}.
 On the contrary, a \ac{xom} \ac{cpu} keeps track of each memory location owner,
 thanks to a tagging mechanism, and supposedly prevents an application to access
 a memory location it does not own.
-
-In 2003, David Lie \emph{et al.} have modelled the \ac{xom}
+%
+In 2003, David Lie \emph{et al.} have verified the \ac{xom}
 architecture\,\cite{lie2003xom} using the Mur$\varphi$ model
 checker\,\cite{murphi}.
 %
-This model is a transition systems defined in terms of states and rules to
-update these states.
+The verification purpose of the authors was to prove that the \ac{xom}
+architecture fulfills its promise to be tamper-resistant, that is the
+architecture forbids an attacker to modify the memory location owned by a given
+application.
 %
-There are two kinds of rules: the \ac{xom} instructions set, and some additional
-capabilities given to the attacker.
+The verification proceeds as follows:
 %
-As for the transitions set, it is defined in terms of pre and postconditions.
+\begin{enumerate}
+\item A first specification of the \ac{xom} architecture, called the ``actual
+  model'', is defined.
+  %
+  The states of this first model contains the different hardware components of a
+  \ac{xom} microprocessor, \emph{i.e.} the registers, the cache and a volatile
+  memory.
+  %
+  It also integrates the internal machinery of \ac{xom} to track ownership of
+  memory locations.
+  %
+  Its transitions can be divided into two categories: the normal execution of an
+  application by the microprocessor, and active tampering from an adversary
+  part.
+  %
+  That is, the actual model embeds a notion of attacker model.
+  %
+\item A second specification, called the ``idealized model'', abstracts away the
+  memory hierarchy formed by the cache and the volatile memory.
+  %
+  This second model captures the execution of a single application, without an
+  adversary.
+  %
+  From this perspective, it encodes the security property.
+  %
+\item To let Mur\( \varphi \) explores both state simultaneously, the authors
+  have manually defined a third model.
+  %
+  Transitions which describes the execution of an application in the actual
+  model also updates the idealized model, whereas transitions which describes
+  actions by the attacker only affect the actual model.
+  %
+\item The authors have defined a function which checks if an ``actual state'' is
+  equivalent to an ``idealized state'', and let Mur\( \varphi \) verifies that
+  the state equivalence is an invariant of the third model.
+\end{enumerate}
 %
-On the one hand, the precondition is parameterized by the current state and the
-labeled event.
-%
-If the pre-condition is satisfied for a given hardware state and labeled events,
-then it means that event can occur in this state.
-%
-On the other hand, the post condition is parameterized by the initial state, the
-labeled event and the resulting state.
-%
-It determines the consequences of that event, in terms of state update.
-
-The security properties targeted by the \ac{xom} architecture are enforceable
-security properties, and the authors rely on Mur$\varphi$ to perform the state
-exploration of their model.
-%
-The main advantage of a model checker, in this context, is to be able to print a
-counter-example, that is a trace it has found not to satisfy the targeted
-security property, in case of failure.
-%
-From a security perspective, a counter-example describes an attack path, that is
-the execution steps to reproduce in order to defeat the security enforcement.
-%
-Hence, the authors have been able to show with their model that the \ac{xom}
-architecture was subject to several replay attacks, and they leveraged their
-model to validate their countermeasures.
+In the process of verifying \ac{xom}, the authors have been able to show with
+their model that the \ac{xom} architecture was subject to several replay
+attacks, and that their countermeasures were effectively effective.
 %
 However, the state explosion problem obliges the authors to simplify their
 model, in order to reduce the state combinatory.
@@ -761,48 +774,75 @@ model of a hypervisor.
 This model is defined in terms of state, actions and a semantics of actions as
 state-trans\-formers.
 %
-In their context, the state mixes information about both hardware components
-(\ac{cpu} execution mode, registers, memory content, etc.) and software
-components (list of guests, current active guest, memory mapping for the
-hypervisor and the guests, etc.).
+The state mixes information about both hardware components (\ac{cpu} execution
+mode, registers, memory content, etc.) and software components (list of guests,
+current active guest, memory mapping for the hypervisor and the guests, etc.).
 %
-The actions are the hypercalls exposed by the hypervisor for the guests to use.
+The set of actions describes the events which can trigger a transformation of
+the model states.
 %
-The semantics of actions as state-transformers, that is the set of possible
-transitions for the modelled system, is defined in terms of pre and
-postconditions.
+For instance, it includes various tasks that the hypervisor must carry out, such
+as scheduling the OS guests, hypercalls handling, or memory management.
+%
+Certain actions also witness the execution of guests, for instance when the OS
+currently running reads from or writes to memory.
+%
+The semantics of actions as state-transformers, which describes the set of
+possible transitions for the model, is defined in terms of pre and
+postconditions, where
+%
+\begin{enumerate}
+\item A precondition \( \mathrm{Pre} \) is a predicate on state and action, such
+  that for a couple \( (s, a) \), if the precondition holds true, then the
+  action \( a \) can occur from the state \( s \)
+\item A postcondition \( \mathrm{Post} \) is a predicate on state, action and
+  state, such that for a tuple \( (s, a, s') \), if the postcondition holds
+  true, then the model state is updated from \( s \) to \( s' \) after an action
+  \( a \).
+\end{enumerate}
+%
+This means, \( (s, a, s') \) is a transition of the model if and only if
+%
+\[
+  \mathrm{Pre}(s, a) \wedge \mathrm{Post}(s, a, s')
+\]
 
-First, they have shown that their ideal hypervisor was
+They implemented their model and their proofs in the Coq theorem prover.
+%
+First, they showed that their ideal hypervisor
 %
 \begin{inparaenum}[(1)]
-\item ensuring strong isolation between guests, and
+\item ensures strong isolation between guests (two safety properties and
+  2-safety property), and
 %
-\item eventually processing every request performed by the
-  guests\,\cite{barthe2011virtcert1}.
+\item eventually processes every request performed by the guests (one liveness
+  property)\,\cite{barthe2011virtcert1}.
 \end{inparaenum}
 %
-Then, they have incorporated the \ac{cpu} cache to their
-model\,\cite{barthe2012virtcert2}.
+Then, they incorporated the \ac{cpu} cache to their hardware model, and a naive
+countermeasure for preventing cache-timing attack to their hypervisor model.
 %
-Cache-based attacks, where attackers are able to infer information they should
-not have access to by leveraging their knowledge of micro-architectural
-implementation specificity, are a very important threat to virtualization
-platforms.
+They proved the effectiveness of the countermeasure\,\cite{barthe2012virtcert2}.
 %
 The authors have shown their ideal hypervisor could prevent such attack, at the
 cost of flushing the cache before each context switch.
 %
-They have taken their approach a step further, by focusing on constant-time
-cryptography\,\cite{barthe2014virtcert3}.
+Finally, they have taken their approach a step further, by focusing on
+constant-time cryptography as an effective countermeasure against cache-timing
+attack\,\cite{barthe2014virtcert3}.
+%
+This last work also introduced a static analysis for C program, notably
+implemented as an extension for CompCert, a certified C
+compiler\,\cite{leroy2012compcert}.
 
-The verification scope of VirtCert is large, and cover many security aspects
-primordial for virtualization platforms.
+The resulting project, called VirtCert, is fairly large.
 %
-Moreover, there have been an important specification and formalization effort
-required to take into consideration the different security properties.
+The Coq development counts over 50\,000 lines of code.
 %
-Some of them, like constant-time cryptography implementations, are
-hyperpoperties, notably harder to reason with.
+The verification results focus on various isolation properties, from the most
+natural and straightforward (\emph{i.e.} an OS guest cannot write to or read
+from a page it does not own) up to non-interference variants, notoriously harder
+to reason with.
 
 \paragraph{seL4.}
 %
@@ -810,11 +850,82 @@ Certified microkernel.
 
 \paragraph{RockSalt.}
 %
-Application checker
+Thanks to the Google's service called \ac{nacl}, it is possible for software
+developers to distribute their web applications in the form of native executable
+code.
+%
+These native applications are executed directly in the context of the browser.
+%
+\ac{nacl} uses \ac{sfi} to prevent arbitrary native applications to tamper with
+the code and data of the browser.
+%
+\ac{sfi} comprises a set of rules native applications have to comply with, and
+that together form a sandbox policy.
+%
+In practice, the \ac{nacl} checks that an arbitrary native applications respect
+the \ac{sfi} rules before loading it to the browser context.
+%
+As a consequence, the browser is protected from malicious machine code.
+
+From a security perspective, this means there are two requirements over the
+\ac{nacl}:
+%
+\begin{inparaenum}[(1)]
+\item verify that the rules indeed are sufficient to constrain the untrusted
+  native applications with respect to the sandbox policy, and
+%
+\item the \ac{nacl} checker correctly verify that native applications respect
+  these rules.
+\end{inparaenum}
+%
+This is similar to the challenges faced by \ac{hse} mechanisms.
+%
+Because \ac{nacl} has been shown to have issues regarding these two
+requirements, Greg Morrisett \emph{et al.} have specified the \ac{nacl} checker
+in Coq, proven the rules it checks are correct and indeed enforce the targeted
+sandbox policy, and then manually translated the checker in
+C\,\cite{morrisett2012rocksalt}.
+%
+By doing so, they have addressed the two requirements listed above, as long as
+their translation is correct.
 
 \paragraph{Moat.}
 %
-Application checker
+Intel \ac{sgx} is a recent addition to certain x86 \acp{cpu}, whose purpose is
+to provide so-called enclaves to user land
+applications\,\cite{costan2016sgxexplained}.
+%
+These enclaves supposedly offer an execution environment isolated from the
+system software.
+%
+The functioning of \ac{sgx} can be roughly summarized as follows:
+\ac{sgx}-capable \acp{cpu} dedicate a special portion of the system memory, called
+the \ac{epc}, to enclaves.
+%
+The system software is responsible for allocating and initializing memory pages
+of the \ac{epc} (thanks to dedicated instructions), but it cannot read or write
+to them once it is done.
+%
+This is enforced by the memory controller, which encrypts the content of the
+\ac{epc} transparently from the \ac{cpu}.
+%
+Hence, the memory controller only decrypts an \ac{epc}'s page if it is accessed
+by the enclave which owns it; it will also discard write accesses performed by
+another software component than the page owner.
+
+Rohit Sinha \emph{et al.} have modelled SGX instructions semantics, to complete
+an existing model, and have developed an automated information flow analysis
+tool called Moat, to verify whether or not a given application code may leak
+secrets or not\,\cite{sinha2015moat}.
+%
+The work proceeds similarly to RockSalt, where instructions are treated as
+labelled transition from one state to another.
+%
+However, Moat also consider an active and passive adversary, with additional
+capabilities (meaning, additional transitions in the system).
+%
+The approach is similar to what David Lie \emph{et al.} have done for the
+\ac{xom} architecture.
 
 \section{Compositional Verification}
 \label{section:sota:compsec}
@@ -1109,7 +1220,7 @@ synchronization is achieved by sending and waiting for messages rather than
       & & \\
       \mathrm{System}
       & \triangleq
-      & \nu c. \nu d_1. \nu d_2. \ (\mathrm{Controller}(c, d_1, d_2) \\
+      & \nu c. \nu d_1. \nu d_2. (\mathrm{Controller}(c, d_1, d_2) \\
       &
       & \quad\qquad\qquad || \mathrm{CloseDoor}(d_1) \\
       &
@@ -1250,45 +1361,85 @@ instance for interface automata\,\cite{emmi2008assume}.
 
 \subsection{Related Works}
 
-\paragraph{Kami.}
+\paragraph{{\scshape Kami}.}
 %
-Interface refinement approach, inspired by process algebra (except, method call
-rather than message passing)
+In 2017, Joonwon Choi \emph{et al.} have released \,\cite{choi2017kami}, a
+framework for Coq to model, verify hardware components.
 %
-% Old version, to be amended
-In in {\scshape Kami}, a transition of $M$ is denoted
+The resulting hardware models can also be converted into
+BlueSpec\,\cite{nikhil2004bluespec} programs, which can be compiled to Verilog,
+a hardware description language.
 %
-\[ p \xrightarrow[a]{i} (v, q) \]
+This means it is possible to turn a {\scshape Kami} model into a concrete
+implementation.
+
+In in {\scshape Kami}, a model \( M \) is a particular labeled transition
+system, whose transitions are of the form
 %
-where $p \in S$ is the state of the component before the operation $i \in I$ is
-called by an other component;
+\[
+  p \xrightarrow[a]{i} (v, q)
+\]
 %
-$a$ is a sequence of actions performed by the component in order to compute the
-result of $i$;
-%
-$v$ is the result of this call, for the other component to use, and $q$ is the
-modified state of the component.
+where \( p \) is the state of the component before an operation \( i \) which is
+called by an other component, \( a \) is a sequence of actions performed by the
+component in order to compute the result of \( i \), \( v \) is the result of
+\( i \), for the caller to use, and \( q \) is the modified state of the
+component.
 %
 Actions, in this context, are either local manipulations of the component's
-state or calls of operations of the interface $O$.
+state or calls of operations.
 
-A component $M$ can be composed with another component $M'$ to form a larger
-component $M + M'$, for instance when the interface exposed by $M'$ is the
-interface used by $M$.
+To reason about \( M \) with respect to a specification \( M_S \), {\scshape
+  Kami} introduces a refinement relation \( \sqsubseteq \).
 %
-To reason about $M + M'$, it is possible to define an abstract module $M''$,
-verify $M + M''$ with respect to a given property, then prove that $M'$ is
-equivalent to $M''$.
+A module \( M \) refines a module \( M_S \) (\emph{i.e.} \( M \) is an
+implementation of \( M_S \)) if any traces of \( M \) can also be produced by
+\( M_S \).
+%
+A component \( M \) can be composed with another component \( M' \) to form a
+larger component \( M + M' \), for instance when the operations exposed by
+\( M' \) are used by \( M \).
+%
+The authors introduced another ``modular'' refinement property, whose simplest
+expression could be
+%
+\[
+  M \sqsubseteq N \wedge R \sqsubseteq S \Rightarrow M + R \sqsubseteq N + S
+\]
+%
+This approach is related to the compositional minimization, where one component
+is reduced to a simpler, more abstract model, to reduce the complexity of the
+proofs.
 
 \paragraph{\texttt{Coq.io}.}
 %
-Algebraic Effects, reasoning on program with effects under hypotheses with
-respect to outer environment behavior, but no way to verify these hypotheses
+The \texttt{Coq.io} framework, developed and released by Guillaume Claret
+\emph{et al.}\,\cite{claret2015coqiowww}, have been originally proposed in order
+to allow the definition and verification of interactive programs in Coq by the
+means of use cases\,\cite{claret2015coqio}.
+%
+Such programs are defined in a dedicated Monad, with side-effects (\emph{e.g.}
+system calls to read from or write to a file) axiomatized as monadic operations
+of this Monad.
+%
+The proofs rely on scenarios which determine how an environment (\emph{e.g.} an
+operating system) would react to the program requests.
+%
+Morally, the verification goal is to verify that, under the hypothesis that the
+environment is correct with respect to a scenario, then a program with effects
+is also correct with respect to the trace of side-effects operations it
+produces.
+
+The approach used by \texttt{Coq.io} enables a beginning of compositional
+approach reasoning.
+%
+A program with effects can be verified, but the verification of the composition
+of this program with its environment is out of the scope of the project.
+
 
 \paragraph{Interface-Confined Adversaries.}
 %
-Logic of Program that overcomes limitation of Coq.io, but to the best of our
-knowledge, no implementation.
+Logic of Program, but to the best of our knowledge, no implementation.
 
 \section{Conclusion: Where this Thesis Stands}
 \label{sec:sota:conclusion}
