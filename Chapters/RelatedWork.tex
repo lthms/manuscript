@@ -112,6 +112,7 @@ In addition, there is often a subset of states which identifies acceptable
 initial states.
 
 \begin{example}[Airlock System]
+  \label{example:sota:airlocklts}
   Figure~\ref{fig:sota:airlock-lts} illustrates an instantiation of this
   definition for a simple airlock system.
   %
@@ -915,7 +916,121 @@ Moore Machines play a key role in compositional model
 checking\,\cite{mcmillan1989compositional}, because they can be translated into
 Kripke structures.
 
-\paragraph{Process algebras.}
+\begin{example}[Airlock System as Interface Automata]
+  In order to illustrate how a system can be broken down into small component,
+  we take once again the example of the airlock system.
+  %
+  In this context, the most obvious component is the door.
+  %
+  A door has two states: it can be either open or close.
+  %
+  It takes two input actions, \( \mathtt{Open} \) (the action to open the door)
+  and \( \mathtt{Close} \) (the action to close the door).
+  %
+  It does not have any output action, which means a door does not interact
+  actively with the rest of the system.
+  %
+  One possible specification for a door can be the following interface
+  automaton:
+
+  \begin{center}
+    \begin{tikzpicture}
+      \node [draw, circle] (o) {1};%
+      \node [draw, circle, right=of o] (c) {2};%
+
+      \draw [-latex] (o) edge [bend left] node [above] {\( \mathtt{Open}? \)}
+      (c);%
+      \draw [-latex] (c) edge [bend left] node [below] {\( \mathtt{Close}? \)}
+      (o);%
+      \draw [-latex] (c) edge [loop right] node {\( \mathtt{Open}? \)} (c);%
+      \draw [-latex] (o) edge [loop left] node {\( \mathtt{Close}? \)} (o);%
+
+      \node [draw, fit=(o) (c), inner sep=20pt, text width=130pt, text badly
+      centered] (d1) {};%
+
+      \node [yshift=10pt, left=35pt of d1.west] (open) {};%
+      \draw [-latex] (open) to node [above] {\( \mathtt{Open} \)}
+      ([yshift=10pt]d1.west);%
+      \node [yshift=-10pt, left=35pt of d1] (close) {};%
+      \draw [-latex] (close) to node [above] {\( \mathtt{Close} \)}
+      ([yshift=-10pt]d1.west);%
+    \end{tikzpicture}
+  \end{center}
+
+  In addition to two doors, a airlock system needs a controller, whose purpose
+  is to handle users requests and open and close doors in consequence.
+  %
+  We consider a slightly different situation than the specification given in
+  Example~\ref{example:sota:airlocklts}.
+  %
+  Here, there are only two commands, modeled with two input actions:
+  \( \mathtt{Req}_1 \) (one user wants the first door to be opened) and
+  \( \mathtt{Req}_2 \) (one user wants the second door to be opened).
+  %
+  The controller does not embed the states of the doors, but has four output
+  actions, two per doors (\( \mathtt{Open}_i \) and \( \mathtt{Close}_i\), for
+  \( i \in \{1, 2\}\)).
+  %
+  We propose the following interface automaton:
+
+  \begin{center}
+    \begin{tikzpicture}
+      \node [draw, circle] (s1) {2};%
+      \node [draw, circle, right=50pt of s1] (s2) {3};%
+      \node [draw, circle, right=50pt of s2] (s3) {4};%
+
+      \draw [-latex] (s1) to node [above] {\( \mathtt{Close2}! \)} (s2);%
+      \draw [-latex] (s2) to node [above] {\( \mathtt{Open1}! \)} (s3);%
+
+      \node [draw, circle, below=60pt of s3] (s4) {5};%
+      \node [draw, circle, left=50pt of s4] (s5) {6};%
+      \node [draw, circle, left=50pt of s5] (s6) {7};%
+
+      \draw [-latex] (s4) to node [below] {\( \mathtt{Close1}! \)} (s5);%
+      \draw [-latex] (s5) to node [below] {\( \mathtt{Open2}! \)} (s6);%
+
+      \node [draw, circle, below=21pt of s2] (s7) {1};%
+
+      \draw [-latex] (s7) to node [left,yshift=-5pt] {\( \mathtt{Req1}? \)}
+      (s1);%
+      \draw [-latex] (s7) to node [right,yshift=5pt] {\( \mathtt{Req2}? \)}
+      (s4);%
+
+      \draw [-latex] (s3) edge [bend left] node [right] {\( \mathtt{Req2}? \)}
+      (s4);%
+      \draw [-latex] (s6) edge [bend left] node [left] {\( \mathtt{Req1}? \)}
+      (s1);%
+
+      \node [draw, fit=(s1) (s4), inner sep=20pt, text width=220pt] (ctrl) {};%
+
+      \node [yshift=20pt, left=35pt of ctrl] (in_open1) {};%
+      \draw [-latex] (in_open1) to node [above] {\( \mathtt{Req}_1 \)}
+      ([yshift=20pt]ctrl.west);%
+      \node [yshift=-20pt, left=35pt of ctrl] (in_open2) {};%
+      \draw [-latex] (in_open2) to node [above] {\( \mathtt{Req}_2 \)}
+      ([yshift=-20pt]ctrl.west);%
+
+      \node [yshift=45pt, right=35pt of ctrl] (out_open1) {};%
+      \draw [latex-] (out_open1) to node [above] {\( \mathtt{Open}_1 \)}
+      ([yshift=45pt]ctrl.east);%
+      \node [yshift=15pt, right=35pt of ctrl] (out_close1) {};%
+      \draw [latex-] (out_close1) to node [above] {\( \mathtt{Close}_1 \)}
+      ([yshift=15pt]ctrl.east);%
+
+      \node [yshift=-15pt, right=35pt of ctrl] (out_open2) {};%
+      \draw [latex-] (out_open2) to node [above] {\( \mathtt{Open}_2 \)}
+      ([yshift=-15pt]ctrl.east);%
+      \node [yshift=-45pt, right=35pt of ctrl] (out_close2) {};%
+      \draw [latex-] (out_close2) to node [above] {\( \mathtt{Close}_2 \)}
+      ([yshift=-45pt]ctrl.east);%
+
+      \draw (s3) edge [loop right] node {\( \mathtt{Req1}? \)} (s3);%
+      \draw (s6) edge [loop left] node {\( \mathtt{Req2}? \)} (s6);%
+    \end{tikzpicture}
+  \end{center}
+\end{example}
+
+\paragraph{Process Algebras.}
 %
 Another popular family of approaches which enable compositional modeling of
 complex systems is process algebras.
@@ -931,13 +1046,105 @@ Systems\,\cite{milner1980ccs} or the Communicating Sequential
 Processes\,\cite{hoare1978csp}, two concurrent threads can run in parallel, and
 synchronization is achieved by sending and waiting for messages rather than
 \emph{via} some shared memory.
-%
-Compare to I/O or interface automata, process algebras eases the description of
-systems interactions.
-%
-Indeed, the behavior of each process is defined in the form of a program.
 
-\paragraph{Algebraic Effects.}
+\begin{example}[Airlock System in \( \pi \)-calculus]
+  We now try to give a specification of our airlock system using a process
+  algebra called \( \pi \)-calculus.
+  %
+  Once again, we consider three components: two doors and a controller.
+  %
+  Our objective is to write a specification equivalent to our interface automata
+  (although we do not provide a proof of that equivalence).
+
+  We have used the following \( \pi \)-calculus construction to specify the
+  airlock system:
+  %
+  \begin{itemize}
+  \item \( c(x). P\) means receiving a value from the channel \( c \), bounding
+    this value to the name \( x \), then executing the process \( P \).
+  \item \( \bar{c} \langle x \rangle . P \) means sending the value bounded to
+    name \( x \) through the channel \( c \), then executing the process
+    \( P \).
+  \item \( [x = \mathrm{OPEN}] . P \) is a guard, that is \( P \) is executed if
+    \( x \) is equal to the value \( \mathrm{OPEN} \).
+  \item \( P + Q \) is the nondeterministic choice operator, we use it here in
+    conjunction with guards to implement a \texttt{if-then-else} construct. That
+    is, considering the process
+    %
+    \[
+      c(x) . ([x = 1] . P + [x = 2] . Q + R)
+    \]
+    %
+    If the value received from \( c \) is \( 1 \), \( P \) is executed.
+    %
+    If it is \( 2 \), then \( Q \) is executed. Otherwise, \( R \) is executed.
+  \item \( \nu c. P \) means a new channel \( c \) is created, and available for
+    \( P \) to use it.
+  \item \( P || Q \) is the parallel execution of \( P \) and \( Q \).
+  \end{itemize}
+
+  \[
+    \begin{array}{rcl}
+      \mathrm{CloseDoor}(c)
+      & \triangleq
+      & c(x) . \ ([x = \mathrm{OPEN}] . \mathrm{OpenDoor}(c) \\
+      &
+      & \qquad + \mathrm{CloseDoor}(c)) \\
+      & & \\
+      \mathrm{OpenDoor}(c)
+      & \triangleq
+      & c(x) . \ ([x = \mathrm{CLOSE}] . \mathrm{CloseDoor}(c) \\
+      &
+      & \qquad + \mathrm{OpenDoor}(c)) \\
+      & & \\
+      \mathrm{Controller}(c, d_1, d_2)
+      & \triangleq
+      & c(x). \ ([x = \mathrm{OPEN}_1] . \bar{d_2} \langle
+        \mathrm{CLOSE} \rangle . \bar{d_1} \langle \mathrm{OPEN} \rangle . 0 \\
+      &
+      & \qquad + [x = \mathrm{OPEN}_2] . \bar{d_1} \langle
+        \mathrm{CLOSE} \rangle . \bar{d_2} \langle \mathrm{OPEN} \rangle.0 \\
+      &
+      & \qquad + 0) . \mathrm{Controller}(c, d_1, d_2) \\
+      & & \\
+      \mathrm{System}
+      & \triangleq
+      & \nu c. \nu d_1. \nu d_2. \ (\mathrm{Controller}(c, d_1, d_2) \\
+      &
+      & \quad\qquad\qquad || \mathrm{CloseDoor}(d_1) \\
+      &
+      & \quad\qquad\qquad || \mathrm{CloseDoor}(d_2))
+    \end{array}
+  \]
+
+  The system, modeled with the process \( \mathrm{System} \) creates the
+  channels used by its components to communicate, then starts their concurrent
+  execution.
+  %
+  A door is either open or close, and we model this with two mutually recursive
+  process \( \mathrm{CloseDoor} \) and \( \mathrm{OpenDoor} \).
+  %
+  They take one channel \( c \) as argument, then wait for new inputs coming
+  from \( c \).
+  %
+  A controller is a recursive process which takes three channels \( c \),
+  \( d_1 \) and \( d_2 \) as arguments.
+  %
+  It waits for receiving new requests from \( c \).
+  %
+  When it receives a new request to open the first (resp. second) door, it first
+  close the second (resp. first) door, using the channel \( d_2 \) (resp. \( d_1
+  \)).
+  %
+  Then, it opens the first (resp. second) door, using the channel \( d_1 \)
+  (resp. \( d_2 \)).
+\end{example}
+
+\paragraph{Program with Effects.}
+%
+The relation between one component and the rest of the system it is connected to
+is reminiscent of the programming language to model and verify large programs
+with side-effects.
 %
 Modeling side-effects in pure programming language, such as Haskell or {\scshape
   Gallina}, is usually achieve thanks to
@@ -949,9 +1156,9 @@ However, Monads have a reputation not to compose very
 well\,\cite{hyland2006combining}, despite construction such as Monad
 Transformers\,\cite{liang1995mtl}.
 %
-Algebraic effects and handlers are a generic approach overcoming this challenge,
-with many different implementations (\emph{e.g.} Eff\,\cite{bauer2015effects},
-{\scshape Idris}\,\cite{brady2013idris}, or
+Algebraic effects and effects handlers are a generic approach overcoming this
+challenge, with many different implementations (\emph{e.g.}
+Eff\,\cite{bauer2015effects}, {\scshape Idris}\,\cite{brady2013idris}, or
 Haskell\,\cite{kiselyov2013extensible}).
 %
 In this context, \emph{effects} are characterized by sets of operations,
