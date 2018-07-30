@@ -10,16 +10,16 @@
 \vspace{1cm}\noindent
 %
 Formal verification consists in proving the correctness of a system ---the
-\emph{Implementation}--- with respect to certain properties.
+\emph{implementation}--- with respect to certain properties.
 %
 To that end, a verifier
 %
 \begin{inparaenum}[(1)]
-\item defines a formal description of the system ---the \emph{Specification}---,
+\item defines a formal description of the system ---the \emph{specification}---,
   %
-\item exhibits a proof that a formal description of the system satisfies a
-  statement (defined in an arbitrary logic) which encodes the property with
-  respect to which the correctness shall be proven, and
+\item exhibits a proof that a specification satisfies a statement (defined in an
+  arbitrary logic) which encodes the property with respect to which the
+  correctness shall be proven, and
   %
 \item exhibits a proof of correspondence between the implementation and the
   specification.
@@ -42,26 +42,49 @@ Similarly, the nature of the proofs and their construction greatly depend on the
 tools used by the verifier.
 %
 For our part, we want to construct correctness proofs of a hardware architecture
-specification, with respect to security properties, and using the Coq theorem
-prover (as explained in Chapter~\ref{chap:introduction}).
-%
-The rest of this Chapter is organized with this objective in mind
+specification, with respect to security properties, using the Coq theorem prover
+(as explained in Chapter~\ref{chapter:introduction}).
 
-First, we describe popular formalisms used to define formal descriptions of
-hardware specifications (Section~\ref{sec:sota:formalisms}).
+The rest of this Chapter proceeds as follow.
 %
-Then, we focus on the encoding of security properties as logic statements
-(Section~\ref{sec:sota:security}).
+First, we describe how transition systems can be leveraged in order to implement
+the verification methodology we just described
+(Section~\ref{sec:sota:formalisms}).
 %
-Finally, we give an overview of related works
-(Section~\ref{sec:sota:relatedwork}).
-% and we conclude this Chapter by positioning our contributions in that respect
-% (Section~\ref{...}).
+Then, we introduce the compositional verification approach, which enables the
+``divide and conquer'' strategy to reduce the burden of verifying large and
+complex systems (Section~\ref{section:sota:compsec}).
+%
+We conclude this Chapter by positioning our contributions with respect to
+preceding research projects (Section~\ref{sec:sota:conclusion}).
 
-\section{Transition Systems}
+\section{Formal Verification of Transition Systems}
 \label{sec:sota:formalisms}
 
-\subsection{Definition}
+Transition systems have long been used to study the behavior of discrete
+systems.
+%
+Over times, many different definitions of what a transition system is have been
+proposed, to address different classes of verification problems.
+%
+In this Section, we do not attempt to give comprehensive overview of these
+approaches.
+%
+On the contrary, we explain how a system can be specified using a generic
+transition system (\ref{subsec:sota:ltsdef}).
+%
+We introduce the key concepts of formal methods which support the formal
+verification process by providing tools to construct proofs
+(\ref{subsec:sota:fm}).
+%
+Then, we focus on characterizing security policies in terms of properties of
+transition systems (\ref{sec:sota:security}).
+%
+Finally, we describe how the concepts of this section have been used in order to
+verify hardware and software systems (\ref{subsec:sota:ltsrelated}).
+
+\subsection{Defining Specifications}
+\label{subsec:sota:ltsdef}
 
 The formal verification of discrete systems, such as computing systems, commonly
 rely on some sort of \emph{transition systems} to describe the behavior of the
@@ -73,10 +96,10 @@ set of \emph{atomic} state-transformation, called \emph{transitions}.
 Transitions occur when the system interacts with its environment (\emph{e.g.} a
 hardware circuit receives a clock signal, a hardware controller receives a
 message from a bus, an operating system handles a syscall).
-%
-Additionally, \emph{labeled} transition systems distinguish between classes of
-transitions \emph{via} the use of labels (\emph{e.g.} one label per syscall).
 
+\emph{Labeled} transition systems distinguish between classes of transitions
+\emph{via} the use of labels (\emph{e.g.} one label per syscall).
+%
 To the best of our knowledge, the more straightforward definition of a labeled
 transition system, as used by Vijayaraghavan \emph{et al.} in their work on
 modular verification of multiprocessor hardware
@@ -84,6 +107,9 @@ designs\,\cite{vijayaraghavan2015modular}, is a tuple
 \( \langle S, L, R \rangle \), such that \( S \) is a set of states, \( L \) is
 a set of labels, and \( R \subseteq S \times L \times S \) is the transition
 relation.
+%
+In addition, there is often a subset of states which identifies acceptable
+initial states.
 
 \begin{example}[Airlock System]
   Figure~\ref{fig:sota:airlock-lts} illustrates an instantiation of this
@@ -179,14 +205,14 @@ process algebra\,\cite{bergstra1984process} or interface
 automata\,\cite{de2001interface} are better suited to model concurrent systems.
 
 \subsection{Introduction to Formal Methods}
+\label{subsec:sota:fm}
 
 Theorem prover rely on formal systems in which formulas (also called
 propositions) of a formal language represent statements which can either be true
 or false.
 %
-Each formal system (\emph{e.g.} higher-order logic\,\cite{leivant1994hol})
-relies on a set of axioms, that are formulas known to be true, and inference
-rules which allows for deriving new formulas.
+A formal system relies on a set of axioms, that are formulas known to be true,
+and inference rules which allows for deriving new formulas.
 
 \paragraph{Propositions and Inference Rules.}
 %
@@ -194,7 +220,7 @@ The statement that a proposition \( P \) is true is commonly denoted by
 \( \vdash P \).
 %
 A proposition \( P \) may also be true on the condition that propositions
-\( Q_0, Q_1, ... Q_n \) is also true.
+\( Q_0, Q_1, ..., \text{and} Q_n \) are also true.
 %
 This statement is denoted by \( Q_0, Q_1, ... Q_n \vdash P \).
 %
@@ -253,19 +279,20 @@ represented as follows:
       {\scshape Modus tollens} &
                                  \( P \Rightarrow Q\text{, }\neg Q \vdash \neg P \) \\
       {\scshape Conjunction:} & \( P\text{, }Q \vdash P \wedge Q \) \\
-      {\scshape Addition:} & \( P \vdash P \vee Q \)
+      {\scshape Addition:} & \( P \vdash P \vee Q \) \\
+      {\scshape Contradiction:} & \( P, \neg P \vdash Q \)
     \end{tabular}
   \end{center}
 
-  \caption{Examples of common inference rules}
+  \caption{List of common inference rules}
   \label{fig:sota:inference}
 \end{figure}
 
 Constructing a proof and verifying its correctness quickly becomes challenging.
 %
-Theorem provers such as Coq\,\cite{coq} or Isabelle/HOL\,\cite{nipkow2002isabelle} provide
-facilities to write proofs, and verify these proofs (supposedly in a more
-reliable way than humans).
+Theorem provers such as Coq\,\cite{coq} or
+Isabelle/HOL\,\cite{nipkow2002isabelle} provide facilities to write proofs, and
+verify these proofs (supposedly in a more reliable way than humans).
 %
 Therefore, the quality of a theorem prover is measured by its capacity to reject
 ill-formed proofs.
@@ -280,11 +307,14 @@ the proof-checking process.
 This greatly diminishes the risk to have inconsistencies in the proof checker,
 although this happened in the
 past\,\cite{claret2015falso,griffioen1998comparison}.
-%
+
 Another common approach is to rely on an algorithm whose correctness has been
 formally established to handle a well-defined class of problem.
 %
 This allows for automating the verification process.
+%
+Once the algorithm has been proven correct, it becomes possible to trust its
+output.
 %
 Abstract interpretation\,\cite{cousot1977absint} and model
 checking\,\cite{clarke2018modelc} are two notorious instances of this approach.
@@ -321,11 +351,11 @@ so it becomes possible to express statements such as \emph{for all sets with a
 Therefore, higher order logics are more expressive than first-order logic, but
 they come with a cost in terms of automation.
 %
-On the one hand, \emph{Interactive} theorem provers (\emph{e.g.}  Coq,
+On the one hand, \emph{interactive} theorem provers (\emph{e.g.}  Coq,
 Isabelle/HOL, or more recently Lean\,\cite{de2015lean} are based on higher-order
 logic.
 %
-\emph{Automated} theorem provers (\emph{e.g.}
+On the other hand, \emph{automated} theorem provers (\emph{e.g.}
 Vampire\,\cite{riazanov2002vampire}, Z3\,\cite{de2008z3}) are based on
 first-order logic.
 
@@ -355,7 +385,7 @@ TLA+\,\cite{lamport2002tla}.
 %
 Other approaches can be used to that end ---for instance Gilles Barthe \emph{et
   al.} have encoded \( \square \) and \( \Diamond \) in
-Coq\,\cite{barthe2011virtcert1}--- model checkers have the benefit of
+Coq\,\cite{barthe2011virtcert1}--- yet model checkers have the benefit of
 automation and counter-example generation.
 
 \subsection{Specifying Security Policies}
@@ -419,35 +449,39 @@ successor.
 Afterwards, we write \( \Sigma(M) \) for the set of traces of a specification
 \( M \).
 
-Simplest properties can be defined in terms of sets of
-traces\,\cite{schneider2000enforceable,basin2013enforceable}\,\thomasrk{cite
-  ``Recognizing Safety and Liveness'' by Alpern}.
+Simplest properties can be defined in terms of predicates on
+traces\,\cite{alpern1987recognizing,schneider2000enforceable,basin2013enforceable}.
 %
 We assume a specification \( M \) whose set of states is \( S \) and whose
 traces only contain states.
 %
-On the one hand, a safety property \( P \in \powerset(\Sigma(M)) \) is
-formalized with an invariant \( \iota \) on trace element (\emph{i.e.} on
-\( S \) in the case of the specification \( M \)).
-%
-\( M \) is correct with respect to \( P \) when
+\( M \) is said to be correct with respect to a property modeled as a predicate
+of traces \( P \) when,
 %
 \[
-  \forall \rho \in \Sigma(M)\text{, } \iota(\rho_0) \wedge \rho_{[1..]} \in P,
+  \forall \rho \in \Sigma(M), P(\rho).
+\]
+
+On the one hand, safety properties are characterized by an invariant \( \iota \)
+on trace element (\emph{i.e.} on \( S \) in the case of the specification
+\( M \)), and
+%
+\[
+  P(\rho) \triangleq \iota(\rho_0) \wedge P(\rho_{[1..]}),
 \]
 %
 where \( \rho_0 \) is the first element of the trace, and \( \rho_{[1..]} \) is
 the trace obtained by removing the first element of \( \rho \).
 %
-On the other hand, a liveness property is formalized by a predicate \( \eta \)
-on trace element which has to be satisfied at least once.
-%
-This time, \( M \) is correct with respect to \( P \) when
+On the other hand, liveness properties are characterized by a predicate
+\( \eta \) on trace which has to be satisfied for at least a subtrace, that is
 %
 \[
-  \rho \in \Sigma(M)\text{, } \eta(\rho_0) \vee \rho_{[1..]} \in P.
+  P(\rho) \triangleq \exists n > 0, \eta(\rho_{[..n]}) \vee P(\rho_{[1..]}),
 \]
 %
+where \( \rho_{[..n]} \) is the substrace made with the \( n \) first elements
+of \( \rho \).
 
 \begin{example}[Airlock Safety and Liveness Properties]
   A typical \emph{safety} property (nothing `bad'' happens) for an airlock
@@ -477,8 +511,8 @@ This time, \( M \) is correct with respect to \( P \) when
   In addition, we can also prove that both doors of the airlock will
   \emph{eventually} be close.
   %
-  We can characterize this liveness property with the predicate \( \eta \), such
-  that
+  We can characterize this liveness property with the predicate \( \eta \) on
+  subtraces of one element, such that
   %
   \[
     \eta(d_1, d_2) \triangleq d_1 = \mathtt{close} \wedge d_2 = \mathtt{close}
@@ -489,8 +523,8 @@ This time, \( M \) is correct with respect to \( P \) when
   for each transition of \( R \), one of the state satisfies \( \eta \), that is
   %
   \[
-    \forall ((d_1, d_2), l, (d_1', d_2')) \in R, \eta(d_1, d_2) \vee
-    \eta(d_1', d_2')
+    \forall ((d_1, d_2), l, (d_1', d_2')) \in R, \eta(d_1, d_2) \vee \eta(d_1',
+    d_2')
   \]
 
 \end{example}
@@ -575,9 +609,9 @@ This time, \( M \) is correct with respect to \( P \) when
   \label{fig:sota:proofsafety}
 \end{figure}
 
-Not all security policies can be formalized with a predicate on traces.
+Not all security policies can be formalized with predicates on traces.
 %
-For instance, \emph{noninterference} \thomasrk{ref} is a confidentiality policy
+For instance, \emph{noninterference}\,\cite{goguen1982security} is a confidentiality policy
 which requires that so-called public inputs handled by a given system always
 produce the same output, regardless of concurrent secret inputs.
 %
@@ -601,10 +635,9 @@ Let \( \equiv \) be the binary relation, such that two states \( s \) and
 instances of the system which have handled the same public inputs and produced
 the same visible behavior.
 %
-Similarly to Banerjee \emph{et al.} \thomasrk{Stack-based access control for
-  secure information flow} or Barthe \emph{et al.}\,\cite{barthe2011virtcert1},
-we can prove \( M \) enforces noninterference if for any public input \( l \) by
-constructing a proof that
+Similarly to Gilles Barthe \emph{et al.}\,\cite{barthe2011virtcert1}, we can
+prove \( M \) enforces noninterference if for any
+public input \( l \) by constructing a proof that
 %
 \[
   \forall (s, r) \in S \times S, s \equiv r \Rightarrow (s \xrightarrow{l} s'
@@ -613,29 +646,32 @@ constructing a proof that
 where \( s \xrightarrow{l} s' \) is a transition of the system from a state
 \( s \) to a state \( s' \) to handle the input \( l \).
 
-%\subsection{Adversary Model}
+% \subsection{Adversary Model}
 %
-%An \emph{adversary model} (or \emph{threat model}) characterizes what attackers
-%can and cannot do inside a system.
+% An \emph{adversary model} (or \emph{threat model}) characterizes what
+% attackers can and cannot do inside a system.
 %%
-%Security guarantees shall always be defined with respect to a certain adversary
-%model, to define the limits of the system security enforcement mechanisms.
+% Security guarantees shall always be defined with respect to a certain
+% adversary model, to define the limits of the system security enforcement
+% mechanisms.
 %%
-%That is, attackers which can leverage capabilities outside of the adversary
-%model are likely to defeat the security policies.
+% That is, attackers which can leverage capabilities outside of the adversary
+% model are likely to defeat the security policies.
 %%
-%Adversary model is a theoretical tool commonly used in the verification of
-%cryptographic protocol, with a well-identified hierarchy of archetypes
-%(\emph{e.g.} the Dolev–Yao model allows attackers to intercept, modify, generate
-%any messages, but require necessary secret to encrypt and decrypt
-%messages\,\thomasrk{ref}).
+% Adversary model is a theoretical tool commonly used in the verification of
+% cryptographic protocol, with a well-identified hierarchy of archetypes
+% (\emph{e.g.} the Dolev–Yao model allows attackers to intercept, modify,
+% generate any messages, but require necessary secret to encrypt and decrypt
+% messages\,\thomasrk{ref}).
 
-%\begin{itemize}
-%\item Combinatronics of system actions (Pip, VirtCert)
-%\item Additional rule to model more powerful attacker (Moat, XOM + bus snooping)
-%\end{itemize}
+% \begin{itemize}
+% \item Combinatronics of system actions (Pip, VirtCert)
+% \item Additional rule to model more powerful attacker (Moat, XOM + bus
+%   snooping)
+% \end{itemize}
 
 \subsection{Related Works}
+\label{subsec:sota:ltsrelated}
 
 Formal verification of hardware and software systems is a large and prolific
 research field, with important applications in the industry.
@@ -659,21 +695,21 @@ verification approach leveraged by the authors.
 \paragraph{XOM.}
 %
 The \ac{xom} microprocessor architecture maintains separate so-called
-\emph{compartments} for applications\,\thomasrk{ref xom}.
+\emph{compartments} for applications\,\cite{lie2000architectural}.
 %
 With mainstream microprocessor architectures, the system software is responsible
 for both memory allocation and access control.
 %
-It relies on configurable \ac{cpu} mechanisms, such as a \ac{mmu}, to implement
-the latter.
+To do so, it implements one or more \ac{hse} mechanisms, which make use of
+hardware features such as a \ac{mmu}.
 %
 On the contrary, a \ac{xom} \ac{cpu} keeps track of each memory location owner,
-thanks to a tagging mechanism, and prevents an application to access a memory
-location it does not own.
+thanks to a tagging mechanism, and supposedly prevents an application to access
+a memory location it does not own.
 
 In 2003, David Lie \emph{et al.} have modelled the \ac{xom}
 architecture\,\cite{lie2003xom} using the Mur$\varphi$ model
-checker\thomasrk{ref murphi}.
+checker\,\cite{murphi}.
 %
 This model is a transition systems defined in terms of states and rules to
 update these states.
@@ -779,7 +815,8 @@ Application checker
 %
 Application checker
 
-\section{Compositional Security}
+\section{Compositional Verification}
+\label{section:sota:compsec}
 
 Traditional transition systems, such as the ones presented in the previous
 section, impose to model the complete system all at once.
@@ -791,23 +828,24 @@ Model checkers and similar automated tools remain subject to the so-called
 algorithms.
 %
 State explosion problem imposes modeling compromises, \emph{e.g.}  verification
-of cache coherency protocols with a fixed number of cores and limited address
-space\thomasrk{ref}.
+of cache coherency protocols with a fixed number of cores and address spaces
+limited in size (\emph{e.g.} in \cite{lie2003xom}, the model only considers
+three cache location).
 %
 Theorem provers allows for modeling \emph{parameterized} systems, so that it
 becomes possible, for example, to construct a proof which holds for an arbitrary
-number of similar components\thomasrk{ref}.
+number of similar components\,\cite{vijayaraghavan2015modular}.
 %
 This approach does not address all the challenges posed by the scale of complete
 hardware architectures, built up from smaller ---yet complex--- components.
 %
 A comprehensive hardware model in terms of hardware components would undoubtedly
 make the construction of the proof unbearable for any non-trivial properties,
-yet is a requirement to prevent compositional attacks.
+yet is a requirement to uncover compositional attacks by the means of formal
+methods.
 
 Compositional verification is a promising (family of) approach(es) to overcome
-the challenges posed by the scale of complex and large systems\thomasrk{ref
-  wing}, including hardware architectures.
+the challenges posed by the scale of complex and large systems.
 %
 In this approach, the verification work is divided into two steps.
 %
@@ -826,7 +864,7 @@ conquer'' strategies to reduce the burden of verifying the system
 \subsection{Compositional Modeling Structures}
 \label{subsec:sota:compmod}
 
-\paragraph{Input-Output Automata.}
+\paragraph{Concurrent Automata.}
 %
 I/O automata\,\cite{lynch1988ioautomata} are labeled transition systems which
 distinguish between three classes of transitions, modeled with three disjoints
@@ -856,15 +894,15 @@ it exists a state \( q \) such that \( (p, \pi, q) \in R(S) \).
 %
 Composition of I/O automaton is achieved \emph{via} input and output actions.
 %
-More precisely, when one automaton perform an output action \( pi \) during a
+More precisely, when one automaton perform an output action \( \pi \) during a
 transition, all automata having \( \pi \) as input action perform \( \pi \)
 simultaneously.
-%
+
 Although by definition, I/O automata are required to be input enabled, in
 practice the component they model will correctly behave (for a certain
 definition of ``correct'') only if certain requirements are met regarding the
 inputs they have to handle.
-
+%
 Interface automata\,\cite{de2001interfaceautomata} are similar to I/O automata,
 except they are not require to be input enabled.
 %
@@ -875,15 +913,15 @@ Another popular modeling structure is the Moore Machine.
 %
 Moore Machines play a key role in compositional model
 checking\,\cite{mcmillan1989compositional}, because they can be translated into
-a regular Kripke structure.
+Kripke structures.
 
 \paragraph{Process algebras.}
 %
-Another popular approach which enables compositional modeling of complex systems
-is process algebra.
+Another popular family of approaches which enable compositional modeling of
+complex systems is process algebras.
 %
-Process algebra has been developed in order to reason about programs executed in
-parallel.
+Process algebras have been developed in order to reason about programs executed
+in parallel.
 %
 It is a formal system to describe interacting systems, together with a semantic
 theory for verifying them.
@@ -891,8 +929,8 @@ theory for verifying them.
 In process algebras such as Calculus of Communication
 Systems\,\cite{milner1980ccs} or the Communicating Sequential
 Processes\,\cite{hoare1978csp}, two concurrent threads can run in parallel, and
-synchronization is achieved by sending messages rather than \emph{via} some
-shared memory.
+synchronization is achieved by sending and waiting for messages rather than
+\emph{via} some shared memory.
 %
 Compare to I/O or interface automata, process algebras eases the description of
 systems interactions.
@@ -916,7 +954,7 @@ with many different implementations (\emph{e.g.} Eff\,\cite{bauer2015effects},
 {\scshape Idris}\,\cite{brady2013idris}, or
 Haskell\,\cite{kiselyov2013extensible}).
 %
-In this context, \emph{effects} are characterized by a set of operations,
+In this context, \emph{effects} are characterized by sets of operations,
 \emph{e.g.} \texttt{get} and \texttt{set} for global state manipulation.
 %
 These operations are expected to produce a value whose type is known by
@@ -937,11 +975,11 @@ effect handlers is by the mean of coroutines\,\cite{kiselyov2013extensible}.
 When a program with effects requires the result of a given effect, it sends a
 request to the handler, and waits for the result.
 
-\subsection{Compositional Verification}
+\subsection{Compositional Verification Approaches}
 \label{subsec:sota:compverif}
 
-Historically, compositional verification is the answer of model
-checking\,\cite{mcmillan1989compositional} and concurrent programs
+Historically, compositional verification\,\cite{peng1998survey} is the answer of
+model checking\,\cite{mcmillan1989compositional} and concurrent programs
 verification\,\cite{jones1983tentative} communities to the state explosion
 problem.
 %
@@ -972,8 +1010,7 @@ Using a behavior equivalence approach, it becomes possible to reason about one
 component by abstracting away the part of the systems it interacts with simpler
 specifications.
 %
-This is referred to as compositional minimization \thomasrk{ref?} in model
-checking.
+This is referred to as compositional minimization in model checking.
 %
 The goal is to reduce the complexity of a model, with smaller yet provably
 equivalent components.
@@ -991,8 +1028,7 @@ is the composition of \( C \) with \( S' \) (denoted by \( C || S' \))
 guarantees \( G \).
 
 First assume-guarantee systems have been developed for model checkers, where
-assumptions and guarantees were defined with different temporal logic,
-\emph{e.g.} LTL and CTL.
+assumptions and guarantees were defined with temporal logic formulas.
 %
 The main obstacle to the adoption of the assume-guarantee paradigm is the
 necessity for the user to provide additional inputs to the checker, in addition
@@ -1048,6 +1084,7 @@ Logic of Program that overcomes limitation of Coq.io, but to the best of our
 knowledge, no implementation.
 
 \section{Conclusion: Where this Thesis Stands}
+\label{sec:sota:conclusion}
 
 \subsection{Specifying and Verifying Hardware-based Security Enforcement
   Mechanisms}
@@ -1078,15 +1115,18 @@ models, whose scope is often limited to necessary hardware features.
 %
 We steer a middle course between these approaches.
 %
-We would rather characterize sets of requirements over low-level software
-components, such that satisfying these requirements is sufficient to ensure the
-hardware architecture enforces a certain property\,\cite{letan2016speccert}.
+In Chapter~\ref{chapter:speccert}, we define \ac{hse} mechanisms as sets of
+requirements over low-level software components, such that satisfying these
+requirements is sufficient to ensure the hardware architecture enforces a
+certain property\,\cite{letan2016speccert}.
 %
-As a first step, we can verify the correctness of these requirements against a
-hardware model.
+In Chapter~\ref{chapter:speccert2}, we show how we can verify the correctness of
+these requirements against a hardware model.
 %
-The long term goal of this approach is to focus the verification of low-level
-software components on proving they satisfy these requirements.
+A desirable long term goal of this approach would be to be able to verify the
+correctness of low-level
+software components with respect to these requirements, so we can conclude the
+security property targeted by a \ac{hse} mechanism is effectively enforced.
 %
 As such, our approach relates to previous research works such as
 RockSalt\,\cite{morrisett2012rocksalt} (validation of arbitrary programs against
@@ -1097,11 +1137,11 @@ confidentiality).
 
 \subsection{Compositional Verification of Hardware Architecture}
 
-Our formal definition of \ac{hse} mechanism assume there exists a formal model
+Our formal definition of \ac{hse} mechanism assumes there exists a formal model
 of the hardware architecture.
 %
-The proof of concept of our approach we have implemented in the Coq theorem
-prover\,\cite{letan2016speccertcode} convinced us that such a model cannot be
+The development of our proof of concept, implemented in
+Coq\,\cite{letan2016speccertcode}, convinced us that such a model cannot be
 monolithic.
 %
 Otherwise, it would make the proof burden hard to bear.
@@ -1115,9 +1155,10 @@ model checking for instance.
 With FreeSpec\,\cite{letan2018freespeccode}, we aim to provide a generic
 compositional reasoning framework for Coq.
 %
-FreeSpec leverages programs with effects and effects handler to model
-component-based system, and introduces so-called abstract specification in order
-to enable compositional reasoning inspired by the assume-guarantee paradigm.
+As detailed in Chapter~\ref{chapter:freespec}, FreeSpec leverages programs with
+effects and effects handler to model component-based system, and introduces
+so-called abstract specification in order to enable a verification methodology
+inspired by the assume-guarantee paradigm.
 %
 In doing so, FreeSpec is at the intersection of several research domains.
 %
