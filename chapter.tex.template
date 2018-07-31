@@ -1,0 +1,95 @@
+\documentclass[oneside,a4paper]{memoir}
+\setsecnumdepth{subsection}
+
+\usepackage[chapter]{minted}
+\usemintedstyle{bw}
+
+% ABOUT THIS FILE
+% ---------------
+% The goal of this document is to prepare the next (and final?) version of the
+% chapter 3.
+
+\usepackage[sc]{mathpazo}    % Palatino with smallcaps
+\usepackage[scaled]{helvet}  % Helvetica, scaled 95%
+\usepackage{eulervm}
+\usepackage{inconsolata}
+
+\usepackage{phdcmd}
+\usepackage{speccert}
+\usepackage{freespec}
+\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
+
+\usepackage{bigcenter}
+\usepackage{geometry}
+\usepackage{paralist}
+\usepackage{hyperref}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{bussproofs}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{inconsolata}
+
+\usepackage[dvipsnames]{xcolor}
+\usepackage{xargs}
+\usepackage{todonotes}
+\newcommandx{\thomasrk}[2][1=]{\todo[linecolor=Plum,backgroundcolor=Plum!25,bordercolor=Plum,#1]{#2}}
+
+\usepackage{mdframed} % or, "mdframed"
+\usepackage[amsthm,framed]{ntheorem}
+\newcommand{\powerset}{\raisebox{.15\baselineskip}{\Large\ensuremath{\wp}}}
+
+\definecolor{statementline}{HTML}{b7e2d6}
+
+\theoremstyle{break}
+\theorembodyfont{\fontshape\rmdefault\selectfont}
+
+\mdfdefinestyle{quoted}{
+hidealllines=true,
+leftmargin=-15pt,
+rightmargin=-15pt,
+leftline=true,
+innertopmargin=10pt,
+innerbottommargin=10pt,
+innerrightmargin=15pt,
+linewidth=5pt,
+linecolor=gray!40,
+backgroundcolor=gray!3,
+usetwoside=false,
+skipabove=\topsep,
+skipbelow=\topsep}
+
+\mdfdefinestyle{definition}{
+style=quoted,
+linecolor=Violet!20,
+backgroundcolor=Violet!2}
+
+\mdfdefinestyle{statement}{
+style=quoted,
+linecolor=PineGreen!30,
+backgroundcolor=PineGreen!2}
+
+\newmdtheoremenv[style=definition]{definition}{Definition}[chapter]
+\newmdtheoremenv{notation}{Notation}[chapter]
+\newmdtheoremenv[style=quoted]{example}{Example}[chapter]
+\newmdtheoremenv[style=statement]{corollary}{Corollary}[chapter]
+\newmdtheoremenv[style=statement]{lemma}{Lemma}[chapter]
+\newmdtheoremenv[style=statement]{theorem}{Theorem}[chapter]
+
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, positioning, arrows, intersections, fit,
+  matrix, shapes, shapes.symbols}
+
+\usepackage{acro}
+
+\input{abbrev}
+\input{nomencl}
+
+\begin{document}
+
+\input{__TEX_INPUT_FILE__}
+
+\bibliographystyle{unsrt}%
+\bibliography{manuscript}
+\end{document}

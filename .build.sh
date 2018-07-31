@@ -1,6 +1,6 @@
 #!/bin/bash
 
-output="$(pdflatex -shell-escape -halt-on-error main.tex | grep -A3 ^! | cat)"
+output="$(pdflatex -shell-escape -halt-on-error "$1" | grep -A3 ^! | cat)"
 
 if [ ! -z "${output}" ];
 then
