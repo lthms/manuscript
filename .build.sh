@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 output="$(pdflatex -shell-escape -halt-on-error main.tex | grep -A3 ^! | cat)"
 
