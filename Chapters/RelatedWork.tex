@@ -1251,7 +1251,7 @@ synchronization is achieved by sending and waiting for messages rather than
   (resp. \( d_2 \)).
 \end{example}
 
-\paragraph{Program with Effects.}
+\paragraph{Programs with Effects.}
 %
 The relation between one component and the rest of the system it is connected to
 is reminiscent of the programming language to model and verify large programs
@@ -1331,7 +1331,50 @@ specifications.
 This is referred to as compositional minimization in model checking.
 %
 The goal is to reduce the complexity of a model, with smaller yet provably
-equivalent components.
+equivalent components, as pictured in Figure~\ref{fig:sota:minicomp}.
+
+\begin{figure}
+  \begin{minipage}{0.48\linewidth}
+    \begin{center}
+      \begin{tikzpicture}
+        \node [draw, inner sep=10pt, minimum height=40pt] (p) {\( P \)};%
+        \node [draw, inner sep=10pt, right=of p, minimum height=40pt] (q)
+        {\( Q \)};%
+
+        \draw ([yshift=5pt]p.east) -- ([yshift=5pt]q.west);%
+        \draw ([yshift=-5pt]p.east) -- ([yshift=-5pt]q.west);%
+
+        \draw ([yshift=10pt, xshift=-25pt]p.west) -- ([yshift=10pt]p.west);%
+        \draw ([xshift=-25pt]p.west) -- (p.west);%
+        \draw ([yshift=-10pt, xshift=-25pt]p.west) -- ([yshift=-10pt]p.west);%
+
+        \draw ([yshift=15pt, xshift=25pt]q.east) -- ([yshift=15pt]q.east);%
+        \draw ([yshift=5pt, xshift=25pt]q.east) -- ([yshift=5pt]q.east);%
+        \draw ([yshift=-5pt, xshift=25pt]q.east) -- ([yshift=-5pt]q.east);%
+        \draw ([yshift=-15pt, xshift=25pt]q.east) -- ([yshift=-15pt]q.east);%
+      \end{tikzpicture}
+    \end{center}
+  \end{minipage}
+  %
+  \begin{minipage}{0.48\linewidth}
+    \begin{center}
+      \begin{tikzpicture}
+        \node [draw, inner sep=10pt, minimum height=40pt] (p) {\( P \)};%
+        \node [draw, inner sep=10pt, right=of p] (q) {\( Q' \)};%
+
+        \draw ([yshift=5pt]p.east) -- ([yshift=5pt]q.west);%
+        \draw ([yshift=-5pt]p.east) -- ([yshift=-5pt]q.west);%
+
+        \draw ([yshift=10pt, xshift=-25pt]p.west) -- ([yshift=10pt]p.west);%
+        \draw ([xshift=-25pt]p.west) -- (p.west);%
+        \draw ([yshift=-10pt, xshift=-25pt]p.west) -- ([yshift=-10pt]p.west);%
+      \end{tikzpicture}
+    \end{center}
+  \end{minipage}
+
+  \caption{Illustration of the compositional minimization paradigm}
+  \label{fig:sota:minicomp}
+\end{figure}
 
 \paragraph{Compositional Reasoning.}
 %
