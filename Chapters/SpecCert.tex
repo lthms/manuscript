@@ -24,13 +24,15 @@ As a consequences of these characteristics, we have broken down our formal
 definition into three components: hardware models, \ac{hse} mechanisms and
 security policies.
 %
-First, we model the hardware architecture as a \ac{lts} whose sequences of
-transitions, also called traces, characterize every possible software components
-execution (Section~\ref{sec:speccert:hardware}).
+First, we model the hardware architecture as a labeled transition system whose
+sequences of transitions, also called traces, characterize every possible
+software components execution (Section~\ref{sec:speccert:hardware}).
 %
-This model acts as a foundation for the two other components: \ac{hse}
-mechanisms (Section~\ref{sec:speccert:hse}) and security policies
-\TODO{broken link}(Section~\ref{sec:speccert:security}) are expressed against a hardware model.
+This model acts as a foundation for our \ac{hse} mechanisms definition
+(Section~\ref{sec:speccert:hse}).
+%
+We finally define what correctness means in the context of \ac{hse} mechanisms
+(Section~\ref{sec:speccert:security}).
 
 For the reader familiar with Coq, we present an implementation of our formalism
 in Appendix~\ref{appendix:speccert}.
@@ -42,18 +44,17 @@ the proof sketches which follow.
 \section{Hardware Model}
 \label{sec:speccert:hardware}
 
-In line with the works we have described in Section~\ref{sec:related:review}, we
-model a hardware architecture which executes several software components as a
-\ac{lts}.
+We model a hardware architecture which executes several software components as a
+labeled transition system.
 
 \paragraph{States.}
 %
 The set of states of the \ac{lts} models the possible configurations of the
 hardware components.
 %
-This configuration changes over time with respect to the hardware
-specifications and comprises any relevant data such as register values, inner
-memory contents, etc.
+This configuration changes over time with respect to the hardware specifications
+and comprises any relevant data such as register values, inner memory contents,
+etc.
 %
 These state transformations occur during the system's transitions.
 
@@ -148,8 +149,8 @@ of the next.
   and we consider the following functions:
   %
   \begin{itemize}
-  \item $\func{init} : \pathesLTS{Ez} \rightarrow H$ maps a trace to its
-    initial state
+  \item $\func{init} : \pathesLTS{Ez} \rightarrow H$ maps a trace to its initial
+    state
   \item
     $\func{trans} : \pathesLTS{Ez} \rightarrow \powerset(\mathcal{T}(\Sigma))$
     maps a trace to the set of transitions which occured during the trace
@@ -169,7 +170,7 @@ This is why we ultimately seek to model \ac{hse} mechanisms as traces subsets,
 to discard traces legitimate from a hardware specification perspective, yet
 dangerous from a security perspective.
 
-\section{HSE Mechanisms}
+\section{HSE Mechanisms Definition}
 \label{sec:speccert:hse}
 
 We now propose a formal definition for \ac{hse} mechanisms, where a \ac{hse}
@@ -526,8 +527,9 @@ set of requirements over hardware configurations throughout the execution of
 a software stack, as long as a set of trusted software components correctly
 implement the mechanism.
 
-\paragraph{HSE Mechanism Correctness.}
-%
+\section{HSE Mechanism Correctness.}
+\label{sec:speccert:security}
+
 It is important to keep in mind that preserving a set of requirements over
 hardware configurations is only a mean to an end.
 %
