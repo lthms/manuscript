@@ -9,7 +9,7 @@
 
 \vspace{1cm}\noindent
 %
-Formal verification consists in proving the correctness of a system ---the
+Formal verification consists of proving the correctness of a system ---the
 \emph{implementation}--- with respect to certain properties.
 %
 To that end, a verifier
@@ -28,13 +28,13 @@ To that end, a verifier
 In this context, the terms ``implementation'' and ``specification'' refer to a
 subjective relation between two layers of abstraction: the specification is more
 abstract than its implementation, and formal verification proofs can be
-organized in an arbitrary number of abstraction layers
+organized in an arbitrary number of abstraction layers.
 %
 The definition of a specification shall ease the construction of the proof of
 correctness, while the correspondence proof allows for extending the properties
 of the specification to the implementation.
 %
-The instantiation of the terms ``formal description'', ``correspondence proof'',
+The instantiation of the terms ``formal description,’’ ``correspondence proof,’’
 ``properties'' or ``correctness proof'' may considerably vary from one system to
 another.
 %
@@ -45,7 +45,7 @@ For our part, we want to construct correctness proofs of a hardware architecture
 specification, with respect to security properties, using the Coq theorem prover
 (as explained in Chapter~\ref{chapter:introduction}).
 
-The rest of this Chapter proceeds as follow.
+The rest of this Chapter proceeds as follows.
 %
 First, we describe how transition systems can be leveraged in order to implement
 the verification methodology we just described
@@ -64,10 +64,10 @@ preceding research projects (Section~\ref{sec:sota:conclusion}).
 Transition systems have long been used to study the behavior of discrete
 systems.
 %
-Over times, many different definitions of what a transition system is have been
+Over times, many different definitions of transition system have been
 proposed, to address different classes of verification problems.
 %
-In this Section, we do not attempt to give comprehensive overview of these
+In this Section, we do not attempt to give a comprehensive overview of these
 approaches.
 %
 On the contrary, we explain how a system can be specified using a generic
@@ -91,7 +91,7 @@ rely on some sort of \emph{transition systems} to describe the behavior of the
 target.
 %
 More precisely, the system is characterized by a set of \emph{states} and by a
-set of \emph{atomic} state-transformation, called \emph{transitions}.
+set of \emph{atomic} state transformation, called \emph{transitions}.
 %
 Transitions occur when the system interacts with its environment (\emph{e.g.} a
 hardware circuit receives a clock signal, a hardware controller receives a
@@ -118,7 +118,7 @@ initial states.
   %
   An airlock system is a device made of two doors, and an intermediary chamber.
   %
-  To get across a airlock system, a user requests the opening of the first door,
+  To get across an airlock system, a user requests the opening of the first door,
   enters the chamber, waits for the system to close the first door and open the
   second door, and exits the chamber.
 
@@ -133,7 +133,7 @@ initial states.
     \( i \in \{1, 2\} \)) of a door of the system.
     %
   \item The system does not allow the simultaneous opening of both doors, as
-    stated by the definition of \( R \) which does not contains a transition
+    stated by the definition of \( R \) which does not contain a transition
     which leads to the state \( (\mathtt{open}, \mathtt{open}) \).
   \end{itemize}
 \end{example}
@@ -190,7 +190,7 @@ initial states.
       \end{center}
     \end{minipage}
 
-    \caption{An simple airlock system modeled as a labeled transition system}
+    \caption{A simple airlock system modeled as a labeled transition system}
     \label{fig:sota:airlock-lts}
   \end{center}
 \end{figure}
@@ -208,12 +208,12 @@ automata\,\cite{de2001interface} are better suited to model concurrent systems.
 \subsection{Introduction to Formal Methods}
 \label{subsec:sota:fm}
 
-Theorem prover rely on formal systems in which formulas (also called
+In a formal system, formulas (also called
 propositions) of a formal language represent statements which can either be true
 or false.
 %
 A formal system relies on a set of axioms, that are formulas known to be true,
-and inference rules which allows for deriving new formulas.
+and inference rules which allow for deriving new formulas.
 
 \paragraph{Propositions and Inference Rules.}
 %
@@ -262,8 +262,8 @@ about the node goal, by using an inference rule of the system.
 By convention, a node goal and its children are separated by a line labeled with
 the name of the inference rule.
 %
-The leafs of the trees are the statement known to be true, either because they
-are part the system axioms or because they have already been proven before.
+The leaves of the trees are the statement known to be true, either because they
+are part of the system axioms or because they have already been proven before.
 %
 Therefore, a proof which only consists in applying the \emph{Modus ponen} can be
 represented as follows:
@@ -349,8 +349,8 @@ so it becomes possible to express statements such as \emph{for all sets with a
   total order \( < \), for all pair of values \( \alpha, \beta \), then either
   \( \alpha < \beta \) or \( \beta < \alpha \) or \( \alpha = \beta \)}.
 %
-Therefore, higher order logics are more expressive than first-order logic, but
-they come with a cost in terms of automation.
+Therefore, higher order logic is more expressive than first-order logic, but
+it comes at a cost in terms of automation.
 %
 On the one hand, \emph{interactive} theorem provers (\emph{e.g.}  Coq,
 Isabelle/HOL, or more recently Lean\,\cite{de2015lean} are based on higher-order
@@ -363,7 +363,7 @@ first-order logic.
 Finally, modal logic\,\cite{chagrov1997modal} is a formal system which extends
 first-order logic with modal operators.
 %
-Temporal logics form the most popular family of modal logics, such as Temporal
+Temporal logic forms the most popular family of modal logic, such as Temporal
 Linear Logic (LTL)\,\cite{sistla1985ltl}.
 %
 They allow for reasoning about propositions over time.
@@ -396,7 +396,7 @@ The verification a system is \emph{always} relative to certain properties (in
 our case, the correct enforcement of a security policy).
 %
 The definition of a specification of the system to allow for formally reasoning
-about its behavior is a key step of the verification process.
+about its behavior is a key step in the verification process.
 %
 The formalization of the targeted property is as important, if not more.
 %
@@ -419,16 +419,16 @@ intuitive classification of properties, such that:
 %
 \begin{itemize}
 \item \emph{Safety properties}\,\cite{lamport1977proving,lamport1985logical}
-  characterize that nothing ``bad'' shall \emph{never} happens.
+  characterize that nothing ``bad'' shall \emph{never} happen.
 \item \emph{Liveness properties}\,\cite{lamport1985logical,alpern1985liveness}
-  characterize that something ``good'' shall \emph{eventually} happens.
+  characterize that something ``good'' shall \emph{eventually} happen.
 \end{itemize}
 
 We discussed in Subsection~\ref{subsec:usecase:targetedsec} the two classes of
 security policies commonly targeted by x86 \ac{hse} mechanisms.
 %
-An access control policy is a safety property: no unauthorized action by a
-subject targeting on object shall never happen.
+An access control policy is a safety property: unauthorized action by a
+subject shall never happen.
 %
 An availability policy is a liveness property: the system shall eventually
 satisfy the service
@@ -464,7 +464,7 @@ of traces \( P \) when,
 \]
 
 On the one hand, safety properties are characterized by an invariant \( \iota \)
-on trace element (\emph{i.e.} on \( S \) in the case of the specification
+on trace elements (\emph{i.e.} on \( S \) in the case of the specification
 \( M \)), and
 %
 \[
@@ -521,7 +521,7 @@ of \( \rho \).
   %
   We verify the specification of the airlock system is correct with respect to
   the liveness property characterized by \( \eta \) by exhibiting a proof that
-  for each transition of \( R \), one of the state satisfies \( \eta \), that is
+  for each transition of \( R \), one of the states satisfies \( \eta \), that is
   %
   \[
     \forall ((d_1, d_2), l, (d_1', d_2')) \in R, \eta(d_1, d_2) \vee \eta(d_1',
@@ -711,7 +711,7 @@ In 2003, David Lie \emph{et al.} have verified the \ac{xom}
 architecture\,\cite{lie2003xom} using the Mur$\varphi$ model
 checker\,\cite{murphi}.
 %
-The verification purpose of the authors was to prove that the \ac{xom}
+The verification goal of the authors was to prove that the \ac{xom}
 architecture fulfills its promise to be tamper-resistant, that is the
 architecture forbids an attacker to modify the memory location owned by a given
 application.
@@ -722,18 +722,18 @@ The verification proceeds as follows:
 \item A first specification of the \ac{xom} architecture, called the ``actual
   model'', is defined.
   %
-  The states of this first model contains the different hardware components of a
-  \ac{xom} microprocessor, \emph{i.e.} the registers, the cache and a volatile
+  States of this first model contain different hardware components of a
+  \ac{xom} microprocessor, \emph{i.e.} registers, cache and volatile
   memory.
   %
   It also integrates the internal machinery of \ac{xom} to track ownership of
   memory locations.
   %
-  Its transitions can be divided into two categories: the normal execution of an
+  Transitions can be divided into two categories: the normal execution of an
   application by the microprocessor, and active tampering from an adversary
   part.
   %
-  That is, the actual model embeds a notion of attacker model.
+  That is, the actual model embeds a notion of adversary model.
   %
 \item A second specification, called the ``idealized model'', abstracts away the
   memory hierarchy formed by the cache and the volatile memory.
@@ -743,15 +743,15 @@ The verification proceeds as follows:
   %
   From this perspective, it encodes the security property.
   %
-\item To let Mur\( \varphi \) explores both state simultaneously, the authors
+\item To let Mur\( \varphi \) explore both models simultaneously, the authors
   have manually defined a third model.
   %
-  Transitions which describes the execution of an application in the actual
-  model also updates the idealized model, whereas transitions which describes
+  Transitions which describe the execution of an application in the actual
+  model also update the idealized model, whereas transitions which describe
   actions by the attacker only affect the actual model.
   %
 \item The authors have defined a function which checks if an ``actual state'' is
-  equivalent to an ``idealized state'', and let Mur\( \varphi \) verifies that
+  equivalent to an ``idealized state'', and let Mur\( \varphi \) verify that
   the state equivalence is an invariant of the third model.
 \end{enumerate}
 %
@@ -765,18 +765,20 @@ model, in order to reduce the state combinatory.
 \paragraph{ARMv8.}
 %
 ARM Specification Language
+%
+\thomasrk[inline]{TODO}
 
 \paragraph{VirtCert.}
 %
 Between 2011 and 2014, Gilles Barthe \emph{et al.} have worked on an idealized
 model of a hypervisor.
 %
-This model is defined in terms of state, actions and a semantics of actions as
-state-trans\-formers.
+This model is defined in terms of state, actions and the semantics of actions as
+state trans\-formers.
 %
 The state mixes information about both hardware components (\ac{cpu} execution
 mode, registers, memory content, etc.) and software components (list of guests,
-current active guest, memory mapping for the hypervisor and the guests, etc.).
+the current active guest, memory mapping for the hypervisor and the guests, etc.).
 %
 The set of actions describes the events which can trigger a transformation of
 the model states.
@@ -787,7 +789,7 @@ as scheduling the OS guests, hypercalls handling, or memory management.
 Certain actions also witness the execution of guests, for instance when the OS
 currently running reads from or writes to memory.
 %
-The semantics of actions as state-transformers, which describes the set of
+The semantics of actions as state transformers, which describes the set of
 possible transitions for the model, is defined in terms of pre and
 postconditions, where
 %
@@ -801,7 +803,7 @@ postconditions, where
   \( a \).
 \end{enumerate}
 %
-This means, \( (s, a, s') \) is a transition of the model if and only if
+This means \( (s, a, s') \) is a transition of the model if and only if
 %
 \[
   \mathrm{Pre}(s, a) \wedge \mathrm{Post}(s, a, s')
@@ -809,7 +811,7 @@ This means, \( (s, a, s') \) is a transition of the model if and only if
 
 They implemented their model and their proofs in the Coq theorem prover.
 %
-First, they showed that their ideal hypervisor
+First, they showed that the ideal hypervisor
 %
 \begin{inparaenum}[(1)]
 \item ensures strong isolation between guests (two safety properties and
@@ -850,7 +852,7 @@ Certified microkernel.
 
 \paragraph{RockSalt.}
 %
-Thanks to the Google's service called \ac{nacl}, it is possible for software
+Thanks to the Google service called \ac{nacl}, it is possible for software
 developers to distribute their web applications in the form of native executable
 code.
 %
@@ -871,7 +873,7 @@ From a security perspective, this means there are two requirements over the
 \ac{nacl}:
 %
 \begin{inparaenum}[(1)]
-\item verify that the rules indeed are sufficient to constrain the untrusted
+\item verify that the rules indeed are sufficient to constrain the distrusted
   native applications with respect to the sandbox policy, and
 %
 \item the \ac{nacl} checker correctly verify that native applications respect
@@ -913,13 +915,13 @@ Hence, the memory controller only decrypts an \ac{epc}'s page if it is accessed
 by the enclave which owns it; it will also discard write accesses performed by
 another software component than the page owner.
 
-Rohit Sinha \emph{et al.} have modelled SGX instructions semantics, to complete
+Rohit Sinha \emph{et al.} have modeled SGX instructions semantics, to complete
 an existing model, and have developed an automated information flow analysis
 tool called Moat, to verify whether or not a given application code may leak
 secrets or not\,\cite{sinha2015moat}.
 %
 The work proceeds similarly to RockSalt, where instructions are treated as
-labelled transition from one state to another.
+labeled transition from one state to another.
 %
 However, Moat also consider an active and passive adversary, with additional
 capabilities (meaning, additional transitions in the system).
@@ -942,9 +944,9 @@ algorithms.
 State explosion problem imposes modeling compromises, \emph{e.g.}  verification
 of cache coherency protocols with a fixed number of cores and address spaces
 limited in size (\emph{e.g.} in \cite{lie2003xom}, the model only considers
-three cache location).
+three cache locations).
 %
-Theorem provers allows for modeling \emph{parameterized} systems, so that it
+Theorem provers allow for modeling \emph{parameterized} systems, so that it
 becomes possible, for example, to construct a proof which holds for an arbitrary
 number of similar components\,\cite{vijayaraghavan2015modular}.
 %
@@ -1006,7 +1008,7 @@ it exists a state \( q \) such that \( (p, \pi, q) \in R(S) \).
 %
 Composition of I/O automaton is achieved \emph{via} input and output actions.
 %
-More precisely, when one automaton perform an output action \( \pi \) during a
+More precisely, when one automaton performs an output action \( \pi \) during a
 transition, all automata having \( \pi \) as input action perform \( \pi \)
 simultaneously.
 
@@ -1016,7 +1018,7 @@ definition of ``correct'') only if certain requirements are met regarding the
 inputs they have to handle.
 %
 Interface automata\,\cite{de2001interfaceautomata} are similar to I/O automata,
-except they are not require to be input enabled.
+except they do not require to be input enabled.
 %
 As a consequence, the definition of an interface automaton captures its
 requirements over the rest of the system.
@@ -1035,7 +1037,7 @@ Kripke structures.
   %
   A door has two states: it can be either open or close.
   %
-  It takes two input actions, \( \mathtt{Open} \) (the action to open the door)
+  It takes two input actions: \( \mathtt{Open} \) (the action to open the door)
   and \( \mathtt{Close} \) (the action to close the door).
   %
   It does not have any output action, which means a door does not interact
@@ -1068,8 +1070,8 @@ Kripke structures.
     \end{tikzpicture}
   \end{center}
 
-  In addition to two doors, a airlock system needs a controller, whose purpose
-  is to handle users requests and open and close doors in consequence.
+  In addition to two doors, an airlock system needs a controller, whose purpose
+  is to handle users' requests and open and close doors in consequence.
   %
   We consider a slightly different situation than the specification given in
   Example~\ref{example:sota:airlocklts}.
@@ -1141,18 +1143,18 @@ Kripke structures.
   \end{center}
 \end{example}
 
-\paragraph{Process Algebras.}
+\paragraph{Process Algebra.}
 %
 Another popular family of approaches which enable compositional modeling of
-complex systems is process algebras.
+complex systems is process algebra.
 %
-Process algebras have been developed in order to reason about programs executed
+Process algebra has been developed in order to reason about programs executed
 in parallel.
 %
 It is a formal system to describe interacting systems, together with a semantic
 theory for verifying them.
 %
-In process algebras such as Calculus of Communication
+In process algebra such as Calculus of Communication
 Systems\,\cite{milner1980ccs} or the Communicating Sequential
 Processes\,\cite{hoare1978csp}, two concurrent threads can run in parallel, and
 synchronization is achieved by sending and waiting for messages rather than
@@ -1188,7 +1190,7 @@ synchronization is achieved by sending and waiting for messages rather than
     %
     If the value received from \( c \) is \( 1 \), \( P \) is executed.
     %
-    If it is \( 2 \), then \( Q \) is executed. Otherwise, \( R \) is executed.
+    If it is \( 2 \), then \( Q \) is executed. Otherwise \( R \) is executed.
   \item \( \nu c. P \) means a new channel \( c \) is created, and available for
     \( P \) to use it.
   \item \( P || Q \) is the parallel execution of \( P \) and \( Q \).
@@ -1235,13 +1237,13 @@ synchronization is achieved by sending and waiting for messages rather than
   A door is either open or close, and we model this with two mutually recursive
   process \( \mathrm{CloseDoor} \) and \( \mathrm{OpenDoor} \).
   %
-  They take one channel \( c \) as argument, then wait for new inputs coming
+  They take one channel \( c \) as an argument, then wait for new inputs coming
   from \( c \).
   %
   A controller is a recursive process which takes three channels \( c \),
   \( d_1 \) and \( d_2 \) as arguments.
   %
-  It waits for receiving new requests from \( c \).
+  It waits for new requests coming from \( c \).
   %
   When it receives a new request to open the first (resp. second) door, it first
   close the second (resp. first) door, using the channel \( d_2 \) (resp. \( d_1
@@ -1255,10 +1257,10 @@ synchronization is achieved by sending and waiting for messages rather than
 %
 The relation between one component and the rest of the system it is connected to
 is reminiscent of the programming language to model and verify large programs
-with side-effects.
+with side effects.
 %
-Modeling side-effects in pure programming language, such as Haskell or {\scshape
-  Gallina}, is usually achieve thanks to
+Modeling side effects in pure programming language, such as Haskell or {\scshape
+  Gallina}, is usually achieved thanks to
 Monads\,\cite{wadler1990comprehending,jones2005io}, \emph{e.g.} the State Monad
 to seamlessly write computations which manipulates a global state, or the List
 Monad to abstract non-determinism,
@@ -1267,7 +1269,7 @@ However, Monads have a reputation not to compose very
 well\,\cite{hyland2006combining}, despite construction such as Monad
 Transformers\,\cite{liang1995mtl}.
 %
-Algebraic effects and effects handlers are a generic approach overcoming this
+Algebraic effects and effect handlers are a generic approach overcoming this
 challenge, with many different implementations (\emph{e.g.}
 Eff\,\cite{bauer2015effects}, {\scshape Idris}\,\cite{brady2013idris}, or
 Haskell\,\cite{kiselyov2013extensible}).
@@ -1284,11 +1286,11 @@ state.
 On the one hand, programs with effects are pure computations which compose
 effects results together.
 %
-On the other hand, handlers models the environment which realizes these effects,
+On the other hand, handlers model the environment which realizes these effects,
 computes their results, and manipulates programs control flows.
 %
 One possible representation of the relation between programs with effects and
-effect handlers is by the mean of coroutines\,\cite{kiselyov2013extensible}.
+effect handlers is by the means of coroutines\,\cite{kiselyov2013extensible}.
 %
 When a program with effects requires the result of a given effect, it sends a
 request to the handler, and waits for the result.
@@ -1301,13 +1303,13 @@ model checking\,\cite{mcmillan1989compositional} and concurrent programs
 verification\,\cite{jones1983tentative} communities to the state explosion
 problem.
 %
-It can be divided into to complementary approaches: compositional minimization
+It can be divided into two complementary approaches: compositional minimization
 and compositional reasoning.
 
 \paragraph{Compositional Minimization.}
 %
 Components of a larger system are primarily identified by the interface they
-expose to their pairs, that is the set of operation they can carry out for the
+expose to their pairs, that is the set of operations they can carry out for the
 rest of the system.
 %
 They also ``hide'' the components they are connected to, and use in order to
@@ -1320,8 +1322,8 @@ respect to their interface.
 There are many different formalization of what ``equivalent behavior'' actually
 means.
 %
-For instance, in the context of process algebras, trace equivalence or
-bisimulation are two possible definition of equivalent
+For instance, in the context of process algebra, trace equivalence or
+bisimulation are two possible definitions of equivalent
 behavior\,\cite{fokkink2013pa}.
 
 Using a behavior equivalence approach, it becomes possible to reason about one
@@ -1389,7 +1391,7 @@ is the composition of \( C \) with \( S' \) (denoted by \( C || S' \))
 guarantees \( G \).
 
 First assume-guarantee systems have been developed for model checkers, where
-assumptions and guarantees were defined with temporal logic formulas.
+assumptions and guarantees were defined in temporal logic formulas.
 %
 The main obstacle to the adoption of the assume-guarantee paradigm is the
 necessity for the user to provide additional inputs to the checker, in addition
@@ -1397,9 +1399,9 @@ to the model and its properties to verify.
 %
 The \( L* \) learning algorithm, originally proposed by
 Augluin\,\cite{angluin1987lstart}, addresses this issue by automatically
-generating the appropriate assumptions.
+generating appropriate assumptions.
 %
-The \( L* \) algorithm has latter been adopted to other modeling structure, for
+The \( L* \) algorithm has latterly been adapted to other modeling structure, for
 instance for interface automata\,\cite{emmi2008assume}.
 
 \subsection{Related Works}
@@ -1424,12 +1426,12 @@ system, whose transitions are of the form
 \]
 %
 where \( p \) is the state of the component before an operation \( i \) which is
-called by an other component, \( a \) is a sequence of actions performed by the
+called by another component, \( a \) is a sequence of actions performed by the
 component in order to compute the result of \( i \), \( v \) is the result of
 \( i \), for the caller to use, and \( q \) is the modified state of the
 component.
 %
-Actions, in this context, are either local manipulations of the component's
+Actions, in this context, are either local manipulation of the component's
 state or calls of operations.
 
 To reason about \( M \) with respect to a specification \( M_S \), {\scshape
@@ -1461,16 +1463,16 @@ The \texttt{Coq.io} framework, developed and released by Guillaume Claret
 to allow the definition and verification of interactive programs in Coq by the
 means of use cases\,\cite{claret2015coqio}.
 %
-Such programs are defined in a dedicated Monad, with side-effects (\emph{e.g.}
+Such programs are defined in a dedicated monad, with side effects (\emph{e.g.}
 system calls to read from or write to a file) axiomatized as monadic operations
-of this Monad.
+of this monad.
 %
 The proofs rely on scenarios which determine how an environment (\emph{e.g.} an
 operating system) would react to the program requests.
 %
 Morally, the verification goal is to verify that, under the hypothesis that the
 environment is correct with respect to a scenario, then a program with effects
-is also correct with respect to the trace of side-effects operations it
+is also correct with respect to the trace of side effects operations it
 produces.
 
 The approach used by \texttt{Coq.io} enables a beginning of compositional
@@ -1497,7 +1499,7 @@ defined as logic formula.
 By definition, \ac{hse} mechanisms fall between two domains that are hardware
 design verification and low-level software components verification.
 
-On the one hand, hardware designs verification often focus on properties
+On the one hand, hardware design verification often focus on properties
 transparent to the executed software components (\emph{e.g.} cache
 coherency\,\cite{stern1995cachecoherence}, linearizability of SGX
 instructions\,\cite{leslie2015sgx}, hardware-based memory
@@ -1524,7 +1526,7 @@ certain property\,\cite{letan2016speccert}.
 In Chapter~\ref{chapter:speccert2}, we show how we can verify the correctness of
 these requirements against a hardware model.
 %
-A desirable long term goal of this approach would be to be able to verify the
+A desirable long-term goal of this approach would be to be able to verify the
 correctness of low-level
 software components with respect to these requirements, so we can conclude the
 security property targeted by a \ac{hse} mechanism is effectively enforced.
@@ -1557,7 +1559,7 @@ With FreeSpec\,\cite{letan2018freespeccode}, we aim to provide a generic
 compositional reasoning framework for Coq.
 %
 As detailed in Chapter~\ref{chapter:freespec}, FreeSpec leverages programs with
-effects and effects handler to model component-based system, and introduces
+effects and effect handlers to model component-based system, and introduces
 so-called abstract specification in order to enable a verification methodology
 inspired by the assume-guarantee paradigm.
 %
@@ -1567,21 +1569,21 @@ Our work is in the continuity of \texttt{Coq.io}\,\cite{claret2015coqio}, but
 our abstract specifications are more generic and expressive than the scenarios.
 %
 We have shown how programs with effects and effects handlers can be used to
-modularly verify a complex system made of inter-connected components, \emph{via}
-the notion of interface as rendez-vous point.
+modularly verify a complex system made of interconnected components, \emph{via}
+the notion of interface as the rendezvous point.
 %
 The principle of our approach is similar to what {\scshape Kami} achieves, but
 is not hardware specific.
 %
-In addition, our abstract specifications allows for compositional verification,
+In addition, our abstract specifications allow for compositional verification,
 while {\scshape Kami} focus on refinement proofs.
 %
 To the best of our knowledge, the closest related research is the work of Deepak
 Garg \emph{et al.}\,\cite{garg2010compositional}.
 %
 Probably the main difference between our two approaches is that they rely on a
-dedicated programming language, while our programs with effects and effects
-handler are regular {\scshape Gallina} development.
+dedicated programming language, while our programs with effects and effect
+handlers are regular {\scshape Gallina} development.
 %
 As a consequence, we can use the full interactive proof development environment
-of Coq in order to write and machine-check our proofs.
+of Coq in order to write and validate our proofs.
