@@ -1,3 +1,4 @@
+%!TEX root = ../main.tex
 \chapter{Formal Definition of HSE Mechanisms}
 \label{chapter:speccert}
 
@@ -17,16 +18,16 @@ takes into account that
 \item trusted and untrusted software components use the same interface and
   manipulate the same stateful environment, and
 \item several \ac{hse} mechanisms are often implemented simultaneously, to
-  enforce several security policies.
+  enforce different security policies.
 \end{inparaenum}
 %
-As a consequences of these characteristics, we have broken down our formal
+As a consequence \TODO{je ne vois pas trop le lien de cause à effet. Revoir la transition de cette phrase}, we have broken down our formal
 definition into three components: hardware models, \ac{hse} mechanisms and
-security policies.
+security policies. \TODO{Attention à l'usage des temps. Dans cette phrase tu utilises le present perfect. Ensuite c'est le présent...}
 %
 First, we model the hardware architecture as a labeled transition system whose
-sequences of transitions, also called traces, characterize every possible
-software components execution (Section~\ref{sec:speccert:hardware}).
+sequences of transitions, also called traces, characterize every possible execution of 
+software components  (Section~\ref{sec:speccert:hardware}).
 %
 This model acts as a foundation for our \ac{hse} mechanisms definition
 (Section~\ref{sec:speccert:hse}).
@@ -38,14 +39,14 @@ For the reader familiar with Coq, we present an implementation of our formalism
 in Appendix~\ref{appendix:speccert}.
 %
 This development comprises machine-checked proofs of the theoretical results
-that we present throughout this Chapter, and we have used these proofs to phrase
-the proof sketches which follow.
+that we present throughout this Chapter. We have used these proofs to phrase
+the proof sketches which follow. \TODO{Je ne suis pas sur de comprendre précisemment la dernière phrase.}
 
 \section{Hardware Model}
 \label{sec:speccert:hardware}
 
-We model a hardware architecture which executes several software components as a
-labeled transition system.
+We model a hardware architecture, which can execute different software components, as a
+\ac{lts}.
 
 \paragraph{States.}
 %
@@ -135,13 +136,12 @@ interrupt.
   \]
 \end{definition}
 
+\TODO{c'est quoi le sigle "union" avec un plus à l'intérieur?}
+
 \paragraph{Traces.}
-%
-Finally, we formally introduce the definition of traces of a hardware model.
-%
 A trace is a non-empty sequence of transitions of~$\Sigma$, such that for two
-consecutive transitions, the resulting state of the first is the initial state
-of the next.
+consecutive transitions, the resulting state of the first one is the initial state
+of the next one. \TODO{Tu ne donnes qu'une définition informelle (en anglais) des traces. Tu pourrais donner la formule correspondante. Idem pour init et trans}
 
 \begin{definition}[Traces]
   \label{def:speccert:trace}
@@ -157,7 +157,7 @@ of the next.
   \end{itemize}
 \end{definition}
 
-As we detailed in Subsection~\ref{subsec:state:secu}, security policies are
+As we detailed in Subsection~\ref{subsec:state:secu} \TODO{le label de cette sous-section n'est pas valide}, security policies are
 modelled as predicates on sets of traces, that is $\powerset (\pathesLTS{Ez})$.
 %
 Mainstream hardware architectures are not ``safe'' by default, and required
@@ -184,17 +184,17 @@ components with respect to a targeted security policy.
 %
 On the other hand, the purpose of the requirements over software transitions is
 to prevent untrusted software components to reach a hardware configuration
-wherein the requirements over state are not satisfied.
+wherein the requirements over state are not satisfied. \TODO{Tu devrais dès le début bien insister sur le fait que ces contraintes ne s'applique que sur le code trusté. On va supposer que le code trusté utiliser correctement le mécanisme hardware. Dans notre modèle d'attaquant, l'attaquant n'a que le controle du code non trusté, qui n'est donc pas contraint.}
 %
 These requirements allow us to determine a subset of compliant traces, that is
 traces where trusted software components have correctly implemented the \ac{hse}
-mechanism.
+mechanism. \TODO{Peut être rappeller que "correctly implement the HSE" veut dire respecter les contraintes sur les états et les transititions software. C'est un peu trop implicite.}
 %
 To verify a \ac{hse} mechanism is correct with respect to a targeted security
 policy means proving the set of compliant traces of this mechanism satisfies the
 predicate which models the policy.
 
-\paragraph{Definition.}
+\paragraph{Definition.} \TODO{Le nom du paragraphe (Definition) n'est pas top. Il y en a plein partout, des définitions. Je propose quelque chose du style "HSE mecanisms"...}
 %
 In the context of \ac{hse} mechanisms, trusted and untrusted software components
 alike use the same interface to interact with the underlying hardware
@@ -221,21 +221,22 @@ executed when the \ac{cpu} is in ring 3, with a particular page table setup.
 \end{definition}
 
 We say a software transition is trusted (respectively untrusted) when it is
-generated from a state assignated to a trusted (respectively untrusted) software
+generated from a state associated to a trusted (respectively untrusted) software
 component.
 %
 A hardware-software mapping is mandatory to define requirements over software
 transitions.
 %
-Indeed, these requirements can only concern trusted software transitions.
+Indeed, these requirements can only concern trusted software transitions. \TODO{Cela devrait être expliqué un peu plus en détail et plus tôt. Il suffirait alors ici de le rappeler (comme expliqué en section xx, ces contraintes ne concernent que les transition trustés.}
 %
+
 Dealing with multi-core architectures is possible, but requires additional
-efforts.
+efforts. \TODO{J'ai l'impression que cela devrait être mentionné et discuté plus haut. De manière générale, comment modéliser une archi multi-core? Plusieurs transitions peuvent-elles arriver simultanément?}
 %
 One solution is to define a set of core identifiers to act as an additional
-parameter for hardware-software mapping and software transitions.
+parameter for hardware-software mapping and software transitions. \TODO{Pourquoi seulement sur les transitions software? Si un coeur fait un défaut de page, est-ce que l'interruption est transmise à tous les coeurs?}
 %
-However, this is out of the scope of this Chapter.
+However, this is out of the scope of this Chapter. \TODO{C'est du bottage en touche peu élégant. Je dirais que c'est une limite du modèle tel qu'il est présenté dans cette thèse. Mais on pourrait étendre le modèle pour traiter le multi-coeur. Il faut le dire clairement. C'est pas un truc hors sujet du chapitre (sauf erreur de ma part, le problème n'est pas traité ailleurs dans le manuscrit). }
 
 \begin{definition}[HSE Mechanism]
   \label{def:speccert:hse}
@@ -257,23 +258,21 @@ However, this is out of the scope of this Chapter.
     hardware configurations and potentially vulnerable ones.
   %
   \item $\func{software\_req}$ is a predicate on $H \times L_S$ to distinguish
-    between safe software transitions and potentially harmful ones.
+    between safe software transitions and potentially harmful ones. \TODO{Je rajouterai une phrase pour enfoncer le clou du style "ce prédicat ne contraint que les transition trusté"}
   \end{itemize}
 \end{definition}
 
 We illustrate this definition with the flash memory lock-down mechanism
 described in Section~\ref{subsec:usecase:hse:smm}.
 %
-As a reminder, the flash memory lock-down mechanism enforces the integrity of
-the \ac{bios} code within the flash memory.
-%
-It is implemented by the \ac{pch}.
+As a reminder, such mechanism enforces the integrity of
+the \ac{bios} code within the flash memory and is implemented by the \ac{pch}.
 %
 As pictured in Figure~\ref{fig:speccert:flash}, the \ac{pch} acts as a proxy
 between the \ac{cpu} and a collection of peripherals, including the flash
 memory.
 %
-as follows:
+as follows: \TODO{Il manque le début de la phrase.}
 %
 \begin{enumerate}
 \item By default, the flash memory is locked and its content cannot be modified.
@@ -292,7 +291,7 @@ as follows:
 %
 \item In order to protect the integrity of the flash memory content, the
   \ac{bios} is expected to lock the flash memory again, before resuming the
-  execution of the system software with the \texttt{rsm} assembly instruction.
+  execution of the system software with the \texttt{rsm} assembly instruction. \TODO{Avant de faire un lock, je suppose que le code du firmware fait quelque chose d'utile (mettre à jour le firmware?) Il faudrait le préciser.}
 \end{enumerate}
 
 \begin{figure}
@@ -324,11 +323,13 @@ as follows:
   \label{fig:speccert:flash}
 \end{figure}
 
+\TODO{Dans le schéma, il faudrait agrandir le bloc "Flash memory" pour que "memory tienne sur une seule ligne"}
+
 \begin{example}[Flash Memory Lock-down Mechanism]
   \label{example:speccert:flashdef}
-  In this example, the trusted software component ($T$) is the \ac{bios}.
+  In this example, the trusted software component ($T$) is the \ac{bios}. \TODO{ et du coup, il faudrait préseciser que les autres composants (OS, applications, etc.) sont les non-trustés.}
   %
-  The \ac{cpu} executes the \ac{bios} when it is in \ac{smm} (\func{context}).
+  The \ac{cpu} executes the \ac{bios} when it is in \ac{smm} (\func{context}). \TODO{La phrase n'est pas suffisamment préciser. En outre, j'ai mis du temps à me rappeler que context ne doit pas être pris ici comme un mot commun mais un nom de fonction!. Il faudrait dire que par défaut contexte(h)=non trusté sauf lorsque le CPU est en SMM, c'est à dire lorsqu'une SMI se produit et avant que le bios exécute une instruction rsm}
   %
   A safe hardware state ($\func{hardware\_req}$) is either a state wherein the
   \ac{bios} is executed, or a state wherein the flash memory is locked.
@@ -341,7 +342,7 @@ as follows:
 %
 As it is, our definition of \ac{hse} mechanisms is too permissive.
 %
-For a \ac{hse} mechanism to be correctly defined, it must also obey a few
+For a \ac{hse} mechanism to be correctly defined \TODO{est-ce que "consistent" ne serait pas mieux que "correct", dans ce cas? Les lois sont la pour assurer la cohérence de la définition.}, it must also obey a few \TODO{a few est un peu vague. Two?"}
 axioms, together called the \ac{hse} Laws.
 %
 The first law says that the $\func{software\_req}$ predicate always holds true
@@ -359,7 +360,7 @@ $\func{software\_req}$ predicate, the $\func{hardware\_req}$ predicate holds
 true.
 %
 This means the software transitions at the untrusted software components
-disposal cannot achieve putting the system in an unsafe state.
+disposal cannot put the system into an unsafe state.
 
 \begin{definition}[\ac{hse} Laws]
   \label{def:speccert:laws}
@@ -385,6 +386,8 @@ disposal cannot achieve putting the system in an unsafe state.
   \end{enumerate}
 \end{definition}
 
+\TODO{Pour être cohérent entre les deux définition, j'utiliserait plutôt un "ET" logique plutôte qu'une imbrication d'implication. Si hardware\_req(h) ET  l in LS...}
+
 On the one hand, a \ac{hse} mechanism definition which does not satisfy the
 first law is incorrectly making assumption about ``untrusted'' software
 components.
@@ -405,12 +408,12 @@ software components.
 %
 In such a condition, the hardware architecture may stop to constrain the
 execution of untrusted software components with respect to the targeted security
-policy.
+policy. \TODO{Cela veut surrement dire que les contraintes sur l'exécution du code trusté sont incomplètes ou que le la restriction sur l'état du hardware est au contraire trop restrictive. S'il n'est pas possible de trouver une contrainte sur l'état du hardware moins restrictive permettant d'assurer la propriété de sécurité ou de restreindre le code trusté pour vérifier cette seconde loi, il y a de forte chance que le HSE ne permette pas d'assurer la propriété de sécurité visée.... }
 
 \begin{example}[Flash Memory Lock-down Inconsistency]
   We can convince ourselves that the informal definition description we have
   discussed in the Example~\ref{example:speccert:flashdef} obeys the second HSE
-  Law, but \emph{does not} obey the first one.
+  Law, but \emph{does not} obey the first one. \TODO{Euh, sauf erreur de ma part, c'est l'inverse. Il obeit à la première mais pas à la deuxième.}
   %
   \paragraph{Untrusted software transitions satisfy $\func{software\_req}$.}
   %
@@ -476,7 +479,7 @@ initial state of the trace satisfies the requirements over state.
 %
 A trace whose initial state satisfies the requirements over state and where
 trusted software components do correctly implement a \ac{hse} mechanism is said
-to complies with this mechanism.
+to comply with this mechanism.
 %
 \begin{definition}[Compliant Traces]
   We write $\mathcal{C}(\Delta)$ for the set of the traces which comply with
@@ -621,7 +624,7 @@ can be difficult, especially when this security policy is a
 hyperproperty\,\cite{clarkson2010hyperproperties}.
 %
 On the contrary, safety properties modelled as predicates on transitions are
-easier to reason about, as shown by the following theorem.
+easier to reason about, as shown by the following theorem. \TODO{Je trouve que c'est un peu s'avancer de dire que ton modèle peut traiter autre chose que des prédicats sur les transitions. Tout est construit dans ton approche pour traiter efficacement ce cas. Tu ne nous convainc pas que ton approhce (prédicat, sur l'état du hard, restriction sur les transition trusté...) est adaptée pour traiter d'autre cas...}
 
 \begin{theorem}[Correct HSE Mechanism for Predicate on Transitions]
   \label{theorem:speccert:correcthse}
@@ -653,6 +656,8 @@ easier to reason about, as shown by the following theorem.
   \end{proof}
 \end{theorem}
 
+\TODO{Contrairement au lemmes précédents, je trouve que la preuve (schéma de preuve?) est un peu trop rapide. Je n'arrive pas à suivre et à me convaincre que çà marche (mais je suis sans doute trop fatigué).}
+
 \section{Conclusion}
 
 In this Chapter, we present our formal definition of \ac{hse} mechanisms, in the
@@ -664,6 +669,8 @@ This approach allows for reusing the same model to define and verify several
 We believe this is an essential property, especially because in practice, these
 multiple mechanisms will be implemented concurrently, and may interfere with
 each other.
+
+\TODO{Sauf erreur de ma part, ton chapitre 4 ne développe pas du tout cet aspect "modulaire" et "réutilisabilié". Donc c'est un peu exagéré de le mettre en avant dans la conclusion. Soit il faut nuancer cette conclusion, soit il faut développer ces aspects (via un exemple notamment) dans le chapitre.}
 
 Throughout this Chapter, we have tried to illustrate our definitions with
 real-world examples, as our effort has been originally motivated by the
