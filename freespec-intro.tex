@@ -15,11 +15,6 @@
 \usepackage{eulervm}
 \usepackage{inconsolata}
 
-\usepackage{phdcmd}
-\usepackage{speccert}
-\usepackage{freespec}
-\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
-
 \usepackage{bigcenter}
 \usepackage{geometry}
 \usepackage{paralist}
@@ -83,13 +78,59 @@ backgroundcolor=PineGreen!2}
   matrix, shapes, shapes.symbols}
 
 \usepackage{acro}
-
 \input{abbrev}
-\input{nomencl}
 
 \begin{document}
 
-\input{__TEX_INPUT_FILE__}
+\chapter{FreeSpec}
+
+\section{A Compositional Reasoning Framework}
+
+\subsection{SpecCert Limitations}
+
+\paragraph{Abstract Model}
+%
+\begin{itemize}
+\item Mix of a concrete and abstract model
+\item As a consequence, the model is not really reusable
+\item May work for similar security properties only
+\item We need a clear separation between the two
+\end{itemize}
+
+\paragraph{Monolithic Model}
+%
+\begin{itemize}
+\item The transitions are not atomic.
+\item The ``\texttt{remember; assert; apply}'' pattern
+  \begin{itemize}
+  \item \texttt{remember} : cleanup the goal, by naming intermediary states
+  \item \texttt{assert} : create intermediary goals to show \texttt{inv} is
+    preserved
+  \item \texttt{apply} : Prove the intermediary goal as a lemma, and apply the
+    lemma
+  \end{itemize}
+\item The airlock system problem avoided, only by luck and not formally
+\end{itemize}
+
+Lorem ipusm Lorem ipusm Lorem ipusm Lorem ipusm Lorem ipusm Lorem ipusm Lorem
+ipusm Lorem ipusm Lorem ipusm Lorem ipusm
+
+\begin{figure}
+  \inputminted{coq}{Listings/StateHell.v}
+
+  \caption{Raw postcondition of a \texttt{Write} transition with a writeback
+    strategy}
+  \label{fig:freespec:postcondition}
+\end{figure}
+
+
+\begin{figure}
+  \inputminted{coq}{Listings/RememberPattern.v}
+
+  \caption{Postcondition of a \texttt{Write} transition with a writeback
+    strategy, after the use of the \texttt{remember} tactic}
+  \label{fig:freespec:rememberpost}
+\end{figure}
 
 \bibliographystyle{unsrt}%
 \bibliography{manuscript}
