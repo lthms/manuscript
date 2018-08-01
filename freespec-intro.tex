@@ -113,15 +113,21 @@ backgroundcolor=PineGreen!2}
 \item Cannot take into account concurrency
 \end{itemize}
 
+\[
+  \vdash \iota(h) \Rightarrow \iota(t(s(r(h))))
+\]
+
 {\bigcentering%
-  \AxiomC{} \LeftLabel{\footnotesize {\scshape Id}} \UnaryInfC{\(
+  \AxiomC{}%
+  \LeftLabel{\footnotesize {\scshape Id}} \UnaryInfC{\(
     \begin{array}{l}
       \iota(h) \\
       \hline
       \vdash \iota(h)
     \end{array}
     \)}%
-  \AxiomC{} \RightLabel{\footnotesize {\scshape Inv}\( _r \)} \UnaryInfC{\(
+  \AxiomC{}%
+  \RightLabel{\footnotesize {\scshape Inv}\( _r \)} \UnaryInfC{\(
     \begin{array}{l}
       \iota(h) \\
       h_1 = r(h) \\
@@ -138,7 +144,8 @@ backgroundcolor=PineGreen!2}
       \vdash \iota(h_1)
     \end{array}
     \)}%
-  \AxiomC{} \RightLabel{\footnotesize {\scshape Inv}\( _s \)} \UnaryInfC{\(
+  \AxiomC{}%
+  \RightLabel{\footnotesize {\scshape Inv}\( _s \)} \UnaryInfC{\(
     \begin{array}{l}
       \iota(h) \\
       h_1 = r(h) \\
@@ -157,7 +164,8 @@ backgroundcolor=PineGreen!2}
       \vdash \iota(h_2)
     \end{array}
     \)}%
-  \AxiomC{} \RightLabel{\footnotesize {\scshape Inv}\( _t \)} \UnaryInfC{\(
+  \AxiomC{}%
+  \RightLabel{\footnotesize {\scshape Inv}\( _t \)} \UnaryInfC{\(
     \begin{array}{l}
       \iota(h) \\
       h_1 = r(h) \\
@@ -177,7 +185,36 @@ backgroundcolor=PineGreen!2}
     \end{array}
     \)}%
   \DisplayProof%
-}
+
+  \vspace{0.5cm} }
+
+Proving \( \Delta_{\mathtt{bios}} \) was correct with respect to
+\( I_{\mathtt{bios}} \) using Coq led to use a recurring pattern we will call
+``\texttt{remember};~\texttt{destruct};~\texttt{assert};~\texttt{apply}'', after
+the {\scshape Ltac} tactics.
+%
+\begin{enumerate}
+\item Using \texttt{remember}, we can make the sequence of state updates more
+  visible. As a result, the Coq goal is more readable, which greatly simplify
+  the task to write the proof.
+\item Using \texttt{destruct}, we can explore the different paths. For instance,
+  regarding the initial state of the system, the content of the address \( pa \)
+  may or may not be present in the cache
+  (Figure~\ref{fig:freespec:rememberpost}, line 7).
+\item Using \texttt{assert}, we can introduce now goals to prove intermediary
+  result. In our case, we will prove that the predicate \texttt{inv} remains
+  satisfied after each state update
+\item Using \texttt{apply}, we can leverage lemmas about \texttt{inv}
+  preservation for a given state update. For instance, the function
+  \texttt{update\_cache\_content} (Figure~\ref{??}, line 11) have a lemma called
+  \texttt{update\_cache\_content\_with\_context\_preserves\_inv}.
+\end{enumerate}
+
+The ``\texttt{remember};~\texttt{destruct};~\texttt{assert};~\texttt{apply}''
+pattern can help to uncover potential invariant violations during a transition.
+%
+In practice, it is cumbersome to use, and nothing prevent the verifier from
+forgetting one state update and still being able to conclude the proof.
 
 \begin{figure}
   \inputminted{coq}{Listings/StateHell.v}
