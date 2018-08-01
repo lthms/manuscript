@@ -110,10 +110,74 @@ backgroundcolor=PineGreen!2}
     lemma
   \end{itemize}
 \item The airlock system problem avoided, only by luck and not formally
+\item Cannot take into account concurrency
 \end{itemize}
 
-Lorem ipusm Lorem ipusm Lorem ipusm Lorem ipusm Lorem ipusm Lorem ipusm Lorem
-ipusm Lorem ipusm Lorem ipusm Lorem ipusm
+{\bigcentering%
+  \AxiomC{} \LeftLabel{\footnotesize {\scshape Id}} \UnaryInfC{\(
+    \begin{array}{l}
+      \iota(h) \\
+      \hline
+      \vdash \iota(h)
+    \end{array}
+    \)}%
+  \AxiomC{} \RightLabel{\footnotesize {\scshape Inv}\( _r \)} \UnaryInfC{\(
+    \begin{array}{l}
+      \iota(h) \\
+      h_1 = r(h) \\
+      \hline
+      \vdash \iota(h) \Rightarrow \iota(h_1)
+    \end{array}
+    \)}%
+  \LeftLabel{\footnotesize {\scshape M-P}}%
+  \BinaryInfC{\(
+    \begin{array}{l}
+      \iota(h) \\
+      h_1 = r(h) \\
+      \hline
+      \vdash \iota(h_1)
+    \end{array}
+    \)}%
+  \AxiomC{} \RightLabel{\footnotesize {\scshape Inv}\( _s \)} \UnaryInfC{\(
+    \begin{array}{l}
+      \iota(h) \\
+      h_1 = r(h) \\
+      h_2 = s(h_1) \\
+      \hline
+      \vdash \iota(h_1) \Rightarrow \iota(h_2)
+    \end{array}
+    \)}%
+  \LeftLabel{\footnotesize {\scshape M-P}}%
+  \BinaryInfC{\(
+    \begin{array}{l}
+      \iota(h) \\
+      h_1 = r(h) \\
+      h_2 = s(h_1) \\
+      \hline
+      \vdash \iota(h_2)
+    \end{array}
+    \)}%
+  \AxiomC{} \RightLabel{\footnotesize {\scshape Inv}\( _t \)} \UnaryInfC{\(
+    \begin{array}{l}
+      \iota(h) \\
+      h_1 = r(h) \\
+      h_2 = s(h_1) \\
+      h' = t(h_2) \\
+      \hline \vdash \iota(h_2) \Rightarrow \iota (h')
+    \end{array}
+    \)}%
+  \RightLabel{\footnotesize {\scshape M-P}}%
+  \BinaryInfC{\(
+    \begin{array}{l}
+      \iota(h) \\
+      h_1 = r(h) \\
+      h_2 = s(h_1) \\
+      h' = t(h_2) \\
+      \hline \vdash \iota (h')
+    \end{array}
+    \)}%
+  \DisplayProof%
+}
 
 \begin{figure}
   \inputminted{coq}{Listings/StateHell.v}
