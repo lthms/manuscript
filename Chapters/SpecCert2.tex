@@ -1,3 +1,4 @@
+%!TEX root = ../main.tex
 \chapter{Specifying and Verifying a BIOS HSE Mechanism}
 \label{chapter:speccert2}
 
@@ -16,7 +17,7 @@ implemented by the \ac{bios} on x86 hardware architecture at runtime and
 described in Section~\ref{sec:usecase:hse}.
 %
 The purpose of this \ac{hse} mechanisms is to provide an isolated execution
-environment to the \ac{bios} and relies on the System Management Mode (SMM) and
+environment to the \ac{bios}. It relies on the System Management Mode (SMM) and
 the System Management Interrupt (SMI).
 
 First, we formally specify the targeted security policy for this \ac{hse}
@@ -36,42 +37,43 @@ previously introduced (Section~\ref{sec:speccert2:verif}).
 
 The model and proofs described in this Chapter have been implemented using Coq.
 %
-We have released this development in a project called SpecCert that has been
-released as a free software\,\footnote{SpecCert can be found at the following
+We have released this development as free software in a project called SpecCert\,\footnote{SpecCert can be found at the following
   URL: \url{https://github.com/lthms/speccert}}.
 %
 As we introduce new definitions and theoretical results, we point to the related
-statements in our development, so the interesting reader familiar with Coq can
-read our machine-checked proofs.
+statements in SpecCert, so the interesting reader familiar with Coq can
+read our machine-checked proofs. \TODO{The reader... can read fait un peu répétition}
 
 \section{Specifying BIOS Isolation Policy}
 \label{sec:speccert2:usecase}
 
-We now focus on a class of security policies we call \emph{isolation policies}.
+We now focus on a class of security policies we call \emph{isolation policies} \TODO{es-tu vraiment le seul (et le premier) a parler de isolation policy? c'est le "we call" qui me fait tiquer}.
 %
 Such a policy prevents a software component to tamper with the execution of
-lower levels of the software stack.
+lower levels of the software stack. \TODO{Pourquoi s'embarquer dans les histoire de position dans la software stack. J'ai pas l'impression que cette histoire de hierarchie dans une stack est été formellement définie. Je préfererais qu'on parle de code trusté/non trusté.}
 %
 We consider that a software component tampers with the execution of another when
 it is able to make the latter execute an instruction of its choice, that is the
-former achieves a code injection against the latter.
+former achieves a code injection against the latter. \TODO{Evite les longues phrases avec "le premier, le second, etc.". A la fin on s'y perd. Il est préférable dans ce cas de nommer les deux composants et d'utiliser leur nom par la suite. Par exemple, soit deux composant A et B... }
+\TODO{Outre la remarque précédente, je n'ai pas l'impression que "make the latter execute an instruction of its choice" soit synonyme de "code injection". J'ai l'impression que la définition inclut également du Code Reuse Attack (l'attaquant fait bien exécuter du code de son choix à la cible également dans ce cas, même si les instruction appartiennent à du code légitime de la cible). En outre, si c'est bien de "code injection" dont tu veux parler, dit le dès le début et n'essaie pas de redéfinir ce concept d'une manière alambiqué et au final ambigue.}
 %
 This is a particular sub-case of the Integrity property
-(Definition~\ref{def:usecase:int}), as we focus on instructions fetches
-exclusively.
+(Definition~\ref{def:usecase:int}) \TODO{Le label de la définition est cassé}, as we focus on instructions fetches
+exclusively. \TODO{Pas claire mais je ne suis pas allez chercher ce que la propriété disait..}
 %
 It is true than, usually, the word ``isolation'' refers to stronger security
 properties; for instance, the guests isolation of the idealized hypervisor of
 Gilles Barthe \emph{et al.} is a hyperproperty similar to
 non-interference\,\cite{barthe2011virtcert1}.
 %
-However, enforcing such a property is a task mostly tackled by system software.
+However, enforcing such a property is a task mostly tackled by system software. \TODO{Cette partie justificative est un peu casse gueule, je trouve. Déjà, utiliser un mot qui, généralement, à un autre sens dans la plupart des travaux (ce que tu sembles avancer) n'est pas une bonne idée. Il faut peut être changer le nom, dans ce cas. En outre, je ne vois pas pourquoi une propriété plus forte devrait être mise en oeuvre seulement dans des couches supérieures (system software). A mon avis, la propriété dépend du modèle d'attaquant considéré. Il faudrait un peu plus développer ces aspects. Par contre, pas sur qu'on soit si générique dans ce cas...}
 
 First, we give a definition of code injection (\ref{subsec:speccert:tampering}).
 %
 We leverage it as a foundation for defining isolation policies which apply to
-complete software stacks (\ref{subsec:speccert:globalsec}).
+complete software stacks (\ref{subsec:speccert:globalsec}). \TODO{Ce label aussi est cassé}
 %
+\TODO{Que veux dire "complete software stacks"?}
 Finally, we introduce isolation sub-policies, and define the \ac{bios} isolation
 policy as an isolation sub-policy (\ref{subsec:speccert:biossec}).
 
