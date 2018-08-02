@@ -1,6 +1,7 @@
-Hinv : inv a
+Hreq : hardware_req a
 =========================================================================
-inv (update_cache_content
+hardware_req
+    (update_cache_content
        (if cache_hit_dec (cache a) pa
         then a
         else

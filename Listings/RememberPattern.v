@@ -1,4 +1,4 @@
-Hinv : inv a
+Hreq : hardware_req a
 Heqa_2 : a_2 =
          update_memory_content
            a
@@ -16,4 +16,4 @@ Heqa_5 : a_5 = (if cache_hit_dec (cache a) pa
                 else a_4)
 Heqa_6 : a_6 = update_cache_content a_5 pa (context (proc a))
 =========================================================================
-inv a_6
+hardware_req a_6
