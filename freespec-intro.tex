@@ -142,7 +142,8 @@ and prove that \( \iota \) is preserved throughout the transition, as
 illustrated in Figure~\ref{freespec:figure:seqproof}.
 %
 Proving \( \Delta_{\mathtt{bios}} \) was correct with respect to
-\( I_{\mathtt{bios}} \) using Coq led us to successfully adopt this approach.
+\( I_{\mathtt{bios}} \) using Coq\,\cite{letan2016speccertcode} led us to
+successfully adopt this approach.
 %
 In practice, we relied on a recurring pattern we call
 ``\texttt{remember};~\texttt{destruct};~\texttt{assert};~\texttt{apply}'', after
@@ -400,8 +401,8 @@ follows:
 %
 In practice, transitions in {\scshape Minx86} are not atomic (they are made of
 several state updates), and an attacker may be able to leverage a temporary
-violation of invariant, similarly to the SENTER Sandman
-attack\,\cite{kovah2015senter} detailed in
+violation of invariant, similarly to the Speed Rcare
+attack\,\cite{kallenberg2015racecondition} detailed in
 Subsection~\ref{subsec:usecase:hse:sandman}.
 %
 To model that threat without changing the modeling structure of {\scshape
