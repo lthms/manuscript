@@ -7,6 +7,8 @@
 
   \hfill\footnotesize --- Marijn Haverbeke}
 
+\PC{commentaire inutile: c'est un peu le but d'un labyrinthe, em même temps}
+
 \vspace{1cm}\noindent
 %
 Our motivation to formally specify and verify \ac{hse} mechanisms comes from
@@ -21,6 +23,9 @@ applicative enclaves (SGX)\,\cite[Volume 3, Chapter
 %
 From a market share perspective, x86 \acp{cpu} are widely used for laptops,
 desktops and servers.
+\PC{avis perso: les 3 phrases précédentes me semblent à l'envers: je dirais
+plutôt ``x86 est utilisé partout, Intel a mis plein de mécanismes, mais
+ils on été contournés, du coup on a envie de les spécifier et vérifier''}
 %
 For these reasons, we have evaluated our approaches against the x86 hardware
 architecture.
@@ -39,7 +44,7 @@ Despite this fact, it has been the object of several compositional
 attacks\,\cite{duflot2009smram,wojtczuk2009smram,domas2015sinkhole}, and
 therefore, it illustrates perfectly our motivations.
 %
-However, it is important to emphasize that other mainstream architecture
+However, it is important to emphasize that other mainstream architectures
 (\emph{e.g.}  ARM) work on a similar basis and potentially suffer similar
 issues.
 
@@ -50,17 +55,19 @@ consequences of this organization in terms of security
 (Section~\ref{sec:usecase:architecture}).
 %
 We then focus on the key role played by the \ac{bios}, and the security model it
-requires so it can play this role (Section~\ref{sec:usecase:firmware}).
+requires so it can play this role\PC{répétition (supprimer ``to play its
+role'')} (Section~\ref{sec:usecase:firmware}).
 %
-Once we have established the role of the \ac{bios}, we detail \ac{hse}
+Once we have established the role of the \ac{bios}, we detail the \ac{hse}
 mechanisms it implements, and several compositional attacks which have defeated
 these \ac{hse} mechanisms in the past (Section~\ref{sec:usecase:hse}).
 
 \section{Introduction to x86 Architecture Security}
 \label{sec:usecase:architecture}
 
-Describing hardware architectures in depth is challenging, because they tend to
-comprise many interconnected components of various natures.
+Describing \PC{modern} hardware architectures in depth is challenging, because they tend to
+comprise many interconnected components of various natures\PC{that were added
+over time}.
 %
 The x86 hardware architecture is a perfect illustration of this, and this is
 probably best illustrated by the scale of its documentation.
@@ -69,7 +76,11 @@ At the time of writing this thesis\,\footnote{Spring 2018.}, the \emph{Intel 64
   and IA-32 Architectures Software Developer’s Manual} is 4842 pages long.
 %
 Executed on the computer used to write the present thesis, the GNU/Linux
-command-line application \texttt{lshw} lists about 30 hardware components, which include a hard drive, a keyboard, a trackpad, an audio controller, an
+command-line application \texttt{lshw} lists about 30 hardware components,\PC{je
+ne suis pas sûr que la mesure lshw soit pertinente: elle ne détaille pas tout,
+il y a beaucoup plus de composants en pratique. Tu peux dire que le PC est
+composé de ``dozens of components'' :)}
+which include a hard drive, a keyboard, a trackpad, an audio controller, an
 integrated graphic card. Several come with their own documentation, often
 in the form of large datasheet.
 
@@ -171,6 +182,13 @@ Most of the time, it chooses the correct branch.
 %
 In case of \emph{branch misprediction}, the erroneous computations performed by the core shall be canceled like if they have never happened.
 %
+\PC{quel est l'objectif de l'explication du \textit{branch misprediction} et
+l'exemple qui
+suivent ?
+Cela me semble un peu hors contexte, on se demande pourquoi ce point est
+détaillé (et pas les autres)
+
+A supprimer ?}
 We illustrate branch misprediction with the following program snippet, written with x86
 assembly instructions (left) and its C equivalent (right)\,\footnote{Provided no
   optimization from the compiler nor the processor.}:
@@ -254,7 +272,7 @@ an attack vector.
 %   arbitrary value (\emph{e.g.} with jump instructions).
 % \end{enumerate}
 
-\paragraph{Memories and Cores \IOs.}
+\paragraph{Memories and Cores \IOs.}\PC{acronyme, donc I/Os ou IOs au pluriel}
 %
 The Intel x86 instructions set contains hundreds of instructions\,\cite[Volume
 2]{intel2014manual}.
@@ -281,7 +299,12 @@ instruction to execute then as an operand of an arithmetical operation.
 Although \ac{dram} is the primary source of memory within the hardware
 architecture, it is not the only one.
 %
-Other hardware components expose additional memory regions.
+Other hardware components expose additional memory regions.\PC{techniquement, ce
+	n'est pas le composant qui expose de la mémoire, mais le CPU (le memory
+	controller) qui expose la mémoire ou les registres du composant dans
+	l'espace d'adressage global. Il serait utile de citer le nom
+	\textit{memory-mapped I/O} ici --- c'est cité plus loin, mais en
+répétition}
 %
 For instance, an x86 processor integrates a display controller which exposes a
 frame buffer to the cores.
@@ -314,7 +337,8 @@ On the other hand, software developers use two dedicated instructions
 software components.
 %
 \IOs issued by \texttt{in} and \texttt{out} instructions are referred to as
-Programmable \IOs (P-\IOs).
+Programmable \IOs (P-\IOs).\PC{jamais vu ce terme --- tu parle des
+	\textit{Port-Mapped I/O (PMIO)}?}
 %
 In addition to this approach, x86 \acp{cpu} are also capable of handling
 \emph{memory-mapped} \IOs, where the memories exposed by the peripherals are
