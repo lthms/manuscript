@@ -94,28 +94,43 @@ backgroundcolor=PineGreen!2}
 
 \subsection{{\scshape Minx86} Limitations}
 
-\paragraph{Abstract Model}
+Implementing the proofs of correctness of \( \Delta_{\mathtt{bios}} \) has been
+very insightful.
 %
-\begin{itemize}
-\item Mix of a concrete and abstract model
-\item As a consequence, the model is not really reusable
-\item May work for similar security properties only
-\item We need a clear separation between the two
-\end{itemize}
+In this subsection, we emphasize two limitations of {\scshape Minx86} ---the
+hardware model which acts as a foundation of this verification work--- which
+makes its use at a larger scale unlikely.
+%
+Then, we formulate requirements on a potential successor for {\scshape Minx86},
+that would allow for taking better advantage of our \ac{hse} mechanism
+definition.
 
 \paragraph{Monolithic Model}
 %
-Hum?
-
-\paragraph{Transition Granularity}
+The set of states \( H(S) \) of {\scshape Minx86} is the Cartesian product of
+the sets of states of its hardware components, namely a core, a cache, a memory
+controller and two arrays of memory cells.
 %
+That is, {\scshape Minx86} is a monolithic model, and this is not without
+consequences when the time comes to reason about its correctness.
+
+In our case, it has remained manageable in practice, because we carefully
+organized our Coq development in order to keep components separated from each
+other as much as possible.
+%
+This does not prevent some changes to the definition of \( H(S) \) to have an
+important impact on proofs already written at the moment.
+%
+We have no doubt that such situations will arise again if we try to increase the
+scope of {\scshape Minx86}.
+
 Some transitions of {\scshape Minx86} imply several state updates may happen in
 sequence.
 %
 This is particularly true for \( \mathrm{Read} \) and \( \mathrm{Write} \)
 transitions, as both the cache and memories are updated in case of cache misses
 or cache evictions.
-
+%
 The complexity of a transition postcondition has a direct impact on the proofs
 we have to construct in order to verify the correctness of a given system.
 %
@@ -403,11 +418,43 @@ In practice, transitions in {\scshape Minx86} are not atomic (they are made of
 several state updates), and an attacker may be able to leverage a temporary
 violation of invariant, similarly to the Speed Rcare
 attack\,\cite{kallenberg2015racecondition} detailed in
-Subsection~\ref{subsec:usecase:hse:sandman}.
+Subsection~\ref{subsec:usecase:hse:speedracer}.
 %
 To model that threat without changing the modeling structure of {\scshape
-  Minx86} requires to increase the granularity of the transitions, with the
+  Minx86} requires increasing the granularity of the transitions, with the
 direct consequence to increase the model overall complexity.
+
+\paragraph{Abstract Model}
+%
+The definition of {\scshape Minx86} has been governed by the use case we have
+used it for.
+%
+The memory location ownership we have embedded inside the model is the most
+visible demonstration of that fact.
+%
+By construction, {\scshape Minx86} abstracts away the concrete domain of memory
+location contents (that are, bytes of bits), similarly to what a type inference
+algorithm can do.
+%
+It worked, because we did not modeled hardware features whose behavior depends
+for instance on configuration stored in memory for instance (\emph{e.g.} a
+\ac{mmu} and its page tables).
+%
+We have tried to address this issue by modifying the model, so that both the
+concrete value and its abstraction cohabit.
+%
+However, if we ever try to verify a \ac{hse} mechanism with respect to a
+security property related to totally different abstract domains, we will have to
+modify the model another time.
+%
+This greatly reduces the opportunity to reuse {\scshape Minx86} for other
+security policies, and therefore contradicts our initial goal to ``x''
+%
+
+\begin{itemize}
+\item Mix of a concrete and abstract model
+\item We need a clear separation between the two
+\end{itemize}
 
 \bibliographystyle{unsrt}%
 \bibliography{manuscript}

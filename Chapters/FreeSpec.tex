@@ -79,19 +79,372 @@ Then, we discuss how the different levels of composition of FreeSpec can be
 leveraged to scale the modelling and verification work for larger systems
 (Section~\ref{sec:freespec:scale}).
 
-\section{Big Picture}
+\section{A Compositional Reasoning Framework}
 % ==============================================================================
 
+\subsection{{\scshape Minx86} Limitations}
 
-\subsection{Motivations}
-
-\paragraph{Model Reusability}
+Implementing the proofs of correctness of \( \Delta_{\mathtt{bios}} \) has been
+very insightful.
 %
-Here we talk about ``metadata'' required to express several security policies.
-
-\paragraph{Model Modularity}
+In this subsection, we emphasize two limitations of {\scshape Minx86} ---the
+hardware model which acts as a foundation of this verification work--- which
+makes its use at a larger scale unlikely.
 %
-Here we talk about the scale of the model.
+Then, we formulate requirements on a potential successor for {\scshape Minx86},
+that would allow for taking better advantage of our \ac{hse} mechanism
+definition.
+
+\paragraph{Monolithic Model}
+%
+The set of states \( H(S) \) of {\scshape Minx86} is the Cartesian product of
+the sets of states of its hardware components, namely a core, a cache, a memory
+controller and two arrays of memory cells.
+%
+That is, {\scshape Minx86} is a monolithic model, and this is not without
+consequences when the time comes to reason about its correctness.
+
+In our case, it has remained manageable in practice, because we carefully
+organized our Coq development in order to keep components separated from each
+other as much as possible.
+%
+This does not prevent some changes to the definition of \( H(S) \) to have an
+important impact on proofs already written at the moment.
+%
+We have no doubt that such situations will arise again if we try to increase the
+scope of {\scshape Minx86}.
+
+Some transitions of {\scshape Minx86} imply several state updates may happen in
+sequence.
+%
+This is particularly true for \( \mathrm{Read} \) and \( \mathrm{Write} \)
+transitions, as both the cache and memories are updated in case of cache misses
+or cache evictions.
+%
+The complexity of a transition postcondition has a direct impact on the proofs
+we have to construct in order to verify the correctness of a given system.
+%
+For instance, let \( M \) be a transition system, such that the transition
+relation \( R \) of \( M \) is defined as follows:
+%
+\[
+  R \triangleq \{ (h, h')\ |\ h' = t(s(r(h))) \}
+\]
+%
+Let \( \iota \) be a predicate on \( M \) states, such that \( \iota \) is
+expected to be an invariant with respect to \( R \), that is
+%
+\[
+  h' = t(s(r(h))) \vdash \iota(h) \Rightarrow \iota(h')
+\]
+%
+Regarding the definition of \( r \), \( s \) and \( t \), proving this statement
+all at once can quickly become unmanageable.
+%
+One possible approach to face this challenge is to manually divide the
+transition into several change updates ---\emph{i.e.} one per state update---
+and prove that \( \iota \) is preserved throughout the transition, as
+illustrated in Figure~\ref{freespec:figure:seqproof}.
+%
+Proving \( \Delta_{\mathtt{bios}} \) was correct with respect to
+\( I_{\mathtt{bios}} \) using Coq\,\cite{letan2016speccertcode} led us to
+successfully adopt this approach.
+%
+In practice, we relied on a recurring pattern we call
+``\texttt{remember};~\texttt{destruct};~\texttt{assert};~\texttt{apply}'', after
+the {\scshape Ltac} tactics.
+%
+We illustrate the use of this pattern with the proof obligation with the proof
+goal pictured in Figure~\ref{fig:freespec:postcondition}.
+%
+We have been extracted this goal directly from the SpecCert project; we have
+only slightly simplified it so it can fit into the page.
+%
+\begin{enumerate}
+\item Using \texttt{remember}, we can make the sequence of state updates more
+  visible (see Figure~\ref{fig:freespec:remember}, compared to
+  Figure~\ref{fig:freespec:entrypoint}).
+  %
+  As a result, the Coq goal is more readable, which greatly simplify the task to
+  write the proof.
+\item Using \texttt{destruct}, we can explore the alternative paths.
+  %
+  For instance, regarding the initial state of the system, the content of the
+  address \( \mathtt{pa} \) may or may not be present in the cache
+  (Figure~\ref{fig:freespec:remember}, line 7).
+  %
+  We explore both solution, though two complementary goals (see the two
+  simplified goals in Figure~\ref{fig:freespec:destruct})
+  %
+\item Using \texttt{assert}, we can introduce now goals to prove intermediary
+  results (like the one in Figure~\ref{fig:freespec:assert}, for instance).
+  %
+  In our case, we will prove that the predicate \texttt{inv} remains satisfied
+  after each state update.
+  %
+\item Using \texttt{apply}, we can leverage lemmas about \texttt{inv}
+  preservation for a given state update.
+  %
+  For instance, the function \texttt{update\_cache\_content}
+  (Figure~\ref{fig:freespec:remember}, line 11) have a lemma called
+  \texttt{update\_cache\_content\_with\_context\_preserves\_inv}.
+\end{enumerate}
+
+\begin{figure}
+{\bigcentering%
+  \AxiomC{}%
+  \LeftLabel{\footnotesize {\scshape Id}} \UnaryInfC{\(
+    \begin{array}{l}
+      \iota(h) \\
+      \hline
+      \vdash \iota(h)
+    \end{array}
+    \)}%
+  \AxiomC{}%
+  \RightLabel{\footnotesize {\scshape Inv}\( _r \)} \UnaryInfC{\(
+    \begin{array}{l}
+      \iota(h) \\
+      h_1 = r(h) \\
+      \hline
+      \vdash \iota(h) \Rightarrow \iota(h_1)
+    \end{array}
+    \)}%
+  \LeftLabel{\footnotesize {\scshape M-P}}%
+  \BinaryInfC{\(
+    \begin{array}{l}
+      \iota(h) \\
+      h_1 = r(h) \\
+      \hline
+      \vdash \iota(h_1)
+    \end{array}
+    \)}%
+  \AxiomC{}%
+  \RightLabel{\footnotesize {\scshape Inv}\( _s \)} \UnaryInfC{\(
+    \begin{array}{l}
+      \iota(h) \\
+      h_1 = r(h) \\
+      h_2 = s(h_1) \\
+      \hline
+      \vdash \iota(h_1) \Rightarrow \iota(h_2)
+    \end{array}
+    \)}%
+  \LeftLabel{\footnotesize {\scshape M-P}}%
+  \BinaryInfC{\(
+    \begin{array}{l}
+      \iota(h) \\
+      h_1 = r(h) \\
+      h_2 = s(h_1) \\
+      \hline
+      \vdash \iota(h_2)
+    \end{array}
+    \)}%
+  \AxiomC{}%
+  \RightLabel{\footnotesize {\scshape Inv}\( _t \)} \UnaryInfC{\(
+    \begin{array}{l}
+      \iota(h) \\
+      h_1 = r(h) \\
+      h_2 = s(h_1) \\
+      h' = t(h_2) \\
+      \hline \vdash \iota(h_2) \Rightarrow \iota (h')
+    \end{array}
+    \)}%
+  \RightLabel{\footnotesize {\scshape M-P}}%
+  \BinaryInfC{\(
+    \begin{array}{l}
+      \iota(h) \\
+      h_1 = r(h) \\
+      h_2 = s(h_1) \\
+      h' = t(h_2) \\
+      \hline \vdash \iota (h')
+    \end{array}
+    \)}%
+  \DisplayProof%
+
+  \vspace{0.5cm} where {\scshape M-P} is the \emph{Modus ponens}, and {\scshape
+    Inv}\( _r \), {\scshape Inv}\( _s \), and {\scshape Inv}\( _t \) are
+  intermediary lemmas previously proved true.%
+}
+
+\caption{Dividing a transition into a sequences of state updates}
+\label{freespec:figure:seqproof}
+\end{figure}
+
+\begin{figure}
+  \inputminted{coq}{Listings/StateHell.v}
+
+  \caption{Raw postcondition of a \texttt{Write} transition with a writeback
+    strategy}
+  \label{fig:freespec:entrypoint}
+\end{figure}
+
+\begin{figure}
+  \inputminted{coq}{Listings/RememberPattern.v}
+
+  \caption{Postcondition of a \texttt{Write} transition with a writeback
+    strategy, after the use of the \texttt{remember} tactic}
+  \label{fig:freespec:remember}
+\end{figure}
+
+\begin{figure}
+  \inputminted{coq}{Listings/DestructGoal.v}
+
+  \inputminted{coq}{Listings/DestructGoal2.v}
+
+  \caption{Exploring alternative paths thanks to the \texttt{destruct} tactics}
+  \label{fig:freespec:destruct}
+\end{figure}
+
+\begin{figure}
+  \inputminted{coq}{Listings/InvGoals.v}
+
+  \caption{Intermediary statements, generated thanks to \texttt{assert} tactics}
+  \label{fig:freespec:assert}
+\end{figure}
+
+The ``\texttt{remember};~\texttt{destruct};~\texttt{assert};~\texttt{apply}''
+structures the proof, but it remains cumbersome to use.
+%
+Besides, it emphasizes another important limitation of {\scshape Minx86}, that
+is it is potentially subject to tho so-called \emph{temporary violation
+  problem}\,\cite{muller2006tempviolation}, where a predicate is satisfied
+\emph{before} and \emph{after} a given transition, yet is temporary violated
+\emph{during} the transition.
+%
+For instance, if it exists a state \( h \) such that \( \neg r(h) \) or
+\( \neg s(r(h)) \) holds true, then \( M \) is subject to the temporary
+violation problem.
+%
+A well known illustration of this threat is ---once again--- the airlock system.
+
+\begin{example}[Temporary Violation Problem in an Airlock System]
+  %
+  In Example~\ref{example:sota:airlocklts}, we have carefully defined the
+  labeled transition system of the airlock system so that it is unambiguously
+  not subject to the temporary violation problem.
+  %
+  We did that by avoiding transitions between states
+  \( (\mathtt{open}, \mathtt{close}) \) and
+  \( (\mathtt{close}, \mathtt{open}) \).
+  %
+  In practice, it is possible to define a transition system with these
+  transitions, such that it is correct with respect to the safety property that
+  at least one door should be close at anytime, for instance:
+
+  \begin{center}
+    \begin{tikzpicture}
+      \node [draw, circle split, text width=30pt, text badly centered] (cc)
+      {\( \mathtt{close} \) \nodepart{lower} \( \mathtt{close} \)};%
+      \node [right=60pt of cc] (x) {};%
+      \node [draw, circle split, above=of x, text width=30pt, text badly
+      centered] (oc) {\( \mathtt{open} \) \nodepart{lower}
+        \( \mathtt{close} \)};%
+      \node [draw, circle split, below=of x, text width=30pt, text badly
+      centered] (co) {\( \mathtt{close} \) \nodepart{lower}
+        \( \mathtt{open} \)};%
+      \node [draw, circle split, right=60pt of x, text width=30pt, text badly
+      centered] (oo) {\( \mathtt{open} \) \nodepart{lower} \( \mathtt{open}
+        \)};%
+
+      \draw [-latex] (cc) edge [bend left] node [xshift=-5pt, left]
+      {\( \mathtt{Req}_1 \)} (oc);%
+
+      \draw [-latex] (cc) edge [bend right] node [xshift=-5pt, left]
+      {\( \mathtt{Req}_2 \)} (co);%
+
+      \draw [-latex] (oc) edge [bend left] node [right] {\( \mathtt{Req}_2 \)}
+      (co);%
+      \draw [-latex] (co) edge [bend left] node [left] {\( \mathtt{Req}_1 \)}
+      (oc);%
+    \end{tikzpicture}
+  \end{center}
+
+  We can imagine several scenarios:
+  %
+  \begin{inparaenum}[(1)]
+  \item Doors states updates are simultaneous and instantaneous, in other words
+    the transitions \emph{are} atomic.
+    %
+  \item The airlock system first closes one door before opening the
+    other. \label{enum:freespec:goodairlock}
+    %
+  \item The airlock system first opens one door before closing the
+    other. \label{enum:freespec:badairlock}
+    %
+  \end{inparaenum}
+  %
+  The systems modeled in Examples~\ref{example:sota:airlocklts},
+  ~\ref{example:sota:airlockinterface} and~\ref{example:sota:airlockprocess}
+  corresponds to the scenario (\ref{enum:freespec:goodairlock}).
+  %
+  On the contrary, the transition system pictures in this example is not precise
+  enough to discard the eventuality that both doors are, at a given point in
+  time, both open.
+\end{example}
+
+Although the \texttt{remember;~destruct;~assert;~apply} pattern can help to
+uncover temporary violation of an invariant, nothing prevents the verifier from
+forgetting a given state updates and yet being able to conclude the proof.
+%
+The temporary violation problem undermines the second \ac{hse} law, which
+stipulates that the requirement on hardware state of a \ac{hse} mechanism is an
+invariant of the model with respect to the requirement on software transitions
+(see Definition~\ref{def:speccert:laws}).
+%
+For the \ac{hse} mechanism \( \Delta_{\mathtt{bios}} \) ---defined as
+\( \langle S, T, \mathrm{context}, \mathrm{hardware\_req}, \mathrm{bios\_req}
+\rangle \), see Definition~\ref{def:speccert2:minx86}--- this translates as
+follows:
+%
+\[
+  \begin{array}{l}
+    \forall (h, l, h') \in H(S) \times L \times H(S), \\
+    \qquad\func{hardware\_req}(h) \\
+    \qquad\Rightarrow (l \in L_S \Rightarrow \func{bios\_req}(h, l)) \\
+    \qquad\Rightarrow \func{hardware\_req}(h')
+  \end{array}
+\]
+%
+In practice, transitions in {\scshape Minx86} are not atomic (they are made of
+several state updates), and an attacker may be able to leverage a temporary
+violation of invariant, similarly to the Speed Rcare
+attack\,\cite{kallenberg2015racecondition} detailed in
+Subsection~\ref{subsec:usecase:hse:speedracer}.
+%
+To model that threat without changing the modeling structure of {\scshape
+  Minx86} requires increasing the granularity of the transitions, with the
+direct consequence to increase the model overall complexity.
+
+\paragraph{Abstract Model}
+%
+The definition of {\scshape Minx86} has been governed by the use case we have
+used it for.
+%
+The memory location ownership we have embedded inside the model is the most
+visible demonstration of that fact.
+%
+By construction, {\scshape Minx86} abstracts away the concrete domain of memory
+location contents (that are, bytes of bits), similarly to what a type inference
+algorithm can do.
+%
+It worked, because we did not modeled hardware features whose behavior depends
+for instance on configuration stored in memory for instance (\emph{e.g.} a
+\ac{mmu} and its page tables).
+%
+We have tried to address this issue by modifying the model, so that both the
+concrete value and its abstraction cohabit.
+%
+However, if we ever try to verify a \ac{hse} mechanism with respect to a
+security property related to totally different abstract domains, we will have to
+modify the model another time.
+%
+This greatly reduces the opportunity to reuse {\scshape Minx86} for other
+security policies, and therefore contradicts our initial goal to ``x''
+%
+
+\begin{itemize}
+\item Mix of a concrete and abstract model
+\item We need a clear separation between the two
+\end{itemize}
 
 \subsection{Approach Overview}
 

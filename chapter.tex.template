@@ -37,6 +37,7 @@
 \usepackage{todonotes}
 \newcommandx{\thomasrk}[2][1=]{\todo[linecolor=Plum,backgroundcolor=Plum!25,bordercolor=Plum,#1]{#2}}
 \newcommand\TODO[1]{\todo[inline,linecolor=red,backgroundcolor=red!25,bordercolor=red]{\textbf{TODO:} #1}}
+\newcommand\PC[1]{\todo[inline,linecolor=red,backgroundcolor=red!25,bordercolor=red]{\textbf{PC:} #1}}
 
 \usepackage{mdframed} % or, "mdframed"
 \usepackage[amsthm,framed]{ntheorem}
