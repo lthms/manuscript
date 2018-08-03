@@ -296,6 +296,12 @@ Therefore, a core decides the semantics of memory cell contents
 depending on the context, \emph{i.e.} it can interpret the same binary sequence as an
 instruction to execute then as an operand of an arithmetical operation.
 
+\PC{après discussion d'hier, AMHA ici tu devrais faire une phrase pour
+introduire les deux idées qui suivent: on distingue ce qui est accessible
+\textit{via} l'espace d'adressage (mot important!) (le ``quoi'') et les manières
+d'y accéder (le ``comment''), sachant que l'accès à une même ressource peut être
+fait de deux manières différentes}
+
 Although \ac{dram} is the primary source of memory within the hardware
 architecture, it is not the only one.
 %
@@ -340,10 +346,16 @@ software components.
 Programmable \IOs (P-\IOs).\PC{jamais vu ce terme --- tu parle des
 	\textit{Port-Mapped I/O (PMIO)}?}
 %
-In addition to this approach, x86 \acp{cpu} are also capable of handling
+In addition to this approach\PC{Proposal: ``Alternatively, peripheral
+	memory and registers can be exposed to the system memory address space
+	using \emph{memory mapped \IOs}.''
+
+Le ``Alternatively'' est plus clair que ``In addition to this approach''}
+, x86 \acp{cpu} are also capable of handling
 \emph{memory-mapped} \IOs, where the memories exposed by the peripherals are
 mapped within the system memory address space.
 %
+\PC{Phrase suivante inutile IMHO}
 That is, the system memory is no longer limited to the
 \ac{dram} only.
 %
@@ -352,11 +364,22 @@ processor and the \ac{pch} dispatches its request to the correct hardware
 component.
 %
 The mapping between a so-called \emph{physical address} manipulated by the
-processor and its concrete memory location is called the \emph{memory map}.
+processor and its concrete memory location is called the \emph{memory
+map}.\PC{``a memory mapping'' plutôt ? La ``memory map'' c'est l'ensemble de
+tous les mappings}
 %
 The memory map is configurable, that is it can be changed dynamically \emph{via}
 a set of configuration registers exposed by the processor and the \ac{pch}.
 %
+\PC{saut de ligne: cette idée est importante, mais elle est noyée dans le
+	paragraphe précédent. Il me semble aussi que ça part trop vite dans un
+	exemple détaillé
+	
+	AMHA, il faudrait détailler plus l'idée générale, en expliquant
+	le fait qu'une même zone mémoire ou registre d'un périphérique peut être
+	lue ou modifiée par MMIO \textbf{et} PMIO, ce qui va notamment
+	complexifier la modélisation,
+	et réduire un peu l'exemple}
 The two approaches are complementary.
 %
 As an example, PCI devices expose a so-called configuration space, which is a
@@ -370,6 +393,12 @@ PCI devices are identified in the hardware architecture with a tuple
 \( \langle \mathrm{bus}, \mathrm{device}, \mathrm{function} \rangle \) (denoted
 by \texttt{bus:device:function}).
 %
+\PC{Je comprends l'idée de l'exemple, mais je ne suis pas persuadé que la
+	fonction de calcul apporte quelque chose.
+	Tu pourrais plutôt prendre un registre au hasard dans la figure et
+	expliquer comment on y accède (relativement au BAR ---qui peut être
+	modifé---, ou \textit{via}
+	PMIO), \textbf{en citant la figure 2.2}}
 A configuration register exposed by a given PCI device identified as
 \texttt{bus:device:function} at the offset \( o \) of its configuration space is
 addressed by the value
@@ -405,12 +434,12 @@ configuration space within the system memory address space.
   \label{fig:usecase:pciconfig}
 \end{figure}
 
-Finally, cores do not manipulate physical addresses directly.
+Finally, cores do not \PC{usually} manipulate physical addresses directly.
 %
 Indeed, cores have their own address translation mechanisms, namely
 segmentation\,\cite[Volume 3, Section 2.4]{intel2014manual} and
 pagination\,\cite[Volume 3, Chapter 4]{intel2014manual}, which are configurable
-by the software components.
+by the software components.\PC{et la virtualisation, qui peut apporter les EPT}
 
 As such, determining which hardware component will handle a core \IO targeting a
 given virtual address requires to have a complete knowledge of the x86 remapping
@@ -427,7 +456,9 @@ For instance, several hardware components can also read from or write to the
 Hardware components can also interact with the processor by sending hardware
 interrupts of various natures.
 %
-When a user presses a key of its keyboard, the latter sends an interrupt
+When a user presses a key of its keyboard, the latter sends an
+interrupt\PC{\textbf{request}}\PC{supprime le numéro d'IRQ (ça n'apporte pas grand chose, et c'est
+	reconfigurable \ldots (\textit{cf.} P de PIC)}
 (\texttt{\#IRQ1}).
 %
 Interrupt handlers, that is programs executed by the core when it receives
@@ -437,17 +468,20 @@ Chapter 6]{intel2014manual}.
 Each line of the \ac{idt} corresponds to a given interrupt whose semantics is
 specified by Intel, as summarized in Table~\ref{tab:usecase:idt} for reference.
 %
-When a core received an interrupt, it saves its current context inside the
+When a core received\PC{handles} an interrupt, it saves its current context inside the
 \ac{dram}, then starts executing the corresponding interrupt handler.
 %
 Not all x86 interrupts come from a hardware component.
 %
-Core use several of them, for instance to recover from errors.
+Cores use several of them, for instance to recover from errors.
 %
 For instance, if a core is not able to translate a virtual address into a
 proper address, it raises a so-called Page Fault (denoted by \texttt{\#PF} or
-\texttt{\#IRQ14}).
+\texttt{\#IRQ14}\PC{supprime le numéro (qui me semble louche: il me semble que
+tu as confondu IRQ et numéro du handler)}).
 
+\PC{table 2.1: je confirme, ce n'est \textbf{pas} le numéro d'IRQ, mais celui du vecteur
+d'interruption}
 \begin{table}
   \centering
   \begin{tabular}{cl}
@@ -501,6 +535,7 @@ proper address, it raises a so-called Page Fault (denoted by \texttt{\#PF} or
   \label{tab:usecase:idt}
 \end{table}
 
+\PC{supprime le ``In addition'', et fais un paragraphe avec un titre}
 In addition, Intel has implemented several out-of-band management technologies
 for its products.
 %
@@ -531,7 +566,7 @@ cannot initialize correctly.
 \subsection{HSE Mechanisms Targeted Security Policies}
 \label{subsec:usecase:targetedsec}
 
-All being told, x86 computing platforms are formed of concurrent, interconnected
+All being told\PC{previously stated}, x86 computing platforms are formed of concurrent, interconnected
 components.
 %
 They are of various natures, from physical components to sequences of
