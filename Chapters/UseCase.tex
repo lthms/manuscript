@@ -826,7 +826,7 @@ The \ac{bios} program is stored inside a flash memory, a small memory connected
 to the \ac{pch} through the Serial Peripheral Interface (SPI) bus on modern x86
 computing platform.
 %
-When the \ac{cpu} is powered up, it is programed to fetch the code stored at a
+When the \ac{cpu} is powered up, it is programmed to fetch the code stored at a
 hard-coded address within the flash memory.
 %
 The first task of the \ac{bios} is to initialize the hardware
@@ -841,7 +841,8 @@ at the beginning of mass storage devices (\emph{e.g.} hard drive, USB stick).
 The MBR, whose size is limited to 512 bytes, contains a small program to
 initiate a loader for a system software component.
 %
-Modern \acp{bios} implement the \ac{uefi}\,\cite{zimmer2007uefi,uefi2017specs},
+Modern \acp{bios} implement the \ac{uefi}\,\cite{zimmer2007uefi,uefi2017specs}
+\PC{standard},
 whose purpose is to standardize the boot sequence process in order to favor
 interoperability of \ac{bios} implementations.
 %
@@ -865,8 +866,9 @@ The \ac{uefi} standard defines a security mechanism called Secure
 Boot\,\cite{rosenbaum2012secboot}.
 %
 When Secure Boot is enabled, \ac{uefi}-compliant \acp{bios} should only execute
-applications which provide an acceptable cryptographic signature, with respects
-to a key hierarchy configurable by the computing platform owner.
+applications which provide an acceptable cryptographic signature, with respect
+to a key hierarchy\PC{supprimer la suite (les clés ne sont pas nécessairement
+configurables} configurable by the computing platform owner.
 %
 The \ac{tcg} has standardized a hardware component called the \ac{tpm}, which is
 the foundation of the Trusted Boot.
@@ -894,6 +896,7 @@ access.
 In this scenario, the access to the encryption key is correlated to the
 measurements received by the \ac{tpm}.
 %
+\PC{saut de ligne}
 Secure Boot and Trusted Boot can uncover \ac{bios} corruptions prior to the
 execution of the illegitimate code.
 %
@@ -932,7 +935,7 @@ For instance, the interrupt \texttt{0x10} is dedicated to video services
 etc.).
 %
 Nowadays, \ac{uefi}-capable \acp{bios} expose so-called \emph{Runtime Services}
-to system software component\cite[Chapter 5]{zimmer2017uefi} under the form of a
+to system software component\,\cite[Chapter 5]{zimmer2017uefi} under the form of a
 function pointers table.
 
 In either case, these interfaces act as an intermediary layer between a system
@@ -958,7 +961,7 @@ through its interfaces, the \ac{bios} carries out several hardware-specific
 tasks which are not publicly documented.
 %
 This includes and is not limited to handling hardware errors, checking thermal
-zones, adjusting \acp{cpu} speed.
+zones, adjusting \acp{cpu} speed.\PC{and configuring hardware workarounds}
 %
 The execution of the \ac{bios} in this context should be transparent to
 the rest of the software stack.
@@ -978,21 +981,27 @@ In most cases, it is a proprietary software, and the computer owner has little
 control over it.
 %
 The rest of the software stack is considered mistrusted, and the one goal of the
-\ac{bios} is to keep the computer in a working state.
+\ac{bios} is to keep the computer in a working state.\PC{ensure that the
+software stack cannot harm the computer}
 %
 To that end, the \ac{bios} relies on several \ac{hse} mechanisms to enforce its
 isolation from the rest of the software stack.
 
 To the best of our knowledge, the security policy targeted by the \ac{bios} as
 runtime is always discussed through the prism of the \ac{hse} mechanism used to
-enforced this policy.
+enforced this policy.\PC{la phrase précédente est un peu bizarre: la politique
+de sécurité est discutée (?!) à travers le prisme \ldots}
 %
 That is, documentation such as the Intel manual, the processor datasheet or the
-\ac{pch} datasheet ---in practice involved in the \ac{hse} mechanisms
+\ac{pch} datasheet ---in practice involved\PC{pas clair: c'est la documentation
+qui est impliquée dans le hse ?!} in the \ac{hse} mechanisms
 implemented by the \ac{bios}--- focus on \emph{how} implementing the security
 policy rather than specifying \emph{what} this policy is\thomasrk{Is it really
   true?}.
+\PC{le paragraphe précédent/en cours me semble à retravailler, je ne le trouve
+pas clair}
 %
+\PC{La phrase qui suit fait un peu ``citation en vrac''}
 Another useful source of information on this matter is the various research
 projects which discuss these mechanisms, for instance to demonstrate a
 security
@@ -1018,6 +1027,11 @@ From the information we gathered, we believe the isolation required by the
   volatile memory region.
 \end{description}
 %
+\PC{(style) ce texte est ``hors-paragraphe'', le résultat est un peu étrange
+\\
+Si tu peux, ce serait mieux d'avoir les trois points consécutivement, et
+exprimés de manière synthétique (en supprimant le texte inter-paragraphe)}
+\PC{(fond): ce texte inter-paragraphe redit surtout les choses}
 Volatile memory is an absolute requirement in order to execute a software
 component, and the \ac{bios} is no exception in this regard.
 %
@@ -1031,6 +1045,10 @@ Besides, and as discussed previously, our statement takes into account the fact
 that the x86 \IOs resolution is highly configurable, by introducing a notion of
 secure channel \thomasrk{ref} between the software component and its assigned
 volatile memory.
+\PC{Cette notion de \textit{secure channel} est-elle importante~?
+Si oui, ajoute un emph et sors-là de ce paragraphe, IMHO}
+%\PC{Cette notion de \textit{secure channel} est-elle importante
+%? Si oui, ajoute un \verb+\emph+ et sors-là de ce paragraphe, IMHO}
 
 \begin{description}
 \item [Availability]
