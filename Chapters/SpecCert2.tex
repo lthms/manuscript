@@ -344,7 +344,7 @@ controller\,\footnote{A VGA controller is a hardware device which on we can
   purposes.} which both expose some memory to the \ac{cpu}.
 
 $\formatLTS{Minx86}$ is meant to illustrate how our formalism can be leveraged
-to formally specify and verify a HSE mechanism, and thus is not exhaustive.
+to formally specify and verify a HSE mechanism, and thus is not exhaustive. \TODO{Le lien de cause à effet entre ces deux phrases n'est pas évident. En outre "a HSE mechanism" est un peu vague. En l'état, ton modèle a été défini pour pouvoir spécifier et vérifier le HSE lié à la SMM. Il vaut mieux être précis dès le début.}
 %
 In its current state of implementation, its scope focuses on the \ac{smm}.
 
@@ -356,22 +356,12 @@ In its current state of implementation, its scope focuses on the \ac{smm}.
 We consider the \ac{cpu} can be either in System Management Mode (\ac{smm}) or
 in an unprivileged mode.
 %
-We give a brief summary of how the \ac{smm} works.
-%
-We remind our readers that Section~\ref{subsec:usecase:hse:smm}
-%
-The \ac{smm} is ``a special-purpose operating mode provided for handling
-system-wide functions like power management, system hardware control, or
-proprietary OEM-designed code''\,\cite{intel2014manual}.
-%
-It is the most privileged execution mode of x86 processors.
-%
-When a \ac{cpu} receives a special hardware interrupt called System Management
-Interrupt (SMI), it halts its current execution and reconfigures itself to a
-specified state from which it executes the code stored in memory at the address
+As explain in Section~\ref{subsec:usecase:hse:smm}, when a \ac{cpu} receives a 
+System Management Interrupt (SMI), it halts its current execution and reconfigures itself to a
+specified state. \TODO{"specified state" est vague. Specifié par qui?}Then it executes the code stored in memory at the address
 $\mathtt{SMBASE} + \val{0x8000}$.
 %
-In practice, the SMBASE value points to the base of a memory region called the
+In practice, the SMBASE value points to the beginning of a memory region called the
 SMRAM.
 %
 Leaving the \ac{smm} is done by executing a special purpose instruction called
@@ -390,32 +380,29 @@ as possible\,\footnote{These cache strategies are explained in
   2317)}.
 %
 To determine which cache strategy to use, the \ac{cpu} relies on several
-configuration registers and mechanisms.
+configuration registers.
 %
-One of them is a pair of registers called the \ac{smrr} which can only be
+Among them, the \ac{smrr} are used to tell the \ac{cpu} where the SMRAM is 
+and which cache strategy to use for \IO targeting the SMRAM when the \ac{cpu} 
+is in \ac{smm}.  When it is not in \ac{smm}, the \ac{cpu} always uses the UC strategy 
+for \IO targeting the SMRAM. Such registers can only be
 configured when the \ac{cpu} is in \ac{smm}.
 %
-They are used to tell the \ac{cpu} where the SMRAM is and which cache strategy
-to use for \IO targeting the SMRAM when the \ac{cpu} is in \ac{smm}.  When it is
-not in \ac{smm}, the \ac{cpu} always uses the UC strategy for \IO targeting the
-SMRAM.
-%
-\ac{smrr} have been introduced as a countermeasure of the SMRAM cache poisoning
-attack\,\cite{wojtczuk2009smram,duflot2009smram} which allowed an untrusted code
+\ac{smrr} have been introduced as a countermeasure of \TODO{to?} the SMRAM cache poisoning
+attack\,\cite{wojtczuk2009smram,duflot2009smram} which allowed some untrusted code
 to tamper with the copy of the SMRAM stored in the cache.
 %
+
 The memory controller\,\cite{intel2009mch} receives all the \ac{cpu} \IOs which
 are not handled by the cache and dispatches them to the DRAM controller or to
 the VGA controller. It exposes a unified view (the memory map) of the system
 memory to the \ac{cpu}.
 %
-The \ac{cpu} manipulates this memory map with a set of addresses called the
-physical addresses.
+The \ac{cpu} manipulates this memory map with a set of physical addresses.
 %
-The memory controller dedicates a special range of physical addresses to form
-the SMRAM.
+The memory controller uses a special range of physical addresses to host the SMRAM.
 %
-The SMRAM is dedicated to store the code intended to be executed when the
+This memory area is  dedicated to store the code intended to be executed when the
 \ac{cpu} is in \ac{smm}.
 
 \paragraph{Tracking Memory Ownership}
@@ -440,6 +427,8 @@ The memory ownership is updated through transitions according to three rules:
 %
 \end{enumerate}
 
+\TODO{La nuance entre "written back to the memory" et "content of a memory location is overwritten during a transition " n'est pas très claire. Dans le cas d'un write back, par définition le contenu de la mémoire est modifiés...}
+
 \begin{definition}[\formatLTS{Minx86}]
   \label{def:speccert2:minx86}
   We write $\formatLTS{Minx86}(\func{context})$ for the hardware model which
@@ -454,6 +443,8 @@ The memory ownership is updated through transitions according to three rules:
   where $S$ is the image of $\func{context}$, that is the set of software
   components which form the software stack.
 \end{definition}
+
+\TODO{Suite à notre discussion téléphonique, je comprends que tu n'as pas pu définir avant précisemment context car celui-ci dépend du raffinement de ton approche générique. Mais ici tu devrais pouvoir le définir précisemment (en t'appuyant sur les trois règles citées précédemment. Hors tu ne le fais pas...}
 
 \subsection{Hardware States}
 
