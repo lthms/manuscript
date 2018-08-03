@@ -95,7 +95,7 @@ Then, we formulate requirements on a potential successor for {\scshape Minx86},
 that would allow for taking better advantage of our \ac{hse} mechanism
 definition.
 
-\paragraph{Monolithic Model}
+\paragraph{Monolithic Model.}
 %
 The set of states \( H(S) \) of {\scshape Minx86} is the Cartesian product of
 the sets of states of its hardware components, namely a core, a cache, a memory
@@ -408,13 +408,13 @@ In practice, transitions in {\scshape Minx86} are not atomic (they are made of
 several state updates), and an attacker may be able to leverage a temporary
 violation of invariant, similarly to the Speed Rcare
 attack\,\cite{kallenberg2015racecondition} detailed in
-Subsection~\ref{subsec:usecase:hse:speedracer}.
+Subsection~\ref{subsec:usecase:hse:speed}.
 %
 To model that threat without changing the modeling structure of {\scshape
   Minx86} requires increasing the granularity of the transitions, with the
 direct consequence to increase the model overall complexity.
 
-\paragraph{Abstract Model}
+\paragraph{Abstract Model.}
 %
 The definition of {\scshape Minx86} has been governed by the use case we have
 used it for.
@@ -434,96 +434,12 @@ We have tried to address this issue by modifying the model, so that both the
 concrete value and its abstraction cohabit.
 %
 However, if we ever try to verify a \ac{hse} mechanism with respect to a
-security property related to totally different abstract domains, we will have to
-modify the model another time.
+security policies which rely on totally different abstract domains, we will have
+to modify the model another time.
 %
 This greatly reduces the opportunity to reuse {\scshape Minx86} for other
-security policies, and therefore contradicts our initial goal to ``x''
-%
-
-\begin{itemize}
-\item Mix of a concrete and abstract model
-\item We need a clear separation between the two
-\end{itemize}
-
-\subsection{Approach Overview}
-
-\begin{figure}
-  \begin{center}
-    \subfloat[Verification of a Core]{
-      \begin{tikzpicture}
-        % CPU
-        \node [inner sep=8pt, draw] (CPU) {Core};%
-        \draw ([yshift=5pt, xshift=3pt]CPU.north west) -- ([yshift=5pt,
-        xshift=-3pt]CPU.north east);%
-        \node [right=4pt of CPU.north east, yshift=3pt] (Ic)
-        {$I_{\mathrm{C}}$};%
-
-        % Memory Controller
-        \node [inner sep=8pt, draw, dashed, below=30pt of CPU.center] (MC)
-        {Memory Controller};%
-        \draw ([yshift=5pt, xshift=3pt]MC.north west) -- ([yshift=5pt,
-        xshift=-3pt]MC.north east);%
-        \node [right=4pt of MC.north east, yshift=3pt, text width=0.5cm] (Im)
-        {$I_{\mathrm{MC}}$};%
-        \node [left=4pt of MC.north west, yshift=3pt, text width=0.5cm]
-        (Im_shadow) {};%
-
-        % Software
-        \node [inner sep=8pt, draw, dashed, above=30pt of CPU.center] (S)
-        {Software};%
-
-        % arrows
-        \draw [-latex] (CPU.south) -- ([yshift=5pt]MC.north);%
-        \draw [-latex] (S.south) -- ([yshift=5pt]CPU.north);%
-
-        % blank
-        \node [below=of MC.center] (Blank) {};
-      \end{tikzpicture}
-    } \qquad \subfloat[Verification of the Memory Controller]{
-      \begin{tikzpicture}
-        % Mems
-        % -- DRAM
-        \node (M) {};%
-        \node [inner sep=8pt, dashed, draw, left=3pt of M.center, text
-        width=1.3cm, text badly centered] (DRAM) {DRAM};%
-        \draw ([yshift=5pt, xshift=3pt]DRAM.north west) -- ([yshift=5pt,
-        xshift=-3pt]DRAM.north east);%
-        \node [left=4pt of DRAM.north west, yshift=3pt, text width=1cm] (Id)
-        {$I_{\mathrm{DRAM}}$};%
-        % -- VGA
-        \node [inner sep=8pt, dashed, draw, right=3pt of M.center, text
-        width=1.3cm, text badly centered] (VGA) {VGA};%
-        \draw ([yshift=5pt, xshift=3pt]VGA.north west) -- ([yshift=5pt,
-        xshift=-3pt]VGA.north east);%
-        \node [right=4pt of VGA.north east, yshift=3pt, text width=1cm] (Iv)
-        {$I_{\mathrm{VGA}}$};%
-
-        % Memory Controller
-        \node [inner sep=8pt, draw, above=30pt of M.center] (MC) {Memory
-          Controller};%
-        \draw ([yshift=5pt, xshift=3pt]MC.north west) -- ([yshift=5pt,
-        xshift=-3pt]MC.north east);%
-        \node [right=4pt of MC.north east, yshift=3pt] (Im)
-        {$I_{\mathrm{MC}}$};%
-
-        % CPU
-        \node [inner sep=8pt, draw, dashed, above=30pt of MC.center] (CPU)
-        {Core};%
-
-        % arrows
-        \draw [-latex] (CPU.south) -- ([yshift=5pt]MC.north);%
-        \draw [latex-] ([yshift=5pt]DRAM.north) |- (MC.south);%
-        \draw [latex-] ([yshift=5pt]VGA.north) |- (MC.south);%
-
-        % blank
-        \node [below=of M.center] (Blank) {};
-      \end{tikzpicture}
-    }
-  \end{center}
-
-  \caption{Two possible steps of a x86 hardware architecture verification}
-\end{figure}
+security policies, and therefore contradicts our initial goal to verify \ac{hse}
+mechanisms of the same architecture against the same model.
 
 \begin{table}
   \center
@@ -548,82 +464,112 @@ security policies, and therefore contradicts our initial goal to ``x''
   \caption{Scheme of the verification proof for a component}
 \end{table}
 
-\subsection{Consequences for Hardware Models}
+\subsection{Approach Overview}
 
-\[
-  \mathtt{HANDLER}_{I} \rightarrow A \times \mathtt{HANDLER}_{I}
-\]
+During the development of SpecCert, we have carefully organized our work to
+model and verify each component of {\scshape Minx86} in isolation prior to
+reason about the architecture as a whole.
+%
+Even though these efforts were sufficient in our case, we believe they should be
+supported by an appropriate framework to reduce risk of error of omission, and
+to automate the verification process.
+%
+Besides, there are certain crucial properties that we cannot express easily in
+{\scshape Gallina} without a proper formalism, like the non-temporary violation
+property, or the concurrent interactions of components (\emph{e.g.}  concurrent
+access of the \ac{dram} by \acp{cpu} and peripherals).
+
+In this Chapter, we address detailed limitations of {\scshape Minx86} by
+introducing such a compositional reasoning framework.
+%
+We leverage the key concepts of algebraic effects and effects handlers to model
+and to verify each component of a computing system independently.
+%
+We also provide the necessary abstractions to compose these components together
+in order to verify the properties of the resulting systems.
+%
+We have implemented our framework in Coq, in a project called
+FreeSpec\,\cite{letan2018freespeccode}.
+%
+This Chapter focuses on the theoretical foundation of FreeSpec.
+%
+The interested reader can refer to the Appendix~\ref{appendix:freespec}, which
+gives a tutorial for FreeSpec.
+
+\paragraph{Components and Interfaces}
+%
+An interface is a set of interdependent operations, which are expected to
+produce a value.
+%
+A component is characterized primarily by the \emph{interface} it exposes to the
+rest of the system, and secondarily by the interfaces it uses in order to
+operate.
+%
+A component receives requests to compute results of operations through its
+interface, and sends operations requests to other components it is connected to
+\emph{via} their interfaces and waits for their results.
 
 \begin{figure}
-  \centering
-  \begin{tikzpicture}
-    % Doors
-    \node (D) {};%
-    \node [inner sep=8pt, dashed, draw, left=3pt of D.center] (D1) {Door 1};%
-    \node [inner sep=8pt, dashed, draw, right=3pt of D.center] (D2) {Door 2};%
-    \node [right=4pt of D2.north east, yshift=3pt] (Isys) {$I_{\mathrm{Sys}}$};%
+  \begin{center}
+    \begin{tikzpicture}
+      % CPU
+      \node [inner sep=8pt, draw] (CPU) {Core};%
+      \draw ([yshift=5pt, xshift=3pt]CPU.north west) -- ([yshift=5pt,
+      xshift=-3pt]CPU.north east);%
+      \node [right=4pt of CPU.north east, yshift=3pt] (Ic) {$I_{\mathrm{C}}$};%
 
-    % Controller
-    \node [inner sep=8pt, draw, above=30pt of D.center] (C) {Controller};%
-    \node [right=4pt of C.north east, yshift=3pt] (Ic) {$I_{\mathrm{C}}$};%
+      % Cache
+      \node [inner sep=8pt, draw, below=30pt of CPU.center] (Cache) {Cache};%
+      \draw ([yshift=5pt, xshift=3pt]Cache.north west) -- ([yshift=5pt,
+      xshift=-3pt]Cache.north east);%
+      \node [right=4pt of Cache.north east, yshift=3pt, text width=0.5cm] (Ic)
+      {$I_{\mathrm{Cache}}$};%
+      \node [left=4pt of Cache.north west, yshift=3pt, text width=0.5cm]
+      (Ic_shadow) {};%
 
-    % User
-    \node [inner sep=8pt, draw, dashed, above=30pt of C.center] (U) {User};%
+      % Memory Controller
+      \node [inner sep=8pt, draw, below=30pt of Cache.center] (MC) {Memory
+        Controller};%
+      \draw ([yshift=5pt, xshift=3pt]MC.north west) -- ([yshift=5pt,
+      xshift=-3pt]MC.north east);%
+      \node [right=4pt of MC.north east, yshift=3pt, text width=0.5cm] (Im)
+      {$I_{\mathrm{MC}}$};%
+      \node [left=4pt of MC.north west, yshift=3pt, text width=0.5cm]
+      (Im_shadow) {};%
 
-    % Interfaces
-    \draw ([yshift=5pt, xshift=3pt]D1.north west) -- ([yshift=5pt,
-    xshift=-3pt]D2.north east);%
-    \draw ([yshift=5pt, xshift=3pt]C.north west) -- ([yshift=5pt,
-    xshift=-3pt]C.north east);%
+      % Software
+      \node [inner sep=8pt, draw, dashed, above=30pt of CPU.center] (S)
+      {Software};%
 
-    % Use arrows
-    \draw [-latex] (U.south) -- ([yshift=5pt]C.north);%
-    \draw [-latex] (C.south) -- ([yshift=5pt, xshift=3pt]D1.north east);%
-  \end{tikzpicture}
+      % Mems
+      \node [below=40pt of MC.center] (M) {};%
+      % -- DRAM
+      \node [inner sep=8pt, draw, left=3pt of M.center, text width=1.3cm, text
+      badly centered] (DRAM) {DRAM};%
+      \draw ([yshift=5pt, xshift=3pt]DRAM.north west) -- ([yshift=5pt,
+      xshift=-3pt]DRAM.north east);%
+      \node [left=4pt of DRAM.north west, yshift=3pt, text width=1cm] (Id)
+      {$I_{\mathrm{DRAM}}$};%
+      % -- VGA
+      \node [inner sep=8pt, draw, right=3pt of M.center, text width=1.3cm, text
+      badly centered] (VGA) {VGA};%
+      \draw ([yshift=5pt, xshift=3pt]VGA.north west) -- ([yshift=5pt,
+      xshift=-3pt]VGA.north east);%
+      \node [right=4pt of VGA.north east, yshift=3pt, text width=1cm] (Iv)
+      {$I_{\mathrm{VGA}}$};%
 
-  \caption{Organization of a airsystem in terms of components}
-  \label{fig:freespec:airsystem}
+      % arrows
+      \draw [-latex] (Cache.south) -- ([yshift=5pt]MC.north);%
+      \draw [-latex] (CPU.south) -- ([yshift=5pt]Cache.north);%
+      \draw [-latex] (S.south) -- ([yshift=5pt]CPU.north);%
+      \draw [latex-] ([yshift=5pt]DRAM.north) |- (MC.south);%
+      \draw [latex-] ([yshift=5pt]VGA.north) |- (MC.south);%
+
+      % blank
+      \node [below=of MC.center] (Blank) {};
+    \end{tikzpicture}
+  \end{center}
 \end{figure}
-
-\begin{table}
-  \centering
-  \begin{tabular}{lc}
-    \multicolumn{1}{c}{{\scshape Name}}
-    & {\scshape Result values} \\
-    \hline
-    \hline
-    $\mathrm{sys/door\_1\_is\_open}$
-    & $\{ \mathtt{true}, \mathtt{false} \}$ \\
-    $\mathrm{sys/door\_2\_is\_open}$
-    & $\{ \mathtt{true}, \mathtt{false} \}$ \\
-    $\mathrm{sys/open\_door\_1}$
-    & $\{ () \}$ \\
-    $\mathrm{sys/open\_door\_2}$
-    & $\{ () \}$ \\
-    $\mathrm{sys/close\_door\_1}$
-    & $\{ () \}$ \\
-    $\mathrm{sys/open\_door\_1}$
-    & $\{ () \}$ \\
-    \hline
-  \end{tabular}
-  \caption{List of System's effects}
-\end{table}
-
-\begin{table}
-  \centering
-  \begin{tabular}{lc}
-    \multicolumn{1}{c}{{\scshape Name}}
-    & {\scshape Result values} \\
-    \hline
-    \hline
-    $\mathrm{c/open\_door\_1}$
-    & $\{ () \}$ \\
-    $\mathrm{c/open\_door\_2}$
-    & $\{ () \}$ \\
-    \hline
-  \end{tabular}
-  \caption{List of Controller's effects}
-\end{table}
 
 \[
   \begin{array}{rcl}
@@ -808,6 +754,46 @@ component at a time.
 To do so, we use the key concepts of algebraic effects and effect handlers,
 implemented with a variant of the Free monad called the Program monad as defined
 in the \texttt{operational} package of Haskell\,\cite{operational}.
+
+\begin{center}
+  \begin{tikzpicture}
+    % Mems
+    % -- DRAM
+    \node (M) {};%
+    \node [inner sep=8pt, dashed, draw, left=3pt of M.center, text width=1.3cm,
+    text badly centered] (DRAM) {DRAM};%
+    \draw ([yshift=5pt, xshift=3pt]DRAM.north west) -- ([yshift=5pt,
+    xshift=-3pt]DRAM.north east);%
+    \node [left=4pt of DRAM.north west, yshift=3pt, text width=1cm] (Id)
+    {$I_{\mathrm{DRAM}}$};%
+    % -- VGA
+    \node [inner sep=8pt, dashed, draw, right=3pt of M.center, text width=1.3cm,
+    text badly centered] (VGA) {VGA};%
+    \draw ([yshift=5pt, xshift=3pt]VGA.north west) -- ([yshift=5pt,
+    xshift=-3pt]VGA.north east);%
+    \node [right=4pt of VGA.north east, yshift=3pt, text width=1cm] (Iv)
+    {$I_{\mathrm{VGA}}$};%
+
+    % Memory Controller
+    \node [inner sep=8pt, draw, above=30pt of M.center] (MC) {Memory
+      Controller};%
+    \draw ([yshift=5pt, xshift=3pt]MC.north west) -- ([yshift=5pt,
+    xshift=-3pt]MC.north east);%
+    \node [right=4pt of MC.north east, yshift=3pt] (Im) {$I_{\mathrm{MC}}$};%
+
+    % CPU
+    \node [inner sep=16pt, draw, dashed, above=30pt of MC.center]
+    (CPU) {CPU};%
+
+    % arrows
+    \draw [-latex] (CPU.south) -- ([yshift=5pt]MC.north);%
+    \draw [latex-] ([yshift=5pt]DRAM.north) |- (MC.south);%
+    \draw [latex-] ([yshift=5pt]VGA.north) |- (MC.south);%
+
+    % blank
+    \node [below=of M.center] (Blank) {};
+  \end{tikzpicture}
+\end{center}
 
 This section and the one afterwards proceed through a running example: a
 minimalist Memory Controller Hub (MCH) of the x86 hardware architecture.
