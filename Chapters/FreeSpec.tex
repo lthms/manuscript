@@ -496,253 +496,136 @@ This Chapter focuses on the theoretical foundation of FreeSpec.
 The interested reader can refer to the Appendix~\ref{appendix:freespec}, which
 gives a tutorial for FreeSpec.
 
+\begin{figure}
+  \centering
+  \begin{tikzpicture}
+    % Memory Controller
+    \node [inner sep=15pt, draw] (MC) {Memory Controller};%
+    \draw ([yshift=5pt, xshift=3pt]MC.north west) -- ([yshift=5pt,
+    xshift=-3pt]MC.north east);%
+    \node [right=4pt of MC.north east, yshift=3pt, text width=0.5cm] (Im)
+    {$I_{\mathrm{MC}}$};%
+    \node [left=4pt of MC.north west, yshift=3pt, text width=0.5cm] (Im_shadow)
+    {};%
+
+    % Cache & IOMMU
+    \node [above=30pt of MC] (CIO) {};%
+    % -- Cache
+    \node [inner sep=8pt, draw, right=13pt of CIO.center] (Cache) {Cache};%
+    \draw ([yshift=5pt, xshift=3pt]Cache.north west) -- ([yshift=5pt,
+    xshift=-3pt]Cache.north east);%
+    \node [right=4pt of Cache.north east, yshift=3pt, text width=0.5cm] (Ic)
+    {$I_{\mathrm{Cache}}$};%
+    \node [left=4pt of Cache.north west, yshift=3pt, text width=0.5cm]
+    (Ic_shadow) {};%
+    % -- IOMMU
+    \node [inner sep=8pt, draw, dashed, left=5pt of CIO.center] (IOMMU) {I/O
+      MMU};%
+
+    % CPU
+    \node [inner sep=8pt, draw, above=20pt of Cache] (CPU) {Core};%
+    \draw ([yshift=5pt, xshift=3pt]CPU.north west) -- ([yshift=5pt,
+    xshift=-3pt]CPU.north east);%
+    \node [right=4pt of CPU.north east, yshift=3pt] (Ic) {$I_{\mathrm{C}}$};%
+
+    % Software
+    \node [inner sep=8pt, draw, dashed, above=30pt of CPU.center] (S)
+    {Software};%
+
+    % Mems
+    \node [below=50pt of MC.center] (M) {};%
+    % -- DRAM
+    \node [inner sep=8pt, draw, left=3pt of M.center, text width=1.3cm, text
+    badly centered] (DRAM) {DRAM};%
+    \draw ([yshift=5pt, xshift=3pt]DRAM.north west) -- ([yshift=5pt,
+    xshift=-3pt]DRAM.north east);%
+    \node [left=4pt of DRAM.north west, yshift=3pt, text width=1cm] (Id)
+    {$I_{\mathrm{DRAM}}$};%
+    % -- VGA
+    \node [inner sep=8pt, draw, right=3pt of M.center, text width=1.3cm, text
+    badly centered] (VGA) {VGA};%
+    \draw ([yshift=5pt, xshift=3pt]VGA.north west) -- ([yshift=5pt,
+    xshift=-3pt]VGA.north east);%
+    \node [right=4pt of VGA.north east, yshift=3pt, text width=1cm] (Iv)
+    {$I_{\mathrm{VGA}}$};%
+
+    % arrows
+    \draw [-latex] (CPU.south) -- ([yshift=5pt]Cache.north);%
+    \draw [-latex] (S.south) -- ([yshift=5pt]CPU.north);%
+    \draw [latex-] ([yshift=5pt]DRAM.north) |- (MC.south);%
+    \draw [latex-] ([yshift=5pt]VGA.north) |- (MC.south);%
+    \draw [-latex] (IOMMU.south) -- ([yshift=-41pt]IOMMU.north);%
+    \draw [-latex] (Cache.south) -- ([yshift=-41pt]Cache.north);
+  \end{tikzpicture}
+
+  \caption{Interface-driven modeling of the x86 architecture}
+  \label{fig:freespec:interfacedriven}
+\end{figure}
+
 \paragraph{Components and Interfaces}
 %
 An interface is a set of interdependent operations, which are expected to
 produce a value.
 %
-A component is characterized primarily by the \emph{interface} it exposes to the
-rest of the system, and secondarily by the interfaces it uses in order to
-operate.
+A component is characterized primarily by the interface it exposes to the rest
+of the system, and secondarily by its current state and the interfaces it uses
+in order to operate.
 %
 A component receives requests to compute results of operations through its
 interface, and sends operations requests to other components it is connected to
 \emph{via} their interfaces and waits for their results.
+%
+Figure~\ref{fig:freespec:interfacedriven} pictures how this could materialize to
+model a simplified x86 architecture.
+%
+The software components interact with the core \emph{via} its instructions set.
+%
+When the core needs to read from or write to memory, it leverages its cache.
+%
+In case of cache miss or cache eviction, the cache interacts with the system
+memory through the memory controller, whose goal is to dispatch memory accesses
+between \emph{e.g.} \ac{dram} and the VGA controller.
+%
+In addition, the memory controller dispatches memory requests coming from other
+sources, for instance an I/O~MMU.
+
+Figure~\ref{fig:freespec:seqdiagr} illustrates the class of scenarios we are
+seeking to model with our framework.
 
 \begin{figure}
-  \begin{center}
-    \begin{tikzpicture}
-      % CPU
-      \node [inner sep=8pt, draw] (CPU) {Core};%
-      \draw ([yshift=5pt, xshift=3pt]CPU.north west) -- ([yshift=5pt,
-      xshift=-3pt]CPU.north east);%
-      \node [right=4pt of CPU.north east, yshift=3pt] (Ic) {$I_{\mathrm{C}}$};%
+  \bigcentering
+  \begin{sequencediagram}
+    \newthread{S}{Software}%
+    \newinst[1.5]{C}{Core}%
+    \newinst[1.5]{Ca}{Cache}{}%
+    \newinst[1.5]{MC}{Memory Controller}{}%
+    \newinst[1.5]{IO}{I/O~MMU}{}%
 
-      % Cache
-      \node [inner sep=8pt, draw, below=30pt of CPU.center] (Cache) {Cache};%
-      \draw ([yshift=5pt, xshift=3pt]Cache.north west) -- ([yshift=5pt,
-      xshift=-3pt]Cache.north east);%
-      \node [right=4pt of Cache.north east, yshift=3pt, text width=0.5cm] (Ic)
-      {$I_{\mathrm{Cache}}$};%
-      \node [left=4pt of Cache.north west, yshift=3pt, text width=0.5cm]
-      (Ic_shadow) {};%
+    \begin{call}{S}{\texttt{movq~\$0,~(\%rax)}}{C}{}%
+      \begin{call}{C}{\texttt{read\_reg(\%rax)}}{C}{\( p \)}
+      \end{call}
 
-      % Memory Controller
-      \node [inner sep=8pt, draw, below=30pt of Cache.center] (MC) {Memory
-        Controller};%
-      \draw ([yshift=5pt, xshift=3pt]MC.north west) -- ([yshift=5pt,
-      xshift=-3pt]MC.north east);%
-      \node [right=4pt of MC.north east, yshift=3pt, text width=0.5cm] (Im)
-      {$I_{\mathrm{MC}}$};%
-      \node [left=4pt of MC.north west, yshift=3pt, text width=0.5cm]
-      (Im_shadow) {};%
+      \begin{call}{IO}{\texttt{\texttt{write}(\( p'' \), \( v' \),
+            \texttt{unpriv})}}{MC}{}
+      \end{call}
 
-      % Software
-      \node [inner sep=8pt, draw, dashed, above=30pt of CPU.center] (S)
-      {Software};%
+      \begin{call}{C}{\texttt{write}(\( p \), 0, \texttt{priv})}{Ca}{}%
+        \begin{call}{Ca}{\texttt{\texttt{cache\_hit}(\( p
+              \))}}{Ca}{\texttt{false}}
+        \end{call}
+        \begin{call}{Ca}{\texttt{\texttt{write}(\( p' \), v,
+              \texttt{priv})}}{MC}{}
+        \end{call}
+        \begin{call}{Ca}{\texttt{\texttt{write\_cache\_line}(\( \func{index}(p),
+              0 \))}}{Ca}{}
+        \end{call}
+      \end{call}
+    \end{call}
+  \end{sequencediagram}
 
-      % Mems
-      \node [below=40pt of MC.center] (M) {};%
-      % -- DRAM
-      \node [inner sep=8pt, draw, left=3pt of M.center, text width=1.3cm, text
-      badly centered] (DRAM) {DRAM};%
-      \draw ([yshift=5pt, xshift=3pt]DRAM.north west) -- ([yshift=5pt,
-      xshift=-3pt]DRAM.north east);%
-      \node [left=4pt of DRAM.north west, yshift=3pt, text width=1cm] (Id)
-      {$I_{\mathrm{DRAM}}$};%
-      % -- VGA
-      \node [inner sep=8pt, draw, right=3pt of M.center, text width=1.3cm, text
-      badly centered] (VGA) {VGA};%
-      \draw ([yshift=5pt, xshift=3pt]VGA.north west) -- ([yshift=5pt,
-      xshift=-3pt]VGA.north east);%
-      \node [right=4pt of VGA.north east, yshift=3pt, text width=1cm] (Iv)
-      {$I_{\mathrm{VGA}}$};%
-
-      % arrows
-      \draw [-latex] (Cache.south) -- ([yshift=5pt]MC.north);%
-      \draw [-latex] (CPU.south) -- ([yshift=5pt]Cache.north);%
-      \draw [-latex] (S.south) -- ([yshift=5pt]CPU.north);%
-      \draw [latex-] ([yshift=5pt]DRAM.north) |- (MC.south);%
-      \draw [latex-] ([yshift=5pt]VGA.north) |- (MC.south);%
-
-      % blank
-      \node [below=of MC.center] (Blank) {};
-    \end{tikzpicture}
-  \end{center}
+  \caption{Sequence diagram of the execution of \texttt{movq~\$0, (\%rax)}}
+  \label{fig:freespec:seqdiagr}
 \end{figure}
-
-\[
-  \begin{array}{rcl}
-    \mathrm{c/open\_door\_1}
-    & :
-    & \mathtt{HANDLER}_{I_{\mathrm{Sys}}} \rightarrow \{()\} \times
-      \mathtt{HANDLER_{I_{\mathrm{Sys}}}} \\
-    \mathrm{c/open\_door\_1}(h)
-    & \triangleq
-    & \text{let } (\mathit{open}, h') = \mathrm{sys/door\_2\_is\_open}(h) \text{ in} \\
-
-    &
-    & \text{let }(\_, h'') = \text{if }\mathit{open} \\
-
-    &
-    & \text{then }\mathrm{sys/close\_door\_2}(h') \\
-
-    &
-    & \text{else }((), h') \text{ in} \\
-
-    &
-    & \mathrm{sys/open\_door\_1}(h'')\\
-  \end{array}
-\]
-
-\[
-  \mathtt{HANDLER}_I \times \Omega \rightarrow A \times \mathtt{HANDLER}_I
-  \times \Omega
-\]
-
-\[
-  \begin{array}{l}
-    \dots \\
-    \text{let } (\mathit{open}, h_1) = \mathrm{sys/door\_2\_is\_open}(h_0) \text{ in} \\
-    \text{let }\omega_1 = \mathrm{step}(\mathrm{sys/door\_2\_is\_open},
-    \mathit{open}, \omega_0) \text{ in} \\
-    \dots
-  \end{array}
-\]
-
-\[
-  \begin{array}{l}
-    \dots \\
-    \mathtt{GOAL} \quad \mathbb{P}(\mathrm{sys/door\_2\_is\_open}, \omega_0) \\
-    \text{let } (\mathit{open}, h_1) = \mathrm{sys/door\_2\_is\_open}(h_0) \text{ in} \\
-    \mathtt{HYP} \quad \mathbb{Q}(\mathrm{sys/door\_2\_is\_open}, open, \omega_0) \\
-    \dots
-  \end{array}
-\]
-
-The complete $\mathrm{c/open\_door\_1}$ program is listed in
-Figure~\ref{fig:freespec:instrumentation}.
-
-\begin{figure}
-  \centering
-  \[
-    \begin{array}{rcl}
-      \mathrm{c/open\_door\_1}
-      & :
-      & \mathtt{HANDLER}_{I_{\mathrm{Sys}}} \times \Omega \rightarrow \{()\} \times
-        \mathtt{HANDLER}_{I_{\mathrm{Sys}}} \times \Omega \\
-      \mathrm{c/open\_door\_1}(h_0, \omega_0)
-      & \triangleq
-      & \mathtt{GOAL} \quad \mathbb{P}(\mathrm{sys/door\_2\_is\_open}, \omega_0) \\
-
-      &
-      & \text{let } (\mathit{open}, h_1) = \mathrm{sys/door\_2\_is\_open}(h_0) \text{ in} \\
-
-      &
-      & \mathtt{HYP} \quad \mathbb{Q}(\mathrm{sys/door\_2\_is\_open}, open, \omega_0) \\
-
-      &
-      & \text{let }\omega_1 = \mathrm{step}(\mathrm{sys/door\_2\_is\_open}, \mathit{open}, \omega_0) \text{ in} \\
-
-      &
-      & \text{let }(h_3, \omega_3) = \\
-
-      &
-      & \qquad\text{if }\mathit{open} \\
-
-      &
-      & \qquad\text{then} \\
-
-      &
-      & \qquad\qquad\mathtt{GOAL} \quad \mathbb{P}(\mathrm{sys/close\_door\_2}, \omega_1) \\
-
-      &
-      & \qquad\qquad\text{let }(x, h_2) =
-        \mathrm{sys/close\_door\_2}(h_1) \text{ in} \\
-
-      &
-      & \qquad\qquad\mathtt{HYP} \quad \mathbb{Q}(\mathrm{sys/close\_door\_2}, x, \omega_1) \\
-
-      &
-      & \qquad\qquad\text{let }\omega_2 =
-        \mathrm{step}(\mathrm{sys/close\_door\_2}, x, \omega_1) \text{ in} \\
-
-      &
-      & \qquad\qquad(h_2, \omega_2) \\
-
-      &
-      & \qquad\text{else }(h_1, \omega_1) \text{ in} \\
-
-      &
-      & \mathtt{GOAL} \quad \mathbb{P}(\mathrm{sys/open\_door\_1}, \omega_3) \\
-
-      &
-      & \text{let }(y, h_4) = \mathrm{sys/open\_door\_1}(h_3) \text{ in} \\
-
-      &
-      & \mathtt{HYP} \quad \mathbb{Q}(\mathrm{sys/open\_door\_1}, y, \omega_3) \\
-
-      &
-      & \text{let }\omega_4 = \mathrm{step}(\mathrm{sys/open\_door\_1}, y, \omega_3) \text{ in} \\
-
-      &
-      & ((), h_4, \omega_4)
-    \end{array}
-  \]
-  \caption{Complete instrumentation of a program with effects}
-  \label{fig:freespec:instrumentation}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \[
-    \begin{array}{l}
-      \text{Given }h_0 \in \mathtt{HANDLER}_{I_{\mathrm{Sys}}} \text{ and }
-      \omega_0 \in \Omega, \\
-      \forall (h_1, h_2) \in \mathtt{HANDLER}_{I_{\mathrm{Sys}}} \times \mathtt{HANDLER}_{I_{\mathrm{Sys}}}, \\
-      \forall \omega_2 \in \Omega, \\
-      \forall \mathtt{open} \in \{ \mathtt{true}, \mathtt{false} \}, \\
-      \forall x \in \{()\}, \\
-      \qquad\mathbb{P}(sys/door\_2\_is\_open, \omega_0) \\
-      \qquad\Rightarrow (\mathit{open}, h_1) = \func{sys/door\_2\_is\_open}(h_0) \\
-      \qquad\Rightarrow \mathbb{Q}(\func{sys/door\_2\_is\_open}, \mathit{open}, \omega_0) \\
-      \qquad\Rightarrow \omega_1 = \func{step}(\func{sys/door\_2\_is\_open}, \omega_0) \\
-      \qquad\Rightarrow \mathit{open} = \mathtt{true} \\
-      \qquad\Rightarrow \mathbb{P}(\mathrm{sys/close\_door\_2}, \omega_1) \\
-    \end{array}
-  \]
-
-  \caption{Proof obligation about $\func{sys/door\_2\_is\_open}$ postcondition}
-  \label{fig:freespec:proofobligation}
-\end{figure}
-
-\[
-  \begin{array}{rcl}
-    \mathrm{c/open\_door\_1}
-    & \triangleq
-    & open \leftarrow \mathrm{sys/door\_2\_is\_open} \\
-
-    &
-    & \mathrm{when} \text{ } \mathit{open} \text{ } \mathrm{sys/close\_door\_2} \\
-
-    &
-    & \mathrm{sys/open\_door\_1}
-  \end{array}
-\]
-
-\[
-  \begin{array}{rcl}
-    \mathrm{c/open\_door\_1}
-    & \triangleq
-    & \mathrm{sys/open\_door\_1} \\
-
-    &
-    & \mathit{open} \leftarrow \mathrm{sys/door\_2\_is\_open} \\
-
-    &
-    & \mathrm{when} \text{ } \mathit{open} \text{ } \mathrm{sys/close\_door\_2}
-  \end{array}
-\]
 
 \section{Modelling Programs with Effects}
 % ==============================================================================
