@@ -9,11 +9,8 @@
 
 \PC{commentaire inutile: c'est un peu le but d'un labyrinthe, em même temps}
 
-\vspace{1cm}\noindent
-%
-Our motivation to formally specify and verify \ac{hse} mechanisms comes from
-various compositional attacks targeting the x86 hardware
-architecture\,\cite{duflot2009smram,wojtczuk2009smram,kallenberg2015racecondition,domas2015sinkhole,kovah2015senter}.
+\vspace{1cm}\noindent From a market share perspective, x86 \acp{cpu} are widely
+used for laptops, desktops and servers.
 %
 Besides, Intel has introduced several \ac{hse} mechanisms over the past decades:
 hardware-based virtualization (VT-x, VT-d)\,\cite[Volume 3, Chapter
@@ -21,11 +18,9 @@ hardware-based virtualization (VT-x, VT-d)\,\cite[Volume 3, Chapter
 applicative enclaves (SGX)\,\cite[Volume 3, Chapter
 36]{intel2014manual}\cite{costan2016sgxexplained}.
 %
-From a market share perspective, x86 \acp{cpu} are widely used for laptops,
-desktops and servers.
-\PC{avis perso: les 3 phrases précédentes me semblent à l'envers: je dirais
-plutôt ``x86 est utilisé partout, Intel a mis plein de mécanismes, mais
-ils on été contournés, du coup on a envie de les spécifier et vérifier''}
+Our motivation to formally specify and verify \ac{hse} mechanisms comes from
+various compositional attacks targeting the x86 hardware
+architecture\,\cite{duflot2009smram,wojtczuk2009smram,kallenberg2015racecondition,domas2015sinkhole,kovah2015senter}.
 %
 For these reasons, we have evaluated our approaches against the x86 hardware
 architecture.
@@ -54,9 +49,8 @@ We describe how a typical x86 hardware architecture is organized, and the
 consequences of this organization in terms of security
 (Section~\ref{sec:usecase:architecture}).
 %
-We then focus on the key role played by the \ac{bios}, and the security model it
-requires so it can play this role\PC{répétition (supprimer ``to play its
-role'')} (Section~\ref{sec:usecase:firmware}).
+We then focus on the key role played by the \ac{bios}, and its requirements in
+term of security (Section~\ref{sec:usecase:firmware}).
 %
 Once we have established the role of the \ac{bios}, we detail the \ac{hse}
 mechanisms it implements, and several compositional attacks which have defeated
@@ -65,9 +59,9 @@ these \ac{hse} mechanisms in the past (Section~\ref{sec:usecase:hse}).
 \section{Introduction to x86 Architecture Security}
 \label{sec:usecase:architecture}
 
-Describing \PC{modern} hardware architectures in depth is challenging, because they tend to
-comprise many interconnected components of various natures\PC{that were added
-over time}.
+Describing hardware architectures in depth is challenging, because they tend to
+comprise an increasing number of interconnected components of various natures
+over time.
 %
 The x86 hardware architecture is a perfect illustration of this, and this is
 probably best illustrated by the scale of its documentation.
@@ -77,12 +71,11 @@ At the time of writing this thesis\,\footnote{Spring 2018.}, the \emph{Intel 64
 %
 Executed on the computer used to write the present thesis, the GNU/Linux
 command-line application \texttt{lshw} lists about 30 hardware components,\PC{je
-ne suis pas sûr que la mesure lshw soit pertinente: elle ne détaille pas tout,
-il y a beaucoup plus de composants en pratique. Tu peux dire que le PC est
-composé de ``dozens of components'' :)}
-which include a hard drive, a keyboard, a trackpad, an audio controller, an
-integrated graphic card. Several come with their own documentation, often
-in the form of large datasheet.
+  ne suis pas sûr que la mesure lshw soit pertinente: elle ne détaille pas tout,
+  il y a beaucoup plus de composants en pratique. Tu peux dire que le PC est
+  composé de ``dozens of components'' :)} which include a hard drive, a
+keyboard, a trackpad, an audio controller, an integrated graphic card. Several
+come with their own documentation, often in the form of large datasheet.
 
 \subsection{Basics of x86 Architecture}
 
@@ -168,8 +161,7 @@ execution\,\cite[Section 2]{fog2012microarchitecture} or predictive
 branching\,\cite{milenkovic2002branchprediction}\cite[Section
 3]{fog2012microarchitecture}.
 %
-These optimizations should not violate properties of the
-architecture.
+These optimizations should not violate properties of the architecture.
 %
 For instance, the predictive branching implemented by x86 \acp{cpu} increases
 performance, \emph{e.g.} inside a loop.
@@ -180,18 +172,17 @@ required to determine the correct execution path.
 %
 Most of the time, it chooses the correct branch.
 %
-In case of \emph{branch misprediction}, the erroneous computations performed by the core shall be canceled like if they have never happened.
+In case of \emph{branch misprediction}, the erroneous computations performed by
+the core shall be canceled like if they have never happened.
 %
 \PC{quel est l'objectif de l'explication du \textit{branch misprediction} et
-l'exemple qui
-suivent ?
-Cela me semble un peu hors contexte, on se demande pourquoi ce point est
-détaillé (et pas les autres)
+  l'exemple qui suivent ?  Cela me semble un peu hors contexte, on se demande
+  pourquoi ce point est détaillé (et pas les autres)
 
-A supprimer ?}
-We illustrate branch misprediction with the following program snippet, written with x86
-assembly instructions (left) and its C equivalent (right)\,\footnote{Provided no
-  optimization from the compiler nor the processor.}:
+  A supprimer ?}  We illustrate branch misprediction with the following program
+snippet, written with x86 assembly instructions (left) and its C equivalent
+(right)\,\footnote{Provided no optimization from the compiler nor the
+  processor.}:
 %
 \begin{center}
   \begin{minipage}[t]{0.35\linewidth}
@@ -202,9 +193,9 @@ assembly instructions (left) and its C equivalent (right)\,\footnote{Provided no
   \end{minipage}
 \end{center}
 %
-During the first 10 steps of the loop, when the core executes the
-\texttt{jle} instruction (l. 5), it takes the same branch and jumps to the
-\texttt{loop} label.
+During the first 10 steps of the loop, when the core executes the \texttt{jle}
+instruction (l. 5), it takes the same branch and jumps to the \texttt{loop}
+label.
 %
 At the end of the last loop step, the register \texttt{rax} contains the value
 \( 11 \).
@@ -272,7 +263,7 @@ an attack vector.
 %   arbitrary value (\emph{e.g.} with jump instructions).
 % \end{enumerate}
 
-\paragraph{Memories and Cores \IOs.}\PC{acronyme, donc I/Os ou IOs au pluriel}
+\paragraph{Memories and Cores \IOs.}
 %
 The Intel x86 instructions set contains hundreds of instructions\,\cite[Volume
 2]{intel2014manual}.
@@ -292,25 +283,24 @@ addressable memory cells.
 These memory cells contain the instructions executed by the cores, \emph{and}
 the data they manipulate.
 %
-Therefore, a core decides the semantics of memory cell contents
-depending on the context, \emph{i.e.} it can interpret the same binary sequence as an
-instruction to execute then as an operand of an arithmetical operation.
+Therefore, a core decides the semantics of memory cell contents depending on the
+context, \emph{i.e.} it can interpret the same binary sequence as an instruction
+to execute then as an operand of an arithmetical operation.
 
 \PC{après discussion d'hier, AMHA ici tu devrais faire une phrase pour
-introduire les deux idées qui suivent: on distingue ce qui est accessible
-\textit{via} l'espace d'adressage (mot important!) (le ``quoi'') et les manières
-d'y accéder (le ``comment''), sachant que l'accès à une même ressource peut être
-fait de deux manières différentes}
+  introduire les deux idées qui suivent: on distingue ce qui est accessible
+  \textit{via} l'espace d'adressage (mot important!) (le ``quoi'') et les
+  manières d'y accéder (le ``comment''), sachant que l'accès à une même
+  ressource peut être fait de deux manières différentes}
 
 Although \ac{dram} is the primary source of memory within the hardware
 architecture, it is not the only one.
 %
 Other hardware components expose additional memory regions.\PC{techniquement, ce
-	n'est pas le composant qui expose de la mémoire, mais le CPU (le memory
-	controller) qui expose la mémoire ou les registres du composant dans
-	l'espace d'adressage global. Il serait utile de citer le nom
-	\textit{memory-mapped I/O} ici --- c'est cité plus loin, mais en
-répétition}
+  n'est pas le composant qui expose de la mémoire, mais le CPU (le memory
+  controller) qui expose la mémoire ou les registres du composant dans l'espace
+  d'adressage global. Il serait utile de citer le nom \textit{memory-mapped I/O}
+  ici --- c'est cité plus loin, mais en répétition}
 %
 For instance, an x86 processor integrates a display controller which exposes a
 frame buffer to the cores.
@@ -344,20 +334,19 @@ software components.
 %
 \IOs issued by \texttt{in} and \texttt{out} instructions are referred to as
 Programmable \IOs (P-\IOs).\PC{jamais vu ce terme --- tu parle des
-	\textit{Port-Mapped I/O (PMIO)}?}
+  \textit{Port-Mapped I/O (PMIO)}?}
 %
-In addition to this approach\PC{Proposal: ``Alternatively, peripheral
-	memory and registers can be exposed to the system memory address space
-	using \emph{memory mapped \IOs}.''
+In addition to this approach\PC{Proposal: ``Alternatively, peripheral memory and
+  registers can be exposed to the system memory address space using \emph{memory
+    mapped \IOs}.''
 
-Le ``Alternatively'' est plus clair que ``In addition to this approach''}
-, x86 \acp{cpu} are also capable of handling
-\emph{memory-mapped} \IOs, where the memories exposed by the peripherals are
-mapped within the system memory address space.
+  Le ``Alternatively'' est plus clair que ``In addition to this approach''} ,
+x86 \acp{cpu} are also capable of handling \emph{memory-mapped} \IOs, where the
+memories exposed by the peripherals are mapped within the system memory address
+space.
 %
-\PC{Phrase suivante inutile IMHO}
-That is, the system memory is no longer limited to the
-\ac{dram} only.
+\PC{Phrase suivante inutile IMHO} That is, the system memory is no longer
+limited to the \ac{dram} only.
 %
 As a consequence, when a core reads from or write to the system memory, the
 processor and the \ac{pch} dispatches its request to the correct hardware
@@ -365,22 +354,20 @@ component.
 %
 The mapping between a so-called \emph{physical address} manipulated by the
 processor and its concrete memory location is called the \emph{memory
-map}.\PC{``a memory mapping'' plutôt ? La ``memory map'' c'est l'ensemble de
-tous les mappings}
+  map}.\PC{``a memory mapping'' plutôt ? La ``memory map'' c'est l'ensemble de
+  tous les mappings}
 %
 The memory map is configurable, that is it can be changed dynamically \emph{via}
 a set of configuration registers exposed by the processor and the \ac{pch}.
 %
 \PC{saut de ligne: cette idée est importante, mais elle est noyée dans le
-	paragraphe précédent. Il me semble aussi que ça part trop vite dans un
-	exemple détaillé
-	
-	AMHA, il faudrait détailler plus l'idée générale, en expliquant
-	le fait qu'une même zone mémoire ou registre d'un périphérique peut être
-	lue ou modifiée par MMIO \textbf{et} PMIO, ce qui va notamment
-	complexifier la modélisation,
-	et réduire un peu l'exemple}
-The two approaches are complementary.
+  paragraphe précédent. Il me semble aussi que ça part trop vite dans un exemple
+  détaillé
+
+  AMHA, il faudrait détailler plus l'idée générale, en expliquant le fait qu'une
+  même zone mémoire ou registre d'un périphérique peut être lue ou modifiée par
+  MMIO \textbf{et} PMIO, ce qui va notamment complexifier la modélisation, et
+  réduire un peu l'exemple} The two approaches are complementary.
 %
 As an example, PCI devices expose a so-called configuration space, which is a
 dedicated memory region with a specific semantics (see
@@ -394,14 +381,12 @@ PCI devices are identified in the hardware architecture with a tuple
 by \texttt{bus:device:function}).
 %
 \PC{Je comprends l'idée de l'exemple, mais je ne suis pas persuadé que la
-	fonction de calcul apporte quelque chose.
-	Tu pourrais plutôt prendre un registre au hasard dans la figure et
-	expliquer comment on y accède (relativement au BAR ---qui peut être
-	modifé---, ou \textit{via}
-	PMIO), \textbf{en citant la figure 2.2}}
-A configuration register exposed by a given PCI device identified as
-\texttt{bus:device:function} at the offset \( o \) of its configuration space is
-addressed by the value
+  fonction de calcul apporte quelque chose.  Tu pourrais plutôt prendre un
+  registre au hasard dans la figure et expliquer comment on y accède
+  (relativement au BAR ---qui peut être modifé---, ou \textit{via} PMIO),
+  \textbf{en citant la figure 2.2}} A configuration register exposed by a given
+PCI device identified as \texttt{bus:device:function} at the offset \( o \) of
+its configuration space is addressed by the value
 %
 \[
   \mathtt{0x80000000}\,|\,\texttt{bios} <\!\!< 16\,|\,\texttt{device} <\!\!<
@@ -434,7 +419,7 @@ configuration space within the system memory address space.
   \label{fig:usecase:pciconfig}
 \end{figure}
 
-Finally, cores do not \PC{usually} manipulate physical addresses directly.
+Finally, cores do not manipulate physical addresses directly.
 %
 Indeed, cores have their own address translation mechanisms, namely
 segmentation\,\cite[Volume 3, Section 2.4]{intel2014manual} and
@@ -457,9 +442,7 @@ Hardware components can also interact with the processor by sending hardware
 interrupts of various natures.
 %
 When a user presses a key of its keyboard, the latter sends an
-interrupt\PC{\textbf{request}}\PC{supprime le numéro d'IRQ (ça n'apporte pas grand chose, et c'est
-	reconfigurable \ldots (\textit{cf.} P de PIC)}
-(\texttt{\#IRQ1}).
+interrupt request.
 %
 Interrupt handlers, that is programs executed by the core when it receives
 interrupts, are configurable \emph{via} a so-called \ac{idt}\,\cite[Volume 3,
@@ -468,20 +451,16 @@ Chapter 6]{intel2014manual}.
 Each line of the \ac{idt} corresponds to a given interrupt whose semantics is
 specified by Intel, as summarized in Table~\ref{tab:usecase:idt} for reference.
 %
-When a core received\PC{handles} an interrupt, it saves its current context inside the
-\ac{dram}, then starts executing the corresponding interrupt handler.
+When a core handles an interrupt, it saves its current context
+inside the \ac{dram}, then starts executing the corresponding interrupt handler.
 %
 Not all x86 interrupts come from a hardware component.
 %
 Cores use several of them, for instance to recover from errors.
 %
-For instance, if a core is not able to translate a virtual address into a
-proper address, it raises a so-called Page Fault (denoted by \texttt{\#PF} or
-\texttt{\#IRQ14}\PC{supprime le numéro (qui me semble louche: il me semble que
-tu as confondu IRQ et numéro du handler)}).
+For instance, if a core is not able to translate a virtual address into a proper
+address, it raises a so-called Page Fault (denoted by \texttt{\#PF}).
 
-\PC{table 2.1: je confirme, ce n'est \textbf{pas} le numéro d'IRQ, mais celui du vecteur
-d'interruption}
 \begin{table}
   \centering
   \begin{tabular}{cl}
@@ -535,17 +514,18 @@ d'interruption}
   \label{tab:usecase:idt}
 \end{table}
 
-\PC{supprime le ``In addition'', et fais un paragraphe avec un titre}
-In addition, Intel has implemented several out-of-band management technologies
-for its products.
+\PC{supprime le ``In addition'', et fais un paragraphe avec un titre} In
+addition, Intel has implemented several out-of-band management technologies for
+its products.
 %
-They allow for administering a computer \emph{via} the network, without the
-need for a physical access.
+They allow for administering a computer \emph{via} the network, without the need
+for a physical access.
 %
 In practice, the software components responsible for implementing the
-out-of-band management features are not executed by the main processor: the network card was implementing the ASF
-technology\,\cite{duflot2010network}, and
-since 2008 x86 \acp{cpu} embed a so-called Management Engine\,\cite{ruan2014me,skochinsky2014intel}.
+out-of-band management features are not executed by the main processor: the
+network card was implementing the ASF technology\,\cite{duflot2010network}, and
+since 2008 x86 \acp{cpu} embed a so-called Management
+Engine\,\cite{ruan2014me,skochinsky2014intel}.
 %
 In 2018, the Management Engine is located inside the \ac{pch}.
 %
@@ -566,8 +546,8 @@ cannot initialize correctly.
 \subsection{HSE Mechanisms Targeted Security Policies}
 \label{subsec:usecase:targetedsec}
 
-All being told\PC{previously stated}, x86 computing platforms are formed of concurrent, interconnected
-components.
+As previously stated, x86 computing platforms are formed of concurrent,
+interconnected components.
 %
 They are of various natures, from physical components to sequences of
 instructions.
@@ -586,7 +566,8 @@ This also raises a significant challenge from a security perspective.
 Hardware and software components come from various places and can be of various
 qualities.
 %
-Once integrated together, an attacker can potentially leverage any of them to threaten the security of the system.
+Once integrated together, an attacker can potentially leverage any of them to
+threaten the security of the system.
 %
 In this context, the principle of least
 privilege\,\cite{saltzer1975leastprivilege} applies: a given component should
@@ -612,9 +593,9 @@ perspective\,\cite{nohl2014badusb,hudson2015thunderstrike,chifflier2013uefi}.
 Secondly, the ``least privilege'' may vary from one execution to another.
 %
 To handle the numerous use cases of the x86 architecture, its default
-configuration is very permissive, until software components such as the \ac{bios} or an
-operating system modifies it to fit their needs, while implementing \ac{hse}
-mechanisms.
+configuration is very permissive, until software components such as the
+\ac{bios} or an operating system modifies it to fit their needs, while
+implementing \ac{hse} mechanisms.
 
 % OLD VERSION: For instance, it has also been repeatedly shown that the various
 % physical interface exposed by the computer (\emph{e.g.}
@@ -634,8 +615,8 @@ policies\,\cite{sandhu1994access}.
 Subjects of these policies include the software and hardware components of the
 system.
 %
-Objects ultimately come down to the memory locations of various natures scattered
-within the hardware architecture.
+Objects ultimately come down to the memory locations of various natures
+scattered within the hardware architecture.
 %
 Actions comprise reading from and writing to a memory location; from a core
 perspective, it is also common to distinguish between reading data and reading
@@ -666,8 +647,8 @@ page table hierarchy the \ac{mmu} uses.
 %
 This is why ring~3 is commonly dedicated to the execution of applications.
 %
-The scope of the \ac{mmu} is limited to the software component executed
-by a core at a given time.
+The scope of the \ac{mmu} is limited to the software component executed by a
+core at a given time.
 %
 To impose an access control policy to hardware components as well, an operating
 system can use the so-called VT-d feature, which implements an \IO-\ac{mmu} for
@@ -842,9 +823,8 @@ The MBR, whose size is limited to 512 bytes, contains a small program to
 initiate a loader for a system software component.
 %
 Modern \acp{bios} implement the \ac{uefi}\,\cite{zimmer2007uefi,uefi2017specs}
-\PC{standard},
-whose purpose is to standardize the boot sequence process in order to favor
-interoperability of \ac{bios} implementations.
+standard, whose purpose is to standardize the boot sequence process in order to
+favor interoperability of \ac{bios} implementations.
 %
 The boot sequence is divided into several phases, and the \ac{bios} is packaged
 into several software components accordingly.
@@ -867,15 +847,14 @@ Boot\,\cite{rosenbaum2012secboot}.
 %
 When Secure Boot is enabled, \ac{uefi}-compliant \acp{bios} should only execute
 applications which provide an acceptable cryptographic signature, with respect
-to a key hierarchy\PC{supprimer la suite (les clés ne sont pas nécessairement
-configurables} configurable by the computing platform owner.
+to a key hierarchy.
 %
 The \ac{tcg} has standardized a hardware component called the \ac{tpm}, which is
 the foundation of the Trusted Boot.
 %
-Each component of the boot sequence should measure any software
-component it initiates prior to starting its execution, and to entrust these
-measurements to the \ac{tpm}.
+Each component of the boot sequence should measure any software component it
+initiates prior to starting its execution, and to entrust these measurements to
+the \ac{tpm}.
 %
 If one of the software components executed during the boot sequence has been
 corrupted, the difference is captured by the \ac{tpm}, because its measurements
@@ -890,13 +869,12 @@ third party to verify that a given computing platform executes the code it is
 supposed to.
 %
 Another popular approach is to entrust to the \ac{tpm} the encryption key which
-protects sensitive information that a corrupted \ac{bios} should not be allowed to
-access.
+protects sensitive information that a corrupted \ac{bios} should not be allowed
+to access.
 %
 In this scenario, the access to the encryption key is correlated to the
 measurements received by the \ac{tpm}.
-%
-\PC{saut de ligne}
+
 Secure Boot and Trusted Boot can uncover \ac{bios} corruptions prior to the
 execution of the illegitimate code.
 %
@@ -924,19 +902,19 @@ At runtime, the \ac{bios} provides various software interfaces to the system
 software component.
 %
 For instance, the \ac{acpi} tables\,\cite{uefi2017acpi,duflot2010acpi} is a
-standardized interface to configure various vendor-specific aspects of
-the hardware platform, such as power management or thermal management.
+standardized interface to configure various vendor-specific aspects of the
+hardware platform, such as power management or thermal management.
 %
-Similarly, legacy \acp{bios} expose facilities to system software
-components, in the form of so-called \ac{bios} Interrupt.
+Similarly, legacy \acp{bios} expose facilities to system software components, in
+the form of so-called \ac{bios} Interrupt.
 %
 For instance, the interrupt \texttt{0x10} is dedicated to video services
 (\emph{e.g.} setting the video mode, setting the cursor shape and position,
 etc.).
 %
 Nowadays, \ac{uefi}-capable \acp{bios} expose so-called \emph{Runtime Services}
-to system software component\,\cite[Chapter 5]{zimmer2017uefi} under the form of a
-function pointers table.
+to system software component\,\cite[Chapter 5]{zimmer2017uefi} under the form of
+a function pointers table.
 
 In either case, these interfaces act as an intermediary layer between a system
 software component and the hardware architecture.
@@ -944,15 +922,16 @@ software component and the hardware architecture.
 In doing so, they reduce the coupling between the software and hardware
 components.
 %
-Sometimes, their use is optional, and \acp{bios} only provide them as a facility.
+Sometimes, their use is optional, and \acp{bios} only provide them as a
+facility.
 %
 Other are mandatory gates towards certain computing platform features, because
 they are related to critical features of the platform and the hardware vendors
 do not want to rely on a (potentially vulnerable or malicious) system software
 component.
 %
-For instance, the \ac{bios} takes care of its own software updates, so that the latter can validate the validity of the new
-version prior to applying it.
+For instance, the \ac{bios} takes care of its own software updates, so that the
+latter can validate the validity of the new version prior to applying it.
 
 \paragraph{Proactive Features.}
 %
@@ -961,10 +940,10 @@ through its interfaces, the \ac{bios} carries out several hardware-specific
 tasks which are not publicly documented.
 %
 This includes and is not limited to handling hardware errors, checking thermal
-zones, adjusting \acp{cpu} speed.\PC{and configuring hardware workarounds}
+zones, adjusting \acp{cpu} speed, and configuring hardware workarounds.
 %
-The execution of the \ac{bios} in this context should be transparent to
-the rest of the software stack.
+The execution of the \ac{bios} in this context should be transparent to the rest
+of the software stack.
 %
 Some \acp{bios} also emulate complete hardware devices to the system software
 component.
@@ -981,8 +960,8 @@ In most cases, it is a proprietary software, and the computer owner has little
 control over it.
 %
 The rest of the software stack is considered mistrusted, and the one goal of the
-\ac{bios} is to keep the computer in a working state.\PC{ensure that the
-software stack cannot harm the computer}
+\ac{bios} is to keep the computer in a working state, even if presence of an
+erroneous or malicious software stack.
 %
 To that end, the \ac{bios} relies on several \ac{hse} mechanisms to enforce its
 isolation from the rest of the software stack.
@@ -990,21 +969,19 @@ isolation from the rest of the software stack.
 To the best of our knowledge, the security policy targeted by the \ac{bios} as
 runtime is always discussed through the prism of the \ac{hse} mechanism used to
 enforced this policy.\PC{la phrase précédente est un peu bizarre: la politique
-de sécurité est discutée (?!) à travers le prisme \ldots}
+  de sécurité est discutée (?!) à travers le prisme \ldots}
 %
 That is, documentation such as the Intel manual, the processor datasheet or the
 \ac{pch} datasheet ---in practice involved\PC{pas clair: c'est la documentation
-qui est impliquée dans le hse ?!} in the \ac{hse} mechanisms
-implemented by the \ac{bios}--- focus on \emph{how} implementing the security
-policy rather than specifying \emph{what} this policy is\thomasrk{Is it really
-  true?}.
-\PC{le paragraphe précédent/en cours me semble à retravailler, je ne le trouve
-pas clair}
+  qui est impliquée dans le hse ?!} in the \ac{hse} mechanisms implemented by
+the \ac{bios}--- focus on \emph{how} implementing the security policy rather
+than specifying \emph{what} this policy is\thomasrk{Is it really true?}.  \PC{le
+  paragraphe précédent/en cours me semble à retravailler, je ne le trouve pas
+  clair}
 %
-\PC{La phrase qui suit fait un peu ``citation en vrac''}
-Another useful source of information on this matter is the various research
-projects which discuss these mechanisms, for instance to demonstrate a
-security
+\PC{La phrase qui suit fait un peu ``citation en vrac''} Another useful source
+of information on this matter is the various research projects which discuss
+these mechanisms, for instance to demonstrate a security
 vulnerability\,\cite{duflot2009smram,wojtczuk2009smram,bulygin2014summary}.
 %
 From the information we gathered, we believe the isolation required by the
@@ -1016,24 +993,23 @@ From the information we gathered, we believe the isolation required by the
   The \ac{bios} is assigned a volatile memory region to support its execution at
   runtime.
   %
-  The rest of the software stack shall not be authorized either to read from
-  or to write to this memory region.
+  The rest of the software stack shall not be authorized either to read from or
+  to write to this memory region.
   % \item [Secure Channel]
   %
   The rest of the software stack cannot prevent the \ac{bios} to read from or
-  write to its assigned volatile memory region.
-  Neither can it tamper with the
+  write to its assigned volatile memory region.  Neither can it tamper with the
   result of read accesses issued by the \ac{bios} and targeting its assigned
   volatile memory region.
 \end{description}
 %
 \PC{(style) ce texte est ``hors-paragraphe'', le résultat est un peu étrange
-\\
-Si tu peux, ce serait mieux d'avoir les trois points consécutivement, et
-exprimés de manière synthétique (en supprimant le texte inter-paragraphe)}
-\PC{(fond): ce texte inter-paragraphe redit surtout les choses}
-Volatile memory is an absolute requirement in order to execute a software
-component, and the \ac{bios} is no exception in this regard.
+  \\
+  Si tu peux, ce serait mieux d'avoir les trois points consécutivement, et
+  exprimés de manière synthétique (en supprimant le texte inter-paragraphe)}
+\PC{(fond): ce texte inter-paragraphe redit surtout les choses} Volatile memory
+is an absolute requirement in order to execute a software component, and the
+\ac{bios} is no exception in this regard.
 %
 It contains both the sequences of instructions which form the program of the
 software component, and the data it manipulates.
@@ -1044,11 +1020,10 @@ by the \ac{bios}, it can actively interfere with its execution.
 Besides, and as discussed previously, our statement takes into account the fact
 that the x86 \IOs resolution is highly configurable, by introducing a notion of
 secure channel \thomasrk{ref} between the software component and its assigned
-volatile memory.
-\PC{Cette notion de \textit{secure channel} est-elle importante~?
-Si oui, ajoute un emph et sors-là de ce paragraphe, IMHO}
-%\PC{Cette notion de \textit{secure channel} est-elle importante
-%? Si oui, ajoute un \verb+\emph+ et sors-là de ce paragraphe, IMHO}
+volatile memory.  \PC{Cette notion de \textit{secure channel} est-elle
+  importante~?  Si oui, ajoute un emph et sors-là de ce paragraphe, IMHO}
+% \PC{Cette notion de \textit{secure channel} est-elle importante ? Si oui,
+% ajoute un \verb+\emph+ et sors-là de ce paragraphe, IMHO}
 
 \begin{description}
 \item [Availability]
@@ -1064,9 +1039,8 @@ want to rely on the rest of the software stack.
 In practice, this means the scheduling between the execution of the \ac{bios}
 and the rest of the software stack cannot be cooperative.
 %
-Therefore, the
-\ac{bios} needs to be able to preempt the execution of the rest of the software
-stack.
+Therefore, the \ac{bios} needs to be able to preempt the execution of the rest
+of the software stack.
 
 \begin{description}
 \item [Non-volatile Memory Access Control]
@@ -1173,17 +1147,20 @@ More precisely, the physical addresses dedicated to the SMRAM from the \ac{bios}
 perspective are used by the rest of the software stack to access the VGA
 controller memory.
 %
-The \texttt{SMRAMC} register exposed by the processor controls this access control mechanism, \emph{via} its \texttt{D\_LCK} bit.
+The \texttt{SMRAMC} register exposed by the processor controls this access
+control mechanism, \emph{via} its \texttt{D\_LCK} bit.
 %
 The \ac{bios} locks the SMRAM by setting the \texttt{D\_LCK} bit.
 %
 A processor with the \texttt{D\_LCK} bit set will prevent a \ac{cpu} not in
 \ac{smm} to access the SMRAM content.
 %
-In addition, the only way to clear the \texttt{D\_LCK} is by performing a complete reboot of the platform.
+In addition, the only way to clear the \texttt{D\_LCK} is by performing a
+complete reboot of the platform.
 %
 This leaves no opportunity for the system software to tamper with the SMRAM
-content, because the \ac{bios} will lock it again prior to executing another software component.
+content, because the \ac{bios} will lock it again prior to executing another
+software component.
 
 \paragraph{System Management Interrupt.}
 
@@ -1204,8 +1181,8 @@ be the \ac{smm} code.
 Once the \ac{smm} code has performed the task it has been requested for, the
 \texttt{rsm} instruction can be used.
 %
-This instruction, specific to the \ac{smm}, tells the \ac{cpu} to
-restore its previous state.
+This instruction, specific to the \ac{smm}, tells the \ac{cpu} to restore its
+previous state.
 %
 This way, the execution of the software component previously halted by the
 \ac{smi} can resume.
@@ -1215,7 +1192,8 @@ From the system point of view, it is almost like if nothing has happened.
 It remains possible to detect \ac{smm} context switches.
 %
 The most straightforward way is to rely on the Model-Specific Register
-\texttt{0x34} (\texttt{MSR\_SMI\_COUNT}), as the \ac{cpu} increments it every time it handles a \ac{smi}\,\cite[Volume 4, Chapter 2]{intel2014manual}.
+\texttt{0x34} (\texttt{MSR\_SMI\_COUNT}), as the \ac{cpu} increments it every
+time it handles a \ac{smi}\,\cite[Volume 4, Chapter 2]{intel2014manual}.
 %
 An operating system can also spin in a loop to take regular timestamps.
 %
@@ -1246,8 +1224,8 @@ The semantics of the \texttt{BIOSWE} and \texttt{BLE} bits is as follows.
 When the \texttt{BIOSWE} bit is clear, the \ac{pch} only authorizes read
 accesses to the flash memory.
 %
-If a core sets the \texttt{BIOSWE} bit, the behavior of the \ac{pch}
-depends on the value of the \texttt{BLE} bit.
+If a core sets the \texttt{BIOSWE} bit, the behavior of the \ac{pch} depends on
+the value of the \texttt{BLE} bit.
 %
 If the \texttt{BLE} bit has been set by the \ac{bios} during the boot sequence,
 then the \ac{pch} triggers a \ac{smi}.
@@ -1270,7 +1248,8 @@ Similarly to the \texttt{D\_LCK} bit of the \texttt{SMRAMC} register, the
 % GUILLAUME: Parfois tu mets Flash Memory en majuscul, parfois non. Je pense
 % qu'il ne faut pas de majuscule, harmonise à tout le document.
 
-The system software component and the \ac{bios} often use the flash memory lockdown mechanism as a communication channel.
+The system software component and the \ac{bios} often use the flash memory
+lockdown mechanism as a communication channel.
 %
 The system software sets the \texttt{BIOSWE} bit in order to notify the \ac{smm}
 code that a \ac{bios} update is available.
@@ -1278,8 +1257,8 @@ code that a \ac{bios} update is available.
 \paragraph{}
 %
 The combination of the SMRAM, the \ac{smi} and the Flash Memory Lock-down
-explains why the \ac{smm} is often referred to as the x86 ``most privileged execution
-mode.''
+explains why the \ac{smm} is often referred to as the x86 ``most privileged
+execution mode.''
 %
 In a nutshell, the \ac{smm} code can leverage the same hardware capabilities
 than system software, including tampering with memories assigned to the system
@@ -1307,13 +1286,12 @@ disclosed over the past decade.
 In this section, we detail three attacks which have defeated the three security
 policies targeted by the \ac{bios}.
 %
-The SMRAM Cache Poisoning Attack allowed for
-circumventing the SMRAM access control mechanism
-(\ref{subsec:usecase:hse:smram}).
+The SMRAM Cache Poisoning Attack allowed for circumventing the SMRAM access
+control mechanism (\ref{subsec:usecase:hse:smram}).
 %
-The so-called SENTER Sandman attack prevented
-the execution of the \ac{bios} and led to modifying the content of the flash
-memory (\ref{subsec:usecase:hse:sandman}).
+The so-called SENTER Sandman attack prevented the execution of the \ac{bios} and
+led to modifying the content of the flash memory
+(\ref{subsec:usecase:hse:sandman}).
 %
 The Speed Racer attack resulted into an authorized modification of the flash
 memory as well (\ref{subsec:usecase:hse:speed}).
@@ -1351,10 +1329,10 @@ As a reference, the Figure~\ref{fig:usecase:l1-l3caches}.
 %
 Caches are mostly transparent to the software components.
 %
-For instance, the processor alone enforces the cache coherence, with
-the notable exception of multiprocessor (not multicore) systems, for which
-``maintenance of cache consistency may, in rare circumstances, require
-intervention by system software.''
+For instance, the processor alone enforces the cache coherence, with the notable
+exception of multiprocessor (not multicore) systems, for which ``maintenance of
+cache consistency may, in rare circumstances, require intervention by system
+software.''
 %
 Intel has developed a dedicated protocol called MESIF to that
 end\,\cite{thomadakis2011nehalem}.
@@ -1517,9 +1495,9 @@ such that write accesses are directly forwarded to the underlying memory.
 
 For cache-friendly programs, the gain in performance can be huge.
 %
-For instance, for a Pentium M Intel have stated that access to L1 cache takes
-3 \ac{cpu} cycles, access to the L2 cache takes 12 cycles and access to
-the DRAM takes 240 cycles\,\cite{drepper2007memory}.
+For instance, for a Pentium M Intel have stated that access to L1 cache takes 3
+\ac{cpu} cycles, access to the L2 cache takes 12 cycles and access to the DRAM
+takes 240 cycles\,\cite{drepper2007memory}.
 
 \begin{figure}
   \centering
@@ -1659,8 +1637,8 @@ Both leverage legitimate hardware features.
 \subsection{SENTER Sandman}
 \label{subsec:usecase:hse:sandman}
 
-In 2015, Xeno Kovah \emph{et al.} showed it was possible to leverage the Intel TXT
-technology to circumvent the flash memory lockdown
+In 2015, Xeno Kovah \emph{et al.} showed it was possible to leverage the Intel
+TXT technology to circumvent the flash memory lockdown
 protection\,\cite{kovah2015senter}.
 
 \paragraph{Intel TXT.}
@@ -1687,8 +1665,8 @@ This makes a big difference regarding the trust we can place in the
 measurements.
 %
 On the one hand, if the root of trust ---which is part of the \ac{bios}--- has
-been corrupted or if the \ac{bios} suffers from an exploitable vulnerability, the authenticity of the
-measurements is no longer guaranteed.
+been corrupted or if the \ac{bios} suffers from an exploitable vulnerability,
+the authenticity of the measurements is no longer guaranteed.
 %
 In such a case, neither the system software component nor a third party involved
 in an attestation protocol has a reliable solution to detect the attack.
@@ -1702,8 +1680,8 @@ The flash memory lockdown mechanism was based under the assumption that
 unlocking the flash memory would force the execution of the \ac{bios}, so that
 the latter could lock it again.
 %
-To that end, the \ac{pch} triggers a \ac{smi} at the same time as it unlocks
-the flash memory.
+To that end, the \ac{pch} triggers a \ac{smi} at the same time as it unlocks the
+flash memory.
 %
 This mechanism was introduced at a time when software components could not
 ignore \ac{smi}.
@@ -1743,8 +1721,7 @@ time''\,\cite{intel2015txt}.
 \subsection{Speed Racer}
 \label{subsec:usecase:hse:speed}
 
-Another attack has defeated the flash memory lockdown
-protection.
+Another attack has defeated the flash memory lockdown protection.
 %
 In 2015, Corey Kallenberg \emph{et al.} showed that the scenario detailed
 previously, such that setting \texttt{BIOSWE} was triggering a \ac{smi} to

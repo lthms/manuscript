@@ -33,6 +33,7 @@
 \usepackage{inconsolata}
 
 \usepackage[dvipsnames]{xcolor}
+\usepackage{pgf-umlsd}
 \usepackage{xargs}
 \usepackage{todonotes}
 \newcommandx{\thomasrk}[2][1=]{\todo[linecolor=Plum,backgroundcolor=Plum!25,bordercolor=Plum,#1]{#2}}
