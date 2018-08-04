@@ -26,7 +26,7 @@ chap-%.tex: Chapters/%.tex chapter.tex.template
 	@echo -en "\e[33m[ ] Compiling (1/4)\e[0m"
 	@./.build.sh $<
 	@echo -en "\r\e[33m[ ] Bibtex    (2/4)\e[0m"
-	@bibtex main > /dev/null
+	@bibtex $(patsubst %.tex,%,$<) > /dev/null
 	@echo -en "\r\e[33m[ ] Compiling (3/4)\e[0m"
 	@./.build.sh $<
 	@echo -en "\r\e[33m[ ] Compiling (4/4)\e[0m"
