@@ -466,6 +466,8 @@ Thus, $H(S)$ is defined as follows:
   \ \right>
 \]
 
+\TODO{Pourquoi Cache et Mem sont paramétré par S et pas les autres? Tu devrais l'expliquer brièvement ici}
+
 \paragraph{Address Spaces}
 %
 We define $\texttt{PhysAddr}$ the set of physical addresses the \ac{cpu} uses to
@@ -502,7 +504,7 @@ The maximal address offset (denoted by $\val{max\_addr}$ here) is specific to
 the \ac{cpu} and may vary in time according to its addressing mode (real mode,
 long mode, etc.), therefore we left its value as a parameter of our model.
 %
-By convenience, we give the same maximum address to each of address space.
+By convenience, we give the same maximum address to each of \TODO{"of" n'est-il pas de trop?} address space.
 
 Finally, we write $\texttt{Val}$ for the set of values that the memory cells
 scattered within the memory locations of the hardware architecture can take.
@@ -524,8 +526,9 @@ a minimal definition of $\texttt{Core}$, with a clear focus on the \ac{smm}.
   \right>
 \]
 %
-The boolean $\func{in\_smm}$ is a boolean set to $\val{true}$ when the \ac{cpu}
-is in \ac{smm} and to $\val{false}$ when it leaves it.
+\TODO{Comme j'ai du le mentionner auparavant, le style de la macro func n'est pas suffisamment discernable du texte descriptif. Comme tu utilises souvent des noms communs pour tes fonctions, çà n'aide pas à bien identifier ces noms commes des noms de fonctions dans les descriptions qui suivent.}
+The boolean $\func{in\_smm}$ is  set to $\val{true}$ when the \ac{cpu}
+is in \ac{smm} and to $\val{false}$ otherwise.
 %
 The physical address $\func{pc}$ models the program counter, a register used to
 store the address of the next instruction to be fetched and executed.
@@ -537,7 +540,7 @@ microprocessors to determine which cache strategy to use for a given \IO, where
 $\texttt{CacheStrat} \triangleq \setshortdef{\val{UC}, \val{WB}}$ is the set of
 the modelled cache strategies.
 %
-The set of states of the \acp{smrr} is denoted $\texttt{Smrr}$.
+The set of states of the \acp{smrr} \TODO{SMRR est noté ici en majuscule mais la variable censé les modélisé est en minuscule.} is denoted $\texttt{Smrr}$.
 %
 \[
   \texttt{Smrr} \triangleq \langle~\func{range}:
@@ -593,6 +596,8 @@ whose index corresponds to the cache line index, that is
   \forall \var{i} \in \texttt{Index}, \func{index}(c(i).\func{tag}) = i
 \]
 
+\TODO{Dans la formule précédente, à quoi correspond "c"? Cache? Est-ce un problème d'incohérence des notations?}
+
 \paragraph{Memory Controller}
 %
 The set of states of the \formatLTS{Minx86} Computing Platforms memory
@@ -637,7 +642,7 @@ memory controller specifications and are left as a parameter of our model.
 It is the software responsability to set the \ac{smrr} accordingly.
 %
 We assume $\val{smram\_end} - \val{smram\_base} > \val{0x8000}$, that is the
-first instruction executed by the core after entering \ac{smm} (that is
+first instruction executed by the core after entering \ac{smm} (located at 
 $\texttt{SMBASE} + \val{0x8000}$) is inside the SMRAM if the \texttt{SMBASE}
 register is correctly configured.
 
@@ -664,6 +669,8 @@ We model this translation with the function
 \]
 %
 \qquad\qquad\qquad\qquad\qquad\qquad where $pa = \textsc{Pa}(i)$.
+
+\TODO{Pourquoi mc.dopen doit valoir "true" pour que la translation d'adresse renvoie vers le VGA? Ca me semble contre-intuitif.}
 
 We emphasize that the same physical address can be translated into two different
 hardware addresses for two memory controller states $m$ and $m'$, hence it is
