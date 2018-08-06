@@ -7,7 +7,8 @@
 
   \hfill\footnotesize --- Marijn Haverbeke}
 
-\PC{commentaire inutile: c'est un peu le but d'un labyrinthe, em même temps}
+% PC: commentaire inutile: c'est un peu le but d'un labyrinthe, em même temps
+% Thomas: pas faux !
 
 \vspace{1cm}\noindent From a market share perspective, x86 \acp{cpu} are widely
 used for laptops, desktops and servers.
@@ -69,13 +70,11 @@ probably best illustrated by the scale of its documentation.
 At the time of writing this thesis\,\footnote{Spring 2018.}, the \emph{Intel 64
   and IA-32 Architectures Software Developer’s Manual} is 4842 pages long.
 %
-Executed on the computer used to write the present thesis, the GNU/Linux
-command-line application \texttt{lshw} lists about 30 hardware components,\PC{je
-  ne suis pas sûr que la mesure lshw soit pertinente: elle ne détaille pas tout,
-  il y a beaucoup plus de composants en pratique. Tu peux dire que le PC est
-  composé de ``dozens of components'' :)} which include a hard drive, a
-keyboard, a trackpad, an audio controller, an integrated graphic card. Several
-come with their own documentation, often in the form of large datasheet.
+A typical computing platform is made of dozens of hardware components, including
+\emph{e.g.} hard drives, a keyboard, a trackpad, an audio controller, and o
+graphic card.
+%
+Several come with their own documentation, often in the form of large datasheet.
 
 \subsection{Basics of x86 Architecture}
 
@@ -162,51 +161,51 @@ branching\,\cite{milenkovic2002branchprediction}\cite[Section
 3]{fog2012microarchitecture}.
 %
 These optimizations should not violate properties of the architecture.
+% %
+% For instance, the predictive branching implemented by x86 \acp{cpu} increases
+% performance, \emph{e.g.} inside a loop.
+% %
+% In presence of a conditional jump, a core will eagerly choose one branch
+% ---based on the past execution--- before it has executed all the computations
+% required to determine the correct execution path.
+% %
+% Most of the time, it chooses the correct branch.
+% %
+% In case of \emph{branch misprediction}, the erroneous computations performed
+% by the core shall be canceled like if they have never happened.
+% %
+% \PC{quel est l'objectif de l'explication du \textit{branch misprediction} et
+% l'exemple qui suivent ?  Cela me semble un peu hors contexte, on se demande
+% pourquoi ce point est détaillé (et pas les autres)
 %
-For instance, the predictive branching implemented by x86 \acp{cpu} increases
-performance, \emph{e.g.} inside a loop.
-%
-In presence of a conditional jump, a core will eagerly choose one branch
----based on the past execution--- before it has executed all the computations
-required to determine the correct execution path.
-%
-Most of the time, it chooses the correct branch.
-%
-In case of \emph{branch misprediction}, the erroneous computations performed by
-the core shall be canceled like if they have never happened.
-%
-\PC{quel est l'objectif de l'explication du \textit{branch misprediction} et
-  l'exemple qui suivent ?  Cela me semble un peu hors contexte, on se demande
-  pourquoi ce point est détaillé (et pas les autres)
-
-  A supprimer ?}  We illustrate branch misprediction with the following program
-snippet, written with x86 assembly instructions (left) and its C equivalent
-(right)\,\footnote{Provided no optimization from the compiler nor the
-  processor.}:
-%
-\begin{center}
-  \begin{minipage}[t]{0.35\linewidth}
-    \inputminted{asm}{Listings/predict.S}
-  \end{minipage}
-  \begin{minipage}[t]{0.35\linewidth}
-    \inputminted{c}{Listings/predict.c}
-  \end{minipage}
-\end{center}
-%
-During the first 10 steps of the loop, when the core executes the \texttt{jle}
-instruction (l. 5), it takes the same branch and jumps to the \texttt{loop}
-label.
-%
-At the end of the last loop step, the register \texttt{rax} contains the value
-\( 11 \).
-%
-According to the semantics of \texttt{jle}, the core should execute the
-\texttt{movq~\$0,~\%rax} (l.6) next.
-%
-From a microarchitectural point of view, the branch prediction technology can
-decide to optimize the execution of the program, by eagerly jumping to the
-\texttt{loop} label and continuing the execution of the program \emph{before}
-\texttt{\%rax} has been updated to \( 11 \).
+% A supprimer ?}  We illustrate branch misprediction with the following program
+% snippet, written with x86 assembly instructions (left) and its C equivalent
+% (right)\,\footnote{Provided no optimization from the compiler nor the
+% processor.}:
+% %
+% \begin{center}
+%   \begin{minipage}[t]{0.35\linewidth}
+%     \inputminted{asm}{Listings/predict.S}
+%   \end{minipage}
+%   \begin{minipage}[t]{0.35\linewidth}
+%     \inputminted{c}{Listings/predict.c}
+%   \end{minipage}
+% \end{center}
+% %
+% During the first 10 steps of the loop, when the core executes the \texttt{jle}
+% instruction (l. 5), it takes the same branch and jumps to the \texttt{loop}
+% label.
+% %
+% At the end of the last loop step, the register \texttt{rax} contains the value
+% \( 11 \).
+% %
+% According to the semantics of \texttt{jle}, the core should execute the
+% \texttt{movq~\$0,~\%rax} (l.6) next.
+% %
+% From a microarchitectural point of view, the branch prediction technology can
+% decide to optimize the execution of the program, by eagerly jumping to the
+% \texttt{loop} label and continuing the execution of the program \emph{before}
+% \texttt{\%rax} has been updated to \( 11 \).
 %
 % TODO: un meilleur snippet de code serait d’incrémenter ebx en plus de eax
 %
@@ -265,149 +264,109 @@ an attack vector.
 
 \paragraph{Memories and Cores \IOs.}
 %
-The Intel x86 instructions set contains hundreds of instructions\,\cite[Volume
-2]{intel2014manual}.
+Besides cores, \emph{memories} are the most important components of a computing
+platform.
 %
-Together, they allow software developers to modify the hardware architecture
-state, from the internal processor registers to the peripherals.
+Cores interact with these memories during so-called \IOs, for Input/Output: a
+core receives data during an input and it sends data during an output.
 %
-Interactions between cores and the rest of the hardware architecture are called
-\IOs, for Input/Output: a core receives data during an input and it sends data
-during an output.
-%
+The x86 architecture integrates several sources of memories, along with several
+mechanisms cores can use to interact with these memories.
+
 The main target of cores \IOs is the \ac{dram}.
 %
-\ac{dram} forms the \emph{system memory}, by exposing an array of contiguous,
-addressable memory cells.
+\ac{dram} contains the instructions executed by the cores, \emph{and} the data
+they manipulate.
 %
-These memory cells contain the instructions executed by the cores, \emph{and}
-the data they manipulate.
+A core decides the semantics of a given memory cell depending on the context,
+and the same binary sequence can be first decoded as an instruction, then
+interpreted as an operand of an arithmetical operation.
 %
-Therefore, a core decides the semantics of memory cell contents depending on the
-context, \emph{i.e.} it can interpret the same binary sequence as an instruction
-to execute then as an operand of an arithmetical operation.
-
-\PC{après discussion d'hier, AMHA ici tu devrais faire une phrase pour
-  introduire les deux idées qui suivent: on distingue ce qui est accessible
-  \textit{via} l'espace d'adressage (mot important!) (le ``quoi'') et les
-  manières d'y accéder (le ``comment''), sachant que l'accès à une même
-  ressource peut être fait de deux manières différentes}
-
-Although \ac{dram} is the primary source of memory within the hardware
-architecture, it is not the only one.
+In addition, other hardware components also provide additional memory regions
+cores can read from or write to.
 %
-Other hardware components expose additional memory regions.\PC{techniquement, ce
-  n'est pas le composant qui expose de la mémoire, mais le CPU (le memory
-  controller) qui expose la mémoire ou les registres du composant dans l'espace
-  d'adressage global. Il serait utile de citer le nom \textit{memory-mapped I/O}
-  ici --- c'est cité plus loin, mais en répétition}
+Contrary to \ac{dram}, \IOs targeting these memories carry a semantics specific
+to each peripheral.
 %
 For instance, an x86 processor integrates a display controller which exposes a
 frame buffer to the cores.
 %
 By writing to the frame buffer, a core changes the pictures displayed by the
 computer screen.
-%
+
 In practice, the processor handles \IOs with high-speed hardware components
 (\emph{e.g.} \ac{dram}, display controller, etc.).
 %
 In addition, it is connected to a companion chipset, called the
 \ac{pch}\,\cite{turley2014introx86}, which handles slower hardware components
-(\emph{e.g.}  hard drives, USB devices, PCI devices, etc.).
+(\emph{e.g.}  hard drives, USB devices, PCI devices, etc.)\,\footnote{In
+  previous iterations of the architecture, the processor was connected to a
+  \emph{northbrige} (low-latency), which was itself connected to a
+  \emph{southbridge} (slower \IOs).}.
 %
-In previous iterations of the architecture, the processor was connected to a
-\emph{northbrige} (low-latency), which was itself connected to a
-\emph{southbridge} (slower \IOs).
-
-Historically, x86 \acp{cpu} use two distinct memory spaces to communicate either
-with the \ac{dram} or with other hardware components.
+\acp{cpu} interact with memories \emph{via} two distinct memory address spaces,
+characterized by a set of addresses and a set of instructions.
 %
-On the one hand, most of the x86 instructions modify the content of the system
-memory.
+The most important address space is the \emph{system memory}, as most of the x86
+instructions (\emph{e.g.} \texttt{mov}, \texttt{sub}, \texttt{sub},
+\texttt{jle}).
 %
-For instance, operands of the \texttt{add} instruction can be addresses of the
-system memory.
+By default, the majority of the system memory is made of \ac{dram}.
 %
-On the other hand, software developers use two dedicated instructions
----\texttt{in} and \texttt{out}--- to target the memories exposed by other
-software components.
+Besides, software developers use another address space characterized by two
+dedicated instructions ---\texttt{in} and \texttt{out}--- to target the memories
+exposed by other software components.
 %
 \IOs issued by \texttt{in} and \texttt{out} instructions are referred to as
-Programmable \IOs (P-\IOs).\PC{jamais vu ce terme --- tu parle des
-  \textit{Port-Mapped I/O (PMIO)}?}
+Port-Mapped \IOs (PMIO), and the addresses of this address space are called
+\emph{ports}.
 %
-In addition to this approach\PC{Proposal: ``Alternatively, peripheral memory and
-  registers can be exposed to the system memory address space using \emph{memory
-    mapped \IOs}.''
-
-  Le ``Alternatively'' est plus clair que ``In addition to this approach''} ,
-x86 \acp{cpu} are also capable of handling \emph{memory-mapped} \IOs, where the
-memories exposed by the peripherals are mapped within the system memory address
-space.
-%
-\PC{Phrase suivante inutile IMHO} That is, the system memory is no longer
-limited to the \ac{dram} only.
+Alternatively, peripheral memories and registers can be exposed to the cores
+\emph{via} the system memory thanks \emph{memory-mapped} \IOs.
 %
 As a consequence, when a core reads from or write to the system memory, the
 processor and the \ac{pch} dispatches its request to the correct hardware
 component.
+
+% PC: “a memory mapping” plutôt ? La “memory map” c'est l'ensemble de tous les
+% mappings.
 %
-The mapping between a so-called \emph{physical address} manipulated by the
-processor and its concrete memory location is called the \emph{memory
-  map}.\PC{``a memory mapping'' plutôt ? La ``memory map'' c'est l'ensemble de
-  tous les mappings}
+% Thomas: justement, c’est bien dans ce sens que je l'utilise. J'ai mis les
+% termes au pluriel pour que ce soit plus clair, c'est mieux ?
+The mapping between addresses of the system memory and their concrete memory
+locations within the hardware architecture is called the \emph{memory map}.
 %
 The memory map is configurable, that is it can be changed dynamically \emph{via}
 a set of configuration registers exposed by the processor and the \ac{pch}.
 %
-\PC{saut de ligne: cette idée est importante, mais elle est noyée dans le
-  paragraphe précédent. Il me semble aussi que ça part trop vite dans un exemple
-  détaillé
-
-  AMHA, il faudrait détailler plus l'idée générale, en expliquant le fait qu'une
-  même zone mémoire ou registre d'un périphérique peut être lue ou modifiée par
-  MMIO \textbf{et} PMIO, ce qui va notamment complexifier la modélisation, et
-  réduire un peu l'exemple} The two approaches are complementary.
+The two approaches are complementary.
 %
 As an example, PCI devices expose a so-called configuration space, which is a
-dedicated memory region with a specific semantics (see
+dedicated memory region with a specific semantics summarized in
 Figure~\ref{fig:usecase:pciconfig}).
 %
-The \ac{pch} exposes two registers which allows for interacting with these
-configuration spaces.
+Registers of the PCI configuration space, such as device and vendor IDs, can be
+accessed \emph{via} PMIO.
 %
-PCI devices are identified in the hardware architecture with a tuple
-\( \langle \mathrm{bus}, \mathrm{device}, \mathrm{function} \rangle \) (denoted
-by \texttt{bus:device:function}).
+Indeed, the \ac{pch} exposes two ``ports'' to that end.
 %
-\PC{Je comprends l'idée de l'exemple, mais je ne suis pas persuadé que la
-  fonction de calcul apporte quelque chose.  Tu pourrais plutôt prendre un
-  registre au hasard dans la figure et expliquer comment on y accède
-  (relativement au BAR ---qui peut être modifé---, ou \textit{via} PMIO),
-  \textbf{en citant la figure 2.2}} A configuration register exposed by a given
-PCI device identified as \texttt{bus:device:function} at the offset \( o \) of
-its configuration space is addressed by the value
+First, software components modify the content of the
+\texttt{PCI\_CONFIG\_ADDRESS} port, to tell the \ac{pch} which PCI configuration
+register they want to interact with.
 %
-\[
-  \mathtt{0x80000000}\,|\,\texttt{bios} <\!\!< 16\,|\,\texttt{device} <\!\!<
-  11\,|\,\texttt{function} <\!\!< 8\,|\,\texttt{o}
-\]
-%
-where \(\cdot\,|\,\cdot\) is the bit-wise OR operator, and
-\(\cdot <\!\!< \cdot\) is the logical shift left operator.
-%
-First, the core updates the register \texttt{PCI\_CONFIG\_ADDRESS} with this
-value.
-%
-Then, the \ac{pch} forwards P-\IOs targeting the register
-\texttt{PCI\_CONFIG\_DATA}.
+Then, they read from and write to the \texttt{PCI\_CONFIG\_DATA} port, and the
+\ac{pch} dispatches these \IO to the targeted register.
 %
 The PCI specification states that the offset \texttt{0x10} of the PCI
 configuration spaces is dedicated to so-called \texttt{BAR}s (Base Address
 Registers).
 %
-Using the \texttt{BAR} of a given device, it becomes possible to remap its
-configuration space within the system memory address space.
+The purposte of the \texttt{BAR}s is to configure a memory-mapped mechanism, so
+that it becomes possible to interact with the PCI configuration space of a given
+peripherals \emph{via} the system memory.
+%
+That is, \emph{it is possible to read from or write the same memory location
+  using two different address spaces}.
 
 \begin{figure}
   \begin{center}
@@ -423,8 +382,9 @@ Finally, cores do not manipulate physical addresses directly.
 %
 Indeed, cores have their own address translation mechanisms, namely
 segmentation\,\cite[Volume 3, Section 2.4]{intel2014manual} and
-pagination\,\cite[Volume 3, Chapter 4]{intel2014manual}, which are configurable
-by the software components.\PC{et la virtualisation, qui peut apporter les EPT}
+pagination\,\cite[Volume 3, Chapter 4]{intel2014manual} (potentially extended
+with its virtualization technology\,\cite[Volume 3, Section
+28.2]{intel2014manual},), which are configurable by the software components.
 
 As such, determining which hardware component will handle a core \IO targeting a
 given virtual address requires to have a complete knowledge of the x86 remapping
@@ -441,8 +401,8 @@ For instance, several hardware components can also read from or write to the
 Hardware components can also interact with the processor by sending hardware
 interrupts of various natures.
 %
-When a user presses a key of its keyboard, the latter sends an
-interrupt request.
+When a user presses a key of its keyboard, the latter sends an interrupt
+request.
 %
 Interrupt handlers, that is programs executed by the core when it receives
 interrupts, are configurable \emph{via} a so-called \ac{idt}\,\cite[Volume 3,
@@ -451,8 +411,8 @@ Chapter 6]{intel2014manual}.
 Each line of the \ac{idt} corresponds to a given interrupt whose semantics is
 specified by Intel, as summarized in Table~\ref{tab:usecase:idt} for reference.
 %
-When a core handles an interrupt, it saves its current context
-inside the \ac{dram}, then starts executing the corresponding interrupt handler.
+When a core handles an interrupt, it saves its current context inside the
+\ac{dram}, then starts executing the corresponding interrupt handler.
 %
 Not all x86 interrupts come from a hardware component.
 %
@@ -514,8 +474,9 @@ address, it raises a so-called Page Fault (denoted by \texttt{\#PF}).
   \label{tab:usecase:idt}
 \end{table}
 
-\PC{supprime le ``In addition'', et fais un paragraphe avec un titre} In
-addition, Intel has implemented several out-of-band management technologies for
+\paragraph{Autonomous Subsystem.}
+%
+Intel has implemented several out-of-band management technologies for
 its products.
 %
 They allow for administering a computer \emph{via} the network, without the need
