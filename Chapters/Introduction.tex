@@ -25,13 +25,12 @@ The typical computing platform can be broken down to the following layers:
 \begin{description}
 \item [Hardware Architecture]
   %
-  A computer consist is made of several inter\-connected, physical hardware
-  components.
+  A computer is made of several inter\-connected, physical hardware components.
   %
   Hardware components take many forms and serve as different purposes, from the
-  \ac{cpu}, which executes the pieces of software which form the upper layers of
-  abstraction, to the various input/output devices, which allow a user to
-  interact with the computing platform.
+  \ac{cpu}, which executes the pieces of software that together form the upper
+  layers of abstraction, to the various input/output devices, which allow users
+  to interact with the computing platform.
   %
 \item [Firmware/BIOS]
   %
@@ -50,8 +49,8 @@ The typical computing platform can be broken down to the following layers:
   For instance, Intel has started to provide out-of-band management features to
   its processors in 2008\,\cite{ruan2014me}.
   %
-  In addition, a piece of firmware is responsible for the initialization of the
-  platform as a whole.
+  In addition, a dedicated piece of firmware is responsible for the
+  initialization and runtime management of the platform as a whole.
   %
   Afterwards, when we refer to this specific type of firmware, we use the term
   \ac{bios}.
@@ -62,30 +61,31 @@ The typical computing platform can be broken down to the following layers:
   \PC{(Pas seulement ici): Le style est assez haché, beaucoup de petites phrases
     qui rendent la lecture un peu difficile.  Il faudrait lisser un peu}
   %
-\item [System Software] \PC{Tu parle bien de l'OS ? Pourquoi ne pas l'appeler
-    par son nom, ou au minimum dire que le System Software est l'OS dans la
-    plupart (tous?) des cas ?}
+\item [System Software]
   %
-  The computing environment which is provided by the hardware architecture alone
-  is very generic.
+  The computing environment provided by the hardware architecture alone is very
+  generic.
   %
   As a consequence, it requires a non-trivial amount of configuration.
   %
-  System software leverages this environment to provide high-level interfaces
-  (\emph{e.g.} system calls), so that applications can focus on business
-  logic. Thus, applications often do not care about which particular hardware
+  System software components leverage this environment to provide high-level
+  interfaces.
+  %
+  For instance, operating systems expose a set of system calls to applications.
+  %
+  Thus, applications often do not care about which particular hardware
   architecture they are executed on.
   %
-  In addition, system software deal with the complexity implied by the
+  System software components also deal with the complexity implied by the
   concurrent execution of several applications.
   %
 \item [Applications]
   %
-  Applications leverages the high-level interface exposed by \PC{(un peu
-    partout): \textbf{the} system software} system software in order to provide
-  a service to the user of the computing platform.
+  Applications leverage the high-level interface exposed by the system software
+  component in order to provide services to users of the computing platform.
   %
-  The previous layers only exist so that applications can be executed.
+  The previous layers only exist so that applications can be executed on a
+  powerful computing platform, yet only focus on business logic.
 \end{description}
 
 \begin{figure}
@@ -170,8 +170,7 @@ Hyper-V\,\cite{velte2009hyperv}) provide powerful features such as virtual
 machines snapshots or migrations.
 %
 It is also frequent that application internals are themselves built as
-abstraction layers (\emph{e.g.} applicative framework, core logic, plugins,
-etc.).
+abstraction layers (\emph{e.g.} applicative framework, core logic, plugins).
 
 Figure~\ref{fig:intro:layers} pictures the abstraction layers of an hypothetical
 ---yet inspired by the Intel x86 hardware architecture--- computing platform.
@@ -183,20 +182,20 @@ These three hardware components execute a software stack each.
 %
 Some features of the \ac{cpu} are implemented in the form of ``microcode''
 programs\,\cite{chen2014microcode}, which determine, in part, the semantics of
-instruction set.
+the instruction set.
 %
 The \ac{cpu} executes the \ac{bios}, an operating system (system software) and
 several applications.
 %
 Both the graphic card and the memory controller execute their own software
-stack, which may be broken down to several abstraction layers as well.
+stack, which may be broken down into several abstraction layers as well.
 
-\section{Hardware-based Security Enforcement mechanisms}
+\section{Hardware-based Security Enforcement Mechanisms}
 
 From a security perspective, layers are often used for privilege separation, and
 each layer is often more privileged than its successors.
 %
-For instance, \PC{the} system software manages the life cycle of the
+For instance, system software components manage the life cycle of the
 applications, by actively tampering with their execution.
 
 As a consequence, each layer implicitly trusts its predecessors.
@@ -204,10 +203,10 @@ As a consequence, each layer implicitly trusts its predecessors.
 On the one hand, it is important to keep this fact in mind when we consider the
 security of the computing platform.
 %
-Trust in lowest levels of abstraction can be misplaced: hardware implants and
-backdoors are no fantasy\PC{slang}\,\cite{yang2016a2}, the \ac{bios} has been
-used as an attack vector to tamper with its execution even after a machine
-restart\,\cite{embleton2013smm}, etc.
+Trust in lower levels of abstraction can be misplaced: hardware implants and
+backdoors pose a significant threat to the platform security\,\cite{yang2016a2},
+the \ac{bios} has been used as an attack vector to tamper with its execution
+even after a machine restart\,\cite{embleton2013smm}, etc.
 %
 On the other hand, one layer may constrain the execution of its successors, with
 respect to a targeted security policy.
@@ -217,37 +216,29 @@ applications, and therefore is able to enforce availability ---fair share of
 \ac{cpu} time---, confidentiality and integrity ---exclusive partition of
 physical memories--- properties.
 
-\PC{le paragraphe suivant est un peu confus: tu parle de différente manières de
-  restreindre, mais la phrase 3 commence par un ``in a nutshell'' qui est une
-  idée générique (et pas une de ces manières), après tu as un exemple, etc.}
 Constraining an execution can be achieved in various ways.
 %
 Concerning the lowest layers of a software stack, the common approach is to rely
-on features provided by the hardware architecture.
+on features provided by the hardware architecture to reduce the hardware
+capabilities one software can leverage while it is executed.
 %
-In a nutshell, the main idea is to reduce the hardware capabilities one software
-can leverage while it is executed.
-%
-For instance, system software often leverages among other mechanisms a \ac{mmu}
-to partition the system memory.
+For instance, system software components often leverage among other mechanisms a
+\ac{mmu} to partition the system memory.
 %
 Thus, when an application is executed, it can only access a subset of the system
 memory.
 %
-In addition, the \ac{cpu} can leverage a hardware timer to stop applications'
+Besides, the \ac{cpu} can leverage a hardware timer to stop applications
 execution, without the need for these applications to cooperate.
+%
+This scenario characterizes a class of security enforcement we call \ac{hse}
+mechanisms.
 
-\PC{(transition) AMHA, il manque une phrase ici pour dire pourquoi tu as besoin
-  de la définition qui suit. QQch comme ``To achieve security, each layer has to
-  know and use properly the security mechanisms offered by the underlying
-  layers'' ?}
-
-\begin{definition}[Hardware-based Security Enforcement]
-  We call \ac{hse} the class of security enforcement mechanisms where a trusted
-  software component configures the underlying hardware architecture to
-  constrain the execution of untrusted software components with respect to a
-  targeted security policy.\PC{``the class of mechanisms where a \ldots
-    component configures the hardware'' ça fait un peu bizarre à la lecture}
+\begin{definition}[Hardware-based Security Enforcement Mechanism]
+  A \ac{hse} mechanism consists in the configuration by a trusted software
+  component of the underlying hardware architecture in order to constrain the
+  execution of untrusted software components with respect to a targeted security
+  policy.
 \end{definition}
 
 A \ac{hse} mechanism enforces its targeted security property when
@@ -264,11 +255,9 @@ Both requirements remain challenging.
 
 \paragraph{Software Errors.}
 %
-Vulnerabilities in \ac{hse} mechanism implementations by trusted software
-components are often due to some misuse of hardware features\thomasrk{une
-  citation serait bienvenue}.
-%
-Many facts can explain this state of things.
+Part of vulnerabilities in \ac{hse} mechanism implementations by trusted
+software components are due to some misuse of hardware
+features\,\cite{bulygin2014summary}.
 %
 In the past, most lower-level pieces of software, such as firmware components,
 have not have been conceived and implemented with security as primary focus.
@@ -284,7 +273,7 @@ security.
 When software developers misunderstand the documentation, as it happened for
 instance for the \texttt{mov ss} and \texttt{pop ss} x86
 instructions\,\cite{movsspopss}, the impact in terms of security can be
-important.
+significant.
 
 \paragraph{Hardware Errors.}
 %
@@ -296,7 +285,7 @@ VT-d)\,\cite{intel2014manualvt}, dynamic root of trust
 (TXT)\,\cite{intel2015txt}, or applicative enclaves
 (SGX)\,\cite{intel2014manualsgx,costan2016sgxexplained}.
 %
-It is important to notice that most of them have been circumvented due to
+It is crucial to notice that most of them have been circumvented due to
 implementation bugs\,\cite{wojtczuk2011txtbug,sang2010iommu}.
 %
 This is not surprising, as novel hardware features tend to be more and more
@@ -305,42 +294,40 @@ complex.
 Hence, using advanced, novel hardware features in a security-sensitive context
 may be counterproductive.
 %
-In addition to these implementation errors, the fact that hardware architecture
-often comprises hundreds of features implemented by dozens of interconnected
-devices complicate the conception of new hardware features.
+In addition to these implementation errors, the fact that hardware architectures
+often comprise hundreds of features implemented by dozens of interconnected
+devices complicates the conception of new hardware features.
 %
 Indeed, these new features should not interfere with the security properties
 enforced by the features which were present before.
 %
-For instance, the Flash Memory (where lives the \ac{bios} code) is supposedly
-protected against arbitrary write accesses from system software.
+For instance, the flash memory (where lives the \ac{bios} code) is supposedly
+protected against arbitrary write accesses from system software components,
+thanks to a particular hardware interrupt.
 %
-\PC{(style haché)fusionner avec la phrase précédente: ``protected \ldots based
-  on a particular hardware interrupt''}
+When Intel introduces TXT\,\cite{intel2015txt}, they had not anticipated that
+this novel security feature had the particular side effect of disabling this
+hardware interrupt\,\cite{kovah2015senter}.
 %
-This protection relies on a particular hardware interrupt.
-%
-This did not prevent Intel to introduce TXT\,\cite{intel2015txt},\PC{on a
-  l'impression que l'erreur a été d'introduire TXT! il faudrait mettre le
-  problème en début de phrase} a novel security mechanism which had the
-particular side effect of disabling this hardware
-interrupt\,\cite{kovah2015senter}.
-%
-This corresponds to the class of compositional
+This corresponds to a class of security vulnerability called compositional
 attacks\,\cite{wing2003compositionalattack}.
 
 \begin{definition}[Compositional Attack]
   Compositional attacks is the class of security vulnerabilities, where each
   component is working as expected in isolation, yet their composition creates
-  an attack path which prevent end-to-end security enforcement.
+  an attack path which prevents end-to-end security enforcement.
 \end{definition}
 
-In the context of \ac{hse} mechanisms, this means it is possible for untrusted
-software components to leverage one hardware component to defeat a \ac{hse}
-mechanism implemented to constrain its execution.
+In the context of \ac{hse} mechanisms, this means untrusted software components
+can leverage one hardware component to defeat a \ac{hse} mechanism implemented
+to constrain its execution.
 %
-Compositional attacks are \PC{often} due to a flaw in the specifications of the
-computing platform.
+% PC: “Compositional attacks are /often/ due...”  Réponse Thomas: Je ne vois pas
+% d’autres raisons, en fait.  En tout cas, l’idée de base est qu’on ne
+% s’intéresse qu’a celle là.
+%
+Compositional attacks are due to a flaw in the specifications of the computing
+platform.
 %
 As such, they precede implementation errors, and their countermeasures often
 require a change in the hardware interface.
@@ -348,10 +335,10 @@ require a change in the hardware interface.
 To prevent them, it is mandatory to reason about the computing platform as a
 whole.
 
-\section{Formal Verification of HSE mechanisms}
+\section{Formal Verification of HSE Mechanisms}
 \label{sec:intro:verif}
 
-The important impact of previously disclosed compositional attacks have
+The significant impact of previously disclosed compositional attacks have
 motivated our will to formally specify HSE mechanisms.
 %
 We believe this would benefit both hardware designers and software developers.
@@ -373,7 +360,7 @@ scattered across many documents which sometimes suffer from lack of security
 focus.
 
 To specify a HSE mechanism, we have to model the hardware architecture and the
-scale of the task represents an important challenge.
+scale of the task represents a significant challenge.
 %
 Compositional attacks can come from unsuspected places, with no apparent link
 with the considered security mechanism.
@@ -393,33 +380,26 @@ the Memory Controller Hub datasheet\,\cite{intel2009mch} is 430 pages long;
 %
 the Platform Controller Hub datasheet\,\cite{intel2012pch} is 988 pages long.
 
-In addition, new hardware components and new versions of already existing
-components are frequently released.
-%
-Also, the same hardware component can be found in different hardware
-architecture to play a similar role.
-%
-For instance, the Trusted Platform Module (TPM) can be found in a vast variety
-of products.\PC{et ? je ne comprends pas trop l'argument}
+Besides, new hardware components and new versions of already existing components
+are frequently released.
 %
 As a consequence, the more modular our models and proofs are, the more
 practicable our approach becomes.
 %
-Otherwise, each modification of the hardware architecture will have an
-important impact on the proofs already written.
+Otherwise, each modification of the hardware architecture will have an important
+impact on the proofs already written.
 
 \paragraph{}
 %
-While we have tried to propose generic formalisms which can potentially be
-applied to large ranges of problems, we have decided to systematically implement
-and evaluate them on the x86 architecture.
+While we intend to propose generic formalisms which can potentially be applied
+to large ranges of problems, we have decided to systematically implement and
+evaluate them on the x86 architecture.
 %
 Because of its predominant position on the personal computer market, the x86
 hardware architecture has been extensively studied.
 %
 Our decision to explore this research field was based on our experience with
-several compositional attacks which have affected x86-based computing platform
-x86 hardware architecture.
+several compositional attacks which have affected the x86 hardware architecture.
 %
 We have implemented our proofs of concepts in the Coq proof assistant.
 %
@@ -440,20 +420,25 @@ Our choice is motivated by the following reasons:
   In theory, we can leverage this feature to validate a model against a real
   implementation.
   %
-  Because we focus on products which already exist, rather to intervene prior to
-  their implementation, \PC{(suite phrase) mal formulé}this possibility is worth
-  taking into account.
+  Since we focus on products which already exist, rather to intervene prior to
+  their implementation, model validation is a valuable step to strengthen our
+  confidence in a verification result.
 \end{itemize}
 
 \section{Contributions and Outline}
 
-Our works fall within a context where the security of lower levels of
-abstraction (\emph{e.g.} hardware components, firmware) grows in importance.
+In Part~\ref{part:context}, we elaborate on the context in which our works fall.
 %
-In Chapter~\ref{chapter:usecase}, we describe in more detail the x86 hardware
-architecture, and a selection of representative compositional attacks which have
-been disclosed over the past decade.\PC{attention, on comprend que tu vas
-  décrire tout x86 en détails}
+The security of lower levels of abstraction (\emph{e.g.} hardware components,
+firmware) are growing in importance.
+%
+In Chapter~\ref{chapter:usecase}, we give an introduction to the x86 hardware
+architecture and the particular role played by the \ac{bios}.
+%
+We then detail a selection of representative compositional attacks which have
+been disclosed over the past decade.
+%
+% PC: attention, on comprend que tu vas décrire tout x86 en détails
 %
 In Chapter~\ref{chapter:relatedwork}, we revisit existing works and approaches
 in line with the two challenges we tackle in this thesis, that is:
@@ -467,17 +452,21 @@ in line with the two challenges we tackle in this thesis, that is:
   and complex--- hardware architectures.
 \end{inparaenum}
 
+In Part~\ref{part:speccert}, we describe our first contribution.
+%
 In Chapter~\ref{chapter:speccert}, we present a generic formalism to specify and
-verify against a hardware model HSE mechanism.
+verify against a hardware model HSE mechanisms.
 %
 In Chapter~\ref{chapter:speccert2}, we leverage our formal definition to reason
 about HSE mechanisms which isolate software components from each other within a
 software stack.
 %
 We have implemented SpecCert, a framework for the Coq proof assistant based on
-this formalism. In addition, we have implemented {\scshape Minx86}, a minimal
-x86 model, and we have verified a HSE mechanism implemented by x86 BIOSes
-against {\scshape Minx86}.
+this formalism.
+%
+Moreover, we have implemented {\scshape Minx86}, a minimal x86 model, and we
+have verified a HSE mechanism implemented by x86 BIOSes against {\scshape
+  Minx86}.
 %
 This HSE mechanism relies on a high-privileged execution mode of x86 \acp{cpu}
 called the System Management Mode\,\cite{intel2014manual}.
@@ -485,11 +474,14 @@ called the System Management Mode\,\cite{intel2014manual}.
 This work has been presented at the $21^{th}$ International Symposium on Formal
 Methods (FM2016)\,\cite{letan2016speccert}.
 
-In Chapter~\ref{chapter:freespec}, we present a systemic approach to modularly
-specify and verify systems organized as trees of components.
+Part~\ref{part:freespec} is dedicated to our second contribution.
+%
+In Chapter~\ref{chapter:freespec}, we present a compositional reasoning
+framework to modularly specify and verify systems organized as trees of
+components.
 %
 We apply ideas from verification of computer programs with side effects to the
-domain of component-based modelling. The resulting approach can be used both for
+domain of component-based modelling. The resulting approach can be used for
 verifying the composition of hardware components and software components alike.
 %
 In addition, we have developed FreeSpec, a framework for the Coq proof
