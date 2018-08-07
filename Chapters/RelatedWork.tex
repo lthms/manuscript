@@ -1,5 +1,5 @@
 %!TEX root = ../main.tex
-\chapter{State of the Art of Formal Verification}
+\chapter{Formal Verification With Respect To Security Policies}
 \label{chapter:relatedwork}
 
 \PC{tu annonce un état de l'art complet, mais en pratique il est plus limité aux
@@ -22,9 +22,9 @@ they produce, and \emph{non-functional} specifications, which notably include
 security policies.
 %
 In this context, the terms ``implementation'' and ``specification'' refer to a
-subjective relation which allows for organizing a verification works into
-several layers, \emph{e.g.} a functional specification can act as an
-implementation of a more abstract functional specification.
+subjective relation which allows for organizing the verification of a system
+into a succession of layers, \emph{e.g.} a functional specification can act as
+an implementation of a more abstract functional specification.
 %
 For instance, a common pattern for verifying a system (\emph{e.g.} a C program)
 is to
@@ -97,7 +97,7 @@ rely on some sort of \emph{transition systems} to describe the behavior of the
 subject of study.
 %
 More precisely, the system is characterized by a set of \emph{states} and by a
-set of \emph{atomic} state transformation, called \emph{transitions}.
+set of state transformation, called \emph{transitions}.
 %
 Transitions occur when the system interacts with its environment (\emph{e.g.} a
 hardware circuit receives a clock signal, a hardware controller receives a
@@ -137,8 +137,8 @@ initial states.\PC{et ? (phrase qui tombe un peu de nulle part)}
   \item A door of the system can be either \( \mathtt{open} \) or
     \( \mathtt{close} \).
     %
-    The set of states of the airlock system reflects the combinatronics\PC{???}
-    of the doors states.
+    The set of states of the airlock system reflects the Cartesian product of
+    the doors states.
   \item A transition is characterized by the opening (\( \mathtt{Open}_i\), with
     \( i \in \{1, 2\} \)) and closing (\( \mathtt{Close}_i \), with
     \( i \in \{1, 2\} \)) of a door of the system.
@@ -210,12 +210,12 @@ There are many modeling structures one can use to characterize transition
 systems, with each variant better suited to tackle a particular class of
 systems.
 %
-For instance, the Kripke structure\,\cite{kripke1971semantical} is a
-notorious\PC{pas notorious (négatif). ``classical'' ?}  variation of (labeled)
-transition systems used in model checking\,\cite{clarke1999model}, while Petri
-net\,\cite{peterson1981petri}, process algebra\,\cite{bergstra1984process} or
-interface automata\,\cite{de2001interface} are better suited to model concurrent
-systems.
+For instance, the Kripke structure\,\cite{kripke1971semantical} is a prominent
+definition of transition systems used in model checking\,\cite{clarke1999model}.
+%
+Besides, Petri net\,\cite{peterson1981petri}, process
+algebra\,\cite{bergstra1984process} or interface
+automata\,\cite{de2001interface} are better suited to model concurrent systems.
 
 \subsection{Introduction to Formal Methods}
 \label{subsec:sota:fm}
@@ -309,8 +309,8 @@ verify these proofs (supposedly in a more reliable way than humans).
 Therefore, the quality of a theorem prover is measured by its capacity to reject
 ill-formed proofs.
 %
-To avoid this pitfall, modern theorem provers are built as ``certified'' layers
-around a certification as small and simple as possible.
+Modern theorem provers are built as ``certified'' layers around a kernel as
+small and simple as possible.
 %
 The idea is that, as long as the kernel does not contain a bug, advanced
 features implemented inside a certified layer cannot introduce inconsistency in
@@ -321,7 +321,7 @@ although this happened in the
 past\,\cite{claret2015falso,griffioen1998comparison}.
 
 Another common approach is to rely on an algorithm whose correctness has been
-formally established to handle a well-defined class of problem.
+formally established to handle a well-defined class of problems.
 %
 This allows for automating the verification process.
 %
@@ -356,16 +356,18 @@ First-order logic quantifiers can only be applied on sets of terms (\emph{e.g.}
 natural numbers, booleans, states of a airlock system).
 %
 Higher-order logic\,\cite{leivant1994hol} does not suffer the same limitation,
-so it becomes possible to express statements such as \emph{for all sets with a
-  total order \( < \), for all pair of values \( \alpha, \beta \), then either
+since they allow quantification over sets of sets, functions and predicates.
+%
+Hence, it becomes possible to express statements such as \emph{for all sets with
+  a total order \( < \), for all pair of values \( \alpha, \beta \), then either
   \( \alpha < \beta \) or \( \beta < \alpha \) or \( \alpha = \beta \)}.
 %
 Therefore, higher order logic is more expressive than first-order logic, but it
 comes at a cost in terms of automation.
 %
 On the one hand, \emph{interactive} theorem provers (\emph{e.g.}  Coq,
-Isabelle/HOL, or more recently Lean\,\cite{de2015lean} are based on higher-order
-logic.
+Isabelle/HOL, or more recently Lean\,\cite{de2015lean}) are based on
+higher-order logic.
 %
 On the other hand, \emph{automated} theorem provers (\emph{e.g.}
 Vampire\,\cite{riazanov2002vampire}, Z3\,\cite{de2008z3}) are based on
@@ -374,8 +376,9 @@ first-order logic.
 Finally, modal logic\,\cite{chagrov1997modal} is a formal system which extends
 first-order logic with modal operators.
 %
-Temporal logic forms the most popular family of modal logic, such as Temporal
-Linear Logic (LTL)\,\cite{sistla1985ltl}.
+Temporal logic forms a family of modal logic, such as Temporal Linear Logic
+(LTL)\,\cite{sistla1985ltl} or Computation Logic Tree
+(CTL)\,\cite{clarke1981ctl}.
 %
 They allow for reasoning about propositions over time.
 %
@@ -383,9 +386,8 @@ Examples of LTL modular operators are \( \square P \) (\( P \) is always true),
 \( \Diamond P \) (\( P \) will eventually become true), \( \bigcirc P \)
 (\( P \) will be true after the next transition of the system).
 %
-Another popular temporal logic is Computation Logic Tree
-(CTL)\,\cite{clarke1981ctl}, which considers trees of possible futures (by
-opposition to a \emph{linear} future).
+CTL considers trees of possible futures (by opposition to a \emph{linear}
+future).
 %
 CTL modal operator includes \( \mathbf{A} P \) (\( P \) is true for all possible
 futures) and \( \mathbf{E} P \) (there exists at least one path where \( P \)
@@ -403,7 +405,7 @@ automation and counter-example generation.
 \subsection{Specifying Security Policies}
 \label{sec:sota:security}
 
-The verification a system is \emph{always} relative to certain properties (in
+The verification of a system is \emph{always} relative to certain properties (in
 our case, the correct enforcement of a security policy).
 %
 The definition of a specification of the system to allow for formally reasoning
@@ -422,7 +424,7 @@ For instance, Mathy Vanhoef \emph{et al.} disclosed a critical vulnerability
 formal verification results (\emph{e.g.} \cite{he2004analysis}).
 %
 The reason remains simple: KRACK does not violate the security properties proven
-in the formal analysis of the protocol, only these security properties were not
+in the formal analysis of the protocol, yet these security properties were not
 strong enough.
 
 The theory of properties of a transition system is now well understood, with an
@@ -709,11 +711,11 @@ verification approach leveraged by the authors.
 The \ac{xom} microprocessor architecture maintains separate so-called
 \emph{compartments} for applications\,\cite{lie2000architectural}.
 %
-With mainstream microprocessor architectures, the system software is responsible
-for both memory allocation and access control.
+With mainstream microprocessor architectures, the system software component is
+responsible for both memory allocation and access control.
 %
-To do so, it implements one or more \ac{hse} mechanisms, which make use of
-hardware features such as a \ac{mmu}.
+To enforce access control, it implements one or more \ac{hse} mechanisms, which
+make use of hardware features such as a \ac{mmu}.
 %
 On the contrary, a \ac{xom} \ac{cpu} keeps track of each memory location owner,
 thanks to a tagging mechanism, and supposedly prevents an application to access
@@ -768,7 +770,7 @@ The verification proceeds as follows:
 %
 In the process of verifying \ac{xom}, the authors have been able to show with
 their model that the \ac{xom} architecture was subject to several replay
-attacks, and that their countermeasures were effectively effective.
+attacks, and that their countermeasures were effective.
 %
 However, the state explosion problem obliges the authors to simplify their
 model, in order to reduce the state combinatory.
@@ -1240,9 +1242,9 @@ synchronization is achieved by sending and waiting for messages rather than
       & \triangleq
       & \nu c. \nu d_1. \nu d_2. (\mathrm{Controller}(c, d_1, d_2) \\
       &
-      & \quad\qquad\qquad || \mathrm{CloseDoor}(d_1) \\
+      & \quad\qquad\qquad ||\ \mathrm{CloseDoor}(d_1) \\
       &
-      & \quad\qquad\qquad || \mathrm{CloseDoor}(d_2))
+      & \quad\qquad\qquad ||\ \mathrm{CloseDoor}(d_2))
     \end{array}
   \]
 
