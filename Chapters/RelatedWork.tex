@@ -3,7 +3,7 @@
 \label{chapter:relatedwork}
 
 \PC{tu annonce un état de l'art complet, mais en pratique il est plus limité aux
-transition systems - titre à revoir ?}
+  transition systems - titre à revoir ?}
 
 \endquote{``\emph{We build our computers the way we build our cities: over time,
     without a plan, on top of ruins.}''
@@ -13,54 +13,50 @@ transition systems - titre à revoir ?}
 \vspace{1cm}\noindent
 %
 Formal verification consists of proving the correctness of a system ---the
-\emph{implementation}--- with respect to certain properties.
-\PC{pas que l'implémentation - souvent c'est le modèle uniquement}
+\emph{implementation}--- with respect to certain properties ---the
+\emph{specification}.
 %
-To that end, a verifier \PC{c'est qui/quoi en pratique ?}
+We distinguish between \emph{functional} specifications, which describe expected
+behaviors of their implementations in terms of inputs they handle and outputs
+they produce, and \emph{non-functional} specifications, which notably include
+security policies.
+%
+In this context, the terms ``implementation'' and ``specification'' refer to a
+subjective relation which allows for organizing a verification works into
+several layers, \emph{e.g.} a functional specification can act as an
+implementation of a more abstract functional specification.
+%
+For instance, a common pattern for verifying a system (\emph{e.g.} a C program)
+is to
 %
 \begin{inparaenum}[(1)]
-\item defines a formal description of the system ---the \emph{specification}---,
+\item \label{enum:modeling}
   %
-\item exhibits a proof that a specification satisfies a statement (defined in an
-  arbitrary logic) which encodes the property with respect to which the
-  correctness shall be proven, and
+  define a functional specification for the system, which abstracts away the
+  implementation details (\emph{e.g.} manual memory management or pointers
+  aliasing),
   %
-\item exhibits a proof of correspondence between the implementation and the
+\item \label{enum:verifying}
+  %
+  prove the correctness of the functional specification with respect to
+  non-functional specifications, and
+  %
+\item \label{enum:equivalence}
+  %
+  prove the correctness of the system with respect to its functional
   specification.
 \end{inparaenum}
-%
-\PC{saut de page --- de manière générale, il faut casser les paragraphes
-``massifs'' qui mélangent des idées, et ne sont pas plus simples à lire}
-In this context, the terms ``implementation'' and ``specification'' refer to a
-subjective relation between two layers of abstraction: the specification is more
-abstract than its implementation, and formal verification proofs can be
-organized in an arbitrary number of abstraction layers.
-%
-The definition of a specification shall ease the construction of the proof of
-correctness, while the correspondence proof allows for extending the properties
-of the specification to the implementation.
-%
-The instantiation of the terms ``formal description,’’ ``correspondence proof,’’
-``properties'' or ``correctness proof'' may considerably vary from one system to
-another.
-\PC{c'est curieux d'écrire que tout est variable, alors que que tu viens d'en
-	donner une définition. Assure toi de donner une définition
-standard et reconnue de ces termes}
-%
-Similarly, the nature of the proofs and their construction greatly depend on the
-tools used by the verifier.
-%
-For our part, we want to construct correctness proofs of a hardware architecture
-specification, with respect to security properties, using the Coq theorem prover
-(as explained in Chapter~\ref{chapter:introduction}).
 
+In the context of this thesis, we focus on steps~(\ref{enum:modeling})
+and~(\ref{enum:verifying}).
+%
 The rest of this Chapter proceeds as follows.
 %
-First, we describe how transition systems can be leveraged in order to implement
-the verification methodology we just described
+First, we explain how transition systems are used as functional specifications
+to verify the correctness of a system with respect to security policies
 (Section~\ref{sec:sota:formalisms}).
 %
-Then, we introduce the compositional verification approach, which enables the
+Then, we introduce compositional verification approaches, which enable the
 ``divide and conquer'' strategy to reduce the burden of verifying large and
 complex systems (Section~\ref{section:sota:compsec}).
 %
@@ -89,8 +85,8 @@ verification process by providing tools to construct proofs
 Then, we focus on characterizing security policies in terms of properties of
 transition systems (\ref{sec:sota:security}).
 %
-Finally, we describe how the concepts of this section have been used\PC{par
-  qui?} in order to verify hardware and software systems
+Finally, we describe how the concepts of this section have been used in the
+literature in order to verify hardware and software systems
 (\ref{subsec:sota:ltsrelated}).
 
 \subsection{Defining Specifications}
@@ -236,7 +232,7 @@ The statement that a proposition \( P \) is true is commonly denoted by
 \( \vdash P \).
 %
 A proposition \( P \) may also be true on the condition that propositions
-\( Q_0, Q_1, ..., \text{and} Q_n \) are also true.
+\( Q_0, Q_1, ..., \text{ and } Q_n \) are also true.
 %
 This statement is denoted by \( Q_0, Q_1, ... Q_n \vdash P \).
 %
@@ -1546,9 +1542,9 @@ In Chapter~\ref{chapter:speccert2}, we show how we can verify the correctness of
 these requirements against a hardware model.
 %
 A desirable long-term goal of this approach would be to be able to verify the
-correctness of low-level
-software components with respect to these requirements, so we can conclude the
-security property targeted by a \ac{hse} mechanism is effectively enforced.
+correctness of low-level software components with respect to these requirements,
+so we can conclude the security property targeted by a \ac{hse} mechanism is
+effectively enforced.
 %
 As such, our approach relates to previous research works such as
 RockSalt\,\cite{morrisett2012rocksalt} (validation of arbitrary programs against
