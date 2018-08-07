@@ -293,7 +293,7 @@ However, this is out of the scope of this Chapter. \TODO{C'est du bottage en
   \end{itemize}
 \end{definition}
 
-We illustrate this definition with the flash memory lock-down mechanism
+We illustrate this definition with the flash memory lockdown mechanism
 described in Section~\ref{subsec:usecase:hse:smm}.
 %
 As a reminder, such mechanism enforces the integrity of the \ac{bios} code
@@ -357,7 +357,7 @@ as follows: \TODO{Il manque le début de la phrase.}
   \label{fig:speccert:flash}
 \end{figure}
 
-\begin{example}[Flash Memory Lock-down Mechanism]
+\begin{example}[Flash Memory Lockdown Mechanism]
   \label{example:speccert:flashdef}
   In this example, the trusted software component ($T$) is the \ac{bios}. \TODO{
     et du coup, il faudrait préseciser que les autres composants (OS,
@@ -451,7 +451,7 @@ policy. \TODO{Cela veut surrement dire que les contraintes sur l'exécution du
   seconde loi, il y a de forte chance que le HSE ne permette pas d'assurer la
   propriété de sécurité visée.... }
 
-\begin{example}[Flash Memory Lock-down Inconsistency]
+\begin{example}[Flash Memory Lockdown Inconsistency]
   We can convince ourselves that the informal definition description we have
   discussed in the Example~\ref{example:speccert:flashdef} obeys the first
   \ac{hse} law, but \emph{does not} obey the second one.
@@ -497,7 +497,7 @@ policy. \TODO{Cela veut surrement dire que les contraintes sur l'exécution du
   of the \ac{smi} by the \ac{cpu}, the \func{hardware\_req} predicate is not
   satisfied.
 
-  It is because the flash memory lock-down as described here does not satisfy
+  It is because the flash memory lockdown as described here does not satisfy
   the first law that the race condition uncovered by Corey Kallenberg \emph{et
     al.}\,\cite{kallenberg2015racecondition} is possible.
   %
@@ -533,7 +533,7 @@ to comply with this mechanism.
   \]
 \end{definition}
 
-\begin{example}[Memory Flash Lock-down Compliance]
+\begin{example}[Memory Flash Lockdown Compliance]
   We consider the trace to start at the end of the boot sequence, when the
   \ac{bios} gives the control flow to the system software component it has
   selected.
