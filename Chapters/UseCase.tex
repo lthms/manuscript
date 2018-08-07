@@ -1143,13 +1143,14 @@ Once the \ac{smm} code has performed the task it has been requested for, the
 \texttt{rsm} instruction can be used.
 %
 This instruction, specific to the \ac{smm}, tells the \ac{cpu} to restore its
-previous state.
+previous state\PC{and exit \ac{smm}}.
 %
 This way, the execution of the software component previously halted by the
 \ac{smi} can resume.
 %
 From the system point of view, it is almost like if nothing has happened.
 %
+\PC{saut de ligne}
 It remains possible to detect \ac{smm} context switches.
 %
 The most straightforward way is to rely on the Model-Specific Register
@@ -1173,7 +1174,7 @@ similarly to the SMRAM protection.
 That is, only the \ac{smm} code should be able to overwrite the content of the
 flash memory.
 %
-This second access control mechanism is implemented by the \ac{pch}.
+This second\PC{c'est quoi le premier ?} access control mechanism is implemented by the \ac{pch}.
 %
 It is configurable \emph{via} the \texttt{BIOS\_CNTL} control register.
 %
@@ -1427,9 +1428,8 @@ mechanisms, including (but not limited to):
   a memory page granularity.
 \end{itemize}
 %
-The most commonly used strategy is write-back strategy.
-%
-It is summarized in Figure~\ref{fig:usecase:writeback}.
+The most commonly used strategy is write-back strategy, summarized in
+Figure~\ref{fig:usecase:writeback}.
 %
 The purpose of the write-back strategy is to reduce the number of write accesses
 forwarded to the system memory.
@@ -1553,7 +1553,8 @@ The attack proceeds as follows:
 %
 \item Attackers issue a memory write access targeting the SMRAM, and because of
   the write-back cache strategy, the \ac{cpu} updates the copies within the
-  cache, but does not pass the access to the Memory Controller.
+  cache, but does not pass the access to the Memory Controller.\PC{``pass the
+access'' maladroit}
 %
 \item Attacker trigger another \ac{smi}, and the \ac{cpu} uses the tampered copy
   of the \ac{smm} code inside its cache.
@@ -1566,7 +1567,7 @@ both the Memory Controller and the \ac{cpu} cache work as expected.
 The former prevents authorized accesses to the SMRAM, that is a subset of the
 \ac{dram}, by a \ac{cpu} not in \ac{smm};
 %
-the former is keeping copies of successful accesses to decrease latency due to
+the former\PC{latter?} is keeping copies of successful accesses to decrease latency due to
 memory accesses.
 %
 However, the composition of the cache and the memory controller breaks the BIOS
@@ -1591,9 +1592,8 @@ disclosed another x86 vulnerability called Sinkhole\,\cite{domas2015sinkhole},
 which relies on a similar approach to trick a \ac{cpu} in \ac{smm} to execute
 arbitrary instructions.
 %
-Both leave the content of the SMRAM in \ac{dram} intact.
-%
-Both leverage legitimate hardware features.
+Both attacks leave the content of the SMRAM in \ac{dram} intact, and leverage
+only legitimate hardware features.
 
 \subsection{SENTER Sandman}
 \label{subsec:usecase:hse:sandman}
@@ -1604,9 +1604,11 @@ protection\,\cite{kovah2015senter}.
 
 \paragraph{Intel TXT.}
 %
-The Intel Trusted eXecution Technology (TXT)\cite{intel2015txt} is a recent
+The Intel Trusted eXecution Technology (TXT)\cite{intel2015txt} is a
+recent\PC{bof, on en trouve déjà en 2009: https://lwn.net/Articles/326747/}
 feature of some x86 \acp{cpu}, whose purpose is to attest the integrity of the
-system software component program without the need to trust the \ac{bios}.
+system software component program without the need to trust the \ac{bios}.\PC{et
+surtout, fournir un environnement d'exécution de confiance}
 %
 As such, it addresses the main limitation of both the Secure Boot and Trusted
 Boot approaches, previously detailed in
@@ -1660,6 +1662,8 @@ component from a corrupted \ac{bios} executed in \ac{smm}.
 % logiciel peut modifier le contenu de la flash. C'est un manuscript de
 % thèse. Il en faut pas faire (trop) de digression mais il faut être (très)
 % pédagogique. Tu n'est pas à une page près!}
+\PC{Ack avec Guillaume, la description est trop succinte, et le style
+télégraphique}
 
 \paragraph{Countermeasure.}
 %
@@ -1674,7 +1678,7 @@ In practice, even the first version of TXT was not changing that fact.
 Indeed, the \ac{bios} plays a key role in making sure the computing platform
 remains in a working state.
 %
-As a consequence, Intel was advising system software developers to enable back
+As a consequence, Intel was\PC{is?} advising system software developers to enable back
 \ac{smi} in the TXT Software Development Guide as ``most systems will not
 function properly if \acp{smi} are disabled for any length of
 time''\,\cite{intel2015txt}.
@@ -1685,7 +1689,8 @@ time''\,\cite{intel2015txt}.
 Another attack has defeated the flash memory lockdown protection.
 %
 In 2015, Corey Kallenberg \emph{et al.} showed that the scenario detailed
-previously, such that setting \texttt{BIOSWE} was triggering a \ac{smi} to
+previously, such that setting \texttt{BIOSWE} was triggering\PC{ce ``was
+triggering'' est bizarre``. Tu veux dire '''which triggers``?} a \ac{smi} to
 suspend the execution of the system software, suffered from a race condition if
 two cores cooperate\,\cite{kallenberg2015racecondition}.
 
@@ -1694,8 +1699,8 @@ two cores cooperate\,\cite{kallenberg2015racecondition}.
 On a typical x86 hardware architecture, all the x86 cores of the platform will
 \emph{eventually} enter \ac{smm} when a \ac{smi} is triggered.
 %
-On the contrary, the \texttt{BIOSWE} is set as soon as the \texttt{BIOS\_CNTL}
-register is modified.
+On the contrary, the \texttt{BIOSWE} flag is set as soon as the
+\texttt{BIOS\_CNTL} register is modified.
 %
 If two cores cooperate, they can benefit from a sufficient window for action and
 successfully tamper with the Flash Memory content.
