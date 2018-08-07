@@ -1265,8 +1265,8 @@ isolated from the rest of the software stack.
 We have formally define this security policy with $I_{\mathtt{bios}}$
 (Definition~\ref{def:speccert:biospol}).
 %
-\( \Delta_{\mathtt{bios}} \) relies on the \ac{smm} and the \ac{smrr} of x86
-\ac{cpu} and the \texttt{SMRAMC} register of the memory controller.
+\( \Delta_{\mathtt{bios}} \) relies on the \ac{smm}, the \ac{smrr} of x86
+\ac{cpu}, and the \texttt{SMRAMC} register of the memory controller. \TODO{Il manque une transition avec la suite. Une annonce du plan "local", notamment.}
 
 \subsection{Defining a Hardware-Software Mapping}
 
@@ -1326,7 +1326,7 @@ Once we have properly introduced both, we verify our definition of
 \paragraph{Hardware Requirements}
 %
 Given \( h \in H(S) \), \( h \) satisfies \func{hardware\_req}, we have
-identified six requirements on states.
+identified six requirements on states. \TODO{Cette phrase me paraît un peu étrange. -> "We have identified six req for h to satishy harware\_req?"}
 %
 \begin{enumerate}
 \item When the \ac{cpu} executes the \ac{smm} code, the program counter register
@@ -1334,6 +1334,7 @@ identified six requirements on states.
   \[
     h.\func{core}.\func{pc} \in \texttt{pSmram}
   \]
+  \TODO{Contrairement aux autres, cette propriété n'est vraie que lorsque le CPU est en SMM. Il faudrait le faire apparaitre dans la formule}
   %
 \item The \texttt{SMBASE} register was correctly set during the boot sequence to
   point to the base of the SMRAM.
@@ -1369,6 +1370,8 @@ identified six requirements on states.
     \texttt{pSmram} \subseteq h.\func{core}.\func{smrr}.\func{range}
   \]
 \end{enumerate}
+
+\TODO{A la lecture de ces requirements, je m'aperçois que certains d'entre eux s'apppuient sur une configuration réalisée au préalable par le code trusté, durant la phase de boot. On peut donc dire que les exigences sur le code trusté ne sont pas seulement dans les software requirements mais aussi, pour certaines, dans les hardware requirements (et du coup le nom n'est peut être pas idéal), même si elles ne correspondent pas à la même phase d'utilisation (initialisation vs. runtime en quelque sorte)}
 
 \paragraph{Software Requirements}
 %
@@ -1409,21 +1412,18 @@ there is no need to further update them.
 \paragraph{HSE Laws}
 %
 For $\Delta_{\mathtt{bios}}$ to be a \ac{hse} mechanism, we need to prove it
-satisfies the two \ac{hse} Laws.
+satisfies the two \ac{hse} Laws \TODO{Attention, pas de majuscules à Laws (c'est un mot commun et auparavant tu n'utilisais pas de majuscule). Fais attention, tu as tendances à utiliser les majuscules comme emphase. Fais une vérification sur tout le document pour homogénéiser}.
 
-The first law states that the \( \func{bios\_req} \) is always satisfied when a
-software component which is not the \ac{bios} is executed by the hardware
+The first law states that the \( \func{bios\_req} \) is always satisfied when a non-trusted
+software component, i.e. different from the \ac{bios}, is executed by the hardware
 architecture.
-%
-In such a case, it would mean our \ac{hse} mechanism does not rely on hypotheses
-which involve untrusted software components.
 %
 By definition of \func{bios\_req}, \( \func{context}(h) = \mathtt{bios} \) is an
 antecedent of the requirements over \func{NextInstruction} and
-\func{UpdateSmrr}.
+\func{UpdateSmrr}. \TODO{Il faudrait conclure explicitement en affirmant que la première loi est bien vérifiée.}
 
 The second law states the state requirements are invariant with respect to the
-software requirements.
+software requirements. \TODO{"states the state" n'est pas très heureux... }
 %
 We prove this by case enumeration of \( l \in L_S \uplus L_H \) and
 \( h \in H(S) \), we check that each requirement described
