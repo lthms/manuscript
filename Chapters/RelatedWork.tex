@@ -2,6 +2,9 @@
 \chapter{State of the Art of Formal Verification}
 \label{chapter:relatedwork}
 
+\PC{tu annonce un état de l'art complet, mais en pratique il est plus limité aux
+transition systems - titre à revoir ?}
+
 \endquote{``\emph{We build our computers the way we build our cities: over time,
     without a plan, on top of ruins.}''
 
@@ -11,8 +14,9 @@
 %
 Formal verification consists of proving the correctness of a system ---the
 \emph{implementation}--- with respect to certain properties.
+\PC{pas que l'implémentation - souvent c'est le modèle uniquement}
 %
-To that end, a verifier
+To that end, a verifier \PC{c'est qui/quoi en pratique ?}
 %
 \begin{inparaenum}[(1)]
 \item defines a formal description of the system ---the \emph{specification}---,
@@ -25,6 +29,8 @@ To that end, a verifier
   specification.
 \end{inparaenum}
 %
+\PC{saut de page --- de manière générale, il faut casser les paragraphes
+``massifs'' qui mélangent des idées, et ne sont pas plus simples à lire}
 In this context, the terms ``implementation'' and ``specification'' refer to a
 subjective relation between two layers of abstraction: the specification is more
 abstract than its implementation, and formal verification proofs can be
@@ -37,6 +43,9 @@ of the specification to the implementation.
 The instantiation of the terms ``formal description,’’ ``correspondence proof,’’
 ``properties'' or ``correctness proof'' may considerably vary from one system to
 another.
+\PC{c'est curieux d'écrire que tout est variable, alors que que tu viens d'en
+	donner une définition. Assure toi de donner une définition
+standard et reconnue de ces termes}
 %
 Similarly, the nature of the proofs and their construction greatly depend on the
 tools used by the verifier.
@@ -64,13 +73,13 @@ preceding research projects (Section~\ref{sec:sota:conclusion}).
 Transition systems have long been used to study the behavior of discrete
 systems.
 %
-Over times, many different definitions of transition system have been
+Over time, many different definitions of transition system have been
 proposed, to address different classes of verification problems.
 %
 In this Section, we do not attempt to give a comprehensive overview of these
 approaches.
 %
-On the contrary, we explain how a system can be specified using a generic
+On the contrary\PC{au contraire de quoi ? la suite semble générique}, we explain how a system can be specified using a generic
 transition system (\ref{subsec:sota:ltsdef}).
 %
 We introduce the key concepts of formal methods which support the formal
@@ -80,7 +89,8 @@ verification process by providing tools to construct proofs
 Then, we focus on characterizing security policies in terms of properties of
 transition systems (\ref{sec:sota:security}).
 %
-Finally, we describe how the concepts of this section have been used in order to
+Finally, we describe how the concepts of this section have been used\PC{par
+qui?} in order to
 verify hardware and software systems (\ref{subsec:sota:ltsrelated}).
 
 \subsection{Defining Specifications}
@@ -100,7 +110,9 @@ message from a bus, an operating system handles a syscall).
 \emph{Labeled} transition systems distinguish between classes of transitions
 \emph{via} the use of labels (\emph{e.g.} one label per syscall).
 %
-To the best of our knowledge, the more straightforward definition of a labeled
+To the best of our knowledge, the more straightforward definition\PC{ce début de
+	phrase laisse penser que 1. tu n'es pas sûr 2. il n'y a pas de def
+standard ? - à revoir} of a labeled
 transition system, as used by Vijayaraghavan \emph{et al.} in their work on
 modular verification of multiprocessor hardware
 designs\,\cite{vijayaraghavan2015modular}, is a tuple
@@ -109,7 +121,11 @@ a set of labels, and \( R \subseteq S \times L \times S \) is the transition
 relation.
 %
 In addition, there is often a subset of states which identifies acceptable
-initial states.
+initial states.\PC{et ? (phrase qui tombe un peu de nulle part)}
+
+\PC{l'exemple Airlock Systems tombe carrément du ciel, on ne voit pas pourquo
+	tu le choisis. Je suggère de mettre ici une phrase disant que tu vas
+prendre un exemple récurrent pour illuster, et pourquoi tu le prends}
 
 \begin{example}[Airlock System]
   \label{example:sota:airlocklts}
@@ -126,13 +142,13 @@ initial states.
   \item A door of the system can be either \( \mathtt{open} \) or
     \( \mathtt{close} \).
     %
-    The set of states of the airlock system reflects the combinatronics of the
+    The set of states of the airlock system reflects the combinatronics\PC{???} of the
     doors states.
   \item A transition is characterized by the opening (\( \mathtt{Open}_i\), with
     \( i \in \{1, 2\} \)) and closing (\( \mathtt{Close}_i \), with
     \( i \in \{1, 2\} \)) of a door of the system.
     %
-  \item The system does not allow the simultaneous opening of both doors, as
+  \item The system does\PC{should?} not allow the simultaneous opening of both doors, as
     stated by the definition of \( R \) which does not contain a transition
     which leads to the state \( (\mathtt{open}, \mathtt{open}) \).
   \end{itemize}
@@ -199,7 +215,8 @@ There are many modeling structures one can use to characterize transition
 systems, with each variant better suited to tackle a particular class of
 systems.
 %
-For instance, the Kripke structure\,\cite{kripke1971semantical} is a notorious
+For instance, the Kripke structure\,\cite{kripke1971semantical} is a
+notorious\PC{pas notorious (négatif). ``classical'' ?}
 variation of (labeled) transition systems used in model
 checking\,\cite{clarke1999model}, while Petri net\,\cite{peterson1981petri},
 process algebra\,\cite{bergstra1984process} or interface
