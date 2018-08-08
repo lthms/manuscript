@@ -24,11 +24,30 @@ takes into account that
 \TODO{Dire dans l'intro du 4, et plusieurs endroits, que l'on a surtout utilisé
   l'approche dans le cas d'une propriété de safety}
 %
-As a consequence \TODO{je ne vois pas trop le lien de cause à effet. Revoir la
-  transition de cette phrase}, we have broken down our formal definition into
-three components: hardware models, \ac{hse} mechanisms and security
-policies. \TODO{Attention à l'usage des temps. Dans cette phrase tu utilises le
-  present perfect. Ensuite c'est le présent...}
+As a consequence,
+%
+\TODO{je ne vois pas trop le lien de cause à effet. Revoir la transition de
+  cette phrase}
+%
+we have broken down our formal definition into three components: hardware
+models, \ac{hse} mechanisms and security policies.
+%
+\TODO{Attention à l'usage des temps. Dans cette phrase tu utilises le present
+  perfect. Ensuite c'est le présent...}
+%
+In this Chapter and the following, we assume only one software component is
+executed at a given time by the hardware architecture, in order to simplify our
+definitions.
+%
+We believe dealing with multi-core architectures is possible with the cost of
+additional efforts, although it remains to be proven as we have not tackled this
+challenge during this thesis.
+%
+% \TODO{C'est du bottage en touche peu élégant. Je dirais que c'est une limite
+% du modèle tel qu'il est présenté dans cette thèse. Mais on pourrait étendre le
+% modèle pour traiter le multi-coeur. Il faut le dire clairement. C'est pas un
+% truc hors sujet du chapitre (sauf erreur de ma part, le problème n'est pas
+% traité ailleurs dans le manuscrit). }
 %
 First, we model the hardware architecture as a labeled transition system whose
 sequences of transitions, also called traces, characterize every possible
@@ -44,9 +63,7 @@ For the reader familiar with Coq, we present an implementation of our formalism
 in Appendix~\ref{appendix:speccert}.
 %
 This development comprises machine-checked proofs of the theoretical results
-that we present throughout this Chapter. We have used these proofs to phrase the
-proof sketches which follow. \TODO{Je ne suis pas sur de comprendre précisemment
-  la dernière phrase.}
+that we present throughout this Chapter.
 
 \section{Hardware Model}
 \label{sec:speccert:hardware}
@@ -147,9 +164,13 @@ interrupt.
 \paragraph{Traces.}
 A trace is a non-empty sequence of transitions of~$\Sigma$, such that for two
 consecutive transitions, the resulting state of the first one is the initial
-state of the next one. \TODO{Tu ne donnes qu'une définition informelle (en
+state of the next one.
+%
+\TODO{Tu ne donnes qu'une définition informelle (en
   anglais) des traces. Tu pourrais donner la formule correspondante. Idem pour
   init et trans}
+\thomasrk[inline]{Bien que je comprenne l'argument, je ne pense personnellement
+  pas que ça apportenait vraiment quelque chose.}
 
 \begin{definition}[Traces]
   \label{def:speccert:trace}
@@ -165,9 +186,8 @@ state of the next one. \TODO{Tu ne donnes qu'une définition informelle (en
   \end{itemize}
 \end{definition}
 
-As we detailed in Subsection~\ref{subsec:state:secu} \TODO{le label de cette
-  sous-section n'est pas valide}, security policies are modelled as predicates
-on sets of traces, that is $\powerset (\pathesLTS{Ez})$.
+As we detailed in Subsection~\ref{subsec:sota:security}, security policies are
+modelled as predicates on sets of traces, that is $\powerset (\pathesLTS{Ez})$.
 %
 Mainstream hardware architectures are not ``safe'' by default, and required
 additional software configuration to enforce security properties.
@@ -192,26 +212,28 @@ hardware configurations which constrain the execution of untrusted software
 components with respect to a targeted security policy.
 %
 On the other hand, the purpose of the requirements over software transitions is
-to prevent untrusted software components to reach a hardware configuration
-wherein the requirements over state are not satisfied. \TODO{Tu devrais dès le
-  début bien insister sur le fait que ces contraintes ne s'applique que sur le
-  code trusté. On va supposer que le code trusté utiliser correctement le
-  mécanisme hardware. Dans notre modèle d'attaquant, l'attaquant n'a que le
-  controle du code non trusté, qui n'est donc pas contraint.}
+to prevent mistrusted software components to reach a hardware configuration
+wherein the requirements over state are not satisfied.
 %
-These requirements allow us to determine a subset of compliant traces, that is
-traces where trusted software components have correctly implemented the \ac{hse}
-mechanism. \TODO{Peut être rappeller que "correctly implement the HSE" veut dire
-  respecter les contraintes sur les états et les transititions software. C'est
-  un peu trop implicite.}
+Requirements over software transitions should only constrain the execution of
+trusted software components, which implement the \ac{hse} mechanism.
+%
+We consider an adversary model where attackers control mistrusted software
+components, and therefore we do not consider any hypotheses on their behavior.
+
+These two classes of requirements allow us to determine a subset of compliant
+traces, that is traces where trusted software components have correctly
+implemented the \ac{hse} mechanism by obeying software requirements.
+%
+% \TODO{Peut être rappeller que "correctly implement the HSE" veut dire
+% respecter les contraintes sur les états et les transititions software. C'est
+% un peu trop implicite.}
 %
 To verify a \ac{hse} mechanism is correct with respect to a targeted security
 policy means proving the set of compliant traces of this mechanism satisfies the
 predicate which models the policy.
 
-\paragraph{Definition.} \TODO{Le nom du paragraphe (Definition) n'est pas
-  top. Il y en a plein partout, des définitions. Je propose quelque chose du
-  style "HSE mecanisms"...}
+\paragraph{HSE Mechanisms.}
 %
 In the context of \ac{hse} mechanisms, trusted and untrusted software components
 alike use the same interface to interact with the underlying hardware
@@ -237,35 +259,16 @@ executed when the \ac{cpu} is in ring 3, with a particular page table setup.
   state and returns the software component currently executed.
 \end{definition}
 
-We say a software transition is trusted (respectively untrusted) when it is
-generated from a state associated to a trusted (respectively untrusted) software
-component.
+We say a software transition is trusted (respectively mistrusted) when it is
+generated from a state associated to a trusted (respectively mistrusted)
+software component.
 %
 A hardware-software mapping is mandatory to define requirements over software
-transitions.
+transitions that are consistent with respect to our adversary model.
 %
-Indeed, these requirements can only concern trusted software
-transitions. \TODO{Cela devrait être expliqué un peu plus en détail et plus
-  tôt. Il suffirait alors ici de le rappeler (comme expliqué en section xx, ces
-  contraintes ne concernent que les transition trustés.}
-%
-
-Dealing with multi-core architectures is possible, but requires additional
-efforts. \TODO{J'ai l'impression que cela devrait être mentionné et discuté plus
-  haut. De manière générale, comment modéliser une archi multi-core? Plusieurs
-  transitions peuvent-elles arriver simultanément?}
-%
-One solution is to define a set of core identifiers to act as an additional
-parameter for hardware-software mapping and software transitions. \TODO{Pourquoi
-  seulement sur les transitions software? Si un coeur fait un défaut de page,
-  est-ce que l'interruption est transmise à tous les coeurs?}
-%
-However, this is out of the scope of this Chapter. \TODO{C'est du bottage en
-  touche peu élégant. Je dirais que c'est une limite du modèle tel qu'il est
-  présenté dans cette thèse. Mais on pourrait étendre le modèle pour traiter le
-  multi-coeur. Il faut le dire clairement. C'est pas un truc hors sujet du
-  chapitre (sauf erreur de ma part, le problème n'est pas traité ailleurs dans
-  le manuscrit). }
+\TODO{Cela devrait être expliqué un peu plus en détail et plus tôt. Il suffirait
+  alors ici de le rappeler (comme expliqué en section xx, ces contraintes ne
+  concernent que les transition trustés.}
 
 \begin{definition}[HSE Mechanism]
   \label{def:speccert:hse}
@@ -293,8 +296,8 @@ However, this is out of the scope of this Chapter. \TODO{C'est du bottage en
   \end{itemize}
 \end{definition}
 
-We illustrate this definition with the flash memory lock-down mechanism
-described in Section~\ref{subsec:usecase:hse:smm}.
+We illustrate this definition with the flash memory lockdown mechanism described
+in Section~\ref{subsec:usecase:hse:smm}.
 %
 As a reminder, such mechanism enforces the integrity of the \ac{bios} code
 within the flash memory and is implemented by the \ac{pch}.
@@ -303,7 +306,7 @@ As pictured in Figure~\ref{fig:speccert:flash}, the \ac{pch} acts as a proxy
 between the \ac{cpu} and a collection of peripherals, including the flash
 memory.
 %
-as follows: \TODO{Il manque le début de la phrase.}
+The \ac{hse} mechanism proceeds as follows:
 %
 \begin{enumerate}
 \item By default, the flash memory is locked and its content cannot be modified.
@@ -322,11 +325,19 @@ as follows: \TODO{Il manque le début de la phrase.}
 %
 \item In order to protect the integrity of the flash memory content, the
   \ac{bios} is expected to lock the flash memory again, before resuming the
-  execution of the system software with the \texttt{rsm} assembly
-  instruction. \TODO{Avant de faire un lock, je suppose que le code du firmware
-    fait quelque chose d'utile (mettre à jour le firmware?) Il faudrait le
-    préciser.}
+  execution of the system software with the \texttt{rsm} assembly instruction.
 \end{enumerate}
+
+Legacy \acp{bios} were probably using this mechanism in order to implement an
+ad-hoc communication channel between the \ac{bios} and the system software
+component, \emph{e.g.} to initiate a \ac{bios} update.
+%
+The \ac{uefi} standard introduces dedicated protocols to enable communication
+between the \ac{bios} and the system software component, and we believe the
+\ac{bios} action, in response to a \ac{smi} triggered by the unlocking of the
+flash memory, is limited to lock it again and resume.
+%
+In both cases, this is really implementation dependent.
 
 \begin{figure}
   \centering
@@ -357,18 +368,32 @@ as follows: \TODO{Il manque le début de la phrase.}
   \label{fig:speccert:flash}
 \end{figure}
 
-\begin{example}[Flash Memory Lock-down Mechanism]
+\begin{example}[Flash Memory Lockdown Mechanism]
   \label{example:speccert:flashdef}
-  In this example, the trusted software component ($T$) is the \ac{bios}. \TODO{
-    et du coup, il faudrait préseciser que les autres composants (OS,
-    applications, etc.) sont les non-trustés.}
   %
-  The \ac{cpu} executes the \ac{bios} when it is in \ac{smm}
-  (\func{context}). \TODO{La phrase n'est pas suffisamment préciser. En outre,
-    j'ai mis du temps à me rappeler que context ne doit pas être pris ici comme
-    un mot commun mais un nom de fonction!. Il faudrait dire que par défaut
-    contexte(h)=non trusté sauf lorsque le CPU est en SMM, c'est à dire
-    lorsqu'une SMI se produit et avant que le bios exécute une instruction rsm}
+  The set of trusted software components is limited to the \ac{bios}, that is
+  \( T = \{ \mathtt{bios} \} \).
+  %
+  This means the rest of the software stack (\emph{e.g.} the operating system
+  and its applications) are mistrusted and therefore assumed to be under the
+  control of attackers.
+  %
+  The hardware-software mapping binds \acp{cpu} in \ac{smm}
+  with the execution of the \ac{bios}, that is
+  %
+  \[
+    \begin{array}{rcll}
+      \func{context}(h) & = & \mathtt{bios} & \text{if } h \text{ characterizes
+                                              a \ac{cpu} in \ac{smm}} \\
+      \func{context}(h) & \in & S \backslash \{ \mathtt{bios} \} & \text{otherwise}
+    \end{array}
+  \]
+  %
+  \TODO{La phrase n'est pas suffisamment préciser. En outre, j'ai mis du temps à
+    me rappeler que context ne doit pas être pris ici comme un mot commun mais
+    un nom de fonction!. Il faudrait dire que par défaut contexte(h)=non trusté
+    sauf lorsque le CPU est en SMM, c'est à dire lorsqu'une SMI se produit et
+    avant que le bios exécute une instruction rsm}
   %
   A safe hardware state ($\func{hardware\_req}$) is either a state wherein the
   \ac{bios} is executed, or a state wherein the flash memory is locked.
@@ -451,7 +476,7 @@ policy. \TODO{Cela veut surrement dire que les contraintes sur l'exécution du
   seconde loi, il y a de forte chance que le HSE ne permette pas d'assurer la
   propriété de sécurité visée.... }
 
-\begin{example}[Flash Memory Lock-down Inconsistency]
+\begin{example}[Flash Memory Lockdown Inconsistency]
   We can convince ourselves that the informal definition description we have
   discussed in the Example~\ref{example:speccert:flashdef} obeys the first
   \ac{hse} law, but \emph{does not} obey the second one.
@@ -497,8 +522,8 @@ policy. \TODO{Cela veut surrement dire que les contraintes sur l'exécution du
   of the \ac{smi} by the \ac{cpu}, the \func{hardware\_req} predicate is not
   satisfied.
 
-  It is because the flash memory lock-down as described here does not satisfy
-  the first law that the race condition uncovered by Corey Kallenberg \emph{et
+  It is because the flash memory lockdown as described here does not satisfy the
+  first law that the race condition uncovered by Corey Kallenberg \emph{et
     al.}\,\cite{kallenberg2015racecondition} is possible.
   %
   On the contrary, the \texttt{SMM\_BWP} register semantics allows for defining
@@ -533,7 +558,7 @@ to comply with this mechanism.
   \]
 \end{definition}
 
-\begin{example}[Memory Flash Lock-down Compliance]
+\begin{example}[Memory Flash Lockdown Compliance]
   We consider the trace to start at the end of the boot sequence, when the
   \ac{bios} gives the control flow to the system software component it has
   selected.

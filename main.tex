@@ -3,8 +3,6 @@
 \maxtocdepth{subsection}
 \usepackage{bookmark}
 
-\usepackage{subfig}
-
 \usepackage[explicit]{titlesec}
 \usepackage{type1cm}
 
@@ -17,11 +15,13 @@
 \usepackage[dvipsnames]{xcolor}
 \usepackage{pgf-umlsd}
 
+\usepackage[chapter]{minted}
+\usemintedstyle{bw}
+\setminted{framesep=10pt,xleftmargin=18pt,frame=leftline,linenos=true}
+
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[english]{babel}
-\usepackage[chapter]{minted}
-\usemintedstyle{bw}
 \usepackage{tocbibind}
 \usepackage[babel=true,kerning=true,spacing=true,auto=true]{microtype}
 \usepackage[babel=true]{csquotes}
@@ -30,10 +30,7 @@
 \let\euscr\mathscr \let\mathscr\relax% just so we can load this and rsfs
 \usepackage[scr]{rsfso}
 \newcommand{\powerset}{\raisebox{.15\baselineskip}{\Large\ensuremath{\wp}}}
-
 \usepackage{geometry}
-
-\setminted{framesep=10pt,xleftmargin=18pt,frame=leftline,linenos=true}
 
 % Use -- instead of bullet for itemize
 \renewcommand{\labelitemi}{\normalfont\textendash}
