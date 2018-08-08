@@ -1509,6 +1509,8 @@ considered:
 Once each requirement has been shown to be preserved during a transition, we can
 conclude for \func{hardware\_req} as a whole.
 
+\TODO{Je comprends ta volonté de résumer une preuve surement un peu rébarbative à décrire et surtout de ne pas réécrire ce que tu as fais en Coq. Toutefois, sans la lecture du code Coq, difficile de comprendre et d'apprécier véritablement ton travail. C'est à mon avis un problème. Ton manuscript devrait expliquer plus précisément ce que tu as fais en Coq pour qu'un lecteur averti puisse juger ton travail sans aller lire ton code. Il faudrait demander l'avis à des spécialistes (Yann?)}
+
 \subsection{BIOS HSE Mechanism Correctness}
 
 Our objective is to prove that \( \Delta_{\mathtt{bios}} \) is correct with
@@ -1529,10 +1531,10 @@ on transitions, we know thanks to Theorem~\ref{theorem:speccert:correcthse} that
 is a sufficient condition for
 \( \Delta_{\mathtt{bios}} \models I_{\mathtt{bios}} \).
 
-From the security policy perspective, only the \func{Fetch} label is relevant.
+From the security policy perspective, only the \func{Fetch} label is relevant. \TODO{Je ne comprends pas cette phrase. Il y a trop d'implicite. Il faut que tu développes un peu ton raisonnement.}
 %
 Unfolding the definitions previously introduced in this Chapter and its
-predecessor leaves us to prove that
+predecessor \TODO{Arrête d'utiliser des qualificatifs relatifs pour désigner les choses comme "previously introduced" ou "its predecessor". Il y a beaucoup de concepts (définition, théorèmes, etc.) dans ton manuscrit donc à la fin on est perdu! Numérote systématiquement les concepts (déf, etc.) et nomme les explicitement "Unfolding definitions xxx".} leaves us to prove that \TODO{Je n'arrive pas à suivre. Je ne comprend pas pourquoi prouver la correctness se réduit à prouver la formule pour fetch seulement. Il faudrait prendre le temps d'expliquer.}
 %
 \[
   \begin{array}{l}
@@ -1550,7 +1552,7 @@ In particular, the requirement 1 constrains the value of the program counter
 register.
 %
 As a consequence, we know we can rely on the requirements 3 and 4 which
-constrains the ownership of memory location related to the SMRAM.
+constrains the ownership of memory location related to the SMRAM. \TODO{Une fois de plus, la présentation de la preuve est un peu rapide et difficile à comprendre sans plus d'élément.}
 
 As a side note, we emphasize that these proofs validate the SMRAM cache
 poisoning countermeasure.
