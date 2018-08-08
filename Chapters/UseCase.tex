@@ -927,99 +927,66 @@ erroneous or malicious software stack.
 To that end, the \ac{bios} relies on several \ac{hse} mechanisms to enforce its
 isolation from the rest of the software stack.
 
-To the best of our knowledge, the security policy targeted by the \ac{bios} as
-runtime is always discussed through the prism of the \ac{hse} mechanism used to
-enforced this policy.\PC{la phrase précédente est un peu bizarre: la politique
-  de sécurité est discutée (?!) à travers le prisme \ldots}
+% To the best of our knowledge, the security policy targeted by the \ac{bios} as
+% runtime is always discussed through the prism of the \ac{hse} mechanism used
+% to enforced this policy.
+%%
+% \PC{la phrase précédente est un peu bizarre: la politique de sécurité est
+% discutée (?!) à travers le prisme \ldots}
+%%
+% That is, documentation such as the Intel manual, the processor datasheet or
+% the \ac{pch} datasheet ---in practice involved
+%%
+% \PC{pas clair: c'est la documentation qui est impliquée dans le hse ?!}
+%%
+% in the \ac{hse} mechanisms implemented by the \ac{bios}--- focus on \emph{how}
+% implementing the security policy rather than specifying \emph{what} this
+% policy is\thomasrk{Is it really true?}.
+%%
+% \PC{le paragraphe précédent/en cours me semble à retravailler, je ne le trouve
+% pas clair}
+%%
+% \PC{La phrase qui suit fait un peu ``citation en vrac''}
+%%
+% Another useful source of information on this matter is the various research
+% projects which discuss these mechanisms, for instance to demonstrate a
+% security
+% vulnerability\,\cite{duflot2009smram,wojtczuk2009smram,bulygin2014summary}.
 %
-That is, documentation such as the Intel manual, the processor datasheet or the
-\ac{pch} datasheet ---in practice involved\PC{pas clair: c'est la documentation
-  qui est impliquée dans le hse ?!} in the \ac{hse} mechanisms implemented by
-the \ac{bios}--- focus on \emph{how} implementing the security policy rather
-than specifying \emph{what} this policy is\thomasrk{Is it really true?}.  \PC{le
-  paragraphe précédent/en cours me semble à retravailler, je ne le trouve pas
-  clair}
-%
-\PC{La phrase qui suit fait un peu ``citation en vrac''} Another useful source
-of information on this matter is the various research projects which discuss
-these mechanisms, for instance to demonstrate a security
-vulnerability\,\cite{duflot2009smram,wojtczuk2009smram,bulygin2014summary}.
-%
-From the information we gathered, we believe the isolation required by the
-\ac{bios} can be divided into three complementary security policies.
+From the information we gathered in the Intel manual, processor and \ac{pch}
+datasheets and in the academic literature, we believe the isolation required by
+the \ac{bios} can be divided into three complementary security policies.
 
 \begin{description}
 \item [Volatile Memory Access Control]
   %
   The \ac{bios} is assigned a volatile memory region to support its execution at
-  runtime.
+  runtime which is protected against \IOs issued by the rest of the software
+  stack.
   %
-  The rest of the software stack shall not be authorized either to read from or
-  to write to this memory region.
-  % \item [Secure Channel]
+  Besides, the \ac{bios} has a reliable \emph{secure channel} \thomasrk{ref?} to
+  access this volatile memory, \emph{e.g.} an adversary cannot modify the memory
+  map in order to intercept \IOs issued by the \ac{bios} and targeting this
+  volatile memory.
   %
-  The rest of the software stack cannot prevent the \ac{bios} to read from or
-  write to its assigned volatile memory region.  Neither can it tamper with the
-  result of read accesses issued by the \ac{bios} and targeting its assigned
-  volatile memory region.
-\end{description}
-%
-\PC{(style) ce texte est ``hors-paragraphe'', le résultat est un peu étrange
-  \\
-  Si tu peux, ce serait mieux d'avoir les trois points consécutivement, et
-  exprimés de manière synthétique (en supprimant le texte inter-paragraphe)}
-\PC{(fond): ce texte inter-paragraphe redit surtout les choses} Volatile memory
-is an absolute requirement in order to execute a software component, and the
-\ac{bios} is no exception in this regard.
-%
-It contains both the sequences of instructions which form the program of the
-software component, and the data it manipulates.
-%
-If a system component is able to modify either the code or the data manipulated
-by the \ac{bios}, it can actively interfere with its execution.
-%
-Besides, and as discussed previously, our statement takes into account the fact
-that the x86 \IOs resolution is highly configurable, by introducing a notion of
-secure channel \thomasrk{ref} between the software component and its assigned
-volatile memory.  \PC{Cette notion de \textit{secure channel} est-elle
-  importante~?  Si oui, ajoute un emph et sors-là de ce paragraphe, IMHO}
-% \PC{Cette notion de \textit{secure channel} est-elle importante ? Si oui,
-% ajoute un \verb+\emph+ et sors-là de ce paragraphe, IMHO}
-
-\begin{description}
+  \PC{Cette notion de \textit{secure channel} est-elle importante~?  Si oui,
+    ajoute un emph et sors-là de ce paragraphe, IMHO}
+  %
 \item [Availability]
   %
   The rest of the software stack is not authorized to prevent the execution of
-  the \ac{bios} at runtime.
+  the \ac{bios} at runtime, \emph{i.e.} the \ac{bios} can preempt the execution
+  of the rest of the software stack.
   %
-\end{description}
-
-Because of the nature of the tasks carried out by the \ac{bios}, vendors do not
-want to rely on the rest of the software stack.
-%
-In practice, this means the scheduling between the execution of the \ac{bios}
-and the rest of the software stack cannot be cooperative.
-%
-Therefore, the \ac{bios} needs to be able to preempt the execution of the rest
-of the software stack.
-
-\begin{description}
 \item [Non-volatile Memory Access Control]
   %
   The \ac{bios} is assigned a non-volatile memory region (in practice, a portion
   of the flash memory) to store its code and data.
   %
-  The rest of the software stack shall not be authorized to modify the content
-  of this memory.
+  The rest of the software stack is not authorized to modify the content of this
+  memory, in order to avoid a scenario where attackers modify the \ac{bios} code
+  according to their needs and provoke a reboot of the platform.
 \end{description}
-
-Limiting the set of authorized software components to modify the content of the
-flash memory to the \ac{bios} alone allows for preserving the isolation of the
-\ac{bios} across reboots.
-%
-Without a proper lockdown on the flash memory, a malicious system software
-component could simply modify the \ac{bios} code, then provoke its execution by
-rebooting the platform.
 
 \subsection{HSE Mechanisms Implemented by the BIOS}
 \label{subsec:usecase:hse:smm}
@@ -1173,9 +1140,8 @@ similarly to the SMRAM protection.
 That is, only the \ac{smm} code should be able to overwrite the content of the
 flash memory.
 %
-This second\PC{c'est quoi le premier ?} access control mechanism is implemented by the \ac{pch}.
-%
-It is configurable \emph{via} the \texttt{BIOS\_CNTL} control register.
+This access control mechanism is implemented by the \ac{pch}, and is
+configurable \emph{via} the \texttt{BIOS\_CNTL} control register.
 %
 Two bits of this register are of interest: the \texttt{BIOSWE} (\ac{bios} Write
 Enable) bit, and the \texttt{BLE} (\ac{bios} Lock Enable) bit.
@@ -1603,9 +1569,12 @@ protection\,\cite{kovah2015senter}.
 \paragraph{Intel TXT.}
 %
 The Intel Trusted eXecution Technology (TXT)\cite{intel2015txt} is a feature of
-some x86 \acp{cpu}, whose purpose is twofold: first, it attests the integrity of
-the system software component program without the need to trust the \ac{bios},
-then it provides a trusted execution environment to the system software
+some x86 \acp{cpu}, whose purpose is twofold.
+%
+Firstly, it attests the integrity of the system software component program
+without the need to trust the \ac{bios}.
+%
+Secondly, it provides a trusted execution environment to the system software
 component.
 %
 As such, it addresses the main limitation of both the Secure Boot and Trusted
@@ -1645,15 +1614,18 @@ To that end, the \ac{pch} triggers a \ac{smi} at the same time as it unlocks the
 flash memory.
 %
 This mechanism was introduced at a time when software components could not
-ignore \ac{smi}.
+configure x86 \acp{cpu} to ignore \acp{smi}.
 %
-It turned out this assumption was no longer true with TXT.
+This assumption became incorrect when Intel introduced the first version of TXT,
+whose ``trusted execution environment'' provided by TXT-capable \acp{cpu}
+explicitly disabled \acp{smi} handling.
 %
-Indeed, with the first version of TXT, the processor was disabling \ac{smi}
-handling.
+As a consequence, adversarial system software components whose execution were
+initiated with TXT were able to unlock the flash memory, without being
+interrupted by the \ac{smi} triggered by the \ac{pch} in response.
 %
-The reasoning behind this design choice was to protect the system software
-component from a corrupted \ac{bios} executed in \ac{smm}.
+Then, they could freely modify the content of the flash memory, left unprotected
+by the \ac{pch}.
 % GUILLAUME: \TODO{La description de l'attaque est trop succinte. Il faut
 % répeter que sans SMI, d'après le mécanisme de lock down, cela veut dire que la
 % flash est inscriptible mais qu'on ne passe pas en SMM du coup n'importe quel
@@ -1661,7 +1633,10 @@ component from a corrupted \ac{bios} executed in \ac{smm}.
 % thèse. Il en faut pas faire (trop) de digression mais il faut être (très)
 % pédagogique. Tu n'est pas à une page près!}
 \PC{Ack avec Guillaume, la description est trop succinte, et le style
-télégraphique}
+  télégraphique} \thomasrk[inline]{Est-ce que c’est mieux comme ça ? Au final,
+  la version actuelle n'est pas forcément plus longue, mais elle se concentre
+  plus sur l'essentiel et donne les éléments qui manquaient dans les précédentes
+  itérations.}
 
 \paragraph{Countermeasure.}
 %
