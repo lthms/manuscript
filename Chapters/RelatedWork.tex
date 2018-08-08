@@ -13,50 +13,47 @@
 \vspace{1cm}\noindent
 %
 \PC{je suis toujours dubitatif sur cette première phrase. Je suis surpris que tu
-	ne parle pas de \textbf{modèle} (en introduisant le concept) au lieu de
-système. Le modèle peut correspondre ou non à l'implémentation réelle}
-Formal verification consists of proving the correctness of a system ---the
-\emph{implementation}--- with respect to certain properties ---the
-\emph{specification}.
+  ne parle pas de \textbf{modèle} (en introduisant le concept) au lieu de
+  système. Le modèle peut correspondre ou non à l'implémentation réelle}
+%
+\thomasrk[inline]{Mieux ?}
+%
+The formal verification of a system consists of proving the correctness of an
+\emph{implementation} with respect to a
+\emph{specification}\,\cite{gupta1992formal}.
+%
+In this context, the terms ``implementation'' and ``specification'' differ from
+their usual meaning in software engineering, and are always subjective to a
+given verification problem.
+%
+An implementation is a description of the system design at any level of
+abstraction, \emph{e.g.} a program written in a language whose semantics has
+been formally specified, a model used to represent a concrete implementation.
+%
+A specification is a description of properties targeted by the systems.
 %
 We distinguish between \emph{functional} specifications, which describe expected
-behaviors of their implementations in terms of inputs they handle and outputs
-they produce, and \emph{non-functional} specifications, which notably include
-security policies.
+behaviors of their implementations,
+% in terms of inputs they handle and outputs they produce
+and \emph{non-functional} specifications, which notably include security
+policies.
 %
-In this context, the terms ``implementation'' and ``specification'' refer to a
-subjective relation which allows for organizing the verification of a system
-into a succession of layers, \emph{e.g.} a functional specification can act as
-an implementation of a more abstract functional specification.
-%
-For instance, a common pattern for verifying a system (\emph{e.g.} a C program)
-is to
-%
-\begin{inparaenum}[(1)]
-\item \label{enum:modeling}
-  %
-  define a functional specification for the system, which abstracts away the
-  implementation details (\emph{e.g.} manual memory management or pointers
-  aliasing),
-  %
-\item \label{enum:verifying}
-  %
-  prove the correctness of the functional specification with respect to
-  non-functional specifications, and
-  %
-\item \label{enum:equivalence}
-  %
-  prove the correctness of the system with respect to its functional
-  specification.
-\end{inparaenum}
+The same formal description of a system design can serve both as an
+implementation in a first verification problem, and as a functional
+specification for a more concrete implementation of the system.
 
-In the context of this thesis, we focus on steps~(\ref{enum:modeling})
-and~(\ref{enum:verifying}).
+In the context of this thesis, we focus on verifying the correctness of
+implementations in the form of idealized models with respect to non-functional
+specifications which characterize security policies.
+%
+In particular, we do not cover \emph{model validation}, that is the verification
+that a model is a correct abstraction of the concrete system it supposedly
+describes.
 %
 The rest of this Chapter proceeds as follows.
 %
-First, we explain how transition systems are used as functional specifications
-to verify the correctness of a system with respect to security policies
+First, we explain how transition systems are used as modeling structures to
+verify the correctness of a system with respect to security policies
 (Section~\ref{sec:sota:formalisms}).
 %
 Then, we introduce compositional verification approaches, which enable the
@@ -244,9 +241,10 @@ inference rules to derive already proven statements.
 %
 By doing so, we construct a \emph{proof}.
 %
-For example, a notorious\PC{well-known?} inference rule is the \emph{Modus ponens}, which states
-that if a proposition \( P \) is true, and the proposition \( P \Rightarrow Q \)
-is also true, then the proposition \( Q \) is true, that is
+For example, a well-known inference rule is the \emph{Modus ponens}, which
+states that if a proposition \( P \) is true, and the proposition
+\( P \Rightarrow Q \) is also true, then the proposition \( Q \) is true, that
+is
 %
 \[
   P\text{, }(P \Rightarrow Q) \vdash Q
@@ -307,14 +305,13 @@ Constructing a proof and verifying its correctness quickly becomes challenging.
 %
 Theorem provers such as Coq\,\cite{coq} or
 Isabelle/HOL\,\cite{nipkow2002isabelle} provide facilities to write proofs, and
-verify these proofs (supposedly in a more reliable way than
-humans).\PC{parenthèse: subjectif (et sarcastique)}
+a checker to automatically verify these proofs.
 %
 Therefore, the quality of a theorem prover is measured by its capacity to reject
 ill-formed proofs.
 %
-Modern theorem provers are built as ``certified''\PC{emph ? ou c'est encore du
-sarcasme ?} layers around a certification as small and simple as possible.
+Modern theorem provers are built as certified layers around a trusted kernel as
+small and simple as possible.
 %
 The idea is that, as long as the kernel does not contain a bug, advanced
 features implemented inside a certified layer cannot introduce inconsistency in
@@ -333,8 +330,7 @@ Once the algorithm has been proven correct, it becomes possible to trust its
 output.
 %
 Abstract interpretation\,\cite{cousot1977absint} and model
-checking\,\cite{clarke2018modelc} are two notorious\PC{décidémment \ldots}
-	classical instances of this approach.
+checking\,\cite{clarke2018modelc} are two classical instances of this approach.
 
 \paragraph{Formal Systems.}
 %
@@ -381,11 +377,9 @@ first-order logic.
 Finally, modal logic\,\cite{chagrov1997modal} is a formal system which extends
 first-order logic with modal operators.
 %
-Temporal logic forms a family of modal logic, such as Linear Temporal Logic
-(LTL)\,\cite{sistla1985ltl} or Computation Logic Tree
+Temporal logic forms a family of modal logic systems, including \emph{e.g.}
+Linear Temporal Logic (LTL)\,\cite{sistla1985ltl} Computation Logic Tree
 (CTL)\,\cite{clarke1981ctl}.
-%
-They\PC{They = ? Les opérateurs sont définis après} allow for reasoning about propositions over time.
 %
 Examples of LTL modular operators are \( \square P \) (\( P \) is always true),
 \( \Diamond P \) (\( P \) will eventually become true), \( \bigcirc P \)
@@ -397,6 +391,9 @@ future).
 CTL modal operator includes \( \mathbf{A} P \) (\( P \) is true for all possible
 futures) and \( \mathbf{E} P \) (there exists at least one path where \( P \)
 becomes true).
+%
+That is, temporal logic operators allow for reasoning about propositions over
+time.
 %
 Temporal logic formulas are commonly verified thanks to model checkers,
 \emph{e.g.}  NuSMV\,\cite{cimatti2002nusmv}, SPIN\,\cite{holzmann1997spin} or
