@@ -307,13 +307,14 @@ Constructing a proof and verifying its correctness quickly becomes challenging.
 %
 Theorem provers such as Coq\,\cite{coq} or
 Isabelle/HOL\,\cite{nipkow2002isabelle} provide facilities to write proofs, and
-verify these proofs (supposedly in a more reliable way than humans).
+verify these proofs (supposedly in a more reliable way than
+humans).\PC{parenthèse: subjectif (et sarcastique)}
 %
 Therefore, the quality of a theorem prover is measured by its capacity to reject
 ill-formed proofs.
 %
-Modern theorem provers are built as ``certified'' layers around a kernel as
-small and simple as possible.
+Modern theorem provers are built as ``certified''\PC{emph ? ou c'est encore du
+sarcasme ?} layers around a certification as small and simple as possible.
 %
 The idea is that, as long as the kernel does not contain a bug, advanced
 features implemented inside a certified layer cannot introduce inconsistency in
@@ -332,7 +333,7 @@ Once the algorithm has been proven correct, it becomes possible to trust its
 output.
 %
 Abstract interpretation\,\cite{cousot1977absint} and model
-checking\,\cite{clarke2018modelc} are two notorious\PC{décidémment \ldots
+checking\,\cite{clarke2018modelc} are two notorious\PC{décidémment \ldots}
 	classical instances of this approach.
 
 \paragraph{Formal Systems.}
@@ -357,7 +358,7 @@ characterized by:
 \end{itemize}
 
 First-order logic quantifiers can only be applied on sets of terms (\emph{e.g.}
-natural numbers, booleans, states of a airlock system).
+natural numbers, booleans, states of an airlock system).
 %
 Higher-order logic\,\cite{leivant1994hol} does not suffer the same limitation,
 since they allow quantification over sets of sets, functions and predicates.
@@ -380,11 +381,11 @@ first-order logic.
 Finally, modal logic\,\cite{chagrov1997modal} is a formal system which extends
 first-order logic with modal operators.
 %
-Temporal logic forms a family of modal logic, such as Temporal Linear Logic
+Temporal logic forms a family of modal logic, such as Linear Temporal Logic
 (LTL)\,\cite{sistla1985ltl} or Computation Logic Tree
 (CTL)\,\cite{clarke1981ctl}.
 %
-They allow for reasoning about propositions over time.
+They\PC{They = ? Les opérateurs sont définis après} allow for reasoning about propositions over time.
 %
 Examples of LTL modular operators are \( \square P \) (\( P \) is always true),
 \( \Diamond P \) (\( P \) will eventually become true), \( \bigcirc P \)
