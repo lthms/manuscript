@@ -43,8 +43,8 @@ implementation in a first verification problem, and as a functional
 specification for a more concrete implementation of the system.
 
 In the context of this thesis, we focus on verifying the correctness of
-implementations in the form of idealized models with respect to non-functional
-specifications which characterize security policies.
+implementations defined in the form of idealized models with respect to
+non-functional specifications which characterize security policies.
 %
 In particular, we do not cover \emph{model validation}, that is the verification
 that a model is a correct abstraction of the concrete system it supposedly
@@ -83,7 +83,7 @@ verification process by providing tools to construct proofs
 (\ref{subsec:sota:fm}).
 %
 Then, we focus on characterizing security policies in terms of properties of
-transition systems (\ref{sec:sota:security}).
+transition systems (\ref{subsec:sota:security}).
 %
 Finally, we describe how the concepts of this section have been used in the
 literature in order to verify hardware and software systems
@@ -405,7 +405,7 @@ Coq\,\cite{barthe2011virtcert1}--- yet model checkers have the benefit of
 automation and counter-example generation.
 
 \subsection{Specifying Security Policies}
-\label{sec:sota:security}
+\label{subsec:sota:security}
 
 The verification of a system is \emph{always} relative to certain properties (in
 our case, the correct enforcement of a security policy).
