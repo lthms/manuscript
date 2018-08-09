@@ -4,6 +4,7 @@
 \usepackage[chapter]{minted}
 \usemintedstyle{bw}
 \setminted{framesep=10pt,xleftmargin=18pt,frame=leftline,linenos=true}
+\renewcommand{\baselinestretch}{1.2}
 
 % ABOUT THIS FILE
 % ---------------
