@@ -1585,6 +1585,7 @@ mechanism, but does not satisfies the security policy.
 
 \section{Perspectives on Concurrent HSE Mechanisms}
 \label{subsec:speccert2:coop}
+\TODO{Je n'aime pas trop le "perspective". On aurait tendance à penser que c'est du future work. A la lecture de ce qui suit, c'est un peu plus qu'une simple perspective.}
 
 We have proven that \( \Delta_{\mathtt{bios}} \models I_{\mathtt{bios}} \), that
 is \( \Delta_{\mathtt{bios}} \) is correct with respect to
@@ -1592,14 +1593,14 @@ is \( \Delta_{\mathtt{bios}} \) is correct with respect to
 %
 As we discussed in Subsection~\ref{subsec:speccert2:globalsec}, the \ac{bios}
 isolation policy fall within a more general isolation policy \( I \) whose scope
-is the complete software stack.
+is the complete software stack. \TODO{Je pense qu'il faudrait rappeler ici brièvement le concept : un ensemble de composants logiciels qui sont ordonnés par une relation d'ordre partiel (forme un treillis?) et I est la politique d'isolation globale.}
 %
 In practice, \( I \) is enforced \emph{via} several \ac{hse} mechanisms,
 including \( \Delta_{\mathtt{bios}} \).
 %
-As a consequence, these mechanisms have to be implemented concurrently.
+As a consequence, these mechanisms have to be implemented concurrently. 
 
-We first introduce a \ac{hse} mechanism composition operator \( \sqcap \)
+\TODO{Il faudrait développer un peu la transition entre le paragraphe précédent et ce paragraphe. On doit implémenter plusieurs HSE "concurrently", OK. Et du coup, quels sont les problèmes que cela pose et qui justifient la suite?}We first introduce a \ac{hse} mechanism composition operator \( \sqcap \)
 (\ref{subsec:speccert2:compo}).
 %
 We then illustrate how we can leverage this operator to reason about \( I \)
@@ -1619,7 +1620,7 @@ For convenience, the \( \sqcap \) operator imposes two restrictions over
 the same hardware-software mapping.
 %
 It is possible to define a more generic and flexible composition operator, but
-it is out of the scope of this Section.
+it is out of the scope of this Section. \TODO{Je n'aime pas trop ce genre de phrase. Encore une fois "out of the scope of this section" laisse à penser que cela sera traité ailleurs dans le manuscript, mais ce n'est pas le cas. }
 
 \begin{definition}[Concurrent HSE Mechanisms]
   Given two HSE mechanism \( \Delta_1 \) and \( \Delta_2 \), such that
@@ -1734,11 +1735,13 @@ trace has to comply with each mechanism individually.
   \end{proof}
 \end{lemma}
 
+\TODO{Même remarques que précédemment, sans le code Coq, difficile de suivre et surtout d'évaluer ce qui a vraiment été fait. Il faudrait au moins mentionner que cette preuve a été réalisée en Coq (dans quel fichier, ligne, etc.}
+
 \subsection{Software Stack Isolation Policy Enforcement}
 \label{subsec:speccert2:isolationenforcement}
 
 Our objective is to prove that by implementing the \ac{hse} mechanism previously
-defined and verified, the \ac{bios} participates in enforcing \( I \).
+defined and verified \TODO{A quoi renvoie "previously defined and verified"? Stop aux qualificatif relatif, nomme explicitement les choses!}, the \ac{bios} participates in enforcing \( I \).
 %
 We can do that by finding a complementary \ac{hse} mechanism \( \Delta' \) such
 that their composition is correct with respect to \( I \), that is
@@ -1748,16 +1751,16 @@ that their composition is correct with respect to \( I \), that is
 \]
 
 We now show that any \ac{hse} mechanism whose purpose is to constrain the
-execution of applications with respect to \( I \) verifies this property.
+execution of applications \TODO{attention, je comprends en lisant la suite que "applications" à un sens bien précis ici. Tu supposes que ta software stack est de la forme BIOS>OS>Appk. Il faudrait le rappeler (ou l'énoncer) juste avant.} with respect to \( I \) \TODO{que veut dire précisément "constrain the execution of app with respect to I'?} verifies this property.
 %
-We formally specify this additional security policy
+We formally specify this additional security policy \TODO{plutôt que additionnal secutiy property, il faudrait dire explicitement que c'est la propriété mise en oeuvre par ce HSE complémentaire.}
 %
 \[
   I_\mathtt{os}(h, l, h') \triangleq \forall x \in S, h
   \xrightarrow[\mathtt{app}_k \leadsto x]{l} h' \Rightarrow x = \mathtt{app}_k
 \]
 %
-Such a \ac{hse} mechanism is principally implemented by the OS \emph{via} the
+Such a \ac{hse} mechanism is generally implemented by the OS \emph{via} the
 memory paging and ring level features of x86.
 %
 The \ac{bios} is required to cooperate, at least by not modifying with the page
@@ -1784,16 +1787,17 @@ to \( I \).
   $\Delta_{\mathtt{os}}$.
   %
   We know that the transitions of these traces satisfy respectively
-  $I|U_{\mathtt{os}}$ and $I|U_{\mathtt{bios}}$.
+  $I|U_{\mathtt{os}}$ and $I|U_{\mathtt{bios}}$. \TODO{Que désignent $I|U_{\mathtt{os}}$ and $I|U_{\mathtt{bios}}$? Tu l'as peut-être définis avant, mais c'est loin. IL y a de forte chance que le relecteur soit perdu comme moi. Il faudrait faire un petit rappel et mettre une référence.}
   %
   This is enough to conclude, based on the definitions of global and partial
-  execution isolation policies.
+  execution isolation policies. \TODO{Que sont les "global et partial execution isolation policies"?}
 \end{proof}
 
 The definition of a correct \( \Delta_{\mathtt{os}} \) remains out of the scope
 of this manuscript, but we wanted to emphasize that the verification work does
 not necessarily ends once \ac{hse} mechanisms are defined and verified
-separately.
+separately. 
+\TODO{Cette dernière phrase est un peu maladroite. Globalement, cette section est mal située, je trouve. Finalement, nous n'avons pas besoin de la définition préciser de  $\Delta_{\mathtt{bios}}$ pour comprendre ces problématiques de composition. En revanche, tu fais souvent référence à des concepts définis en section 5.1 ou avant... Les idées sont intéressantes mais il faudrait mieux les vendre.}
 
 % TODO: ? Should we?
 %\subsection{On HSE Mechanisms Compatibility}
@@ -1804,13 +1808,13 @@ separately.
 
 Throughout this Chapter, we have applied our three-steps methodology for
 formally specifying and verifying \ac{hse} mechanisms against a hardware
-architecture model to a real world example.
+architecture model to a real world example. \TODO{Phrase trop longue et difficile à suivre. Couper en deux. Première phrase "on a proposé une approche pour spécifier et vérifier un HSE au regard d'un model hardware (virer architecture). On a ensuite appliqué cette méthodo sur un exemple concret : le mécanisme d'isolation du BIOS utilisant la SMM.}
 %
-Our goal was to illustrate our methodology can benefit both hardware designers
+Such approach can benefit both hardware designers
 and software developers.
 
-First, the hardware architecture model can be used as a formal specification by
-software developers.
+First, the hardware model \TODO{A quoi renvoie précisément "hardware model" dans ton approche? harware\_req? software\_req? les deux? Il faut être explicite } can be used as a formal specification by
+software developers. \TODO{tu es sur que c'est bien "software dev" que tu as voulu mettre ici? Dans ce cas je ne comprends pas trop ton développement. Tu dis que ton approche peut à la fois bénéficier au hard designer et soft dev mais ton "first" et ton 'secondly" s'adresse tous deux au "soft dev"...}
 %
 The main benefit of a formal specification is to avoid any ambiguity such as the
 one we have found in \cite{intel2009mch} (as published in 2009).
@@ -1821,17 +1825,18 @@ before the LOCK bit is set''.
 At the same page, in the description of the LOCK bit, one can also read that
 ``when [LOCK] is set to 1 then [OPEN] is reset to 0''.
 %
-We had modelled the second statement as the behavior of the memory controller is
+We modelled the second statement since the behavior of the memory controller is
 not specified if the first statement is true\,\footnote{If we had to actually
   implement the \ac{hse} mechanism, we would have to assume the first was the
-  correct one.}  \formatLTS{Minx86} as a formal specification does not suffer
-from the same flaw.
+  correct one.}. \TODO{Cette phrase et la footnote correspondante ne sont pas claires.} \formatLTS{Minx86} as a formal specification does not suffer
+from the same flaw. \TODO{Mouais, disons que par définition, une specification formelle ne peut être ambigu. Dans ton cas, tu as du faire un choix si j'ai bien compris. Mais est-ce le bon....?}
 %
+
 Secondly, a formal specification of a \ac{hse} mechanism will help software
 developers when the time comes to implement it.
 %
 For instance, the Chapter 34, Volume 3C of \cite{intel2014manual} about \ac{smm}
-is about 30 pages long, it gives many details on how the \ac{smm} actually
+is about 30 pages long. It gives many details on how the \ac{smm} actually
 works, yet no section is actually dedicated to security.
 %
 On the contrary, our \ac{hse} mechanism definition gathers six requirements on
@@ -1851,13 +1856,12 @@ introduction of the \ac{smrr}.
 
 From our point of view, the clear separation between the hardware model, the
 security properties and the \ac{hse} mechanisms to enforce those properties are
-the main advantage of our approach, as two different use cases can be studied
-against the same hardware model.
+the main advantage of our approach. Thanks to this separation, different \ac{hse} mechanisms can be studied against the same hardware model.
 %
 However, the scalability of SpecCert remains to be proven.
 %
 In particular, the complexity of the hardware architecture makes monolithic
-model impracticable in practice.
+model impracticable in practice. \TODO{Que veux dire "monolithic model"? Il faudrait détailler un peu plus la problématique} 
 %
 The next Part of this thesis focuses on this problematic.
 
