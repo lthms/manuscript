@@ -264,11 +264,11 @@ generated from a state associated to a trusted (respectively mistrusted)
 software component.
 %
 A hardware-software mapping is mandatory to define requirements over software
-transitions that are consistent with respect to our adversary model.
-%
-\TODO{Cela devrait être expliqué un peu plus en détail et plus tôt. Il suffirait
-  alors ici de le rappeler (comme expliqué en section xx, ces contraintes ne
-  concernent que les transition trustés.}
+transitions that are consistent with respect to our adversary model, \emph{i.e.}
+which only constrain trusted software components.
+% GH: Cela devrait être expliqué un peu plus en détail et plus tôt. Il suffirait
+% alors ici de le rappeler (comme expliqué en section xx, ces contraintes ne
+% concernent que les transition trustés.}
 
 \begin{definition}[HSE Mechanism]
   \label{def:speccert:hse}
@@ -290,9 +290,8 @@ transitions that are consistent with respect to our adversary model.
     hardware configurations and potentially vulnerable ones.
   %
   \item $\func{software\_req}$ is a predicate on $H \times L_S$ to distinguish
-    between safe software transitions and potentially harmful ones. \TODO{Je
-      rajouterai une phrase pour enfoncer le clou du style "ce prédicat ne
-      contraint que les transition trusté"}
+    between software transitions trusted software components can safely use, and
+    potentially harmful ones they need to avoid.
   \end{itemize}
 \end{definition}
 
@@ -378,8 +377,8 @@ In both cases, this is really implementation dependent.
   and its applications) are mistrusted and therefore assumed to be under the
   control of attackers.
   %
-  The hardware-software mapping binds \acp{cpu} in \ac{smm}
-  with the execution of the \ac{bios}, that is
+  The hardware-software \( \func{context} \) maps \acp{cpu} in \ac{smm} with the
+  execution of the \ac{bios}, that is
   %
   \[
     \begin{array}{rcll}
@@ -389,11 +388,11 @@ In both cases, this is really implementation dependent.
     \end{array}
   \]
   %
-  \TODO{La phrase n'est pas suffisamment préciser. En outre, j'ai mis du temps à
-    me rappeler que context ne doit pas être pris ici comme un mot commun mais
-    un nom de fonction!. Il faudrait dire que par défaut contexte(h)=non trusté
-    sauf lorsque le CPU est en SMM, c'est à dire lorsqu'une SMI se produit et
-    avant que le bios exécute une instruction rsm}
+  % \TODO{La phrase n'est pas suffisamment préciser. En outre, j'ai mis du temps à
+  %   me rappeler que context ne doit pas être pris ici comme un mot commun mais
+  %   un nom de fonction!. Il faudrait dire que par défaut contexte(h)=non trusté
+  %   sauf lorsque le CPU est en SMM, c'est à dire lorsqu'une SMI se produit et
+  %   avant que le bios exécute une instruction rsm}
   %
   A safe hardware state ($\func{hardware\_req}$) is either a state wherein the
   \ac{bios} is executed, or a state wherein the flash memory is locked.
@@ -467,14 +466,23 @@ states, despite the correct implementation of the mechanism by the trusted
 software components.
 %
 In such a condition, the hardware architecture may stop to constrain the
-execution of untrusted software components with respect to the targeted security
-policy. \TODO{Cela veut surrement dire que les contraintes sur l'exécution du
-  code trusté sont incomplètes ou que le la restriction sur l'état du hardware
-  est au contraire trop restrictive. S'il n'est pas possible de trouver une
-  contrainte sur l'état du hardware moins restrictive permettant d'assurer la
-  propriété de sécurité ou de restreindre le code trusté pour vérifier cette
-  seconde loi, il y a de forte chance que le HSE ne permette pas d'assurer la
-  propriété de sécurité visée.... }
+execution of mistrusted software components with respect to the targeted
+security policy.
+%
+This could mean that constrains over trusted software components execution are
+incomplete, or that requirements over hardware states are too restrictive.
+%
+If it is not possible to loosen the requirements over hardware states without
+threatening the security policy enforcement or to find additional restrictions
+over trusted software execution, then the \ac{hse} mechanism probably does not
+serve its purpose.
+% \TODO{Cela veut surrement dire que les contraintes sur l'exécution du code
+% trusté sont incomplètes ou que le la restriction sur l'état du hardware est au
+% contraire trop restrictive. S'il n'est pas possible de trouver une contrainte
+% sur l'état du hardware moins restrictive permettant d'assurer la propriété de
+% sécurité ou de restreindre le code trusté pour vérifier cette seconde loi, il
+% y a de forte chance que le HSE ne permette pas d'assurer la propriété de
+% sécurité visée.... }
 
 \begin{example}[Flash Memory Lockdown Inconsistency]
   We can convince ourselves that the informal definition description we have
@@ -690,12 +698,21 @@ can be difficult, especially when this security policy is a
 hyperproperty\,\cite{clarkson2010hyperproperties}.
 %
 On the contrary, safety properties modelled as predicates on transitions are
-easier to reason about, as shown by the following theorem. \TODO{Je trouve que
-  c'est un peu s'avancer de dire que ton modèle peut traiter autre chose que des
-  prédicats sur les transitions. Tout est construit dans ton approche pour
-  traiter efficacement ce cas. Tu ne nous convainc pas que ton approhce
-  (prédicat, sur l'état du hard, restriction sur les transition trusté...) est
-  adaptée pour traiter d'autre cas...}
+easier to reason about, as shown by the following theorem.
+%
+\TODO{Je trouve que c'est un peu s'avancer de dire que ton modèle peut traiter
+  autre chose que des prédicats sur les transitions. Tout est construit dans ton
+  approche pour traiter efficacement ce cas. Tu ne nous convainc pas que ton
+  approche (prédicat, sur l'état du hard, restriction sur les transition
+  trusté...) est adaptée pour traiter d'autre cas...}
+
+\thomasrk[inline]{Pour le moment, je n'ai décris aucune « approche », mais
+  simplement une définition « méta » qui permet de raisonner a propos des HSE
+  mechanisms. Les deux requirements que je propose ne sont pas totalement sortis
+  de mon chapeau, ils visent à décrire une réalité. Ce ne sont pas que des
+  outils théoriques complètement déconnectés de la réalité.  Du coup, j’ai
+  l’impression que ce que tu dis reviens à sous-entendre que les HSE mechanisms
+  ne permettent pas d’enforce des hyperproperties.}
 
 \begin{theorem}[Correct HSE Mechanism for Predicate on Transitions]
   \label{theorem:speccert:correcthse}
@@ -717,7 +734,14 @@ easier to reason about, as shown by the following theorem. \TODO{Je trouve que
   \]
 
   \begin{proof}
-    \TODO{Comment faut-il lire la formule logique précédente? 3 implications imbriquées? Du coup, si hardware\_req(h) n'est pas vérifié, la propriété est quand même vérifiée? Ca semble contre-intuitif...}
+    \TODO{Comment faut-il lire la formule logique précédente? 3 implications
+      imbriquées? Du coup, si hardware\_req(h) n'est pas vérifié, la propriété
+      est quand même vérifiée? Ca semble contre-intuitif...}
+    %
+    \thomasrk[inline]{Si hardware\_req n’est pas vérifié, alors la trace
+      considérée n’est pas compliant, du coup effectivement dans le cadre de
+      Delta |= P, on ne la considère pas.}
+    %
     With Lemma~\ref{lemma:speccert:hseinv}, we know that every initial state of
     a transition of $\rho$ satisfies $\func{hardware\_req}$.
     %
