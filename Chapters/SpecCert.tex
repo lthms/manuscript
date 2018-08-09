@@ -20,20 +20,9 @@ takes into account that
 \item several \ac{hse} mechanisms are often implemented simultaneously, to
   enforce different security policies.
 \end{inparaenum}
-%
-\TODO{Dire dans l'intro du 4, et plusieurs endroits, que l'on a surtout utilisé
-  l'approche dans le cas d'une propriété de safety}
-%
-As a consequence,
-%
-\TODO{je ne vois pas trop le lien de cause à effet. Revoir la transition de
-  cette phrase}
-%
-we have broken down our formal definition into three components: hardware
-models, \ac{hse} mechanisms and security policies.
-%
-\TODO{Attention à l'usage des temps. Dans cette phrase tu utilises le present
-  perfect. Ensuite c'est le présent...}
+
+% \TODO{Dire dans l'intro du 4, et plusieurs endroits, que l'on a surtout
+% utilisé l'approche dans le cas d'une propriété de safety}
 %
 In this Chapter and the following, we assume only one software component is
 executed at a given time by the hardware architecture, in order to simplify our
@@ -58,6 +47,10 @@ This model acts as a foundation for our \ac{hse} mechanisms definition
 %
 We finally define what correctness means in the context of \ac{hse} mechanisms
 (Section~\ref{sec:speccert:security}).
+%
+Our motivation to separate the model of the hardware architecture and the
+\ac{hse} mechanism definition is to enable the reuse of the same hardware model
+to verify the correctness of several \ac{hse} mechanisms.
 
 For the reader familiar with Coq, we present an implementation of our formalism
 in Appendix~\ref{appendix:speccert}.
@@ -166,9 +159,8 @@ A trace is a non-empty sequence of transitions of~$\Sigma$, such that for two
 consecutive transitions, the resulting state of the first one is the initial
 state of the next one.
 %
-\TODO{Tu ne donnes qu'une définition informelle (en
-  anglais) des traces. Tu pourrais donner la formule correspondante. Idem pour
-  init et trans}
+\TODO{Tu ne donnes qu'une définition informelle (en anglais) des traces. Tu
+  pourrais donner la formule correspondante. Idem pour init et trans}
 \thomasrk[inline]{Bien que je comprenne l'argument, je ne pense personnellement
   pas que ça apportenait vraiment quelque chose.}
 
@@ -388,11 +380,12 @@ In both cases, this is really implementation dependent.
     \end{array}
   \]
   %
-  % \TODO{La phrase n'est pas suffisamment préciser. En outre, j'ai mis du temps à
-  %   me rappeler que context ne doit pas être pris ici comme un mot commun mais
-  %   un nom de fonction!. Il faudrait dire que par défaut contexte(h)=non trusté
-  %   sauf lorsque le CPU est en SMM, c'est à dire lorsqu'une SMI se produit et
-  %   avant que le bios exécute une instruction rsm}
+  % \TODO{La phrase n'est pas suffisamment préciser. En outre, j'ai mis du temps
+  % à
+  % me rappeler que context ne doit pas être pris ici comme un mot commun mais
+  % un nom de fonction!. Il faudrait dire que par défaut contexte(h)=non trusté
+  % sauf lorsque le CPU est en SMM, c'est à dire lorsqu'une SMI se produit et
+  % avant que le bios exécute une instruction rsm}
   %
   A safe hardware state ($\func{hardware\_req}$) is either a state wherein the
   \ac{bios} is executed, or a state wherein the flash memory is locked.
@@ -742,27 +735,35 @@ easier to reason about, as shown by the following theorem.
       considérée n’est pas compliant, du coup effectivement dans le cadre de
       Delta |= P, on ne la considère pas.}
     %
-    With Lemma~\ref{lemma:speccert:hseinv}, we know that every initial state of
-    a transition of $\rho$ satisfies $\func{hardware\_req}$.
+    A HSE mechanisn \( \Delta \) is correct with respect to a security policy
+    characterized by a predicate on transitions \( P \) if transitions of its
+    compliant traces satisfy \( P \).
     %
-    As a consequence and by definition of Compliant Traces, we know that every
-    transition satisfies the safety property $P$.
+    With Lemma~\ref{lemma:speccert:hseinv}, we know that initial states of a
+    transition of compliant traces satisfy $\func{hardware\_req}$.
     %
-    We conclude with the \ac{hse} mechanism correctness.
+    We also know by definition of compliant traces that their transitions
+    satisfy \func{software\_req}.
+    %
+    Therefore, if we can prove that transition which satisfy both
+    \func{hardware\_req} and \func{software\_req} also satisfy \( P \), then we
+    can conclude that transitions of compliant traces satisfy \( P \).
   \end{proof}
 \end{theorem}
 
 \TODO{Contrairement au lemmes précédents, je trouve que la preuve (schéma de
   preuve?) est un peu trop rapide. Je n'arrive pas à suivre et à me convaincre
   que çà marche (mais je suis sans doute trop fatigué).}
+\thomasrk[inline]{Mieux ?}
 
 \section{Conclusion}
 
 In this Chapter, we present our formal definition of \ac{hse} mechanisms, in the
 form of requirements over a hardware model.
 %
-This approach allows for reusing the same model to define and verify several
-\ac{hse} mechanisms.
+This approach makes it possible to reuse the same model to define and verify
+several \ac{hse} mechanisms, provided that the model is comprehensive enough in
+terms of hardware features.
 %
 We believe this is an essential property, especially because in practice, these
 multiple mechanisms will be implemented concurrently, and may interfere with
@@ -772,6 +773,19 @@ each other.
   "modulaire" et "réutilisabilié". Donc c'est un peu exagéré de le mettre en
   avant dans la conclusion. Soit il faut nuancer cette conclusion, soit il faut
   développer ces aspects (via un exemple notamment) dans le chapitre.}
+%
+\thomasrk[inline]{Encore un fois, on est très méta dans ce chapitre. Je pense
+  sincèrement que le choix de « conception » de bien faire la séparation entre
+  HW et HSE \textbf{permet} la réutilisation d'un modèle HW.
+
+  Ça ne veut pas dire que dans la pratique, ça va se passer aussi bien.  Par
+  exemple, Minx86 est réutilisable pour vérifier des classes de propriétés de
+  sécurité similaires à celle traitée dans le chapitre 5 seulement. C’est
+  d’ailleurs évoqué dans le début du chapitre 6, pour justifier les
+  spécifications abstraites.
+
+  J’ai édité à plusieurs endroits pour \emph{nuancer} le propos et dire que ça
+  demande de faire attention quand on applique concrètement l'approche.}
 
 Throughout this Chapter, we have tried to illustrate our definitions with
 real-world examples, as our effort has been originally motivated by the

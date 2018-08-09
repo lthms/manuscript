@@ -42,7 +42,7 @@ We have released this development as free software in a project called SpecCert\
 %
 As we introduce new definitions and theoretical results, we point to the related
 statements in SpecCert, so the interesting reader familiar with Coq can
-read our machine-checked proofs. \TODO{The reader... can read fait un peu répétition}
+refer to our machine-checked proofs.
 
 \section{Specifying BIOS Isolation Policy}
 \label{sec:speccert2:usecase}
@@ -227,12 +227,8 @@ formal definition of a \textit{code injection}.
 
 We leverage the code injection definition to propose a generic formalization of
 \emph{isolation policies}, to determine if a given software component is
-authorized to tamper with the execution \TODO{est-ce que "tamper with the
-  execution" est synonyme de "make a code injection"? Dans ce cas, j'aimerais
-  que tu n'utilises qu'un seul termes, et de préférence le plus précis. Tamper
-  with laisse imagine d'autres formes d'interférences que l'on pourrait très
-  légitimement vouloir interdir mais qui ne semble pas couverte par ton
-  approche.} of another software component in the context of a software stack.
+authorized to make a code injection against of another software component in the
+context of a software stack.
 
 \begin{definition}[Isolation Policy]
   \label{def:speccert:global}
@@ -335,12 +331,12 @@ authorized to tamper with the execution \TODO{est-ce que "tamper with the
   We prove by case enumeration that $\rightarrowtail$ is anti-symmetric and
   transitive.
 
-  The definition of the corresponding $\func{context}$ shall obey the
-  following logic: when the \ac{cpu} is in \ac{smm}, the \ac{bios} is executed;
-  when the \ac{cpu} is not in \ac{smm} and is in ring 0, the system software
-  component is executed; when the \ac{cpu} is not in \ac{smm} and is in ring 3,
-  one of the applications ---identified by the page tables used by the
-  \ac{cpu}--- is executed.
+  The definition of the corresponding $\func{context}$ shall obey the following
+  logic: when the \ac{cpu} is in \ac{smm}, the \ac{bios} is executed; when the
+  \ac{cpu} is not in \ac{smm} and is in ring 0, the system software component is
+  executed; when the \ac{cpu} is not in \ac{smm} and is in ring 3, one of the
+  applications ---identified by the page tables used by the \ac{cpu}--- is
+  executed.
 \end{example}
 
 \subsection{BIOS Isolation Policy}
@@ -355,9 +351,8 @@ mechanisms.
 %
 We can break it down to more specific security policies.
 %
-For instance, we use this approach to define the \ac{bios} isolation policy we
-seek to define in this Section. \TODO{"to define... we seek to define" fait une
-  peu répétition}
+For instance, we use this approach to define the \ac{bios} isolation policy
+which is the object of this Section.
 
 \begin{definition}[BIOS Isolation Sub-policy]
   \label{def:speccert:biospol}
@@ -406,7 +401,12 @@ controller\,\footnote{A VGA controller is a hardware device which on we can
   purposes.} which both expose some memory to the \ac{cpu}.
 
 $\formatLTS{Minx86}$ is meant to illustrate how our formalism can be leveraged
-to formally specify and verify a HSE mechanism, and thus is not exhaustive. \TODO{Le lien de cause à effet entre ces deux phrases n'est pas évident. En outre "a HSE mechanism" est un peu vague. En l'état, ton modèle a été défini pour pouvoir spécifier et vérifier le HSE lié à la SMM. Il vaut mieux être précis dès le début.}
+to formally specify and verify a HSE mechanism, and thus is not exhaustive.
+%
+\TODO{Le lien de cause à effet entre ces deux phrases n'est pas évident. En
+  outre "a HSE mechanism" est un peu vague. En l'état, ton modèle a été défini
+  pour pouvoir spécifier et vérifier le HSE lié à la SMM. Il vaut mieux être
+  précis dès le début.}
 %
 In its current state of implementation, its scope focuses on the \ac{smm}.
 
@@ -419,12 +419,14 @@ We consider the \ac{cpu} can be either in System Management Mode (\ac{smm}) or
 in an unprivileged mode.
 %
 As explain in Section~\ref{subsec:usecase:hse:smm}, when a \ac{cpu} receives a
-System Management Interrupt (SMI), it halts its current execution and reconfigures itself to a
-specified state. \TODO{"specified state" est vague. Specifié par qui?}Then it executes the code stored in memory at the address
+System Management Interrupt (SMI), it halts its current execution and
+reconfigures itself to a hard-coded state.
+%
+Then it executes the code stored in memory at the address
 $\mathtt{SMBASE} + \val{0x8000}$.
 %
-In practice, the SMBASE value points to the beginning of a memory region called the
-SMRAM.
+In practice, the SMBASE value points to the beginning of a memory region called
+the SMRAM.
 %
 Leaving the \ac{smm} is done by executing a special purpose instruction called
 \texttt{rsm} (for \emph{resume}).
@@ -444,27 +446,32 @@ as possible\,\footnote{These cache strategies are explained in
 To determine which cache strategy to use, the \ac{cpu} relies on several
 configuration registers.
 %
-Among them, the \ac{smrr} are used to tell the \ac{cpu} where the SMRAM is
-and which cache strategy to use for \IO targeting the SMRAM when the \ac{cpu}
-is in \ac{smm}.  When it is not in \ac{smm}, the \ac{cpu} always uses the UC strategy
-for \IO targeting the SMRAM. Such registers can only be
-configured when the \ac{cpu} is in \ac{smm}.
+Among them, the \ac{smrr} are used to tell the \ac{cpu} where the SMRAM is and
+which cache strategy to use for \IO targeting the SMRAM when the \ac{cpu} is in
+\ac{smm}.
 %
-\ac{smrr} have been introduced as a countermeasure of \TODO{to?} the SMRAM cache poisoning
-attack\,\cite{wojtczuk2009smram,duflot2009smram} which allowed some untrusted code
-to tamper with the copy of the SMRAM stored in the cache.
+When it is not in \ac{smm}, the \ac{cpu} always uses the UC strategy for \IO
+targeting the SMRAM.
+%
+Such registers can only be configured when the \ac{cpu} is in \ac{smm}.
+%
+\ac{smrr} have been introduced as a countermeasure to the SMRAM cache poisoning
+attack\,\cite{wojtczuk2009smram,duflot2009smram} which allowed some untrusted
+code to tamper with the copy of the SMRAM stored in the cache.
 %
 
 The memory controller\,\cite{intel2009mch} receives all the \ac{cpu} \IOs which
 are not handled by the cache and dispatches them to the DRAM controller or to
-the VGA controller. It exposes a unified view (the memory map) of the system
-memory to the \ac{cpu}.
+the VGA controller.
+%
+It exposes a unified view (the memory map) of the system memory to the \ac{cpu}.
 %
 The \ac{cpu} manipulates this memory map with a set of physical addresses.
 %
-The memory controller uses a special range of physical addresses to host the SMRAM.
+The memory controller uses a special range of physical addresses to host the
+SMRAM.
 %
-This memory area is  dedicated to store the code intended to be executed when the
+This memory area is dedicated to store the code intended to be executed when the
 \ac{cpu} is in \ac{smm}.
 
 \paragraph{Tracking Memory Ownership}
@@ -489,7 +496,9 @@ The memory ownership is updated through transitions according to three rules:
 %
 \end{enumerate}
 
-\TODO{La nuance entre "written back to the memory" et "content of a memory location is overwritten during a transition " n'est pas très claire. Dans le cas d'un write back, par définition le contenu de la mémoire est modifiés...}
+\TODO{La nuance entre "written back to the memory" et "content of a memory
+  location is overwritten during a transition " n'est pas très claire. Dans le
+  cas d'un write back, par définition le contenu de la mémoire est modifiés...}
 
 \begin{definition}[\formatLTS{Minx86}]
   \label{def:speccert2:minx86}
@@ -506,7 +515,11 @@ The memory ownership is updated through transitions according to three rules:
   components which form the software stack.
 \end{definition}
 
-\TODO{Suite à notre discussion téléphonique, je comprends que tu n'as pas pu définir avant précisemment context car celui-ci dépend du raffinement de ton approche générique. Mais ici tu devrais pouvoir le définir précisemment (en t'appuyant sur les trois règles citées précédemment. Hors tu ne le fais pas...}
+\TODO{Suite à notre discussion téléphonique, je comprends que tu n'as pas pu
+  définir avant précisemment context car celui-ci dépend du raffinement de ton
+  approche générique. Mais ici tu devrais pouvoir le définir précisemment (en
+  t'appuyant sur les trois règles citées précédemment. Hors tu ne le fais
+  pas...}
 
 \subsection{Hardware States}
 
@@ -524,11 +537,12 @@ Thus, $H(S)$ is defined as follows:
 %
 \[
   H(S) \triangleq \left<\ \func{core}: \texttt{Core},\quad\func{cache}:
-  \texttt{Cache}(S),\quad\func{mc}: \texttt{MC},\quad\func{mem}: \texttt{Mem}(S)
-  \ \right>
+    \texttt{Cache}(S),\quad\func{mc}: \texttt{MC},\quad\func{mem}:
+    \texttt{Mem}(S) \ \right>
 \]
 
-\TODO{Pourquoi Cache et Mem sont paramétré par S et pas les autres? Tu devrais l'expliquer brièvement ici}
+\TODO{Pourquoi Cache et Mem sont paramétré par S et pas les autres? Tu devrais
+  l'expliquer brièvement ici}
 
 \paragraph{Address Spaces}
 %
@@ -566,15 +580,18 @@ The maximal address offset (denoted by $\val{max\_addr}$ here) is specific to
 the \ac{cpu} and may vary in time according to its addressing mode (real mode,
 long mode, etc.), therefore we left its value as a parameter of our model.
 %
-By convenience, we give the same maximum address to each of \TODO{"of" n'est-il pas de trop?} address space.
+By convenience, we give the same maximum address to each of \TODO{"of" n'est-il
+  pas de trop?} address space.
 
 Finally, we write $\texttt{Val}$ for the set of values that the memory cells
 scattered within the memory locations of the hardware architecture can take.
 
 \paragraph{Core}
 %
-The set of states of the \ac{cpu}'s core is denoted by $\texttt{Core}$. We give
-a minimal definition of $\texttt{Core}$, with a clear focus on the \ac{smm}.
+The set of states of the \ac{cpu}'s core is denoted by $\texttt{Core}$.
+%
+We give a minimal definition of $\texttt{Core}$, with a clear focus on the
+\ac{smm}.
 %
 \[
   \texttt{Core} \triangleq \left<\
@@ -588,9 +605,9 @@ a minimal definition of $\texttt{Core}$, with a clear focus on the \ac{smm}.
   \right>
 \]
 %
-\TODO{Comme j'ai du le mentionner auparavant, le style de la macro func n'est pas suffisamment discernable du texte descriptif. Comme tu utilises souvent des noms communs pour tes fonctions, çà n'aide pas à bien identifier ces noms commes des noms de fonctions dans les descriptions qui suivent.}
-The boolean $\func{in\_smm}$ is  set to $\val{true}$ when the \ac{cpu}
-is in \ac{smm} and to $\val{false}$ otherwise.
+%
+The boolean $\func{in\_smm}$ is set to $\val{true}$ when the \ac{cpu} is in
+\ac{smm} and to $\val{false}$ otherwise.
 %
 The physical address $\func{pc}$ models the program counter, a register used to
 store the address of the next instruction to be fetched and executed.
@@ -602,7 +619,8 @@ microprocessors to determine which cache strategy to use for a given \IO, where
 $\texttt{CacheStrat} \triangleq \setshortdef{\val{UC}, \val{WB}}$ is the set of
 the modelled cache strategies.
 %
-The set of states of the \acp{smrr} \TODO{SMRR est noté ici en majuscule mais la variable censé les modélisé est en minuscule.} is denoted $\texttt{Smrr}$.
+The set of states of the \acp{smrr} \TODO{SMRR est noté ici en majuscule mais la
+  variable censé les modélisé est en minuscule.} is denoted $\texttt{Smrr}$.
 %
 \[
   \texttt{Smrr} \triangleq \langle~\func{range}:
@@ -651,14 +669,12 @@ The cache is modelled as a mapping between address indexes and cache lines.
   \texttt{Cache}(S) \triangleq \texttt{Index} \rightarrow \texttt{CacheLine}(S)
 \]
 %
-A cache $c$ is well-formed if every cache line is tagged with a physical address
+A cache \( c \in \texttt{Cache}(S) \) is well-formed if every cache line is tagged with a physical address
 whose index corresponds to the cache line index, that is
 %
 \[
   \forall \var{i} \in \texttt{Index}, \func{index}(c(i).\func{tag}) = i
 \]
-
-\TODO{Dans la formule précédente, à quoi correspond "c"? Cache? Est-ce un problème d'incohérence des notations?}
 
 \paragraph{Memory Controller}
 %
@@ -714,9 +730,8 @@ forwards the \IO accordingly.
 We model this translation with the function
 %
 \[
-  \func{dispatch} : \texttt{MC} \times
-  \setshortdef{\val{true},\,\val{false}} \times \texttt{PhysAddr} \rightarrow
-  \texttt{HardAddr}
+  \func{dispatch} : \texttt{MC} \times \setshortdef{\val{true},\,\val{false}}
+  \times \texttt{PhysAddr} \rightarrow \texttt{HardAddr}
   %
 \]
 %
@@ -725,14 +740,12 @@ We model this translation with the function
   \begin{cases}
     \textsc{Vga}(i) & \text{if }\var{in\_smm} = \val{false}\text{, }pa \in
     \texttt{pSmram}\text{,} \\
-    & \quad\text{ and } \var{mc}.\func{d\_open} = \val{true}  \\
+    & \quad\text{ and } \var{mc}.\func{d\_open} = \val{false}  \\
     \textsc{Dram}(i) & \text{otherwise}
   \end{cases}
 \]
 %
 \qquad\qquad\qquad\qquad\qquad\qquad where $pa = \textsc{Pa}(i)$.
-
-\TODO{Pourquoi mc.dopen doit valoir "true" pour que la translation d'adresse renvoie vers le VGA? Ca me semble contre-intuitif.}
 
 We emphasize that the same physical address can be translated into two different
 hardware addresses for two memory controller states $m$ and $m'$, hence it is
@@ -806,7 +819,9 @@ We write $\texttt{Mem}(S)$ for the set of states of the physical memories.
 
 We consider two sets of labels to distinguish between software transitions
 (direct, foreseeable consequences of instructions execution, denoted by $L_S$)
-and hardware transitions (denoted by $L_H$). For each transition label we define
+and hardware transitions (denoted by $L_H$).
+%
+For each transition label we define
 %
 \begin{inparaenum}[(1)]
 \item a precondition to determine whether the transition can occur from a given
@@ -885,12 +900,14 @@ We model the \ac{cpu} \IOs with \( \func{Read}(\var{pa}) \) and
 \( \func{Write}(\var{pa}) \), the configuration of the memory controller with
 \( \func{OpenBitFlip} \) and \( \func{LockSmramc} \), the configuration of the
 cache strategy with \( \func{SetCacheStrat}(\var{pa}, \var{strat}) \), the
-configuration of the \ac{smrr} with \( \func{UpdateSmrr}(\var{smrr}) \), the exit
-of the \ac{smm} with $\func{Rsm}$, and the update of the \ac{cpu} program counter
-register with $\func{NextInstruction}(\var{pa})$.
+configuration of the \ac{smrr} with \( \func{UpdateSmrr}(\var{smrr}) \), the
+exit of the \ac{smm} with $\func{Rsm}$, and the update of the \ac{cpu} program
+counter register with $\func{NextInstruction}(\var{pa})$.
 %
 As an example, the pre and postconditions of the \func{Write} transitions are
-formally defined in Figure~\ref{fig:speccert2:softprepost}. \TODO{Il faut commenter cette figure (et donc, ces définitions formelles)}
+formally defined in Figure~\ref{fig:speccert2:softprepost}.
+%
+\TODO{Il faut commenter cette figure (et donc, ces définitions formelles)}
 %
 They are presented under the following form:
 %
@@ -903,7 +920,15 @@ They are presented under the following form:
 For the remainder, we give a informal description of the pre and postconditions.
 %
 The interested readers can always refer to the Coq development in case they want
-to review their definitions. \TODO{Je trouve cette dernière phrase un peu maladroite. En outre, le code Coq ne fait pas parti de la thèse. Peut-être cela serait-il pertinent de mettre toutes les définitions formelles en annexes sous forme textuelle et rappeler que ces définitions sont également disponibles dans le code Coq (dans tel fichier). En tout cas, donner seulement un exemple de définition formelle dans le coeur du manuscrit me semble la bonne stratégie. Par contre, renvoyer le lecteur au code Coq pour les autres me semble un peu limite}
+to review their definitions.
+%
+\TODO{Je trouve cette dernière phrase un peu maladroite. En outre, le code Coq
+  ne fait pas parti de la thèse. Peut-être cela serait-il pertinent de mettre
+  toutes les définitions formelles en annexes sous forme textuelle et rappeler
+  que ces définitions sont également disponibles dans le code Coq (dans tel
+  fichier). En tout cas, donner seulement un exemple de définition formelle dans
+  le coeur du manuscrit me semble la bonne stratégie. Par contre, renvoyer le
+  lecteur au code Coq pour les autres me semble un peu limite}
 
 \begin{figure}[p]
   {\small
@@ -1108,14 +1133,24 @@ to review their definitions. \TODO{Je trouve cette dernière phrase un peu malad
   \label{fig:speccert2:softprepost}
 \end{figure}
 
-A software component can always read and write at any physical address. \TODO{Cette phrase est un peu ambigu. On pourrait comprendre que n'importe quel softare peut lire n'importe quelle adresse physique. En pratique ce n'est pas le cas car un mécanisme de mémoire virtuelle, utilisant la pagination et ou la segmentation, va s'interposer et empêcher la lecture de certaines adresses physique. Par contre, une fois cette traduction effectuée, rien n'empêche la lecture d'une adresse physique (le MC?). Il faudrait le rappeler ici.}
+A software component can always read and write at any physical address.
+%
+\TODO{Cette phrase est un peu ambigu. On pourrait comprendre que n'importe quel
+  softare peut lire n'importe quelle adresse physique. En pratique ce n'est pas
+  le cas car un mécanisme de mémoire virtuelle, utilisant la pagination et ou la
+  segmentation, va s'interposer et empêcher la lecture de certaines adresses
+  physique. Par contre, une fois cette traduction effectuée, rien n'empêche la
+  lecture d'une adresse physique (le MC?). Il faudrait le rappeler ici.}
 %
 As a consequence, the precondition for \( \func{Read}(\var{pa}) \) and
 \( \func{Write}(\var{pa}) \) always holds true.
 %
 The postcondition for \( \func{Read}(\var{pa}) \) and
 \( \func{Write}(\var{pa}) \) requires the memory content and ownership to be
-updated according to the update of the memory and cache states. \TODO{En l'absence de plus de détail (formalisme), difficile de comprendre précisemment cette dernière phrase}
+updated according to the update of the memory and cache states.
+%
+\TODO{En l'absence de plus de détail (formalisme), difficile de comprendre
+  précisemment cette dernière phrase}
 %
 The memory controller enforces a simple access control to protect the
 SMRAM content in the DRAM memory by forwarding the related \IO to the VGA
@@ -1125,7 +1160,10 @@ This mecanism is modelled by the \func{dispatch} function.
 %
 To determine the owner of the memory location which sees its content overridden
 during a state transformation, the postcondition uses the hardware-software
-mapping passed as a parameter of {\scshape Minx86}. \TODO{Idem remarque précédente. Difiicile de comprendre ce que tu veux dire sans le modèle explicite sous les yeux.}
+mapping passed as a parameter of {\scshape Minx86}.
+%
+\TODO{Idem remarque précédente. Difiicile de comprendre ce que tu veux dire sans
+  le modèle explicite sous les yeux.}
 
 A software component can always update the cache strategy used for an \IO.
 %
@@ -1147,9 +1185,10 @@ program counter register to be updated with \( \var{pa} \).
 The \( \func{OpenBitFlip} \) precondition requires the \texttt{SMRAMC} register
 to be unlocked.
 %
-The postcondition requires the \texttt{d\_open} bit to be updated. The
-$\func{LockSmramc}$ precondition requires the \texttt{d\_lock} bit to be
-unset. \TODO{d\_lock bit unset c'est la même chose que SMRAMC unlocked? Il faudrait éviter de décrire les même conditions avec des termes différents, çà pert le lecteur non averti}
+The postcondition requires the \texttt{d\_open} bit to be updated.
+%
+The $\func{LockSmramc}$ precondition requires the SMRAM to be unlocked,
+\emph{i.e.} the \texttt{d\_lock} bit to be unset.
 %
 The postcondition requires the $\texttt{d\_open}$ bit to be unset and the
 \texttt{d\_lock} bit to be unset.
@@ -1221,8 +1260,13 @@ value, that is
 \]
 %
 \TODO{Il y a simplement implication ou équivalence?}
+%
 We distinguish between \func{Read} and \func{Fetch} because a software component
-does not always decide the value of the program counter register of the Core. \TODO{Je comprends la fin de la phrase mais je ne vois pas le lien avec "We distinguish between \func{Read} and \func{Fetch}". Difficile de comprendre ce que tu voulais dire.}
+does not always decide the value of the program counter register of the Core.
+%
+\TODO{Je comprends la fin de la phrase mais je ne vois pas le lien avec "We
+  distinguish between \func{Read} and \func{Fetch}". Difficile de comprendre ce
+  que tu voulais dire.}
 %
 For instance, the value of the program counter is updated during a
 \func{ReceiveSMI} transition.
@@ -1234,7 +1278,10 @@ $\formatLTS{Minx86}$ (Definition~\ref{def:speccert2:transsoft}).
 %
 The \(\textsc{Minx86}\func{\_fetched}\) function maps an initial state of a
 transition and the label of this transition with the set of software components
-which own an instruction fetched during this transition. \TODO{C'est le cas de tous les transition-software mapping, non? Qu'est-ce qui est spécifique à la version Minx86?}
+which own an instruction fetched during this transition.
+%
+\TODO{C'est le cas de tous les transition-software mapping, non? Qu'est-ce qui
+  est spécifique à la version Minx86?}
 %
 In the case of \formatLTS{Minx86}, there is only one event which implies
 fetching instructions: \func{Fetch}.
@@ -1244,7 +1291,12 @@ respect to the \ac{smrr} and \ac{cpu} cache strategy configuration) or from the
 hardware components memories (\ac{dram} and VGA).
 %
 The formal definition of \(\textsc{Minx86}\func{\_fetched}\) is given in
-Figure~\ref{fig:speccert2:fetchedformal}. \TODO{Un peu rapide. Il faudrait commenter un peu cette définition. En outre, figure est-il un environnement adéquat pour ce genre de définition? (on s'attend à une figure, pas des définitions logiques...). Peut-être faudrait-il définir un environnement adéquat.}
+Figure~\ref{fig:speccert2:fetchedformal}.
+%
+\TODO{Un peu rapide. Il faudrait commenter un peu cette définition. En outre,
+  figure est-il un environnement adéquat pour ce genre de définition? (on
+  s'attend à une figure, pas des définitions logiques...). Peut-être faudrait-il
+  définir un environnement adéquat.}
 
 \begin{figure}
   \centering \small
@@ -1320,7 +1372,7 @@ We consider the execution of the software stack described in
 Example~\ref{example:speccert2:isolation} after the end of the boot sequence,
 when the OS manages the execution of several applications.
 %
-Our objective is to give a formal definition for \TODO{for -> of?} the \ac{hse} mechanism
+Our objective is to give a formal definition of the \ac{hse} mechanism
 implemented by the \ac{bios} (denoted by \( \Delta_{\mathtt{bios}} \)) to remain
 isolated from the rest of the software stack.
 %
@@ -1328,7 +1380,10 @@ We have formally define this security policy with $I_{\mathtt{bios}}$
 (Definition~\ref{def:speccert:biospol}).
 %
 \( \Delta_{\mathtt{bios}} \) relies on the \ac{smm}, the \ac{smrr} of x86
-\ac{cpu}, and the \texttt{SMRAMC} register of the memory controller. \TODO{Il manque une transition avec la suite. Une annonce du plan "local", notamment.}
+\ac{cpu}, and the \texttt{SMRAMC} register of the memory controller.
+%
+\TODO{Il manque une transition avec la suite. Une annonce du plan "local",
+  notamment.}
 
 \subsection{Defining a Hardware-Software Mapping}
 
@@ -1387,16 +1442,16 @@ Once we have properly introduced both, we verify our definition of
 
 \paragraph{Hardware Requirements}
 %
-Given \( h \in H(S) \), \( h \) satisfies \func{hardware\_req}, we have
-identified six requirements on states. \TODO{Cette phrase me paraît un peu étrange. -> "We have identified six req for h to satishy harware\_req?"}
+Given \( h \in H(S) \), we have identified six requirements on states for
+\( h \) to satisfy \func{hardware\_req}.
 %
 \begin{enumerate}
 \item When the \ac{cpu} executes the \ac{smm} code, the program counter register
   value needs to be an address in SMRAM.
   \[
-    h.\func{core}.\func{pc} \in \texttt{pSmram}
+    \func{context}(h) = \mathtt{bios} \Rightarrow h.\func{core}.\func{pc} \in
+    \texttt{pSmram}
   \]
-  \TODO{Contrairement aux autres, cette propriété n'est vraie que lorsque le CPU est en SMM. Il faudrait le faire apparaitre dans la formule}
   %
 \item The \texttt{SMBASE} register was correctly set during the boot sequence to
   point to the base of the SMRAM.
@@ -1419,9 +1474,10 @@ identified six requirements on states. \TODO{Cette phrase me paraît un peu étr
   \]
   %
 \item In order to protect the content of the SMRAM inside the DRAM memory, the
-  boot sequence code has locked the SMRAMC controller. This ensures that an OS
-  cannot set the \texttt{d\_open} bit any longer and only a \ac{cpu} in \ac{smm}
-  can modify the content of the SMRAM.
+  boot sequence code has locked the SMRAMC controller.
+  %
+  This ensures that an OS cannot set the \texttt{d\_open} bit any longer and
+  only a \ac{cpu} in \ac{smm} can modify the content of the SMRAM.
   \[
     h.\func{mc}.\func{d\_lock} = \val{true}
   \]
@@ -1433,7 +1489,13 @@ identified six requirements on states. \TODO{Cette phrase me paraît un peu étr
   \]
 \end{enumerate}
 
-\TODO{A la lecture de ces requirements, je m'aperçois que certains d'entre eux s'apppuient sur une configuration réalisée au préalable par le code trusté, durant la phase de boot. On peut donc dire que les exigences sur le code trusté ne sont pas seulement dans les software requirements mais aussi, pour certaines, dans les hardware requirements (et du coup le nom n'est peut être pas idéal), même si elles ne correspondent pas à la même phase d'utilisation (initialisation vs. runtime en quelque sorte)}
+\TODO{A la lecture de ces requirements, je m'aperçois que certains d'entre eux
+  s'apppuient sur une configuration réalisée au préalable par le code trusté,
+  durant la phase de boot. On peut donc dire que les exigences sur le code
+  trusté ne sont pas seulement dans les software requirements mais aussi, pour
+  certaines, dans les hardware requirements (et du coup le nom n'est peut être
+  pas idéal), même si elles ne correspondent pas à la même phase d'utilisation
+  (initialisation vs. runtime en quelque sorte)}
 
 \paragraph{Software Requirements}
 %
@@ -1474,22 +1536,24 @@ there is no need to further update them.
 \paragraph{HSE Laws}
 %
 For $\Delta_{\mathtt{bios}}$ to be a \ac{hse} mechanism, we need to prove it
-satisfies the two \ac{hse} Laws \TODO{Attention, pas de majuscules à Laws (c'est un mot commun et auparavant tu n'utilisais pas de majuscule). Fais attention, tu as tendances à utiliser les majuscules comme emphase. Fais une vérification sur tout le document pour homogénéiser}.
+satisfies the two \ac{hse} laws.
 
-The first law states that the \( \func{bios\_req} \) is always satisfied when a non-trusted
-software component, i.e. different from the \ac{bios}, is executed by the hardware
-architecture.
+The first law states that the \( \func{bios\_req} \) is always satisfied when a
+non-trusted software component, i.e. different from the \ac{bios}, is executed
+by the hardware architecture.
 %
 By definition of \func{bios\_req}, \( \func{context}(h) = \mathtt{bios} \) is an
 antecedent of the requirements over \func{NextInstruction} and
-\func{UpdateSmrr}. \TODO{Il faudrait conclure explicitement en affirmant que la première loi est bien vérifiée.}
+\func{UpdateSmrr}.
+%
+Therefore, the first \ac{hse} law is satisfied for \( \Delta_{\mathtt{bios}} \).
 
-The second law states the state requirements are invariant with respect to the
-software requirements. \TODO{"states the state" n'est pas très heureux... }
+The second law requires the state requirements to be invariant with respect to the
+software requirements.
 %
 We prove this by case enumeration of \( l \in L_S \uplus L_H \) and
-\( h \in H(S) \), we check that each requirement described
-previously is preserved by \func{bios\_req}.
+\( h \in H(S) \), we check that each requirement described previously is
+preserved by \func{bios\_req}.
 %
 In practice, these proofs turned out to be the more demanding, especially for
 requirements 3 and 4.
@@ -1509,7 +1573,13 @@ considered:
 Once each requirement has been shown to be preserved during a transition, we can
 conclude for \func{hardware\_req} as a whole.
 
-\TODO{Je comprends ta volonté de résumer une preuve surement un peu rébarbative à décrire et surtout de ne pas réécrire ce que tu as fais en Coq. Toutefois, sans la lecture du code Coq, difficile de comprendre et d'apprécier véritablement ton travail. C'est à mon avis un problème. Ton manuscript devrait expliquer plus précisément ce que tu as fais en Coq pour qu'un lecteur averti puisse juger ton travail sans aller lire ton code. Il faudrait demander l'avis à des spécialistes (Yann?)}
+\TODO{Je comprends ta volonté de résumer une preuve surement un peu rébarbative
+  à décrire et surtout de ne pas réécrire ce que tu as fais en Coq. Toutefois,
+  sans la lecture du code Coq, difficile de comprendre et d'apprécier
+  véritablement ton travail. C'est à mon avis un problème. Ton manuscript
+  devrait expliquer plus précisément ce que tu as fais en Coq pour qu'un lecteur
+  averti puisse juger ton travail sans aller lire ton code. Il faudrait demander
+  l'avis à des spécialistes (Yann?)}
 
 \subsection{BIOS HSE Mechanism Correctness}
 
@@ -1531,10 +1601,22 @@ on transitions, we know thanks to Theorem~\ref{theorem:speccert:correcthse} that
 is a sufficient condition for
 \( \Delta_{\mathtt{bios}} \models I_{\mathtt{bios}} \).
 
-From the security policy perspective, only the \func{Fetch} label is relevant. \TODO{Je ne comprends pas cette phrase. Il y a trop d'implicite. Il faut que tu développes un peu ton raisonnement.}
+From the security policy perspective, only the \func{Fetch} label is relevant.
+%
+\TODO{Je ne comprends pas cette phrase. Il y a trop d'implicite. Il faut que tu
+  développes un peu ton raisonnement.}
 %
 Unfolding the definitions previously introduced in this Chapter and its
-predecessor \TODO{Arrête d'utiliser des qualificatifs relatifs pour désigner les choses comme "previously introduced" ou "its predecessor". Il y a beaucoup de concepts (définition, théorèmes, etc.) dans ton manuscrit donc à la fin on est perdu! Numérote systématiquement les concepts (déf, etc.) et nomme les explicitement "Unfolding definitions xxx".} leaves us to prove that \TODO{Je n'arrive pas à suivre. Je ne comprend pas pourquoi prouver la correctness se réduit à prouver la formule pour fetch seulement. Il faudrait prendre le temps d'expliquer.}
+predecessor
+%
+\TODO{Arrête d'utiliser des qualificatifs relatifs pour désigner les choses
+  comme "previously introduced" ou "its predecessor". Il y a beaucoup de
+  concepts (définition, théorèmes, etc.) dans ton manuscrit donc à la fin on est
+  perdu! Numérote systématiquement les concepts (déf, etc.) et nomme les
+  explicitement "Unfolding definitions xxx".} leaves us to prove that \TODO{Je
+  n'arrive pas à suivre. Je ne comprend pas pourquoi prouver la correctness se
+  réduit à prouver la formule pour fetch seulement. Il faudrait prendre le temps
+  d'expliquer.}
 %
 \[
   \begin{array}{l}
@@ -1552,7 +1634,10 @@ In particular, the requirement 1 constrains the value of the program counter
 register.
 %
 As a consequence, we know we can rely on the requirements 3 and 4 which
-constrains the ownership of memory location related to the SMRAM. \TODO{Une fois de plus, la présentation de la preuve est un peu rapide et difficile à comprendre sans plus d'élément.}
+constrains the ownership of memory location related to the SMRAM.
+%
+\TODO{Une fois de plus, la présentation de la preuve est un peu rapide et
+  difficile à comprendre sans plus d'élément.}
 
 As a side note, we emphasize that these proofs validate the SMRAM cache
 poisoning countermeasure.
@@ -1598,7 +1683,7 @@ is the complete software stack. \TODO{Je pense qu'il faudrait rappeler ici briè
 In practice, \( I \) is enforced \emph{via} several \ac{hse} mechanisms,
 including \( \Delta_{\mathtt{bios}} \).
 %
-As a consequence, these mechanisms have to be implemented concurrently. 
+As a consequence, these mechanisms have to be implemented concurrently.
 
 \TODO{Il faudrait développer un peu la transition entre le paragraphe précédent et ce paragraphe. On doit implémenter plusieurs HSE "concurrently", OK. Et du coup, quels sont les problèmes que cela pose et qui justifient la suite?}We first introduce a \ac{hse} mechanism composition operator \( \sqcap \)
 (\ref{subsec:speccert2:compo}).
@@ -1618,9 +1703,6 @@ and \( \Delta_2 \) as a third \ac{hse} mechanism \( \Delta_1 \sqcap \Delta_2 \).
 For convenience, the \( \sqcap \) operator imposes two restrictions over
 \ac{hse} mechanisms: they shall share the same set of software components and
 the same hardware-software mapping.
-%
-It is possible to define a more generic and flexible composition operator, but
-it is out of the scope of this Section. \TODO{Je n'aime pas trop ce genre de phrase. Encore une fois "out of the scope of this section" laisse à penser que cela sera traité ailleurs dans le manuscript, mais ce n'est pas le cas. }
 
 \begin{definition}[Concurrent HSE Mechanisms]
   Given two HSE mechanism \( \Delta_1 \) and \( \Delta_2 \), such that
@@ -1796,7 +1878,7 @@ to \( I \).
 The definition of a correct \( \Delta_{\mathtt{os}} \) remains out of the scope
 of this manuscript, but we wanted to emphasize that the verification work does
 not necessarily ends once \ac{hse} mechanisms are defined and verified
-separately. 
+separately.
 \TODO{Cette dernière phrase est un peu maladroite. Globalement, cette section est mal située, je trouve. Finalement, nous n'avons pas besoin de la définition préciser de  $\Delta_{\mathtt{bios}}$ pour comprendre ces problématiques de composition. En revanche, tu fais souvent référence à des concepts définis en section 5.1 ou avant... Les idées sont intéressantes mais il faudrait mieux les vendre.}
 
 % TODO: ? Should we?
@@ -1861,7 +1943,7 @@ the main advantage of our approach. Thanks to this separation, different \ac{hse
 However, the scalability of SpecCert remains to be proven.
 %
 In particular, the complexity of the hardware architecture makes monolithic
-model impracticable in practice. \TODO{Que veux dire "monolithic model"? Il faudrait détailler un peu plus la problématique} 
+model impracticable in practice. \TODO{Que veux dire "monolithic model"? Il faudrait détailler un peu plus la problématique}
 %
 The next Part of this thesis focuses on this problematic.
 

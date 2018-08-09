@@ -100,9 +100,6 @@ backgroundcolor=PineGreen!2}
 \newmdtheoremenv[style=statement]{lemma}{Lemma}[chapter]
 \newmdtheoremenv[style=statement]{theorem}{Theorem}[chapter]
 
-% A command I use to leave myself notes
-\newcommandx{\thomasrk}[2][1=]{\todo[linecolor=Plum,backgroundcolor=Plum!25,bordercolor=Plum,#1]{#2}}
-
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, positioning, arrows, intersections, fit,
   matrix, shapes, shapes.symbols}
@@ -111,7 +108,8 @@ backgroundcolor=PineGreen!2}
 \usepackage{speccert}
 \usepackage{freespec}
 
-\usepackage{todonotes}
+% Commands to annotate the manuscripts
+\newcommandx{\thomasrk}[2][1=]{\todo[linecolor=Plum,backgroundcolor=Plum!25,bordercolor=Plum,#1]{#2}}
 \newcommand\TODO[1]{\todo[inline,linecolor=red,backgroundcolor=red!25,bordercolor=red]{\textbf{TODO:} #1}}
 \newcommand\PC[1]{\todo[inline,linecolor=red,backgroundcolor=red!25,bordercolor=red]{\textbf{PC:} #1}}
 

@@ -60,8 +60,8 @@ Then, we introduce compositional verification approaches, which enable the
 ``divide and conquer'' strategy to reduce the burden of verifying large and
 complex systems (Section~\ref{section:sota:compsec}).
 %
-We conclude this Chapter by positioning our contributions with respect to
-preceding research projects (Section~\ref{sec:sota:conclusion}).
+We conclude this Chapter by comparing our contributions with respect to
+preceding related work (Section~\ref{sec:sota:conclusion}).
 
 \section{Formal Verification of Transition Systems}
 \label{sec:sota:formalisms}
@@ -124,8 +124,8 @@ initial states.\PC{et ? (phrase qui tombe un peu de nulle part)}
 
 \begin{example}[Airlock System]
   \label{example:sota:airlocklts}
-  Figure~\ref{fig:sota:airlock-lts} illustrates an instantiation of this
-  definition for a simple airlock system.
+  Figure~\ref{fig:sota:airlock-lts} illustrates this definition for a simple
+  airlock system.
   %
   An airlock system is a device made of two doors, and an intermediary chamber.
   %
@@ -206,7 +206,7 @@ initial states.\PC{et ? (phrase qui tombe un peu de nulle part)}
   \end{center}
 \end{figure}
 
-There are many modeling structures one can use to characterize transition
+There are many modeling structures for characterizing transition
 systems, with each variant better suited to tackle a particular class of
 systems.
 %
@@ -236,8 +236,8 @@ A proposition \( P \) may also be true on the condition that propositions
 %
 This statement is denoted by \( Q_0, Q_1, ... Q_n \vdash P \).
 %
-A statement is proven true when it is part of the base of axioms or we use
-inference rules to derive already proven statements.
+A statement is proven true when it is part of the base of axioms or if we use
+inference rules to derive it from already proven statements.
 %
 By doing so, we construct a \emph{proof}.
 %
@@ -259,8 +259,8 @@ Figure~\ref{fig:sota:inference} gives a list of common inference rules.
 Conditional statements, once proven, become new inference rules to be used to
 construct proofs.
 
-Formally constructing a proof can quickly become cumbersome as propositions
-become more complex.
+Constructing a proof can quickly become cumbersome as propositions become more
+complex.
 %
 They can be described in the form of carefully worded sentences.
 %
@@ -318,7 +318,7 @@ features implemented inside a certified layer cannot introduce inconsistency in
 the proof-checking process.
 %
 This greatly diminishes the risk to have inconsistencies in the proof checker,
-although this happened in the
+although it happened in the
 past\,\cite{claret2015falso,griffioen1998comparison}.
 
 Another common approach is to rely on an algorithm whose correctness has been
@@ -338,7 +338,7 @@ Choosing a formal language is a key part of the verification process of a
 system.
 %
 It decides the expressiveness of the statements that can be proven, and the
-tools verifiers can leverage to construct their proofs.
+tools that can be leveraged to construct their proofs.
 
 The most common formal system is the first-order logic\,\cite{smullyan2012fol},
 characterized by:
@@ -422,7 +422,7 @@ As for the targeted properties, a gap between its characterization using a
 particular logic and its semantics should not be understated.
 %
 For instance, Mathy Vanhoef \emph{et al.} disclosed a critical vulnerability
-(KRACK) targeting the WPA2 protocol\,\cite{vanhoef2017key}, despite previous
+named KRACK targeting the WPA2 protocol\,\cite{vanhoef2017key}, despite previous
 formal verification results (\emph{e.g.} \cite{he2004analysis}).
 %
 The reason remains simple: KRACK does not violate the security properties proven
@@ -472,7 +472,7 @@ We assume a specification \( M \) whose set of states is \( S \) and whose
 traces only contain states.
 %
 \( M \) is said to be correct with respect to a property modeled as a predicate
-of traces \( P \) when,
+on traces \( P \) when
 %
 \[
   \forall \rho \in \Sigma(M), P(\rho).
@@ -661,7 +661,7 @@ prove \( M \) enforces noninterference if for any public input \( l \), then
   \wedge r \xrightarrow{l} r') \Rightarrow s' \equiv r',
 \]
 where \( s \xrightarrow{l} s' \) is a transition of the system from a state
-\( s \) to a state \( s' \) to handle the input \( l \).
+\( s \) to a state \( s' \) wherein the input \( l \) is handled.
 
 % \subsection{Adversary Model}
 %
@@ -774,7 +774,7 @@ In the process of verifying \ac{xom}, the authors have been able to show with
 their model that the \ac{xom} architecture was subject to several replay
 attacks, and that their countermeasures were effective.
 %
-However, the state explosion problem obliges the authors to simplify their
+However, the state explosion problem forces the authors to simplify their
 model, in order to reduce the state combinatory.
 
 \paragraph{ARMv8.}
@@ -830,7 +830,7 @@ They implemented their model and their proofs in the Coq theorem prover.
 First, they showed that the ideal hypervisor
 %
 \begin{inparaenum}[(1)]
-\item ensures strong isolation between guests (two safety properties and
+\item ensures strong isolation between guests (two safety properties and one
   2-safety property), and
 %
 \item eventually processes every request performed by the guests (one liveness
@@ -891,7 +891,7 @@ From a security perspective, this means there are two requirements over the
 \ac{nacl}:
 %
 \begin{inparaenum}[(1)]
-\item verify that the rules indeed are sufficient to constrain the distrusted
+\item verify that the rules are indeed sufficient to constrain the distrusted
   native applications with respect to the sandbox policy, and
 %
 \item the \ac{nacl} checker correctly verify that native applications respect
@@ -906,8 +906,8 @@ in Coq, proven the rules it checks are correct and indeed enforce the targeted
 sandbox policy, and then manually translated the checker in
 C\,\cite{morrisett2012rocksalt}.
 %
-By doing so, they have addressed the two requirements listed above, as long as
-their translation is correct.
+By doing so, they have addressed the two requirements listed above, provided
+that their translation is correct.
 
 \paragraph{Moat.}
 %
@@ -941,11 +941,11 @@ not\,\cite{sinha2015moat}.
 The work proceeds similarly to RockSalt, where instructions are treated as
 labeled transition from one state to another.
 %
-However, Moat also consider an active and passive adversary, with additional
+However, Moat also considers an active and passive adversary, with additional
 capabilities (meaning, additional transitions in the system).
 %
 The approach is similar to what David Lie \emph{et al.} have done for the
-\ac{xom} architecture.
+\ac{xom} architecture\,\cite{lie2003xom}.
 
 \section{Compositional Verification}
 \label{section:sota:compsec}
@@ -1011,7 +1011,7 @@ sets of labels:
   %
 \end{inparaenum}
 %
-They together form the signature of a given automaton (denoted by
+They form the signature of a given automaton (denoted by
 \( \mathrm{act}(S) \)).
 %
 Its transition relation \( R(S) \) is a subset of
@@ -1168,7 +1168,7 @@ Kripke structures.
 Another popular family of approaches which enable compositional modeling of
 complex systems is process algebra.
 %
-Process algebra has been developed in order to reason about programs executed in
+Process algebra has been developed to reason about programs executed in
 parallel.
 %
 It is a formal system to describe interacting systems, together with a proof
@@ -1176,9 +1176,9 @@ system for verifying them.
 %
 In process algebra such as Calculus of Communication
 Systems\,\cite{milner1980ccs} or the Communicating Sequential
-Processes\,\cite{hoare1978csp}, two concurrent threads can run in parallel, and
+Processes\,\cite{hoare1978csp}, concurrent threads run in parallel, and
 synchronization is achieved by sending and waiting for messages rather than
-\emph{via} some shared memory.
+\emph{via} shared memory.
 
 \begin{example}[Airlock System in \( \pi \)-calculus]
   \label{example:sota:airlockprocess}
@@ -1428,8 +1428,9 @@ for instance for interface automata\,\cite{emmi2008assume}.
 
 \paragraph{{\scshape Kami}.}
 %
-In 2017, Joonwon Choi \emph{et al.} have released \,\cite{choi2017kami}, a
-framework for Coq to model, verify hardware components.
+In 2017, Joonwon Choi \emph{et al.} have released {\scshape
+  Kami}\,\cite{choi2017kami}, a framework for Coq to model and verify hardware
+components.
 %
 The resulting hardware models can also be converted into
 BlueSpec\,\cite{nikhil2004bluespec} programs, which can be compiled to Verilog,
@@ -1490,7 +1491,7 @@ of this monad.
 The proofs rely on scenarios which determine how an environment (\emph{e.g.} an
 operating system) would react to the program requests.
 %
-Morally, the verification goal is to verify that, under the hypothesis that the
+The verification goal is to verify that, under the hypothesis that the
 environment is correct with respect to a scenario, then a program with effects
 is also correct with respect to the trace of side effects operations it
 produces.
@@ -1539,16 +1540,15 @@ We steer a middle course between these approaches.
 %
 In Chapter~\ref{chapter:speccert}, we define \ac{hse} mechanisms as sets of
 requirements over low-level software components, such that satisfying these
-requirements is sufficient to ensure the hardware architecture enforces a
+requirements are sufficient to ensure the hardware architecture enforces a
 certain property\,\cite{letan2016speccert}.
 %
 In Chapter~\ref{chapter:speccert2}, we show how we can verify the correctness of
 these requirements against a hardware model.
 %
-A desirable long-term goal of this approach would be to be able to verify the
-correctness of low-level software components with respect to these requirements,
-so we can conclude the security property targeted by a \ac{hse} mechanism is
-effectively enforced.
+A desirable long-term goal of this approach would be to verify the correctness
+of low-level software components with respect to these requirements, \emph{i.e.}
+the security policy by the implemented \ac{hse} is enforced.
 %
 As such, our approach relates to previous research works such as
 RockSalt\,\cite{morrisett2012rocksalt} (validation of arbitrary programs against
@@ -1585,14 +1585,15 @@ inspired by the assume-guarantee paradigm.
 In doing so, FreeSpec is at the intersection of several research domains.
 %
 Our work is in the continuity of \texttt{Coq.io}\,\cite{claret2015coqio}, but
-our abstract specifications are more generic and expressive than the scenarios.
+our abstract specifications are more generic and expressive than their
+scenarios.
 %
 We have shown how programs with effects and effects handlers can be used to
 modularly verify a complex system made of interconnected components, \emph{via}
 the notion of interface as the rendezvous point.
 %
-The principle of our approach is similar to what {\scshape Kami} achieves, but
-is not hardware specific.
+The principle of our approach is similar to what {\scshape Kami}
+achieves\,\cite{choi2017kami}, but is not hardware specific.
 %
 In addition, our abstract specifications allow for compositional verification,
 while {\scshape Kami} focuses on refinement proofs.
