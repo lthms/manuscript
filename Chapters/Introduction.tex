@@ -9,6 +9,8 @@
 
 \vspace{1cm}\noindent
 %
+\TODO{Remarque générale : je trouve ton intro un peu trop longue. Surtout, les paragraphes avant le 1.1 sont long et parlent d'un point très spécifique (l'architecture en couche d'une plateforme x86). Je pense qu'il faudrait placer ces paragraphes dans une sous-section à part et réserver les paragraphes situés avant 1.1 à une description générale de la problématique abordées dans cette thèse.}
+
 To manage complexity, computing platforms are commonly built as successions of
 abstraction layers, from the hardware components to high-level software
 applications.
@@ -20,7 +22,7 @@ This enables separation of concerns ---each layer encapsulates one dimension of
 the overall complexity--- and modularity ---two layers which expose the same
 interface can be seamlessly interchanged.
 %
-The typical computing platform can be broken down to the following layers:
+The typical computing platform can be broken down to the following layers: 
 %
 \begin{description}
 \item [Hardware Architecture]
@@ -196,7 +198,7 @@ From a security perspective, layers are often used for privilege separation, and
 each layer is often more privileged than its successors.
 %
 For instance, system software components manage the life cycle of the
-applications, by actively tampering with their execution.
+applications, by actively tampering \TODO{c'est la première fois que tu utilises le termes tampering et tu ne l'as pas définis avant. Je pense que, dans le sens où tu veux l'utiliser, le termes n'est pas fréquent dans la littérature} with their execution.
 
 As a consequence, each layer implicitly trusts its predecessors.
 %
@@ -205,14 +207,14 @@ security of the computing platform.
 %
 Trust in lower levels of abstraction can be misplaced: hardware implants and
 backdoors pose a significant threat to the platform security\,\cite{yang2016a2},
-the \ac{bios} has been used as an attack vector to tamper with its execution
+the \ac{bios} has been used as an attack vector to tamper with its execution \TODO{tu utilises à mon avis trop souvent "tamper with". Ce n'est pas courant, et c'est un tic de langage. En outre, je ne vois pas à quoi renvois "its execution"}
 even after a machine restart\,\cite{embleton2013smm}, etc.
 %
 On the other hand, one layer may constrain the execution of its successors, with
 respect to a targeted security policy.
 %
 For instance, an operating system shares hardware resources among several
-applications, and therefore is able to enforce availability ---fair share of
+applications, and therefore \TODO{le lien de cause à effet ne me parait pas évident. L'OS doit partager les ressources et il doit le faire correctement.} is able to enforce availability ---fair share of
 \ac{cpu} time---, confidentiality and integrity ---exclusive partition of
 physical memories--- properties.
 
@@ -220,7 +222,7 @@ Constraining an execution can be achieved in various ways.
 %
 Concerning the lowest layers of a software stack, the common approach is to rely
 on features provided by the hardware architecture to reduce the hardware
-capabilities one software can leverage while it is executed.
+capabilities that can be used by upper layers.
 %
 For instance, system software components often leverage among other mechanisms a
 \ac{mmu} to partition the system memory.
@@ -231,7 +233,7 @@ memory.
 Besides, the \ac{cpu} can leverage a hardware timer to stop applications
 execution, without the need for these applications to cooperate.
 %
-This scenario characterizes a class of security enforcement we call \ac{hse}
+This scenario characterizes a class of security mechanisms we call \ac{hse}
 mechanisms.
 
 \begin{definition}[Hardware-based Security Enforcement Mechanism]
@@ -260,7 +262,7 @@ software components are due to some misuse of hardware
 features\,\cite{bulygin2014summary}.
 %
 In the past, most lower-level pieces of software, such as firmware components,
-have not have been conceived and implemented with security as primary focus.
+have not been conceived and implemented with security as primary focus.
 %
 The increasing complexity of hardware architectures can also be held partly
 responsible.
@@ -299,21 +301,21 @@ often comprise hundreds of features implemented by dozens of interconnected
 devices complicates the conception of new hardware features.
 %
 Indeed, these new features should not interfere with the security properties
-enforced by the features which were present before.
+enforced by the existing components of the platform.
 %
 For instance, the flash memory (where lives the \ac{bios} code) is supposedly
 protected against arbitrary write accesses from system software components,
 thanks to a particular hardware interrupt.
 %
-When Intel introduces TXT\,\cite{intel2015txt}, they had not anticipated that
-this novel security feature had the particular side effect of disabling this
-hardware interrupt\,\cite{kovah2015senter}.
+When Intel introduced TXT\,\cite{intel2015txt}, they did not anticipate that
+this novel security feature had the particular side effect of disabling the
+hardware interrupt used to protect the flash memory\,\cite{kovah2015senter}.
 %
 This corresponds to a class of security vulnerability called compositional
-attacks\,\cite{wing2003compositionalattack}.
+attacks\,\cite{wing2003compositionalattack}. \TODO{Tu sembles maintenant utiliser le termes de compositional attack. Attention, dans l'abstract tu continues de parler de architectural attack}
 
 \begin{definition}[Compositional Attack]
-  Compositional attacks is the class of security vulnerabilities, where each
+  Compositional attacks is the class of security vulnerabilities \TODO{meme remarque que dans l'abstract tu utilises "attack" pour désigner une vulnérabilité, ce qui n'est pas cohérent}, where each
   component is working as expected in isolation, yet their composition creates
   an attack path which prevents end-to-end security enforcement.
 \end{definition}
@@ -338,7 +340,7 @@ whole.
 \section{Formal Verification of HSE Mechanisms}
 \label{sec:intro:verif}
 
-The significant impact of previously disclosed compositional attacks have
+The significant impact of previously disclosed compositional attacks \TODO{ajouter ici des ref concernant ces " previously disclosed compositional attacks"} have
 motivated our will to formally specify HSE mechanisms.
 %
 We believe this would benefit both hardware designers and software developers.
@@ -357,7 +359,7 @@ provided security properties.
 We believe these specifications are a valuable addition to the existing
 documentation, because they gather at one place information that is normally
 scattered across many documents which sometimes suffer from lack of security
-focus.
+focus. \TODO{Cet argumentaire est repris à plusieurs endroits (dans l'abstract, ici dans l'intro et dans la section 5.5. Il faut à la fois s'assurer que ces différentes occurences sont cohérentes dans la manière de présenter les choses (il faudrait s'en assurer en les comparants car les différentes parties ont évoluées à des rythmes différent) et que ces différentes occurences ne sont pas redondantes. En gros, il faut que chaque nouvelle occurrence apporte quelque chose (un peu plus de détail, une mise en contexte, etc.}
 
 To specify a HSE mechanism, we have to model the hardware architecture and the
 scale of the task represents a significant challenge.
@@ -373,10 +375,10 @@ As a consequence, it is necessary to consider the whole computing platform.
 %
 At the same time, some components are individually complex:
 %
-the Intel Architectures Software Developer Manual\,\cite{intel2014manual} is
-4842 pages long;
+for example, the Intel Architectures Software Developer Manual\,\cite{intel2014manual} is
+4842 pages long, 
 %
-the Memory Controller Hub datasheet\,\cite{intel2009mch} is 430 pages long;
+the Memory Controller Hub datasheet\,\cite{intel2009mch} is 430 pages long, and
 %
 the Platform Controller Hub datasheet\,\cite{intel2012pch} is 988 pages long.
 
@@ -417,30 +419,29 @@ Our choice is motivated by the following reasons:
   specifications written in {\scshape Gallina} to OCaml, meaning we can write
   \emph{executable specifications}.
   %
-  In theory, we can leverage this feature to validate a model against a real
-  implementation.
+  We could leverage this feature to validate a model against a real
+  implementation. \TODO{Tu pourrais rajouter une footnote disant que bien qu'il s'agisse d'une propriété intéressante qui a notamment motivé ton choix,  tu ne l'as pas utilisée durant ta thèse}
   %
   Since we focus on products which already exist, rather to intervene prior to
   their implementation, model validation is a valuable step to strengthen our
-  confidence in a verification result.
+  confidence in a verification result. \TODO{Comme tu n'as pas exploité cette fonctionnalité, j'éviterais de trop insister donc je supprimerais cette dernière phrase. De toute façon, cette fonctionnalité aurait également un intérêt si tu travaillez en amont, pour vérifier par la suite que les implémentations sont cohérente avec la spec (dans ce cas, ce n'est pas la spec que tu valides, mais l'implémentation}
 \end{itemize}
 
 \section{Contributions and Outline}
 
-In Part~\ref{part:context}, we elaborate on the context in which our works fall.
-%
-The security of lower levels of abstraction (\emph{e.g.} hardware components,
-firmware) are growing in importance.
+\TODO{Tu mélanges plan et contribution. J'aime pas trop. La contribution est du coup noyée dans le plan. Je préferais deux parties (paragraphes) distincts.}
+
+In Part~\ref{part:context}, we elaborate on the context in which our works fall, \emph{i.e.} the security of lower levels of abstraction (hardware components and firmware).
 %
 In Chapter~\ref{chapter:usecase}, we give an introduction to the x86 hardware
 architecture and the particular role played by the \ac{bios}.
 %
-We then detail a selection of representative compositional attacks which have
+We then detail some representative compositional attacks which have
 been disclosed over the past decade.
 %
 % PC: attention, on comprend que tu vas décrire tout x86 en détails
 %
-In Chapter~\ref{chapter:relatedwork}, we revisit existing works and approaches
+In Chapter~\ref{chapter:relatedwork}, we revisit existing works \TODO{Je crois que yann t'a fait la remarque que related work est singulier. Je ne sais pas si c'est le cas mais il faut être cohérent dans tout le document} and approaches
 in line with the two challenges we tackle in this thesis, that is:
 %
 \begin{inparaenum}[(1)]
@@ -455,7 +456,7 @@ in line with the two challenges we tackle in this thesis, that is:
 In Part~\ref{part:speccert}, we describe our first contribution.
 %
 In Chapter~\ref{chapter:speccert}, we present a generic formalism to specify and
-verify against a hardware model HSE mechanisms.
+verify HSE mechanisms against a hardware model.
 %
 In Chapter~\ref{chapter:speccert2}, we leverage our formal definition to reason
 about HSE mechanisms which isolate software components from each other within a
@@ -464,7 +465,7 @@ software stack.
 We have implemented SpecCert, a framework for the Coq proof assistant based on
 this formalism.
 %
-Moreover, we have implemented {\scshape Minx86}, a minimal x86 model, and we
+Moreover, we have specified {\scshape Minx86}, a minimal x86 model, and we
 have verified a HSE mechanism implemented by x86 BIOSes against {\scshape
   Minx86}.
 %
