@@ -59,22 +59,24 @@ these \ac{hse} mechanisms in the past (Section~\ref{sec:usecase:hse}).
 Describing hardware architectures in depth is challenging, because they tend to
 comprise an increasing number of interconnected components of various natures.
 %
-The x86 hardware architecture is a perfect illustration of this, and this is
+The x86 hardware architecture is a perfect illustration of this, and this \TODO{répétition de "this"} is
 probably best illustrated by the scale of its documentation.
 %
 At the time of writing this thesis\,\footnote{Spring 2018.}, the \emph{Intel 64
   and IA-32 Architectures Software Developer’s Manual} is 4842 pages long.
 %
 A typical computing platform is made of dozens of hardware components, including
-\emph{e.g.} hard drives, a keyboard, a trackpad, an audio controller, and o
+\emph{e.g.} hard drives, a keyboard, a trackpad, an audio controller, and a
 graphic card.
 %
 Several come with their own documentation, often in the form of large datasheet.
 
+\TODO{et? Quel est le lien avec la suite? Il manque ici une transition, annoncant notamment le plan de la section.}
+
 \subsection{Basics of x86 Architecture}
 
 A simplified x86 hardware architecture is pictured in
-Figure~\ref{fig:usecase:x86arch}.
+Figure~\ref{fig:usecase:x86arch}. \TODO{Il faudrait préciser que cette figure correspond à une architecture x86 récente (je ne sais plus à partir de quelle nom de code, il faudrait retrouver). Il faudrait en profiter pour souligner que l'architecture x86 a évolué sensiblement depuis sa création et que même aujourd'hui, on peut trouver dans un parc existants des machines avec des architectures sensiblement différentes}
 %
 We now describe how the different hardware components are integrated together to
 form a typical x86 computing platform, from the processor which executes
@@ -138,7 +140,7 @@ The main component of the architecture is the \emph{processor}.
 It embeds several execution units called \emph{cores}.
 %
 They are responsible for executing sequences of assembly instructions which form
-software components programs.
+software component programs.
 %
 The concrete hardware implementation of the processor is often referred as the
 Intel microarchitecture, in opposition to the Intel architecture which describes
@@ -313,7 +315,7 @@ majority of the system memory is made of \ac{dram}.
 %
 Besides, cores use another address space characterized by two dedicated
 instructions ---\texttt{in} and \texttt{out}--- to target the memories exposed
-by other software components.
+by other software components \TODO{software components? tu ne voulais pas dire plutôt hardware components?}.
 %
 \IOs issued by \texttt{in} and \texttt{out} instructions are referred to as
 Port-Mapped \IOs (PMIO), and the addresses of this address space are called
@@ -321,7 +323,7 @@ Port-Mapped \IOs (PMIO), and the addresses of this address space are called
 
 Although they are historically used to target different memory regions, nowadays
 these two address spaces overlap, as peripheral memories and registers can be
-exposed to the cores \emph{via} the system memory thanks \emph{memory-mapped}
+exposed to the cores \emph{via} the system memory thanks to \emph{memory-mapped}
 \IOs.
 %
 That is, \emph{it is possible to read from or write the same memory location
@@ -339,9 +341,9 @@ locations within the hardware architecture is called the \emph{memory map}.
 The memory map is configurable, that is it can be changed dynamically \emph{via}
 configuration registers exposed by the processor and the \ac{pch}.
 %
-For instance, PCI devices expose a so-called configuration space, which is a
+For instance, PCI  \TODO{c'est la première fois que tu utilises PCI. Tu dois rapidement expliquer cette acronyme} devices expose a so-called configuration space, which is a
 dedicated memory region with a specific semantics summarized in
-Figure~\ref{fig:usecase:pciconfig}).
+Figure~\ref{fig:usecase:pciconfig}.
 %
 Registers of the PCI configuration space, such as device and vendor IDs, can be
 accessed \emph{via} PMIO.
@@ -364,7 +366,7 @@ that it becomes possible to interact with the PCI configuration space of a given
 peripherals \emph{via} the system memory.
 %
 As a consequence, when a core reads from or write to the system memory in a
-range specified by a BAR, the processor and the \ac{pch} dispatches its \IOs to
+range specified by a BAR, the processor and the \ac{pch} \TODO{pourquoi "the processor and the PCH" et pas "the PCH" seulement?} dispatches its \IOs to
 the PCI configuration space.
 
 \begin{figure}
@@ -377,7 +379,7 @@ the PCI configuration space.
   \label{fig:usecase:pciconfig}
 \end{figure}
 
-Finally, software components do not manipulate addresses of the system memory
+Finally, software components often do not manipulate addresses of the system memory
 directly.
 %
 Indeed, cores have their own address translation mechanisms, namely
@@ -409,7 +411,7 @@ interrupts, are configurable \emph{via} a so-called \ac{idt}\,\cite[Volume 3,
 Chapter 6]{intel2014manual}.
 %
 Each line of the \ac{idt} corresponds to a given interrupt whose semantics is
-specified by Intel, as summarized in Table~\ref{tab:usecase:idt} for reference.
+specified by Intel, as summarized in Table~\ref{tab:usecase:idt}.
 %
 When a core handles an interrupt, it saves its current context inside the
 \ac{dram}, then starts executing the corresponding interrupt handler.
@@ -418,8 +420,8 @@ Not all x86 interrupts come from a hardware component.
 %
 Cores use several of them, for instance to recover from errors.
 %
-For instance, if a core is not able to translate a virtual address into a proper
-address, it raises a so-called Page Fault (denoted by \texttt{\#PF}).
+For example, if a core is not able to translate a virtual address into a proper
+address, it raises a so-called Page Fault (denoted by \texttt{\#PF} \TODO{tu vas utiliser cette notation plus tard? si ce n'est pas le cas vire cette parenthèse}).
 
 \begin{table}
   \centering
@@ -484,8 +486,8 @@ for a physical access.
 %
 In practice, the software components responsible for implementing the
 out-of-band management features are not executed by the main processor: the
-network card was implementing the ASF technology\,\cite{duflot2010network}, and
-since 2008 x86 \acp{cpu} embed a so-called Management
+network card was implementing \TODO{pourquoi "was implementing"? l'usage de ce temps est bizarre. en outre, cette techno n'est plus présente dans les cartes actuelles?} the ASF technology\,\cite{duflot2010network}, and
+since 2008 x86 \acp{cpu} \TODO{Qu'est ce que veux dire précisemment CPU? Tu as défini avant plusieurs termes (processor, core, PCH) mais pas celui là. En outre tu indique que le ME est intégré au CPU. Je pense qu'il faut dire que le CPU est le packaging vendu par Intel, et qu'un client peut acheter séparemment, comprenant le processeur, le controleur mémoire (généralement un controleur video) et le PCH} embed a so-called Management
 Engine\,\cite{ruan2014me,skochinsky2014intel}.
 %
 In 2018, the Management Engine is located inside the \ac{pch}.
@@ -499,25 +501,23 @@ to execute the software components within the image it has
 downloaded\,\cite{kumar2009active}.
 %
 It becomes harder and harder to completely disable the Management Engine on a
-typical x86 computing platform.
+typical x86 computing platform \TODO{ref!}.
 %
 The Management Engine will notably provoke the reboot of the platform if it
 cannot initialize correctly.
 
 \subsection{HSE Mechanisms Targeted Security Policies}
 \label{subsec:usecase:targetedsec}
+\TODO{Le titre est difficile à comprendre. }
 
 As previously stated, x86 computing platforms are formed of concurrent,
-interconnected components.
+interconnected components \TODO{que veut dire "concurrent components"? Interconnected, je vois. On parle de programme concurrents, mais pour des composants matériels, qui sont en outre interconnecté, je ne vois pas trop... }.
 %
-They are of various natures, from physical components to sequences of
-instructions.
-%
-They share common resources, like the \ac{dram} which can be modified by the
-cores (which execute a software stack) and \ac{dma}-capable hardware components.
+Such components share common resources, like the \ac{dram} which can be both modified by the
+cores and \ac{dma}-capable hardware components.
 %
 This allows for cooperation, \emph{e.g.} when a network card receives a TCP
-packet, it copies its content to a pre-defined address in \ac{dram}, then
+packet, it copies its content to a pre-defined address in \ac{dram} and then
 notifies the operating system by sending an interrupt to the core.
 %
 This also raises a significant challenge from a security perspective.
