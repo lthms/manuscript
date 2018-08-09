@@ -24,14 +24,8 @@ various compositional attacks targeting the x86 hardware
 architecture\,\cite{duflot2009smram,wojtczuk2009smram,kallenberg2015racecondition,domas2015sinkhole,kovah2015senter}.
 %
 For these reasons, we have evaluated our approaches against the x86 hardware
-architecture.
-%
-However, our contributions are intended to be applicable to other hardware
-architectures.
-%
-We have chosen to focus on the \ac{hse} mechanism implemented by the BIOS at
-runtime to stay isolated from the rest of the software stack, including the
-system software.
+architecture, with a focus on the \ac{hse} mechanism implemented by the BIOS at
+runtime to stay isolated from the rest of the software stack.
 %
 Because the BIOS is the most privileged piece of software executed by the
 hardware architecture, this \ac{hse} mechanism is of key importance.
@@ -42,7 +36,9 @@ therefore, it illustrates perfectly our motivations.
 %
 However, it is important to emphasize that other mainstream architectures
 (\emph{e.g.}  ARM) work on a similar basis and potentially suffer similar
-issues.
+issues, and our contributions are intended to be applicable to other hardware
+architectures.
+%
 
 The rest of this Chapter proceeds as follows.
 %
@@ -61,8 +57,7 @@ these \ac{hse} mechanisms in the past (Section~\ref{sec:usecase:hse}).
 \label{sec:usecase:architecture}
 
 Describing hardware architectures in depth is challenging, because they tend to
-comprise an increasing number of interconnected components of various natures
-over time.
+comprise an increasing number of interconnected components of various natures.
 %
 The x86 hardware architecture is a perfect illustration of this, and this is
 probably best illustrated by the scale of its documentation.
@@ -160,7 +155,7 @@ execution\,\cite[Section 2]{fog2012microarchitecture} or predictive
 branching\,\cite{milenkovic2002branchprediction}\cite[Section
 3]{fog2012microarchitecture}.
 %
-These optimizations should not violate properties of the architecture.
+% These optimizations should not violate properties of the architecture.
 % %
 % For instance, the predictive branching implemented by x86 \acp{cpu} increases
 % performance, \emph{e.g.} inside a loop.
@@ -285,8 +280,8 @@ interpreted as an operand of an arithmetical operation.
 In addition, other hardware components also provide additional memory regions
 cores can read from or write to.
 %
-Contrary to \ac{dram}, \IOs targeting these memories carry a semantics specific
-to each peripheral.
+Contrary to \ac{dram}, \IOs targeting these memories often carry a semantics
+specific to each peripheral.
 %
 For instance, an x86 processor integrates a display controller which exposes a
 frame buffer to the cores.
@@ -303,45 +298,48 @@ In addition, it is connected to a companion chipset, called the
   previous iterations of the architecture, the processor was connected to a
   \emph{northbrige} (low-latency), which was itself connected to a
   \emph{southbridge} (slower \IOs).}.
+
+\paragraph{Address Spaces.}
 %
 \acp{cpu} interact with memories \emph{via} two distinct memory address spaces,
 characterized by a set of addresses and a set of instructions.
 %
-The most important address space is the \emph{system memory}, as most of the x86
-instructions (\emph{e.g.} \texttt{mov}, \texttt{sub}, \texttt{sub},
-\texttt{jle}).
+The most important address space is the \emph{system memory}, and most of the
+x86 instructions (\emph{e.g.} \texttt{mov} variants, arithmetic operations such
+as \texttt{sub} and \texttt{add}) are designed to manipulate it.
 %
-By default, the majority of the system memory is made of \ac{dram}.
+Addresses of the system memory are often refer to as physical addresses, and the
+majority of the system memory is made of \ac{dram}.
 %
-Besides, software developers use another address space characterized by two
-dedicated instructions ---\texttt{in} and \texttt{out}--- to target the memories
-exposed by other software components.
+Besides, cores use another address space characterized by two dedicated
+instructions ---\texttt{in} and \texttt{out}--- to target the memories exposed
+by other software components.
 %
 \IOs issued by \texttt{in} and \texttt{out} instructions are referred to as
 Port-Mapped \IOs (PMIO), and the addresses of this address space are called
 \emph{ports}.
-%
-Alternatively, peripheral memories and registers can be exposed to the cores
-\emph{via} the system memory thanks \emph{memory-mapped} \IOs.
-%
-As a consequence, when a core reads from or write to the system memory, the
-processor and the \ac{pch} dispatches its request to the correct hardware
-component.
 
+Although they are historically used to target different memory regions, nowadays
+these two address spaces overlap, as peripheral memories and registers can be
+exposed to the cores \emph{via} the system memory thanks \emph{memory-mapped}
+\IOs.
+%
+That is, \emph{it is possible to read from or write the same memory location
+  using two different address spaces}.
+%
 % PC: “a memory mapping” plutôt ? La “memory map” c'est l'ensemble de tous les
 % mappings.
 %
 % Thomas: justement, c’est bien dans ce sens que je l'utilise. J'ai mis les
 % termes au pluriel pour que ce soit plus clair, c'est mieux ?
+%
 The mapping between addresses of the system memory and their concrete memory
 locations within the hardware architecture is called the \emph{memory map}.
 %
 The memory map is configurable, that is it can be changed dynamically \emph{via}
-a set of configuration registers exposed by the processor and the \ac{pch}.
+configuration registers exposed by the processor and the \ac{pch}.
 %
-The two approaches are complementary.
-%
-As an example, PCI devices expose a so-called configuration space, which is a
+For instance, PCI devices expose a so-called configuration space, which is a
 dedicated memory region with a specific semantics summarized in
 Figure~\ref{fig:usecase:pciconfig}).
 %
@@ -365,8 +363,9 @@ The purposte of the \texttt{BAR}s is to configure a memory-mapped mechanism, so
 that it becomes possible to interact with the PCI configuration space of a given
 peripherals \emph{via} the system memory.
 %
-That is, \emph{it is possible to read from or write the same memory location
-  using two different address spaces}.
+As a consequence, when a core reads from or write to the system memory in a
+range specified by a BAR, the processor and the \ac{pch} dispatches its \IOs to
+the PCI configuration space.
 
 \begin{figure}
   \begin{center}
@@ -378,7 +377,8 @@ That is, \emph{it is possible to read from or write the same memory location
   \label{fig:usecase:pciconfig}
 \end{figure}
 
-Finally, cores do not manipulate physical addresses directly.
+Finally, software components do not manipulate addresses of the system memory
+directly.
 %
 Indeed, cores have their own address translation mechanisms, namely
 segmentation\,\cite[Volume 3, Section 2.4]{intel2014manual} and
@@ -476,8 +476,8 @@ address, it raises a so-called Page Fault (denoted by \texttt{\#PF}).
 
 \paragraph{Autonomous Subsystem.}
 %
-Intel has implemented several out-of-band management technologies for
-its products.
+Intel has implemented several out-of-band management technologies for its
+products.
 %
 They allow for administering a computer \emph{via} the network, without the need
 for a physical access.
@@ -548,14 +548,15 @@ introduced by the PCI standard, whose purpose is to allow PCI devices to bypass
 security mechanisms designed to reduce their
 privileges\,\cite{daubignard2017protip}.
 %
-Other examples showed it is not without consequences from a security
+Other examples showed blind trust in the context of foreign hardware components
+(\emph{e.g.} USB devices) is not without consequences from a security
 perspective\,\cite{nohl2014badusb,hudson2015thunderstrike,chifflier2013uefi}.
 %
 Secondly, the ``least privilege'' may vary from one execution to another.
 %
 To handle the numerous use cases of the x86 architecture, its default
 configuration is very permissive, until software components such as the
-\ac{bios} or an operating system modifies it to fit their needs, while
+\ac{bios} or an operating system modifies it to fit their needs, by
 implementing \ac{hse} mechanisms.
 
 % OLD VERSION: For instance, it has also been repeatedly shown that the various
@@ -608,8 +609,8 @@ page table hierarchy the \ac{mmu} uses.
 %
 This is why ring~3 is commonly dedicated to the execution of applications.
 %
-The scope of the \ac{mmu} is limited to the software component executed by a
-core at a given time.
+Finally, the scope of the \ac{mmu} is limited to the software component executed
+by a core at a given time.
 %
 To impose an access control policy to hardware components as well, an operating
 system can use the so-called VT-d feature, which implements an \IO-\ac{mmu} for
@@ -792,7 +793,7 @@ into several software components accordingly.
 %
 In particular, \ac{uefi}-compliant \ac{bios} can load so-called \ac{uefi}
 applications of arbitrary size, leading modern hypervisors and operating systems
-to be packaged as \ac{uefi} applications.
+to be packaged as \ac{uefi} applications\,\cite{2011efistub}.
 
 Because the \ac{bios} is the first software component executed by the hardware
 architecture, and is responsible for initiating the execution of following
@@ -891,8 +892,10 @@ they are related to critical features of the platform and the hardware vendors
 do not want to rely on a (potentially vulnerable or malicious) system software
 component.
 %
-For instance, the \ac{bios} takes care of its own software updates, so that the
-latter can validate the validity of the new version prior to applying it.
+For instance, the \ac{bios} takes care of its own software updates, in order to
+verify submitted versions prior to applying them, \emph{e.g.} by verifying
+cryptographic signature or preventing the installation of older, out-dated
+versions.
 
 \paragraph{Proactive Features.}
 %
@@ -903,11 +906,11 @@ tasks which are not publicly documented.
 This includes and is not limited to handling hardware errors, checking thermal
 zones, adjusting \acp{cpu} speed, and configuring hardware workarounds.
 %
-The execution of the \ac{bios} in this context should be transparent to the rest
-of the software stack.
-%
 Some \acp{bios} also emulate complete hardware devices to the system software
 component.
+
+The execution of the \ac{bios} in this context should be transparent to the rest
+of the software stack.
 %
 As such, the \ac{bios} remains the most privilege software component of the
 software stack, even after the end of the boot sequence.
@@ -920,8 +923,8 @@ The hardware architecture’s manufacturer provides the \ac{bios}.
 In most cases, it is a proprietary software, and the computer owner has little
 control over it.
 %
-The rest of the software stack is considered mistrusted, and the one goal of the
-\ac{bios} is to keep the computer in a working state, even if presence of an
+The rest of the software stack is considered mistrusted, and one goal of the
+\ac{bios} is to keep the computer in a working state, even in presence of an
 erroneous or malicious software stack.
 %
 To that end, the \ac{bios} relies on several \ac{hse} mechanisms to enforce its
@@ -964,10 +967,10 @@ the \ac{bios} can be divided into three complementary security policies.
   runtime which is protected against \IOs issued by the rest of the software
   stack.
   %
-  Besides, the \ac{bios} has a reliable \emph{secure channel} \thomasrk{ref?} to
-  access this volatile memory, \emph{e.g.} an adversary cannot modify the memory
-  map in order to intercept \IOs issued by the \ac{bios} and targeting this
-  volatile memory.
+  Besides, the \ac{bios} can rely on a \emph{secure channel} \thomasrk{ref?} to
+  manipulate this volatile memory, \emph{e.g.} an adversary cannot modify the
+  memory map in order to intercept \IOs issued by the \ac{bios} and targeting
+  this volatile memory.
   %
   \PC{Cette notion de \textit{secure channel} est-elle importante~?  Si oui,
     ajoute un emph et sors-là de ce paragraphe, IMHO}
@@ -998,9 +1001,8 @@ processor, the \ac{dram} and the \ac{pch}.
 \paragraph{System Management Mode.}
 %
 To handle several software components with different levels of privilege, Intel
-\acp{cpu} provide several execution modes.
-%
-An execution mode can be assimilated to a set of hardware capabilities.
+\acp{cpu} provide several execution modes, which can be assimilated to sets of
+hardware capabilities.
 %
 For instance, in a given execution mode, a \ac{cpu} may refuse to execute
 certain assembly instructions, and the software component executed at the time
@@ -1052,8 +1054,8 @@ As its name suggests, the \texttt{SMBASE} value should point to the base of the
 SMRAM.
 %
 As for the end of the SMRAM, the hardware architecture does not expose it
-explicitly, and the \ac{bios} needs to refer to the processor datasheet in order
-to find it.
+explicitly, and the \ac{bios} developers need to refer to the processor
+datasheet in order to find it.
 
 At the beginning of the boot sequence, the SMRAM is left unprotected, meaning
 arbitrary memory accesses targeting the SMRAM are authorized.
@@ -1061,9 +1063,9 @@ arbitrary memory accesses targeting the SMRAM are authorized.
 This design allows the \ac{bios} to initialize the SMRAM content.
 %
 Once the \ac{smm} code ---the \ac{bios} code intended to be executed at runtime
-in \ac{smm}--- has been correctly loaded into the SMRAM, and prior to giving the
-\ac{cpu} control flow to a system software component, the \ac{bios} has to lock
-the SMRAM.
+in \ac{smm}--- has been correctly loaded into the SMRAM, and prior to starting
+the execution of a system software component, the \ac{bios} has to lock the
+SMRAM.
 %
 % \TODO{expliquer ce que veut dire invisible -> la mémoire n'est plus mappé dans
 % la plage d'adresse et soit le processeur accède à une autre mémoire soit il y
@@ -1117,11 +1119,12 @@ This way, the execution of the software component previously halted by the
 %
 From the system point of view, it is almost like if nothing has happened.
 
-It remains possible to detect \ac{smm} context switches.
+It is possible to detect \ac{smm} context switches, the most straightforward way
+being to rely on the Model-Specific Register \texttt{0x34}
+(\texttt{MSR\_SMI\_COUNT}).
 %
-The most straightforward way is to rely on the Model-Specific Register
-\texttt{0x34} (\texttt{MSR\_SMI\_COUNT}), as the \ac{cpu} increments it every
-time it handles a \ac{smi}\,\cite[Volume 4, Chapter 2]{intel2014manual}.
+Indeed, the \ac{cpu} increments it every time it handles a
+\ac{smi}\,\cite[Volume 4, Chapter 2]{intel2014manual}.
 %
 An operating system can also spin in a loop to take regular timestamps.
 %
@@ -1188,8 +1191,8 @@ explains why the \ac{smm} is often referred to as the x86 ``most privileged
 execution mode.''
 %
 In a nutshell, the \ac{smm} code can leverage the same hardware capabilities
-than system software, including tampering with memories assigned to the system
-software.
+than the system software component, including manipulating memories used by this
+system software components.
 %
 On the contrary, the system software cannot modify either the SMRAM content or
 the \ac{smm} code stored in the flash memory, and cannot prevent the \ac{smm}
@@ -1242,18 +1245,16 @@ Interacting with the \ac{dram} remains slow, in regard to the speed of a
 To improve performance, Intel \acp{cpu} come with several levels of caches, from
 the smaller and quicker, to the bigger and slower.
 %
-For instance, Intel Core i7, i5 and i3 processors have three levels of cache
+For instance, Intel Core i7, i5 and i3 processors have three levels of caches.
 %
-More precisely, each core is assigned two levels of cache called L1 and L2.
+More precisely, each core is assigned two levels of cache called L1 and L2,
+while they all share a so-called L3 cache, as pictured in
+Figure~\ref{fig:usecase:l1-l3caches}.
 %
 The L1 cache has the particularity to be divided into a cache of instructions
 (used when the core read from memory instructions to execute) and a cache of
 data.
-%
-The cores of the processor share the L3 cache.
-%
-As a reference, the Figure~\ref{fig:usecase:l1-l3caches}.
-%
+
 Caches are mostly transparent to the software components.
 %
 For instance, the processor alone enforces the cache coherence, with the notable
@@ -1393,11 +1394,11 @@ mechanisms, including (but not limited to):
   a memory page granularity.
 \end{itemize}
 %
-The most commonly used strategy is write-back strategy, summarized in
+The most commonly used strategy is the write-back strategy, summarized in
 Figure~\ref{fig:usecase:writeback}.
 %
-The purpose of the write-back strategy is to reduce the number of write accesses
-forwarded to the system memory.
+The purpose of the write-back strategy is to reduce the number of \IO forwarded
+to the \ac{dram}.
 %
 To that end, each cache block has a ``dirty bit'' which is set by the cache when
 its value is updated by a write access.
@@ -1411,7 +1412,8 @@ issue write access to the underlying memory.
 The write-back strategy is not suitable for memories of hardware components
 mapped into the \ac{cpu} address space.
 %
-For instance, caching write accesses to a framebuffer does not make sense.
+For instance, caching \IOs targeting a framebuffer does not make sense, because
+the screen wouldn't be updated.
 %
 This is why Intel provides four complementary strategies.
 %
