@@ -4,17 +4,12 @@
 \usepackage[chapter]{minted}
 \usemintedstyle{bw}
 \setminted{framesep=10pt,xleftmargin=18pt,frame=leftline,linenos=true}
-\renewcommand{\baselinestretch}{1.2}
 
-% ABOUT THIS FILE
-% ---------------
-% The goal of this document is to prepare the next (and final?) version of the
-% chapter 3.
-
-\usepackage[sc]{mathpazo}    % Palatino with smallcaps
-\usepackage[scaled]{helvet}  % Helvetica, scaled 95%
+\usepackage[sc]{mathpazo}
+\usepackage[scaled]{helvet}
 \usepackage{eulervm}
 \usepackage{inconsolata}
+\renewcommand{\baselinestretch}{1.2}
 
 \usepackage{phdcmd}
 \usepackage{speccert}
@@ -24,14 +19,17 @@
 \usepackage{bigcenter}
 \usepackage{geometry}
 \usepackage{paralist}
-\usepackage{hyperref}
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{bussproofs}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  allcolors=Violet
+}
 
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage{inconsolata}
 
 \usepackage[dvipsnames]{xcolor}
 \usepackage{pgf-umlsd}
@@ -42,11 +40,9 @@
 \newcommand\TODO[1]{}
 \newcommand\PC[1]{}
 
-\usepackage{mdframed} % or, "mdframed"
+\usepackage{mdframed}
 \usepackage[amsthm,framed]{ntheorem}
 \newcommand{\powerset}{\raisebox{.15\baselineskip}{\Large\ensuremath{\wp}}}
-
-\definecolor{statementline}{HTML}{b7e2d6}
 
 \theoremstyle{break}
 \theorembodyfont{\fontshape\rmdefault\selectfont}
@@ -84,8 +80,7 @@ backgroundcolor=PineGreen!2}
 \newmdtheoremenv[style=statement]{theorem}{Theorem}[chapter]
 
 \usepackage{tikz}
-\usetikzlibrary{shapes.geometric, positioning, arrows, intersections, fit,
-  matrix, shapes, shapes.symbols}
+\usetikzlibrary{positioning, arrows, intersections, fit, matrix, shapes}
 
 \usepackage{acro}
 

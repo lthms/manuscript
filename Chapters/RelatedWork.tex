@@ -46,9 +46,9 @@ In the context of this thesis, we focus on verifying the correctness of
 implementations defined in the form of idealized models with respect to
 non-functional specifications which characterize security policies.
 %
-In particular, we do not cover \emph{model validation}, that is the verification
-that a model is a correct abstraction of the concrete system it supposedly
-describes.
+%In particular, we do not cover \emph{model validation}, that is the verification
+%that a model is a correct abstraction of the concrete system it supposedly
+%describes.
 %
 The rest of this Chapter proceeds as follows.
 %
@@ -104,34 +104,26 @@ hardware circuit receives a clock signal, a hardware controller receives a
 message from a bus, an operating system handles a syscall).
 
 \emph{Labeled} transition systems distinguish between classes of transitions
-\emph{via} the use of labels (\emph{e.g.} one label per syscall).
+\emph{via} the use of labels\,\cite{loiseaux1995lts} (\emph{e.g.} one label per
+syscall).
 %
-To the best of our knowledge, the more straightforward definition\PC{ce début de
-  phrase laisse penser que 1. tu n'es pas sûr 2. il n'y a pas de def standard ?
-  - à revoir} of a labeled transition system, as used by Vijayaraghavan \emph{et
-  al.} in their work on modular verification of multiprocessor hardware
-designs\,\cite{vijayaraghavan2015modular}, is a tuple
-\( \langle S, L, R \rangle \), such that \( S \) is a set of states, \( L \) is
-a set of labels, and \( R \subseteq S \times L \times S \) is the transition
-relation.
-%
-In addition, there is often a subset of states which identifies acceptable
-initial states.\PC{et ? (phrase qui tombe un peu de nulle part)}
+A labeled transition system is a tuple \( \langle S, L, R \rangle \), such that
+\( S \) is a set of states, \( L \) is a set of labels, and
+\( R \subseteq S \times L \times S \) is the transition relation.
 
-\PC{l'exemple Airlock Systems tombe carrément du ciel, on ne voit pas pourquo tu
-  le choisis. Je suggère de mettre ici une phrase disant que tu vas prendre un
-  exemple récurrent pour illuster, et pourquoi tu le prends}
+Throughout this Chapter, we will use the airlock system in order to act as a
+running example to illustrate the introduced definitions.
+%
+An airlock system is a device made of two doors, and an intermediary chamber.
+%
+To get across an airlock system, a user requests the opening of the first door,
+enters the chamber, waits for the system to close the first door and open the
+second door, and exits the chamber.
 
 \begin{example}[Airlock System]
   \label{example:sota:airlocklts}
-  Figure~\ref{fig:sota:airlock-lts} illustrates this definition for a simple
-  airlock system.
-  %
-  An airlock system is a device made of two doors, and an intermediary chamber.
-  %
-  To get across an airlock system, a user requests the opening of the first
-  door, enters the chamber, waits for the system to close the first door and
-  open the second door, and exits the chamber.
+  Figure~\ref{fig:sota:airlock-lts} gives a definition of an idealized airlock
+  system, modeled as a labeled transition system.
 
   \begin{itemize}
   \item A door of the system can be either \( \mathtt{open} \) or
@@ -143,9 +135,9 @@ initial states.\PC{et ? (phrase qui tombe un peu de nulle part)}
     \( i \in \{1, 2\} \)) and closing (\( \mathtt{Close}_i \), with
     \( i \in \{1, 2\} \)) of a door of the system.
     %
-  \item The system does\PC{should?} not allow the simultaneous opening of both
-    doors, as stated by the definition of \( R \) which does not contain a
-    transition which leads to the state \( (\mathtt{open}, \mathtt{open}) \).
+  \item The model does not allow the simultaneous opening of both doors, as
+    stated by the definition of \( R \) which does not contain a transition
+    which leads to the state \( (\mathtt{open}, \mathtt{open}) \).
   \end{itemize}
 \end{example}
 
@@ -206,9 +198,8 @@ initial states.\PC{et ? (phrase qui tombe un peu de nulle part)}
   \end{center}
 \end{figure}
 
-There are many modeling structures for characterizing transition
-systems, with each variant better suited to tackle a particular class of
-systems.
+There are many modeling structures for characterizing transition systems, with
+each variant better suited to tackle a particular class of systems.
 %
 For instance, the Kripke structure\,\cite{kripke1971semantical} is a prominent
 definition of transition systems used in model checking\,\cite{clarke1999model}.
@@ -640,17 +631,15 @@ In this context, considering each trace independently does not make sense.
 To witness a violation of the security policy requires to compare two traces
 together.
 %
-Such properties\PC{lesquelles ? il y a un mix entre policies et properties} are
-called \emph{hyperproperties}\,\cite{marr2002hypertheading},
-and are characterized by sets of sets of traces.
+As a consequence, such policies are characterized by sets of sets of traces;
+they are called called \emph{hyperproperties}\,\cite{marr2002hypertheading}.
 %
 Verifying a system with respect to a hyperproperty is harder in the general
 case, but certain hyperproperties, called \( k \)-safety properties, can be
 reduced to an invariant.
 %
-\PC{saut de ligne}
-For instance, we assume \( M \) handles inputs which can be either secret or
-public.
+For instance, we assume \( M \) handles inputs which can be
+either secret or public.
 %
 Let \( \equiv \) be the binary relation, such that two states \( s \) and
 \( r \) satisfies this relation (\( s \equiv r \)) if and only if they
@@ -838,14 +827,13 @@ First, they showed that the ideal hypervisor
 %
 \begin{inparaenum}[(1)]
 \item ensures strong isolation between guests (two safety properties and one
-	2-safety property\PC{c'est quoi une ``2-safety property''?}), and
+  2-safety property\PC{c'est quoi une ``2-safety property''?}), and
 %
 \item eventually processes every request performed by the guests (one liveness
   property)\,\cite{barthe2011virtcert1}.
 \end{inparaenum}
 %
 Then, they incorporated the \ac{cpu} cache to their hardware model, and a
-naive\PC{un peu agressif. ``simple / trivial'' ?}
 countermeasure for preventing cache-timing attack to their hypervisor model.
 %
 They proved the effectiveness of the countermeasure\,\cite{barthe2012virtcert2}.
@@ -860,6 +848,7 @@ attack\,\cite{barthe2014virtcert3}.
 This last work also introduced a static analysis for C program, notably
 implemented as an extension for CompCert, a certified C
 compiler\,\cite{leroy2012compcert}.
+%
 \PC{trop générique/vague: ``une analyse statique ?'' laquelle ? pour faire quoi}
 
 The resulting project, called VirtCert, is fairly large.
@@ -869,9 +858,8 @@ The Coq development counts over 50\,000 lines of code.
 The verification results focus on various isolation properties, from the most
 natural and straightforward (\emph{i.e.} an OS guest cannot write to or read
 from a page it does not own) up to non-interference variants, notoriously harder
-to reason with.
-\PC{idem, on ne voit pas les limites de ce travail, et/ou pourquoi tu ne
-l'utilise pas directement}
+to reason with.  \PC{idem, on ne voit pas les limites de ce travail, et/ou
+  pourquoi tu ne l'utilise pas directement}
 
 \paragraph{seL4.}
 %
@@ -910,8 +898,7 @@ From a security perspective, this means there are two requirements over
 \end{inparaenum}
 %
 This is similar to the challenges faced by \ac{hse} mechanisms.
-%
-\PC{saut de ligne}
+
 Because \ac{nacl} has been shown to have issues regarding these two
 requirements, Greg Morrisett \emph{et al.} have specified the \ac{nacl} checker
 in Coq, proven the rules it checks are correct and indeed enforce the targeted
