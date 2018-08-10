@@ -1237,6 +1237,7 @@ Loic Duflot \emph{et al.}\,\cite{duflot2009smram} and Rafal Wojtczuk \emph{et
 misplaced when they disclosed the SMRAM Cache Poisoning Attack.
 
 \paragraph{Cache Memory.}
+\TODO{Contrairement à Intel TXT, les caches sont une techno hyper courantes, non spécifiques à Intel et que tout le monde connait. Ce long paragraph de description des caches devrait donc plutôt être placé en section 2.1.1. Ici, tu te contenterais de manière très succinte de rappeler les concepts nécessaire pour comprendre l'attaque en faisant référence à la section décrivant les caches. Cela éviterait cette longue digression qui nous éloigne de la description de l'attaque. Le contenu est intéressant mais doit être mieux placé.}
 %
 Interacting with the \ac{dram} remains slow, in regard to the speed of a
 \ac{cpu}.
@@ -1248,9 +1249,9 @@ For instance, Intel Core i7, i5 and i3 processors have three levels of caches.
 %
 More precisely, each core is assigned two levels of cache called L1 and L2,
 while they all share a so-called L3 cache, as pictured in
-Figure~\ref{fig:usecase:l1-l3caches}.
+Figure~\ref{fig:usecase:l1-l3caches}. \TODO{La figure fait apparaître des L3 slice. Il faudrait expliquer à quoi cela correspondre ou simplifier la figure}
 %
-The L1 cache has the particularity to be divided into a cache of instructions
+The L1 cache has the particularity of being divided into a cache of instructions
 (used when the core read from memory instructions to execute) and a cache of
 data.
 
@@ -1388,27 +1389,25 @@ mechanisms, including (but not limited to):
 \item The \ac{cpu} has several registers called Memory Type Range Registers
   (MTRR), to specify a cache strategy for pre-defined memory regions.
   %
-  Each MTRR
+  Each MTRR \TODO{la phrase n'est pas terminée}
 \item The Page Table Attribute (PAT) allows for configuring a cache strategy at
   a memory page granularity.
 \end{itemize}
 %
-The most commonly used strategy is the write-back strategy, summarized in
+The write-back strategy is the most commonly used and is summarized in
 Figure~\ref{fig:usecase:writeback}.
 %
-The purpose of the write-back strategy is to reduce the number of \IO forwarded
+The purpose of this strategy is to reduce the number of \IO forwarded
 to the \ac{dram}.
 %
-To that end, each cache block has a ``dirty bit'' which is set by the cache when
-its value is updated by a write access.
+To that end, each cache block \TODO{C'est quoi un cache bloc? Il faudrait l'expliquer rapidement avant (il faudrait brièvement décrire la structure d'un cache).} has a ``dirty bit'' which is set by the cache when its value is updated by a write access.
 %
-In case of cache eviction, the cache verifies the value of the ``dirty bit'', so
-it can update the underlying memory cell if necessary.
+In case of cache eviction \TODO{c'est quoi cache eviction?}, the cache verifies the value of the ``dirty bit'', so it can update the underlying memory cell if necessary.
 %
 Therefore, as long as the cache block is not evicted, the \ac{cpu} does not
 issue write access to the underlying memory.
 %
-The write-back strategy is not suitable for memories of hardware components
+The write-back strategy is not suitable for memories of other hardware components
 mapped into the \ac{cpu} address space.
 %
 For instance, caching \IOs targeting a framebuffer does not make sense, because
@@ -1418,11 +1417,11 @@ This is why Intel provides four complementary strategies.
 %
 The uncacheable strategy disables the cache for the given address, while write
 combining, write-through, write-back and write-protected are similar strategies
-such that write accesses are directly forwarded to the underlying memory.
+such that write accesses are directly forwarded to the underlying memory. \TODO{euh, du coup c'est quoi la différence entre "uncacheable" et les autres stratégies "similaires". Naivement j'aurais tendance à penser que désactiver le cache revient à rediriger directement l'écriture vers la mémoire. A oui, ok, pour la lecture de contenu non modifié, les stratégies en question te permette une optimisation. Mais il faudrait le préciser car sinon on ne comprends pas trop pourquoi tu distingues ces différents cas.}
 
-For cache-friendly programs, the gain in performance can be huge.
+For cache-friendly programs, the gain in performance can be huge. \TODO{utilité de ce dernier paragraphe? en outre, il n'est pas vraiment raccord avec ce qui précède.}
 %
-For instance, for a Pentium M Intel have stated that access to L1 cache takes 3
+For instance, for a Pentium M Intel  stated that access to L1 cache takes 3
 \ac{cpu} cycles, access to the L2 cache takes 12 cycles and access to the DRAM
 takes 240 cycles\,\cite{drepper2007memory}.
 
@@ -1514,10 +1513,10 @@ The attack proceeds as follows:
 \item They write to the \texttt{APM\_CNT} register in order to provoke the
   triggering of a \ac{smi}.
 %
-\item The \ac{smm} code is executed in SMM, leading the cache to be filled with
+\item The \ac{smm} \TODO{BIOS code plutôt que SMM? "SMM code exécuté en SMM" fait bizarre } code is executed in SMM, leading the cache to be filled with
   copies of that code
 %
-\item Attackers write to an address which belongs to the SMRAM, and because of
+\item \TODO{Il faudrait mentionner qu'à la fin de l'étape 3, le processeur a quitté le SMM}Attackers write to an address which belongs to the SMRAM, and because of
   the write-back cache strategy, the \ac{cpu} updates the copies within the
   cache, and does not forward the \IO to the Memory Controller.
 %
@@ -1541,7 +1540,7 @@ Integrity property.
 \paragraph{Countermeasure.}
 %
 The solution implemented by Intel to prevent further exploitation of this
-vulnerability was to modify the behavior of the cache, when the memory accesses
+vulnerability was to modify the behavior of the cache, when some memory access
 target the SMRAM.
 %
 Because the SMRAM size and location remain specific to each architecture, this
@@ -1555,7 +1554,7 @@ The SMRAM Cache Poisoning attack is a textbook case of compositional attacks.
 It is interesting to notice that six years later, Christopher Domas has
 disclosed another x86 vulnerability called Sinkhole\,\cite{domas2015sinkhole},
 which relies on a similar approach to trick a \ac{cpu} in \ac{smm} to execute
-arbitrary instructions.
+arbitrary instructions. \TODO{Les contre-mesures contre le cache poisoning ne fonctionnaient pas pour Sinkhole? Elles n'étaient pas encore déployées?}
 %
 Both attacks leave the content of the SMRAM in \ac{dram} intact, and leverage
 only legitimate hardware features.
@@ -1603,7 +1602,7 @@ In such a case, neither the system software component nor a third party involved
 in an attestation protocol has a reliable solution to detect the attack.
 %
 On the other hand, only an error within the implementation of the TXT
-instructions can lead to a similar scenario\,\cite{wojtczuk2011txtbug}.
+instructions can lead to a similar scenario\,\cite{wojtczuk2011txtbug}. \TODO{Comment çà marche? Comment le processeur sait qu'il doit faire ces mesures sans que le BIOS ne puisse l'influencer sur sa décision? Comme tu as choisi de détailler le fonctionnement de cette techno (ce qui peut s'enterndre) il faudrait que tu nous donnes quelques billes supplémentaire pour qu'on comprenne le principe de fonctionnement.}
 
 \paragraph{Attack Path.}
 %
@@ -1638,11 +1637,12 @@ by the \ac{pch}.
   la version actuelle n'est pas forcément plus longue, mais elle se concentre
   plus sur l'essentiel et donne les éléments qui manquaient dans les précédentes
   itérations.}
+\TODO{Je ne sais pas si c'est mieux qu'avant (je ne me souvient plus) mais je trouve très bien comme çà. Comme tu le dis, la description se concentre sur l'essentiel (en gros, un mécanisme de sécurité qui a été rajouté désactive les SMI). Par contre, on peut se poser la question de l'intérêt de la description de TXT qui précède. Peut-être qu'il est suffisant de dire que TXT est un mécanisme de sécurité additionnel qui a été rajouté par Intel et qui avait la mauvaise idée de désactiver les SMI. Sinon, si tu souhaite détailler TXT, tu détaille  (un peu) actuellement le fonctionnement du mécanisme de vérification d'intégrité mais pas le mécanisme de "trusted execution environment" or c'est celui-là qui est en cause dans l'attaque visiblement...}
 
 \paragraph{Countermeasure.}
 %
 Recent x86 \acp{cpu} do not disable \ac{smi} when using the \texttt{SENTER}
-instructions.
+instructions. \TODO{C'est quoi l'instruction SENTER? Il me semble que tu n'en parles nul part avant}
 %
 This means the system software component continues to rely on the \ac{bios} code
 stored in the SMRAM.
@@ -1655,7 +1655,7 @@ remains in a working state.
 As a consequence, Intel is advising system software developers to enable back
 \ac{smi} in the TXT Software Development Guide as ``most systems will not
 function properly if \acp{smi} are disabled for any length of
-time''\,\cite{intel2015txt}.
+time''\,\cite{intel2015txt}. \TODO{ce dernier paragraphe n'est pas claire. De manière générale, l'explication de la contre-mesure n'est pas claire. }
 
 \subsection{Speed Racer}
 \label{subsec:usecase:hse:speed}
