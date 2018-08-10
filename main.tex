@@ -1,69 +1,48 @@
 \documentclass[oneside,a4paper]{memoir}
 \setsecnumdepth{subsection}
-\maxtocdepth{subsection}
-\usepackage{bookmark}
-
-\usepackage[explicit]{titlesec}
-\usepackage{type1cm}
-
-\usepackage[sc]{mathpazo}    % Palatino with smallcaps
-\usepackage[scaled]{helvet}  % Helvetica, scaled 95%
-\usepackage{eulervm}
-\usepackage{inconsolata}
-\renewcommand{\baselinestretch}{1.2}
-
-\usepackage[dvipsnames]{xcolor}
-\usepackage{pgf-umlsd}
 
 \usepackage[chapter]{minted}
 \usemintedstyle{bw}
 \setminted{framesep=10pt,xleftmargin=18pt,frame=leftline,linenos=true}
 
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage[english]{babel}
-\usepackage{tocbibind}
-\usepackage[babel=true,kerning=true,spacing=true,auto=true]{microtype}
-\usepackage[babel=true]{csquotes}
-\usepackage{makeidx}
-\usepackage[mathscr]{euscript}
-\let\euscr\mathscr \let\mathscr\relax% just so we can load this and rsfs
-\usepackage[scr]{rsfso}
-\newcommand{\powerset}{\raisebox{.15\baselineskip}{\Large\ensuremath{\wp}}}
+\usepackage[sc]{mathpazo}
+\usepackage[scaled]{helvet}
+\usepackage{eulervm}
+\usepackage{inconsolata}
+\renewcommand{\baselinestretch}{1.2}
+
+\usepackage{phdcmd}
+\usepackage{speccert}
+\usepackage{freespec}
+\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
+
+\usepackage{bigcenter}
 \usepackage{geometry}
-
-% Use -- instead of bullet for itemize
-\renewcommand{\labelitemi}{\normalfont\textendash}
-
-\usepackage{textcomp}
+\usepackage{paralist}
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{bussproofs}
-\usepackage{paralist}
-\usepackage{bigcenter}
-\usepackage[mode=buildnew]{standalone}
-\usepackage[index=true]{acro}
-\usepackage{xargs}
-\usepackage{todonotes}
 \usepackage{hyperref}
 \hypersetup{
   colorlinks=true,
   allcolors=Violet
 }
 
-\titleformat{\chapter}[display]
-  {\normalfont\Large}
-  {\flushright\fontsize{90}{0}\textbf{\textcolor{Violet!20}{\thechapter}}}{10pt}
-  {\flushright\fontsize{30}{0}\textsc{#1}\vskip80pt}
-\titlespacing*{\chapter}
-  {0pt}{-40pt}{0pt}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
 
-\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{pgf-umlsd}
+\usepackage{xargs}
 
-\usepackage{mdframed} % or, "mdframed"
+\usepackage{todonotes}
+\newcommandx{\thomasrk}[2][1=]{\todo[linecolor=Plum,backgroundcolor=Plum!25,bordercolor=Plum,#1]{#2}}
+\newcommand\TODO[1]{\todo[inline,linecolor=red,backgroundcolor=red!25,bordercolor=red]{\textbf{TODO:} #1}}
+\newcommand\PC[1]{\todo[inline,linecolor=red,backgroundcolor=red!25,bordercolor=red]{\textbf{PC:} #1}}
+
+\usepackage{mdframed}
 \usepackage[amsthm,framed]{ntheorem}
-
-\definecolor{statementline}{HTML}{b7e2d6}
+\newcommand{\powerset}{\raisebox{.15\baselineskip}{\Large\ensuremath{\wp}}}
 
 \theoremstyle{break}
 \theorembodyfont{\fontshape\rmdefault\selectfont}
@@ -101,28 +80,38 @@ backgroundcolor=PineGreen!2}
 \newmdtheoremenv[style=statement]{theorem}{Theorem}[chapter]
 
 \usepackage{tikz}
-\usetikzlibrary{shapes.geometric, positioning, arrows, intersections, fit,
-  matrix, shapes, shapes.symbols}
+\usetikzlibrary{positioning, arrows, intersections, fit, matrix, shapes}
 
-\usepackage{phdcmd}
-\usepackage{speccert}
-\usepackage{freespec}
-
-% Commands to annotate the manuscripts
-\newcommandx{\thomasrk}[2][1=]{\todo[linecolor=Plum,backgroundcolor=Plum!25,bordercolor=Plum,#1]{#2}}
-\newcommand\TODO[1]{\todo[inline,linecolor=red,backgroundcolor=red!25,bordercolor=red]{\textbf{TODO:} #1}}
-\newcommand\PC[1]{\todo[inline,linecolor=red,backgroundcolor=red!25,bordercolor=red]{\textbf{PC:} #1}}
+\usepackage[index=true]{acro}
 
 \input{abbrev}
 \input{nomencl}
 
+% not in template (required)
+\usepackage{bookmark}
+% not in template (customization)
+\usepackage[explicit]{titlesec}
+\maxtocdepth{subsection}
+
+\usepackage[american]{babel}
+\usepackage[babel=true,kerning=true,spacing=true,auto=true]{microtype}
+\usepackage[babel=true]{csquotes}
+
+\usepackage{makeidx}
+
+\renewcommand{\labelitemi}{\normalfont\textendash}
+
+\titleformat{\chapter}[display]
+  {\normalfont\Large}
+  {\flushright\fontsize{90}{0}\textbf{\textcolor{Violet!20}{\thechapter}}}{10pt}
+  {\flushright\fontsize{30}{0}\textsc{#1}\vskip80pt}
+\titlespacing*{\chapter}
+  {0pt}{-40pt}{0pt}
+%%%%%%%%%%%%%%%%%
+
 \title{Specifying and Verifying Hardware-based Security Enforcement Mechanisms}
 \author{Thomas Letan}
 \date{2015 -- 2018}
-
-\pagestyle{plain}
-
-\usepackage{titlesec}
 
 \makeindex
 
