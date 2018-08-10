@@ -921,7 +921,7 @@ software stack, even after the end of the boot sequence.
 \subsection{Security Model}
 \label{subsec:usecase:firm:sec}
 
-The hardware architecture’s manufacturer provides the \ac{bios}.
+The \ac{bios} is provided by the manufacturer of the hardware architecture.
 %
 In most cases, it is a proprietary software, and the computer owner has little
 control over it.
@@ -959,18 +959,17 @@ isolation from the rest of the software stack.
 % security
 % vulnerability\,\cite{duflot2009smram,wojtczuk2009smram,bulygin2014summary}.
 %
-From the information we gathered in the Intel manual, processor and \ac{pch}
-datasheets and in the academic literature, we believe the isolation required by
-the \ac{bios} can be divided into three complementary security policies.
+From the information we gathered in the Intel manuals\TODO{ref} and in the academic literature \TODO{ref}, 
+the isolation required by the \ac{bios} can be divided into three complementary security policies.
 
 \begin{description}
 \item [Volatile Memory Access Control]
   %
-  The \ac{bios} is assigned a volatile memory region to support its execution at
-  runtime which is protected against \IOs issued by the rest of the software
+  The \ac{bios} is assigned a region of the volatile memory  to support its execution at
+  runtime. This region is protected against \IOs issued by the rest of the software
   stack.
   %
-  Besides, the \ac{bios} can rely on a \emph{secure channel} \thomasrk{ref?} to
+  Besides, the \ac{bios} can rely on a \emph{secure channel} \thomasrk{ref?} \TODO{oui, ref!} to
   manipulate this volatile memory, \emph{e.g.} an adversary cannot modify the
   memory map in order to intercept \IOs issued by the \ac{bios} and targeting
   this volatile memory.
@@ -999,7 +998,8 @@ the \ac{bios} can be divided into three complementary security policies.
 
 The isolation of the \ac{bios} at runtime, as detailed in the previous
 subsection, directly involves three different hardware components: the
-processor, the \ac{dram} and the \ac{pch}.
+processor, the \ac{dram} and the \ac{pch}. \TODO{la flash aussi (au même titre que la DRAM. On pourrait aussi parler du memory controleur}
+\TODO{il manque ici une phrase de transition avec la suite /annonce de plan}
 
 \paragraph{System Management Mode.}
 %
@@ -1008,9 +1008,7 @@ To handle several software components with different levels of privilege, Intel
 hardware capabilities.
 %
 For instance, in a given execution mode, a \ac{cpu} may refuse to execute
-certain assembly instructions, and the software component executed at the time
-will not be able to leverage the side effects involved in the execution of these
-instructions.
+certain assembly instructions.
 %
 Contrary to common belief, x86 execution modes are not organized in a linear
 hierarchy, but are rather a matrix of complementary hardware features:
@@ -1040,7 +1038,7 @@ Chapter 34]{intel2014manual}, introduced in the Intel manual as follows:
 \end{quote}
 
 The \ac{smm} is the foundation of the \ac{bios} execution at runtime, but it is
-not sufficient.
+not sufficient. \TODO{Sauf erreur de ma part, tout le code du BIOS exécuté à runtime ne s'exécute par en SMM. Je pense que les routines ACPI par exemple s'exécutent dans le contexte du code appelant. En revanche, SMM est le moyen matériel utilisé par le BIOS pour s'isoler à runtime. Le code critique du BIOS est exécuté à runtime en SMM} 
 
 \paragraph{System Management RAM.}
 %
@@ -1073,22 +1071,21 @@ SMRAM.
 % \TODO{expliquer ce que veut dire invisible -> la mémoire n'est plus mappé dans
 % la plage d'adresse et soit le processeur accède à une autre mémoire soit il y
 % a une exception (je suppose)}
-A locked SMRAM can only be accessed by a \ac{cpu} in \ac{smm}, and is
-inaccessible to a \ac{cpu} not in \ac{smm}.
+A locked SMRAM can only be accessed by a \ac{cpu} in \ac{smm}.
 %
 More precisely, the physical addresses dedicated to the SMRAM from the \ac{bios}
 perspective are used by the rest of the software stack to access the VGA
-controller memory.
+controller memory. \TODO{en fait, c'est le mapping de la mémoire qui est différent. Il faudrait l'expliquer comme çà, c'est un peu implicite dans ton explication et j'ai peur que le lecteur non averti ne comprenne pas.}
 %
 The \texttt{SMRAMC} register exposed by the processor controls this access
 control mechanism, \emph{via} its \texttt{D\_LCK} bit.
 %
 The \ac{bios} locks the SMRAM by setting the \texttt{D\_LCK} bit.
 %
-A processor with the \texttt{D\_LCK} bit set will prevent a \ac{cpu} not in
+A processor with the \texttt{D\_LCK} bit set will prevent a \ac{cpu} \TODO{"core" plutôt que CPU, non? "A processor .. prevent a CPU" est étrange.} not in
 \ac{smm} to access the SMRAM content.
 %
-In addition, the only way to clear the \texttt{D\_LCK} is by performing a
+In addition, the only way to clear the \texttt{D\_LCK} bit is by performing a
 complete reboot of the platform.
 %
 This leaves no opportunity for the system software to tamper with the SMRAM
@@ -1097,7 +1094,7 @@ software component.
 
 \paragraph{System Management Interrupt.}
 
-The \ac{smi} is a hardware interrupt which makes the \ac{cpu} ``enters''
+The \ac{smi} is a hardware interrupt which makes the \ac{cpu} \TODO{tu utilises souvent CPU mais on ne sais pas vraiement si c'est un synonyme de "processor". En outre, tu l'utilise parfois pour désigner un coeur. Il faudrait être précis et notamment bien distinguer ce qui relève de l'ensemble (le processeur) de ce qui est réalisé sur chaque unité d'exécution (les coeurs). En l'occurence, pour une SMI, est-ce seulement un coeurs ou l'ensemble des coeurs qui passent en SMM? } ``enters''
 \ac{smm}.
 %
 More precisely, when a \ac{cpu} receives a \ac{smi}, it saves its current state
@@ -1132,15 +1129,15 @@ Indeed, the \ac{cpu} increments it every time it handles a
 An operating system can also spin in a loop to take regular timestamps.
 %
 Variations in the timestamps interval are likely to be explained by a \ac{smm}
-context switch.
+context switch. \TODO{Utilité de ce paragraphe? C'est un peu une digression, qui, je suppose, viennent nuancer la dernière phrase du paragrpahe précédent. Mais a-t-on besoin de rentrer dans ce niveau de détail pour ton sujet...?}
 
 Finally, the \ac{pch} exposes a register called \texttt{APM\_CNT} that a system
 software component can write to in order to make the \ac{pch} triggers a
-\ac{smi}\,\cite{intel2012pch}.
+\ac{smi}\,\cite{intel2012pch}. \TODO{Il faudrait indiquer que c'est donc un moyen pour l'OS de faire appel à du code du BIOS isolé à runtime. Par exemple pour xxxx}
 
 \paragraph{Flash Memory Lockdown.}
 %
-The content of the flash memory has to be protected from arbitrary tampering,
+The content of the flash memory has to be protected from arbitrary tampering \TODO{tu aimes bien "tampering" mais tu l'utilises beaucoup et un peu à toutes les sauces. ici "write access" ne serait-il pas plus approprié?},
 similarly to the SMRAM protection.
 %
 That is, only the \ac{smm} code should be able to overwrite the content of the
@@ -1163,17 +1160,16 @@ the value of the \texttt{BLE} bit.
 If the \texttt{BLE} bit has been set by the \ac{bios} during the boot sequence,
 then the \ac{pch} triggers a \ac{smi}.
 %
-As a consequence, the \ac{cpu} stops its current execution and enters in
+As a consequence, the \ac{cpu} \TODO{CPU? core? processor?} stops its current execution and enters in
 \ac{smm}.
 %
-This prevents the system software from tampering with the content of the Flash
-Memory, even if the \ac{pch} now authorizes write accesses.
+This prevents the system software from tampering \TODO{modifying plutôt que tampering? } with the content of the Flash Memory, even if the \ac{pch} now authorizes write accesses.
 %
 It is the \ac{smm} code responsibility to clear the \texttt{BIOSWE} bit before
 using the \texttt{rsm} instruction.
 %
 On the contrary, if the \texttt{BLE} bit is not set, setting the \texttt{BIOSWE}
-bit will not cause a \ac{smi}.
+bit will not cause a \ac{smi}. \TODO{et donc? Il faudrait expliquer que le code exécuté (l'OS par exemple) peut alors librement modifier le contenu de la flash}
 %
 Similarly to the \texttt{D\_LCK} bit of the \texttt{SMRAMC} register, the
 \texttt{BLE} bit cannot be cleared without a reboot.
@@ -1194,8 +1190,8 @@ explains why the \ac{smm} is often referred to as the x86 ``most privileged
 execution mode.''
 %
 In a nutshell, the \ac{smm} code can leverage the same hardware capabilities
-than the system software component, including manipulating memories used by this
-system software components.
+than the system software, including manipulating memories used by the
+system software.
 %
 On the contrary, the system software cannot modify either the SMRAM content or
 the \ac{smm} code stored in the flash memory, and cannot prevent the \ac{smm}
