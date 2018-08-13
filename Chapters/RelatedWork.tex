@@ -1,5 +1,5 @@
 %!TEX root = ../main.tex
-\chapter{Formal Verification With Respect To Security Policies}
+\chapter{State of the Art}
 \label{chapter:relatedwork}
 
 \PC{tu annonce un état de l'art complet, mais en pratique il est plus limité aux
@@ -686,23 +686,63 @@ where \( s \xrightarrow{l} s' \) is a transition of the system from a state
 \subsection{Related Work}
 \label{subsec:sota:ltsrelated}
 
-Formal verification of hardware and software systems is a large and prolific
-research field, with important applications in the industry.
+Throughout this Section, we have detailed how we can model a target of
+verification as a transition system in order to verify its correctness with
+respect to security policies specified as predicates on set of model traces.
 %
-The interest has grown in the use of formal methods to improve the security of
-computer systems\,\cite{chong2016report}.
-%
-We give an overview of formal verification projects which
+In order to verify \ac{hse} mechanisms, it is important to consider that
 %
 \begin{inparaenum}[(1)]
-\item have a clear focus on security, and
-\item target two domains related to \ac{hse} mechanisms, that is hardware
-  architectures, and system software components.
+\item \label{needreuse}%
+  hardware architectures often allow for implementing several \ac{hse}
+  mechanisms, and
+  %
+\item \label{needreduce}%
+  hardware features involved in \ac{hse} mechanisms are not safe by default,
+  hence the role played by trusted software components to configure them.
 \end{inparaenum}
+
+In this thesis, we advocate for defining \ac{hse} mechanisms of a given hardware
+architecture against a generic functional specification of this architecture,
+rather than relying on ad-hoc models dedicated to specific \ac{hse} mechanisms.
 %
-For each project, we detail the modeling structure used to define the
-specification of the targeted system, the verified properties and the
-verification approach leveraged by the authors.
+Our hypothesis is that a pre-existing model which is comprehensive in terms of
+hardware features is a prerequisite to address the threat posed by compositional
+attacks.
+%
+Besides, this means the same model can be reused for several \ac{hse}
+mechanisms, reducing the overall verification effort induced by
+(\ref{needreuse}).
+%
+However, (\ref{needreduce}) means models of hardware architectures necessarily
+contains traces which are legitimate with respect to the functional
+specifications, but violate the security policy.
+
+As a consequence, a formal definition of \ac{hse} mechanisms, like the one we
+present in Chapter~\ref{chapter:speccert}, shall allow for identifying the
+subset of traces wherein the mechanism is correctly implemented by the trusted
+software components.
+%
+In this context, verifying a \ac{hse} mechanism consists of proving this set of
+traces satisfies the predicate which characterizes the targeted security policy.
+
+We now give an overview of formal verification projects which have required to
+define a functional specification of (part of) a hardware architecture, either
+to reason about the architecture itself (\ref{subsubsec:sota:hw}), or to verify
+the correctness of software components executed by this architecture
+(\ref{subsubsec:sota:ssw} and \ref{subsubsec:sota:asw}).
+%
+We detail the projects scope, the verification approaches authors utilized, and
+we discuss to what extent their results apply to our objectives.
+
+\subsubsection{Hardware Architecture Verification}
+\label{subsubsec:sota:hw}
+
+\paragraph{x86.}
+%
+
+\paragraph{ARMv8.}
+%
 
 \paragraph{XOM.}
 %
@@ -770,17 +810,14 @@ In the process of verifying \ac{xom}, the authors have been able to show with
 their model that the \ac{xom} architecture was subject to several replay
 attacks, and that their countermeasures were effective.
 %
-However, the state explosion problem forces the authors to simplify their
-model, in order to reduce the state combinatory.
-\PC{ça manque un peu d'évaluation: la seule phrase donnant les limites de
-	l'approche est la dernière: il faut montrer pourquoi ce qui existe ne
-suffit pas!}
+However, the state explosion problem forces the authors to simplify their model,
+in order to reduce the state combinatory.  \PC{ça manque un peu d'évaluation: la
+  seule phrase donnant les limites de l'approche est la dernière: il faut
+  montrer pourquoi ce qui existe ne suffit pas!}
 
-\paragraph{ARMv8.}
-%
-ARM Specification Language
-%
-\thomasrk[inline]{TODO}
+
+\subsubsection{System Software Components Verification}
+\label{subsubsec:sota:ssw}
 
 \paragraph{VirtCert.}
 %
@@ -870,11 +907,13 @@ Certified microkernel.
 %
 \thomasrk[inline]{TODO}
 
+\subsubsection{Machine-Code Program Verification}
+\label{subsubsec:sota:asw}
+
 \paragraph{RockSalt.}
 %
-A Google service called \ac{nacl} allows for for software
-developers to distribute their web applications in the form of native executable
-code.
+A Google service called \ac{nacl} allows for for software developers to
+distribute their web applications in the form of native executable code.
 %
 These native applications are executed directly in the context of the browser.
 %
@@ -884,8 +923,8 @@ with the code and data of the browser.
 \ac{sfi} comprises a set of rules native applications have to comply with, and
 that together form a sandbox policy.
 %
-In practice, \ac{nacl} checks that an arbitrary native applications respects
-the \ac{sfi} rules before loading it to the browser context.
+In practice, \ac{nacl} checks that an arbitrary native applications respects the
+\ac{sfi} rules before loading it to the browser context.
 %
 As a consequence, the browser is protected from malicious machine code.
 
@@ -979,9 +1018,8 @@ yet is a requirement to uncover compositional attacks by the means of formal
 methods.
 
 \PC{il manque aussi l'argument de la difficulté à maintenir / faire évoluer le
-	modèle si un composant change - or c'est le cas en pratique: de
-	nombreuses archis sont similaires, mais avec quelques différences dans
-les composants}
+  modèle si un composant change - or c'est le cas en pratique: de nombreuses
+  archis sont similaires, mais avec quelques différences dans les composants}
 
 Compositional verification is a promising (family of) approach(es) to overcome
 the challenges posed by the scale of complex and large systems.
@@ -991,7 +1029,7 @@ In this approach, the verification work is divided into two steps.
 First, each component is verified in isolation.
 %
 Then, the composition of these components is also verified in order to ensure it
-does not create\PC{make them vulnerable to} compositional attacks.
+does not make them vulnerable to compositional attacks.
 %
 This approach requires to use adapted modeling structures when it comes to
 defining a specification (\ref{subsec:sota:compmod}).
@@ -1018,8 +1056,7 @@ sets of labels:
   %
 \end{inparaenum}
 %
-They form the signature of a given automaton (denoted by
-\( \mathrm{act}(S) \)).
+They form the signature of a given automaton (denoted by \( \mathrm{act}(S) \)).
 %
 Its transition relation \( R(S) \) is a subset of
 \( \mathrm{state}(S) \times \mathrm{act}(S) \times \mathrm{state}(S) \), where
@@ -1048,8 +1085,7 @@ except they do not require to be input enabled.
 As a consequence, the definition of an interface automaton captures its
 requirements over the rest of the system.
 %
-\PC{saut de ligne}
-Another popular modeling structure is the Moore Machine.
+\PC{saut de ligne} Another popular modeling structure is the Moore Machine.
 %
 Moore Machines play a key role in compositional model
 checking\,\cite{mcmillan1989compositional}, because they can be translated into
@@ -1432,7 +1468,7 @@ generating appropriate assumptions.
 The \( L* \) algorithm has latterly been adapted to other modeling structure,
 for instance for interface automata\,\cite{emmi2008assume}.
 
-\subsection{Related Works}
+\subsection{Related Work}
 
 \paragraph{{\scshape Kami}.}
 %
