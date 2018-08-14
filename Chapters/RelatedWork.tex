@@ -735,11 +735,68 @@ the correctness of software components executed by this architecture
 We detail the projects scope, the verification approaches authors utilized, and
 we discuss to what extent their results apply to our objectives.
 
-\subsubsection{Hardware Architecture Verification}
-\label{subsubsec:sota:hw}
+\subsubsection{x86 Models}
 
-\paragraph{x86.}
+Intel has integrated formal verification in its processors design process for
+more than a decade now.
 %
+Intel engineers first verified arithmetic operations performed by the
+processors\,\cite{harrison2000x86}, then increased the verification scope to
+cover the complete execution unit responsible for executing assembly
+instruction\,\cite{kaivola2009formalintel}.
+%
+More recently, the SGX instructions ---which allow system software components to
+create and manage enclaves\,\cite{costan2016sgxexplained}--- have been verified
+with respect to security properties, rather than functional
+specification\,\cite{leslie2015linsgx}.
+%
+Each project focused on one aspect of the x86 architecture and led to uncover
+logic errors and inconsistencies in processor designs.
+%
+However, models and tools are rarely publicly available, making it difficult to
+formally specify and verify \ac{hse} mechanisms.
+%
+Besides, to the extend of our knowledge, Intel has not advertised about a
+``global'' model of its architecture, even though Nachiketh Potlapally, who was
+working at Intel at the time, discussed the benefits of such a model in
+2011\,\cite{potlapally2011hardwaresecurity}.
+
+Additionally, several x86 model have been proposed by academic researchers over
+the years, but for purposes of formally reasoning about machine-code programs.
+%
+Probably the most mature projects include RockSalt by Morissett \emph{et
+  al.}\,\cite{morrisett2012rocksalt}, Goel \emph{et al.}
+framework\,\cite{goel2014x86}, and CompCert x86 assembly
+model\,\cite{leroy2012compcert}.
+%
+These models have in common to focus on the execution of one particular software
+component, remain focused on the semantics of the x86 instructions set, and
+abstract away as many hardware details as possible to increase the applicability
+of the model, \emph{e.g.} are limited to the \ac{dram}.
+%
+This approach works well when software components use a limited amount of
+hardware features, as applications typically do, and to reason about correction
+with respect to functional specifications.
+%
+It has been shown in the past that it is possible to extend them, when their
+abstraction is too strong and hides crucial of concrete code execution.
+%
+For instance, Gu \emph{et al.} extended CompCert to reason about
+concurrency\,\cite{gu2016certikos}, and Chen \emph{et al.} developed an approach
+to reason about interruptible programs\,\cite{chen2018interrupt}.
+%
+However, this requires an important level of expertise and understanding of
+fairly complicated formal developments.
+
+As a consequence, we decided to develop an ad-hoc x86 hardware model which
+include the necessary hardware components ---abstracted away in related work---
+to demonstrate in Chapter~\ref{chapter:speccert2} how it is possible to leverage
+our formal definition of \ac{hse} mechanisms presented in
+Chapter~\ref{chapter:speccert} in order to specify and verify a \ac{hse}
+mechanism implemented by the \ac{bios}.
+
+\subsubsection{Hardware Architecture Model}
+\label{subsubsec:sota:hw}
 
 \paragraph{ARMv8.}
 %
@@ -814,7 +871,6 @@ However, the state explosion problem forces the authors to simplify their model,
 in order to reduce the state combinatory.  \PC{ça manque un peu d'évaluation: la
   seule phrase donnant les limites de l'approche est la dernière: il faut
   montrer pourquoi ce qui existe ne suffit pas!}
-
 
 \subsubsection{System Software Components Verification}
 \label{subsubsec:sota:ssw}

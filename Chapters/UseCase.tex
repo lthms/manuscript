@@ -315,7 +315,7 @@ majority of the system memory is made of \ac{dram}.
 %
 Besides, cores use another address space characterized by two dedicated
 instructions ---\texttt{in} and \texttt{out}--- to target the memories exposed
-by other software components \TODO{software components? tu ne voulais pas dire plutôt hardware components?}.
+by other hardware components.
 %
 \IOs issued by \texttt{in} and \texttt{out} instructions are referred to as
 Port-Mapped \IOs (PMIO), and the addresses of this address space are called
@@ -341,9 +341,10 @@ locations within the hardware architecture is called the \emph{memory map}.
 The memory map is configurable, that is it can be changed dynamically \emph{via}
 configuration registers exposed by the processor and the \ac{pch}.
 %
-For instance, PCI  \TODO{c'est la première fois que tu utilises PCI. Tu dois rapidement expliquer cette acronyme} devices expose a so-called configuration space, which is a
-dedicated memory region with a specific semantics summarized in
-Figure~\ref{fig:usecase:pciconfig}.
+For instance, PCI \TODO{c'est la première fois que tu utilises PCI. Tu dois
+  rapidement expliquer cette acronyme} devices expose a so-called configuration
+space, which is a dedicated memory region with a specific semantics summarized
+in Figure~\ref{fig:usecase:pciconfig}.
 %
 Registers of the PCI configuration space, such as device and vendor IDs, can be
 accessed \emph{via} PMIO.
@@ -366,8 +367,9 @@ that it becomes possible to interact with the PCI configuration space of a given
 peripherals \emph{via} the system memory.
 %
 As a consequence, when a core reads from or write to the system memory in a
-range specified by a BAR, the processor and the \ac{pch} \TODO{pourquoi "the processor and the PCH" et pas "the PCH" seulement?} dispatches its \IOs to
-the PCI configuration space.
+range specified by a BAR, the processor and the \ac{pch} \TODO{pourquoi "the
+  processor and the PCH" et pas "the PCH" seulement?} dispatches its \IOs to the
+PCI configuration space.
 
 \begin{figure}
   \begin{center}
@@ -379,8 +381,8 @@ the PCI configuration space.
   \label{fig:usecase:pciconfig}
 \end{figure}
 
-Finally, software components often do not manipulate addresses of the system memory
-directly.
+Finally, software components often do not manipulate addresses of the system
+memory directly.
 %
 Indeed, cores have their own address translation mechanisms, namely
 segmentation\,\cite[Volume 3, Section 2.4]{intel2014manual} and
@@ -959,7 +961,7 @@ isolation from the rest of the software stack.
 % security
 % vulnerability\,\cite{duflot2009smram,wojtczuk2009smram,bulygin2014summary}.
 %
-From the information we gathered in the Intel manuals\TODO{ref} and in the academic literature \TODO{ref}, 
+From the information we gathered in the Intel manuals\TODO{ref} and in the academic literature \TODO{ref},
 the isolation required by the \ac{bios} can be divided into three complementary security policies.
 
 \begin{description}
@@ -1038,7 +1040,7 @@ Chapter 34]{intel2014manual}, introduced in the Intel manual as follows:
 \end{quote}
 
 The \ac{smm} is the foundation of the \ac{bios} execution at runtime, but it is
-not sufficient. \TODO{Sauf erreur de ma part, tout le code du BIOS exécuté à runtime ne s'exécute par en SMM. Je pense que les routines ACPI par exemple s'exécutent dans le contexte du code appelant. En revanche, SMM est le moyen matériel utilisé par le BIOS pour s'isoler à runtime. Le code critique du BIOS est exécuté à runtime en SMM} 
+not sufficient. \TODO{Sauf erreur de ma part, tout le code du BIOS exécuté à runtime ne s'exécute par en SMM. Je pense que les routines ACPI par exemple s'exécutent dans le contexte du code appelant. En revanche, SMM est le moyen matériel utilisé par le BIOS pour s'isoler à runtime. Le code critique du BIOS est exécuté à runtime en SMM}
 
 \paragraph{System Management RAM.}
 %
