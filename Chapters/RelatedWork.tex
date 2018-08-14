@@ -689,8 +689,13 @@ where \( s \xrightarrow{l} s' \) is a transition of the system from a state
 Throughout this Section, we have detailed how we can model a target of
 verification as a transition system in order to verify its correctness with
 respect to security policies specified as predicates on set of model traces.
+
+\paragraph{Model Prerequisites.}
 %
-In order to verify \ac{hse} mechanisms, it is important to consider that
+Our objective is to apply these concepts in order to verify \ac{hse} mechanisms,
+with the hope to uncover compositional attacks.
+%
+To that end, it is important to consider that
 %
 \begin{inparaenum}[(1)]
 \item \label{needreuse}%
@@ -701,7 +706,7 @@ In order to verify \ac{hse} mechanisms, it is important to consider that
   hardware features involved in \ac{hse} mechanisms are not safe by default,
   hence the role played by trusted software components to configure them.
 \end{inparaenum}
-
+%
 In this thesis, we advocate for defining \ac{hse} mechanisms of a given hardware
 architecture against a generic functional specification of this architecture,
 rather than relying on ad-hoc models dedicated to specific \ac{hse} mechanisms.
@@ -726,17 +731,8 @@ software components.
 In this context, verifying a \ac{hse} mechanism consists of proving this set of
 traces satisfies the predicate which characterizes the targeted security policy.
 
-We now give an overview of formal verification projects which have required to
-define a functional specification of (part of) a hardware architecture, either
-to reason about the architecture itself (\ref{subsubsec:sota:hw}), or to verify
-the correctness of software components executed by this architecture
-(\ref{subsubsec:sota:ssw} and \ref{subsubsec:sota:asw}).
+\paragraph{x86 Models.}
 %
-We detail the projects scope, the verification approaches authors utilized, and
-we discuss to what extent their results apply to our objectives.
-
-\subsubsection{x86 Models}
-
 Intel has integrated formal verification in its processors design process for
 more than a decade now.
 %
@@ -795,35 +791,60 @@ our formal definition of \ac{hse} mechanisms presented in
 Chapter~\ref{chapter:speccert} in order to specify and verify a \ac{hse}
 mechanism implemented by the \ac{bios}.
 
-\subsubsection{Hardware Architecture Model}
-\label{subsubsec:sota:hw}
-
-\paragraph{ARMv8.}
+\paragraph{Other Hardware Architecture Models.}
 %
-
-\paragraph{XOM.}
+The x86 architecture is not the only hardware architecture which has been the
+object of formal verification projects.
 %
+We give an overview of the approaches implemented to model and verify them.
+
+The two latest versions of the ARM processors have been formally
+specified\,\cite{fox2010armv7,reid2016armv8}.
+%
+It is important to emphasize that the specification of the ARMv8
+architectures\footnote{There are three variants of the ARM Architecture, for as
+  many use cases: the A-class architecture provides the necessary features to
+  allow an operating system to manage applications, the R-class processors are
+  dedicated to real-time systems, and the M-class are used in microcontrollers.}
+is the result of an important 5 year effort by ARM Ltd to integrate formal
+specification definition to their regular specification process.
+%
+The formal specification of ARMv8 architectures is written in a dedicated
+language called ARM Specification Language, and have been intensively validated
+against the ARM internal conformance testsuit.
+%
+Once the level of trustworthiness of the ASL specifications have been asserted,
+they have been able to leverage them to formally verify properties of the
+hardware architectures, \emph{e.g.} by compiling them to a subset of Verilog
+accepted by commercial Verilog model checkers\,\cite{reid2016end}.
+%
+The result of these efforts is being made available on the ARM website, in
+addition to regular informal specifications\,\cite{arm2018aspec}.
+%
+This represent an exciting opportunity for research targeting ARM architectures,
+and we can only hope that it eventually becomes a standard in the industry.
+%
+However, it would not make sense to use the ASL language ourselves to specify
+the x86 architecture.
+%
+Indeed, ASL is used to \emph{describe} the architecture in an unambiguous
+fashion, but it cannot be used as is to reason about the correctness of this
+architecture.
+
 The \ac{xom} microprocessor architecture maintains separate so-called
 \emph{compartments} for applications\,\cite{lie2000architectural}.
 %
-With mainstream microprocessor architectures, the system software component is
-responsible for both memory allocation and access control.
-%
-To enforce access control, it implements one or more \ac{hse} mechanisms, which
-make use of hardware features such as a \ac{mmu}.
-%
-On the contrary, a \ac{xom} \ac{cpu} keeps track of each memory location owner,
-thanks to a tagging mechanism, and supposedly prevents an application from
-accessing a memory location it does not own.
+A \ac{xom} \ac{cpu} keeps track of each memory location owner, thanks to a
+tagging mechanism, and supposedly prevents an application from accessing a
+memory location it does not own.
 %
 In 2003, David Lie \emph{et al.} have verified the \ac{xom}
 architecture\,\cite{lie2003xom} using the Mur$\varphi$ model
 checker\,\cite{murphi}.
 %
 The verification objective of the authors was to prove that the \ac{xom}
-architecture fulfills its promise to be tamper-resistant, that is the
-architecture forbids an attacker to modify the memory location owned by a given
-application.
+architecture fulfills its promise to be tamper-resistant, by forbidding an
+attacker to modify the memory location owned by a given application.
 %
 The verification proceeds as follows:
 %
@@ -832,22 +853,16 @@ The verification proceeds as follows:
   model'', is defined.
   %
   States of this first model contain different hardware components of a \ac{xom}
-  microprocessor, \emph{i.e.} registers, cache and volatile memory.
-  %
-  It also integrates the internal machinery of \ac{xom} to track ownership of
-  memory locations.
+  microprocessor, \emph{i.e.} registers, cache, volatile memory, and the
+  internal machinery of \ac{xom} to track ownership of memory locations.
   %
   Transitions can be divided into two categories: the normal execution of an
   application by the microprocessor, and active tampering from an adversary
-  part.
-  %
-  That is, the actual model embeds a notion of adversary model.
+  part, leading the actual model to embed an adversary model.
   %
 \item A second specification, called the ``idealized model'', abstracts away the
-  memory hierarchy formed by the cache and the volatile memory.
-  %
-  This second model captures the execution of a single application, without an
-  adversary.
+  memory hierarchy formed by the cache and the volatile memory, and models the
+  execution of a single application, without an adversary.
   %
   From this perspective, it encodes the security property.
   %
@@ -866,16 +881,27 @@ The verification proceeds as follows:
 In the process of verifying \ac{xom}, the authors have been able to show with
 their model that the \ac{xom} architecture was subject to several replay
 attacks, and that their countermeasures were effective.
+
+We believe the necessity to manually maintain a merge of two transition systems
+reduces its applicability in the long run, as new architecture versions are
+released frequently.
 %
-However, the state explosion problem forces the authors to simplify their model,
-in order to reduce the state combinatory.  \PC{ça manque un peu d'évaluation: la
-  seule phrase donnant les limites de l'approche est la dernière: il faut
-  montrer pourquoi ce qui existe ne suffit pas!}
+This is why our formal definition of \ac{hse} mechanism is characterized by a
+subset of traces of a model, rather than an additional, idealized model.
+%
+Besides, the state explosion problem forces the authors to simplify their model,
+in order to reduce the state combinatory.
+%
+From a security perspective, simplifying the model comes with the risk to hide
+an attack path.
+%
+Theorem proving has been shown as a viable alternative to model checking to
+overcome the state explosion problem to verify hardware designs, with modern
+theorem proving providing facilities to compensate the cost in terms of
+automation, \emph{e.g.} Coq provides {\scshape Ltac}, a dedicated language to
+automate proof constructions to some extend.
 
-\subsubsection{System Software Components Verification}
-\label{subsubsec:sota:ssw}
-
-\paragraph{VirtCert.}
+\paragraph{Hardware Models in System Software Components Verification.}
 %
 Between 2011 and 2014, Gilles Barthe \emph{et al.} have worked on an idealized
 model of a hypervisor.
@@ -966,83 +992,83 @@ Certified microkernel.
 \subsubsection{Machine-Code Program Verification}
 \label{subsubsec:sota:asw}
 
-\paragraph{RockSalt.}
+%\paragraph{RockSalt.}
+%%
+%A Google service called \ac{nacl} allows for for software developers to
+%distribute their web applications in the form of native executable code.
+%%
+%These native applications are executed directly in the context of the browser.
+%%
+%\ac{nacl} uses \ac{sfi} to prevent arbitrary native applications from tampering
+%with the code and data of the browser.
+%%
+%\ac{sfi} comprises a set of rules native applications have to comply with, and
+%that together form a sandbox policy.
+%%
+%In practice, \ac{nacl} checks that an arbitrary native applications respects the
+%\ac{sfi} rules before loading it to the browser context.
+%%
+%As a consequence, the browser is protected from malicious machine code.
 %
-A Google service called \ac{nacl} allows for for software developers to
-distribute their web applications in the form of native executable code.
+%From a security perspective, this means there are two requirements over
+%\ac{nacl}:
+%%
+%\begin{inparaenum}[(1)]
+%\item verifying that the rules are indeed sufficient to constrain the distrusted
+%  native applications with respect to the sandbox policy, and
+%%
+%\item the \ac{nacl} checker correctly verifies that native applications respect
+%  these rules.
+%\end{inparaenum}
+%%
+%This is similar to the challenges faced by \ac{hse} mechanisms.
 %
-These native applications are executed directly in the context of the browser.
+%Because \ac{nacl} has been shown to have issues regarding these two
+%requirements, Greg Morrisett \emph{et al.} have specified the \ac{nacl} checker
+%in Coq, proven the rules it checks are correct and indeed enforce the targeted
+%sandbox policy, and then manually translated the checker in
+%C\,\cite{morrisett2012rocksalt}.
+%%
+%By doing so, they have addressed the two requirements listed above, provided
+%that their translation is correct.
 %
-\ac{nacl} uses \ac{sfi} to prevent arbitrary native applications from tampering
-with the code and data of the browser.
+%\paragraph{Moat.}
+%%
+%Intel \ac{sgx} is a recent addition to certain x86 \acp{cpu}, whose purpose is
+%to provide so-called \emph{enclaves} to user land
+%applications\,\cite{costan2016sgxexplained}.
+%%
+%These enclaves supposedly offer an execution environment isolated from the
+%system software.
+%%
+%The functioning of \ac{sgx} can be roughly summarized as follows:
+%\ac{sgx}-capable \acp{cpu} dedicate a special portion of the system memory,
+%called the \ac{epc}, to enclaves.
+%%
+%The system software is responsible for allocating and initializing memory pages
+%of the \ac{epc} (thanks to dedicated instructions), but it cannot read or write
+%to them once it is done.
+%%
+%This is enforced by the memory controller, which encrypts the content of the
+%\ac{epc} transparently from the \ac{cpu}.
+%%
+%Hence, the memory controller only decrypts an \ac{epc}'s page if it is accessed
+%by the enclave which owns it; it will also discard write accesses performed by
+%other software components.
 %
-\ac{sfi} comprises a set of rules native applications have to comply with, and
-that together form a sandbox policy.
-%
-In practice, \ac{nacl} checks that an arbitrary native applications respects the
-\ac{sfi} rules before loading it to the browser context.
-%
-As a consequence, the browser is protected from malicious machine code.
-
-From a security perspective, this means there are two requirements over
-\ac{nacl}:
-%
-\begin{inparaenum}[(1)]
-\item verifying that the rules are indeed sufficient to constrain the distrusted
-  native applications with respect to the sandbox policy, and
-%
-\item the \ac{nacl} checker correctly verifies that native applications respect
-  these rules.
-\end{inparaenum}
-%
-This is similar to the challenges faced by \ac{hse} mechanisms.
-
-Because \ac{nacl} has been shown to have issues regarding these two
-requirements, Greg Morrisett \emph{et al.} have specified the \ac{nacl} checker
-in Coq, proven the rules it checks are correct and indeed enforce the targeted
-sandbox policy, and then manually translated the checker in
-C\,\cite{morrisett2012rocksalt}.
-%
-By doing so, they have addressed the two requirements listed above, provided
-that their translation is correct.
-
-\paragraph{Moat.}
-%
-Intel \ac{sgx} is a recent addition to certain x86 \acp{cpu}, whose purpose is
-to provide so-called \emph{enclaves} to user land
-applications\,\cite{costan2016sgxexplained}.
-%
-These enclaves supposedly offer an execution environment isolated from the
-system software.
-%
-The functioning of \ac{sgx} can be roughly summarized as follows:
-\ac{sgx}-capable \acp{cpu} dedicate a special portion of the system memory,
-called the \ac{epc}, to enclaves.
-%
-The system software is responsible for allocating and initializing memory pages
-of the \ac{epc} (thanks to dedicated instructions), but it cannot read or write
-to them once it is done.
-%
-This is enforced by the memory controller, which encrypts the content of the
-\ac{epc} transparently from the \ac{cpu}.
-%
-Hence, the memory controller only decrypts an \ac{epc}'s page if it is accessed
-by the enclave which owns it; it will also discard write accesses performed by
-other software components.
-
-Rohit Sinha \emph{et al.} have modeled SGX instructions semantics, to complete
-an existing model, and have developed an automated information flow analysis
-tool called Moat, to verify whether a given application code may leak secrets or
-not\,\cite{sinha2015moat}.
-%
-The work proceeds similarly to RockSalt, where instructions are treated as
-labeled transition from one state to another.
-%
-However, Moat also considers an active and passive adversary, with additional
-capabilities (meaning, additional transitions in the system).
-%
-The approach is similar to what David Lie \emph{et al.} have done for the
-\ac{xom} architecture\,\cite{lie2003xom}.
+%Rohit Sinha \emph{et al.} have modeled SGX instructions semantics, to complete
+%an existing model, and have developed an automated information flow analysis
+%tool called Moat, to verify whether a given application code may leak secrets or
+%not\,\cite{sinha2015moat}.
+%%
+%The work proceeds similarly to RockSalt, where instructions are treated as
+%labeled transition from one state to another.
+%%
+%However, Moat also considers an active and passive adversary, with additional
+%capabilities (meaning, additional transitions in the system).
+%%
+%The approach is similar to what David Lie \emph{et al.} have done for the
+%\ac{xom} architecture\,\cite{lie2003xom}.
 
 \section{Compositional Verification}
 \label{section:sota:compsec}
