@@ -22,7 +22,7 @@ This enables separation of concerns ---each layer encapsulates one dimension of
 the overall complexity--- and modularity ---two layers which expose the same
 interface can be seamlessly interchanged.
 %
-The typical computing platform can be broken down to the following layers: 
+The typical computing platform can be broken down to the following layers:
 %
 \begin{description}
 \item [Hardware Architecture]
@@ -376,7 +376,7 @@ As a consequence, it is necessary to consider the whole computing platform.
 At the same time, some components are individually complex:
 %
 for example, the Intel Architectures Software Developer Manual\,\cite{intel2014manual} is
-4842 pages long, 
+4842 pages long,
 %
 the Memory Controller Hub datasheet\,\cite{intel2009mch} is 430 pages long, and
 %
@@ -402,30 +402,6 @@ hardware architecture has been extensively studied.
 %
 Our decision to explore this research field was based on our experience with
 several compositional attacks which have affected the x86 hardware architecture.
-%
-We have implemented our proofs of concepts in the Coq proof assistant.
-%
-Our choice is motivated by the following reasons:
-%
-\begin{itemize}
-\item {\scshape Gallina}, the specification of Coq, is an expressive formal
-  language, that combines both a higher-order logic and a powerful dependent
-  type system, while {\scshape Ltac}, the proof tactic language of Coq, enables
-  powerful automation features.
-  %
-  This suits well for specifying security properties to be enforced by HSE
-  mechanisms, as they can take many forms.
-\item The extraction mechanism of Coq allows for transpiling formal
-  specifications written in {\scshape Gallina} to OCaml, meaning we can write
-  \emph{executable specifications}.
-  %
-  We could leverage this feature to validate a model against a real
-  implementation. \TODO{Tu pourrais rajouter une footnote disant que bien qu'il s'agisse d'une propriété intéressante qui a notamment motivé ton choix,  tu ne l'as pas utilisée durant ta thèse}
-  %
-  Since we focus on products which already exist, rather to intervene prior to
-  their implementation, model validation is a valuable step to strengthen our
-  confidence in a verification result. \TODO{Comme tu n'as pas exploité cette fonctionnalité, j'éviterais de trop insister donc je supprimerais cette dernière phrase. De toute façon, cette fonctionnalité aurait également un intérêt si tu travaillez en amont, pour vérifier par la suite que les implémentations sont cohérente avec la spec (dans ce cas, ce n'est pas la spec que tu valides, mais l'implémentation}
-\end{itemize}
 
 \section{Contributions and Outline}
 

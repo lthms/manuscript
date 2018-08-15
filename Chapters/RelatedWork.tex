@@ -10,13 +10,12 @@
 
   \hfill\footnotesize --- Ellen Ullman}
 
-\vspace{1cm}\noindent
-%
-\PC{je suis toujours dubitatif sur cette première phrase. Je suis surpris que tu
-  ne parle pas de \textbf{modèle} (en introduisant le concept) au lieu de
-  système. Le modèle peut correspondre ou non à l'implémentation réelle}
-%
+\vspace{1cm} \PC{je suis toujours dubitatif sur cette première phrase. Je suis
+  surpris que tu ne parle pas de \textbf{modèle} (en introduisant le concept) au
+  lieu de système. Le modèle peut correspondre ou non à l'implémentation réelle}
 \thomasrk[inline]{Mieux ?}
+%
+\noindent
 %
 The formal verification of a system consists of proving the correctness of an
 \emph{implementation} with respect to a
@@ -46,22 +45,239 @@ In the context of this thesis, we focus on verifying the correctness of
 implementations defined in the form of idealized models with respect to
 non-functional specifications which characterize security policies.
 %
-%In particular, we do not cover \emph{model validation}, that is the verification
-%that a model is a correct abstraction of the concrete system it supposedly
-%describes.
+% In particular, we do not cover \emph{model validation}, that is the
+% verification that a model is a correct abstraction of the concrete system it
+% supposedly describes.
 %
 The rest of this Chapter proceeds as follows.
 %
-First, we explain how transition systems are used as modeling structures to
-verify the correctness of a system with respect to security policies
+First, we introduce the key concepts of formal methods which support the formal
+verification process by providing tools to construct proofs, and we justify our
+choice to use the Coq theorem prover in our experiments
+(Section~\ref{sec:sota:fm}).
+%
+We explain how transition systems are used as modeling structures to verify the
+correctness of a system with respect to security policies, and where does our
+formal definition of \ac{hse} mechanisms stands with respect to previous work
 (Section~\ref{sec:sota:formalisms}).
 %
 Then, we introduce compositional verification approaches, which enable the
 ``divide and conquer'' strategy to reduce the burden of verifying large and
-complex systems (Section~\ref{section:sota:compsec}).
+complex systems, and compare our compositional framework for Coq with existing
+solutions (Section~\ref{section:sota:compsec}).
+
+\section{Introduction to Formal Methods}
+\label{sec:sota:fm}
+
+In a formal system, formulas (also called propositions) of a formal language
+represent statements which can either be true or false.
 %
-We conclude this Chapter by comparing our contributions with respect to
-preceding related work (Section~\ref{sec:sota:conclusion}).
+A formal system relies on a set of axioms, that are formulas known to be true,
+and inference rules which allow for deriving new formulas.
+
+\subsection{Propositions and Inference Rules.}
+%
+The statement that a proposition \( P \) is true is commonly denoted by
+\( \vdash P \).
+%
+A proposition \( P \) may also be true on the condition that propositions
+\( Q_0, Q_1, ..., \text{ and } Q_n \) are also true.
+%
+This statement is denoted by \( Q_0, Q_1, ... Q_n \vdash P \).
+%
+A statement is proven true when it is part of the base of axioms or if we use
+inference rules to derive it from already proven statements.
+%
+By doing so, we construct a \emph{proof}.
+%
+For example, a well-known inference rule is the \emph{Modus ponens}, which
+states that if a proposition \( P \) is true, and the proposition
+\( P \Rightarrow Q \) is also true, then the proposition \( Q \) is true, that
+is
+%
+\[
+  P\text{, }(P \Rightarrow Q) \vdash Q
+\]
+%
+Using the \emph{Modus ponens}, it becomes possible to construct a proof of
+\( \vdash Q \) from a proof of \( \vdash P \) and a proof of
+\( \vdash P \Rightarrow Q \).
+%
+Figure~\ref{fig:sota:inference} gives a list of common inference rules.
+%
+Conditional statements, once proven, become new inference rules to be used to
+construct proofs.
+
+Constructing a proof can quickly become cumbersome as propositions become more
+complex.
+%
+They can be described in the form of carefully worded sentences.
+%
+Another popular approach is to write them as so-called proof trees.
+%
+Each node of the tree is a proof step.
+%
+The children of a given proof obligation are proofs which allows for concluding
+about the node judgment, by using an inference rule of the system.
+%
+By convention, a node and its children are separated by a line labeled with the
+name of the inference rule.
+%
+The leaves of the trees are the statements known to be true, either because they
+are part of the system axioms or because they have already been proven before.
+%
+Therefore, a proof which only consists in applying the \emph{Modus ponen} can be
+represented as follows:
+%
+\begin{prooftree}
+  \AxiomC{\( P \)} \AxiomC{\( P \Rightarrow Q \)} \RightLabel{\small {\scshape
+      Modus Ponens}} \BinaryInfC{\( Q \)}
+\end{prooftree}
+
+\begin{figure}
+  \begin{center}
+    \begin{tabular}{ll}
+      {\scshape Modus ponens} & \( P \Rightarrow Q\text{, }P \vdash Q \) \\
+      {\scshape Modus tollens} &
+                                 \( P \Rightarrow Q\text{, }\neg Q \vdash \neg P \) \\
+      {\scshape Conjunction:} & \( P\text{, }Q \vdash P \wedge Q \) \\
+      {\scshape Addition:} & \( P \vdash P \vee Q \) \\
+      {\scshape Contradiction:} & \( P, \neg P \vdash Q \)
+    \end{tabular}
+  \end{center}
+
+  \caption{List of common inference rules}
+  \label{fig:sota:inference}
+\end{figure}
+
+Constructing a proof and verifying its correctness quickly becomes challenging.
+%
+Theorem provers such as Coq\,\cite{coq} or
+Isabelle/HOL\,\cite{nipkow2002isabelle} provide facilities to write proofs, and
+a checker to automatically verify these proofs.
+%
+Therefore, the quality of a theorem prover is measured by its capacity to reject
+ill-formed proofs.
+%
+Modern theorem provers are built as certified layers around a trusted kernel as
+small and simple as possible.
+%
+The idea is that, as long as the kernel does not contain a bug, advanced
+features implemented inside a certified layer cannot introduce inconsistency in
+the proof-checking process.
+%
+This greatly diminishes the risk to have inconsistencies in the proof checker,
+although it happened in the
+past\,\cite{claret2015falso,griffioen1998comparison}.
+
+Another common approach is to rely on an algorithm whose correctness has been
+formally established to handle a well-defined class of problems.
+%
+This allows for automating the verification process.
+%
+Once the algorithm has been proven correct, it becomes possible to trust its
+output.
+%
+Abstract interpretation\,\cite{cousot1977absint} and model
+checking\,\cite{clarke2018modelc} are two classical instances of this approach.
+
+\subsection{Formal Systems.}
+%
+Choosing a formal language is a key part of the verification process of a
+system.
+%
+It decides the expressiveness of the statements that can be proven, and the
+tools that can be leveraged to construct their proofs.
+
+The most common formal system is the first-order logic\,\cite{smullyan2012fol},
+characterized by:
+%
+\begin{itemize}
+\item \emph{Terms}, which represents objects.
+\item \emph{Logical operators}, such as conjunction \( \wedge \), disjunction
+  \( \vee \), implication \( \Rightarrow \), negation \( \neg \).
+\item \emph{Predicates}, that is parameterized formulas that can be true or
+  false with respect to the applied terms.
+\item \emph{Quantifiers}, such as \( \forall \) (all values) or \( \exists \)
+  (there exists a value).
+\end{itemize}
+
+First-order logic quantifiers can only be applied on sets of terms (\emph{e.g.}
+natural numbers, booleans, states of an airlock system).
+%
+Higher-order logic\,\cite{leivant1994hol} does not suffer the same limitation,
+since they allow quantification over sets of sets, functions and predicates.
+%
+Hence, it becomes possible to express statements such as \emph{for all sets with
+  a total order \( < \), for all pair of values \( \alpha, \beta \), then either
+  \( \alpha < \beta \) or \( \beta < \alpha \) or \( \alpha = \beta \)}.
+%
+Therefore, higher order logic is more expressive than first-order logic, but it
+comes at a cost in terms of automation.
+%
+On the one hand, \emph{interactive} theorem provers (\emph{e.g.}  Coq,
+Isabelle/HOL, or more recently Lean\,\cite{de2015lean}) are based on
+higher-order logic.
+%
+On the other hand, \emph{automated} theorem provers (\emph{e.g.}
+Vampire\,\cite{riazanov2002vampire}, Z3\,\cite{de2008z3}) are based on
+first-order logic.
+
+Finally, modal logic\,\cite{chagrov1997modal} is a formal system which extends
+first-order logic with modal operators.
+%
+Temporal logic forms a family of modal logic systems, including \emph{e.g.}
+Linear Temporal Logic (LTL)\,\cite{sistla1985ltl} Computation Logic Tree
+(CTL)\,\cite{clarke1981ctl}.
+%
+Examples of LTL modular operators are \( \square P \) (\( P \) is always true),
+\( \Diamond P \) (\( P \) will eventually become true), \( \bigcirc P \)
+(\( P \) will be true after the next transition of the system).
+%
+CTL considers trees of possible futures (by opposition to a \emph{linear}
+future).
+%
+CTL modal operator includes \( \mathbf{A} P \) (\( P \) is true for all possible
+futures) and \( \mathbf{E} P \) (there exists at least one path where \( P \)
+becomes true).
+%
+That is, temporal logic operators allow for reasoning about propositions over
+time.
+%
+Temporal logic formulas are commonly verified thanks to model checkers,
+\emph{e.g.}  NuSMV\,\cite{cimatti2002nusmv}, SPIN\,\cite{holzmann1997spin} or
+TLA+\,\cite{lamport2002tla}.
+%
+Other approaches can be used to that end ---for instance Gilles Barthe \emph{et
+  al.} have encoded \( \square \) and \( \Diamond \) in
+Coq\,\cite{barthe2011virtcert1}--- yet model checkers have the benefit of
+automation and counter-example generation.
+
+\subsection{Conclusion}
+
+We have implemented our proofs of concepts in the Coq proof assistant.
+%
+Our choice is motivated by the following reasons:
+%
+\begin{itemize}
+\item {\scshape Gallina}, the specification of Coq, is an expressive formal
+  language, that combines both a higher-order logic and a powerful dependent
+  type system, while {\scshape Ltac}, the proof tactic language of Coq, enables
+  powerful automation features.
+  %
+  This suits well for specifying security properties to be enforced by HSE
+  mechanisms, as they can take many forms.
+\item The extraction mechanism of Coq allows for transpiling formal
+  specifications written in {\scshape Gallina} to OCaml, meaning we can write
+  \emph{executable specifications}.
+  %
+  We could leverage this feature to validate a model against a real
+  implementation.
+  %
+  \TODO{Tu pourrais rajouter une footnote disant que bien qu'il s'agisse d'une
+    propriété intéressante qui a notamment motivé ton choix, tu ne l'as pas
+    utilisée durant ta thèse}
+\end{itemize}
 
 \section{Formal Verification of Transition Systems}
 \label{sec:sota:formalisms}
@@ -72,15 +288,8 @@ systems.
 Over time, many different definitions of transition system have been proposed,
 to address different classes of verification problems.
 %
-In this Section, we do not attempt to give a comprehensive overview of these
-approaches.
-%
-We explain how a system can be specified using a generic transition system
+We explain how it is possible to model a system with transition systems
 (\ref{subsec:sota:ltsdef}).
-%
-We introduce the key concepts of formal methods which support the formal
-verification process by providing tools to construct proofs
-(\ref{subsec:sota:fm}).
 %
 Then, we focus on characterizing security policies in terms of properties of
 transition systems (\ref{subsec:sota:security}).
@@ -88,6 +297,9 @@ transition systems (\ref{subsec:sota:security}).
 Finally, we describe how the concepts of this section have been used in the
 literature in order to verify hardware and software systems
 (\ref{subsec:sota:ltsrelated}).
+%
+We conclude with a summary of our motivations for not reusing an existing x86
+model for our experiments (\ref{subsec:sota:ltsconclusion}).
 
 \subsection{Defining Specifications}
 \label{subsec:sota:ltsdef}
@@ -209,193 +421,6 @@ definition of transition systems used in model checking\,\cite{clarke1999model}.
 Besides, Petri net\,\cite{peterson1981petri}, process
 algebra\,\cite{bergstra1984process} or interface
 automata\,\cite{de2001interface} are better suited to model concurrent systems.
-
-\subsection{Introduction to Formal Methods}
-\label{subsec:sota:fm}
-
-In a formal system, formulas (also called propositions) of a formal language
-represent statements which can either be true or false.
-%
-A formal system relies on a set of axioms, that are formulas known to be true,
-and inference rules which allow for deriving new formulas.
-
-\paragraph{Propositions and Inference Rules.}
-%
-The statement that a proposition \( P \) is true is commonly denoted by
-\( \vdash P \).
-%
-A proposition \( P \) may also be true on the condition that propositions
-\( Q_0, Q_1, ..., \text{ and } Q_n \) are also true.
-%
-This statement is denoted by \( Q_0, Q_1, ... Q_n \vdash P \).
-%
-A statement is proven true when it is part of the base of axioms or if we use
-inference rules to derive it from already proven statements.
-%
-By doing so, we construct a \emph{proof}.
-%
-For example, a well-known inference rule is the \emph{Modus ponens}, which
-states that if a proposition \( P \) is true, and the proposition
-\( P \Rightarrow Q \) is also true, then the proposition \( Q \) is true, that
-is
-%
-\[
-  P\text{, }(P \Rightarrow Q) \vdash Q
-\]
-%
-Using the \emph{Modus ponens}, it becomes possible to construct a proof of
-\( \vdash Q \) from a proof of \( \vdash P \) and a proof of
-\( \vdash P \Rightarrow Q \).
-%
-Figure~\ref{fig:sota:inference} gives a list of common inference rules.
-%
-Conditional statements, once proven, become new inference rules to be used to
-construct proofs.
-
-Constructing a proof can quickly become cumbersome as propositions become more
-complex.
-%
-They can be described in the form of carefully worded sentences.
-%
-Another popular approach is to write them as so-called proof trees.
-%
-Each node of the tree is a proof step.
-%
-The children of a given proof obligation are proofs which allows for concluding
-about the node judgment, by using an inference rule of the system.
-%
-By convention, a node and its children are separated by a line labeled with the
-name of the inference rule.
-%
-The leaves of the trees are the statements known to be true, either because they
-are part of the system axioms or because they have already been proven before.
-%
-Therefore, a proof which only consists in applying the \emph{Modus ponen} can be
-represented as follows:
-%
-\begin{prooftree}
-  \AxiomC{\( P \)} \AxiomC{\( P \Rightarrow Q \)} \RightLabel{\small {\scshape
-      Modus Ponens}} \BinaryInfC{\( Q \)}
-\end{prooftree}
-
-\begin{figure}
-  \begin{center}
-    \begin{tabular}{ll}
-      {\scshape Modus ponens} & \( P \Rightarrow Q\text{, }P \vdash Q \) \\
-      {\scshape Modus tollens} &
-                                 \( P \Rightarrow Q\text{, }\neg Q \vdash \neg P \) \\
-      {\scshape Conjunction:} & \( P\text{, }Q \vdash P \wedge Q \) \\
-      {\scshape Addition:} & \( P \vdash P \vee Q \) \\
-      {\scshape Contradiction:} & \( P, \neg P \vdash Q \)
-    \end{tabular}
-  \end{center}
-
-  \caption{List of common inference rules}
-  \label{fig:sota:inference}
-\end{figure}
-
-Constructing a proof and verifying its correctness quickly becomes challenging.
-%
-Theorem provers such as Coq\,\cite{coq} or
-Isabelle/HOL\,\cite{nipkow2002isabelle} provide facilities to write proofs, and
-a checker to automatically verify these proofs.
-%
-Therefore, the quality of a theorem prover is measured by its capacity to reject
-ill-formed proofs.
-%
-Modern theorem provers are built as certified layers around a trusted kernel as
-small and simple as possible.
-%
-The idea is that, as long as the kernel does not contain a bug, advanced
-features implemented inside a certified layer cannot introduce inconsistency in
-the proof-checking process.
-%
-This greatly diminishes the risk to have inconsistencies in the proof checker,
-although it happened in the
-past\,\cite{claret2015falso,griffioen1998comparison}.
-
-Another common approach is to rely on an algorithm whose correctness has been
-formally established to handle a well-defined class of problems.
-%
-This allows for automating the verification process.
-%
-Once the algorithm has been proven correct, it becomes possible to trust its
-output.
-%
-Abstract interpretation\,\cite{cousot1977absint} and model
-checking\,\cite{clarke2018modelc} are two classical instances of this approach.
-
-\paragraph{Formal Systems.}
-%
-Choosing a formal language is a key part of the verification process of a
-system.
-%
-It decides the expressiveness of the statements that can be proven, and the
-tools that can be leveraged to construct their proofs.
-
-The most common formal system is the first-order logic\,\cite{smullyan2012fol},
-characterized by:
-%
-\begin{itemize}
-\item \emph{Terms}, which represents objects.
-\item \emph{Logical operators}, such as conjunction \( \wedge \), disjunction
-  \( \vee \), implication \( \Rightarrow \), negation \( \neg \).
-\item \emph{Predicates}, that is parameterized formulas that can be true or
-  false with respect to the applied terms.
-\item \emph{Quantifiers}, such as \( \forall \) (all values) or \( \exists \)
-  (there exists a value).
-\end{itemize}
-
-First-order logic quantifiers can only be applied on sets of terms (\emph{e.g.}
-natural numbers, booleans, states of an airlock system).
-%
-Higher-order logic\,\cite{leivant1994hol} does not suffer the same limitation,
-since they allow quantification over sets of sets, functions and predicates.
-%
-Hence, it becomes possible to express statements such as \emph{for all sets with
-  a total order \( < \), for all pair of values \( \alpha, \beta \), then either
-  \( \alpha < \beta \) or \( \beta < \alpha \) or \( \alpha = \beta \)}.
-%
-Therefore, higher order logic is more expressive than first-order logic, but it
-comes at a cost in terms of automation.
-%
-On the one hand, \emph{interactive} theorem provers (\emph{e.g.}  Coq,
-Isabelle/HOL, or more recently Lean\,\cite{de2015lean}) are based on
-higher-order logic.
-%
-On the other hand, \emph{automated} theorem provers (\emph{e.g.}
-Vampire\,\cite{riazanov2002vampire}, Z3\,\cite{de2008z3}) are based on
-first-order logic.
-
-Finally, modal logic\,\cite{chagrov1997modal} is a formal system which extends
-first-order logic with modal operators.
-%
-Temporal logic forms a family of modal logic systems, including \emph{e.g.}
-Linear Temporal Logic (LTL)\,\cite{sistla1985ltl} Computation Logic Tree
-(CTL)\,\cite{clarke1981ctl}.
-%
-Examples of LTL modular operators are \( \square P \) (\( P \) is always true),
-\( \Diamond P \) (\( P \) will eventually become true), \( \bigcirc P \)
-(\( P \) will be true after the next transition of the system).
-%
-CTL considers trees of possible futures (by opposition to a \emph{linear}
-future).
-%
-CTL modal operator includes \( \mathbf{A} P \) (\( P \) is true for all possible
-futures) and \( \mathbf{E} P \) (there exists at least one path where \( P \)
-becomes true).
-%
-That is, temporal logic operators allow for reasoning about propositions over
-time.
-%
-Temporal logic formulas are commonly verified thanks to model checkers,
-\emph{e.g.}  NuSMV\,\cite{cimatti2002nusmv}, SPIN\,\cite{holzmann1997spin} or
-TLA+\,\cite{lamport2002tla}.
-%
-Other approaches can be used to that end ---for instance Gilles Barthe \emph{et
-  al.} have encoded \( \square \) and \( \Diamond \) in
-Coq\,\cite{barthe2011virtcert1}--- yet model checkers have the benefit of
-automation and counter-example generation.
 
 \subsection{Specifying Security Policies}
 \label{subsec:sota:security}
@@ -640,8 +665,8 @@ Verifying a system with respect to a hyperproperty is harder in the general
 case, but certain hyperproperties, called \( k \)-safety properties, can be
 reduced to an invariant.
 %
-For instance, we assume \( M \) handles inputs which can be
-either secret or public.
+For instance, we assume \( M \) handles inputs which can be either secret or
+public.
 %
 Let \( \equiv \) be the binary relation, such that two states \( s \) and
 \( r \) satisfies this relation (\( s \equiv r \)) if and only if they
@@ -799,8 +824,8 @@ architecture.
 
 \paragraph{Ad-hoc x86 Models}
 %
-Finally, a last category of x86 models is ad-hoc models, specially developed to
-verify a dedicated system software component.
+Finally, a last category of existing x86 models is ad-hoc models, specially
+developed to verify a dedicated system software component.
 %
 As such, they focus on hardware features used by the target of verification, in
 particular the \ac{mmu} and the interrupt handlers, and trust the hardware will
@@ -1013,91 +1038,16 @@ automate proof constructions to some extend.
 For instance, in our proofs in Chapter~\ref{chapter:speccert2}, the cache,
 \ac{dram} and VGA memories are of arbitrary sizes.
 
-% \subsubsection{Machine-Code Program Verification}
-% \label{subsubsec:sota:asw}
-
-% \paragraph{RockSalt.}
-%%
-% A Google service called \ac{nacl} allows for for software developers to
-% distribute their web applications in the form of native executable code.
-%%
-% These native applications are executed directly in the context of the browser.
-%%
-% \ac{nacl} uses \ac{sfi} to prevent arbitrary native applications from
-% tampering with the code and data of the browser.
-%%
-% \ac{sfi} comprises a set of rules native applications have to comply with, and
-% that together form a sandbox policy.
-%%
-% In practice, \ac{nacl} checks that an arbitrary native applications respects
-% the \ac{sfi} rules before loading it to the browser context.
-%%
-% As a consequence, the browser is protected from malicious machine code.
-%
-% From a security perspective, this means there are two requirements over
-% \ac{nacl}:
-%%
-% \begin{inparaenum}[(1)]
-% \item verifying that the rules are indeed sufficient to constrain the
-%   distrusted native applications with respect to the sandbox policy, and
-%%
-% \item the \ac{nacl} checker correctly verifies that native applications
-%   respect these rules.
-% \end{inparaenum}
-%%
-% This is similar to the challenges faced by \ac{hse} mechanisms.
-%
-% Because \ac{nacl} has been shown to have issues regarding these two
-% requirements, Greg Morrisett \emph{et al.} have specified the \ac{nacl}
-% checker in Coq, proven the rules it checks are correct and indeed enforce the
-% targeted sandbox policy, and then manually translated the checker in
-% C\,\cite{morrisett2012rocksalt}.
-%%
-% By doing so, they have addressed the two requirements listed above, provided
-% that their translation is correct.
-%
-% \paragraph{Moat.}
-%%
-% Intel \ac{sgx} is a recent addition to certain x86 \acp{cpu}, whose purpose is
-% to provide so-called \emph{enclaves} to user land
-% applications\,\cite{costan2016sgxexplained}.
-%%
-% These enclaves supposedly offer an execution environment isolated from the
-% system software.
-%%
-% The functioning of \ac{sgx} can be roughly summarized as follows:
-% \ac{sgx}-capable \acp{cpu} dedicate a special portion of the system memory,
-% called the \ac{epc}, to enclaves.
-%%
-% The system software is responsible for allocating and initializing memory
-% pages of the \ac{epc} (thanks to dedicated instructions), but it cannot read
-% or write to them once it is done.
-%%
-% This is enforced by the memory controller, which encrypts the content of the
-% \ac{epc} transparently from the \ac{cpu}.
-%%
-% Hence, the memory controller only decrypts an \ac{epc}'s page if it is
-% accessed by the enclave which owns it; it will also discard write accesses
-% performed by other software components.
-%
-% Rohit Sinha \emph{et al.} have modeled SGX instructions semantics, to complete
-% an existing model, and have developed an automated information flow analysis
-% tool called Moat, to verify whether a given application code may leak secrets
-% or not\,\cite{sinha2015moat}.
-%%
-% The work proceeds similarly to RockSalt, where instructions are treated as
-% labeled transition from one state to another.
-%%
-% However, Moat also considers an active and passive adversary, with additional
-% capabilities (meaning, additional transitions in the system).
-%%
-% The approach is similar to what David Lie \emph{et al.} have done for the
-% \ac{xom} architecture\,\cite{lie2003xom}.
-
 \subsection{Conclusion}
+%
+\label{subsec:sota:ltsconclusion}
 
 Transition systems are a popular formalism to reason about the correctness of
-computing system, including hardware architecture.
+computing system, and have been successfully applied to model and reason about
+(part of) hardware architectures.
+%
+In order to specify and verify \ac{hse} mechanisms, we need a comprehensive
+model of the related hardware architecture.
 %
 On the one hand, hardware design verification often focus on properties
 transparent to the executed software components (\emph{e.g.} cache
@@ -1115,6 +1065,8 @@ On the other hand, low-level software components such as
 seL4\,\cite{klein2009sel4} or CertiKOS\,\cite{gu2016certikos} use the features
 exposed by these components, and are verified against \emph{ad hoc} hardware
 models, whose scope is driven by their target of verification.
+%
+As a consequence, we would need to make significant changes prior to using them.
 
 Thus, we face a 'chicken-and-egg' problem: we need a detailed hardware model to
 reason about \ac{hse} mechanisms, yet such a model does not exist and requires a
@@ -1122,9 +1074,8 @@ tremendous amount of efforts to be developed, reviewed and validated; which
 means we need to be reasonably certain of our modeling choices for those efforts
 not going to waste.
 %
-As a consequence, we decided develop an ad-hoc, simplified x86 hardware model
-which includes the necessary hardware components abstracted away in related
-work.
+We decided develop an ad-hoc, simplified x86 hardware model which includes the
+necessary hardware components abstracted away in related work.
 %
 Using this model, we demonstrate in Chapter~\ref{chapter:speccert2} how it is
 possible to leverage our formal definition of \ac{hse} mechanisms presented in
