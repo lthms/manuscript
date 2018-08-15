@@ -103,19 +103,10 @@ Transitions occur when the system interacts with its environment (\emph{e.g.} a
 hardware circuit receives a clock signal, a hardware controller receives a
 message from a bus, an operating system handles a syscall).
 
-\emph{Labeled} transition systems distinguish between classes of transitions
-\emph{via} the use of labels\,\cite{loiseaux1995lts} (\emph{e.g.} one label per
-syscall).
-%
-A labeled transition system is a tuple \( \langle S, L, R \rangle \), such that
-\( S \) is a set of states, \( L \) is a set of labels, and
-\( R \subseteq S \times L \times S \) is the transition relation.
-
 Throughout this Chapter, we will use the airlock system in order to act as a
-running example to illustrate the introduced definitions.
-%
-\thomasrk[inline]{Mieux vendre que c'est un exemple simple et qu'on peut
-  facilement tirer.}
+running example to illustrate the introduced definitions, since it is both
+simple ---our examples remain of manageable size--- and rich ---our examples do
+not feel far-fetched.
 %
 An airlock system is a device made of two doors, and an intermediary chamber.
 %
@@ -125,6 +116,14 @@ second door, and exits the chamber.
 
 \begin{example}[Airlock System]
   \label{example:sota:airlocklts}
+
+  \emph{Labeled} transition systems distinguish between classes of transitions
+  \emph{via} the use of labels\,\cite{loiseaux1995lts} (\emph{e.g.} one label
+  per syscall).
+%
+  A labeled transition system is a tuple \( \langle S, L, R \rangle \), such
+  that \( S \) is a set of states, \( L \) is a set of labels, and
+  \( R \subseteq S \times L \times S \) is the transition relation.
   Figure~\ref{fig:sota:airlock-lts} gives a definition of an idealized airlock
   system, modeled as a labeled transition system.
 
@@ -1014,26 +1013,6 @@ automate proof constructions to some extend.
 For instance, in our proofs in Chapter~\ref{chapter:speccert2}, the cache,
 \ac{dram} and VGA memories are of arbitrary sizes.
 
-\paragraph*{}
-%
-We face a 'chicken-and-egg' problem: we need a detailed hardware model to reason
-about \ac{hse} mechanisms, yet such a model does not exist and requires a
-tremendous amount of efforts to be developed, reviewed and validated; which
-means we need to be reasonably certain of our modeling choices for those efforts
-not going to waste.
-%
-As a consequence, we decided develop an ad-hoc, simplified x86 hardware model
-which includes the necessary hardware components abstracted away in related
-work.
-%
-Using this model, we demonstrate in Chapter~\ref{chapter:speccert2} how it is
-possible to leverage our formal definition of \ac{hse} mechanisms presented in
-Chapter~\ref{chapter:speccert} in order to specify and verify a \ac{hse}
-mechanism implemented by the \ac{bios}.
-%
-This experiment allowed us to learn a lot with regard to desirable properties a
-detailed hardware model could have.
-
 % \subsubsection{Machine-Code Program Verification}
 % \label{subsubsec:sota:asw}
 
@@ -1114,6 +1093,46 @@ detailed hardware model could have.
 %%
 % The approach is similar to what David Lie \emph{et al.} have done for the
 % \ac{xom} architecture\,\cite{lie2003xom}.
+
+\subsection{Conclusion}
+
+Transition systems are a popular formalism to reason about the correctness of
+computing system, including hardware architecture.
+%
+On the one hand, hardware design verification often focus on properties
+transparent to the executed software components (\emph{e.g.} cache
+coherency\,\cite{stern1995cachecoherence}, linearizability of SGX
+instructions\,\cite{leslie2015linsgx}, hardware-based memory
+isolation\,\cite{lie2003xom}).
+%
+Security gap in interactions of multiple platform components are less subject to
+formal verification, due to their increasing
+complexity\,\cite{potlapally2011hardwaresecurity}, and we are not aware of any
+x86 hardware model comprehensive in terms of hardware components and hardware
+features exposed by these components
+%
+On the other hand, low-level software components such as
+seL4\,\cite{klein2009sel4} or CertiKOS\,\cite{gu2016certikos} use the features
+exposed by these components, and are verified against \emph{ad hoc} hardware
+models, whose scope is driven by their target of verification.
+
+Thus, we face a 'chicken-and-egg' problem: we need a detailed hardware model to
+reason about \ac{hse} mechanisms, yet such a model does not exist and requires a
+tremendous amount of efforts to be developed, reviewed and validated; which
+means we need to be reasonably certain of our modeling choices for those efforts
+not going to waste.
+%
+As a consequence, we decided develop an ad-hoc, simplified x86 hardware model
+which includes the necessary hardware components abstracted away in related
+work.
+%
+Using this model, we demonstrate in Chapter~\ref{chapter:speccert2} how it is
+possible to leverage our formal definition of \ac{hse} mechanisms presented in
+Chapter~\ref{chapter:speccert} in order to specify and verify a \ac{hse}
+mechanism implemented by the \ac{bios}.
+%
+This experiment allowed us to learn a lot with regard to desirable properties a
+detailed hardware model could have.
 
 \section{Compositional Verification}
 \label{section:sota:compsec}
@@ -1211,12 +1230,10 @@ except they do not require to be input enabled.
 %
 As a consequence, the definition of an interface automaton captures its
 requirements over the rest of the system.
-%
-\PC{saut de ligne} Another popular modeling structure is the Moore Machine.
-%
-Moore Machines play a key role in compositional model
-checking\,\cite{mcmillan1989compositional}, because they can be translated into
-Kripke structures.
+
+Another popular modeling structure is the Moore Machine, as they play a key role
+in compositional model checking\,\cite{mcmillan1989compositional}, because they
+can be translated into Kripke structures.
 
 \begin{example}[Airlock System as Interface Automata]
   \label{example:sota:airlockinterface}
@@ -1683,50 +1700,6 @@ Logic of Program, but to the best of our knowledge, no implementation.
 \label{sec:sota:conclusion}
 
 \thomasrk[inline]{TODO}
-
-\subsection{Specifying and Verifying Hardware-based Security Enforcement
-  Mechanisms}
-
-By definition, \ac{hse} mechanisms fall between two domains that are hardware
-design verification and low-level software components verification.
-
-On the one hand, hardware design verification often focus on properties
-transparent to the executed software components (\emph{e.g.} cache
-coherency\,\cite{stern1995cachecoherence}, linearizability of SGX
-instructions\,\cite{leslie2015sgx}, hardware-based memory
-isolation\,\cite{lie2003xom}).
-%
-Security gap in interactions of multiple platform components are less subject to
-formal verification, due to their increasing
-complexity\,\cite{potlapally2011hardwaresecurity}.
-%
-Yet they are responsible for architectural attacks we want to avoid.
-%
-On the other hand, low-level software components such as
-seL4\,\cite{klein2009sel4} or CertiKOS\,\cite{gu2016certikos} use the features
-exposed by these components, and are verified against \emph{ad hoc} hardware
-models, whose scope is often limited to necessary hardware features.
-%
-We steer a middle course between these approaches.
-%
-In Chapter~\ref{chapter:speccert}, we define \ac{hse} mechanisms as sets of
-requirements over low-level software components, such that satisfying these
-requirements are sufficient to ensure the hardware architecture enforces a
-certain property\,\cite{letan2016speccert}.
-%
-In Chapter~\ref{chapter:speccert2}, we show how we can verify the correctness of
-these requirements against a hardware model.
-%
-A desirable long-term goal of this approach would be to verify the correctness
-of low-level software components with respect to these requirements, \emph{i.e.}
-the security policy by the implemented \ac{hse} is enforced.
-%
-As such, our approach relates to previous research works such as
-RockSalt\,\cite{morrisett2012rocksalt} (validation of arbitrary programs against
-a verified software-based fault isolation\,\cite{wahbe1994sfi} policy) or
-Moat\,\cite{sinha2015moat} (verification of SGX
-enclave\,\cite{costan2016sgxexplained} programs with respect to
-confidentiality).
 
 \subsection{Compositional Verification of Hardware Architecture}
 
