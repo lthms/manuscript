@@ -1113,7 +1113,7 @@ A comprehensive hardware model in terms of hardware components would undoubtedly
 make the construction of the proof unbearable for any non-trivial properties,
 yet is a requirement to uncover compositional attacks by the means of formal
 methods.
-
+%
 \PC{il manque aussi l'argument de la difficulté à maintenir / faire évoluer le
   modèle si un composant change - or c'est le cas en pratique: de nombreuses
   archis sont similaires, mais avec quelques différences dans les composants}
@@ -1129,11 +1129,13 @@ Then, the composition of these components is also verified in order to ensure it
 does not make them vulnerable to compositional attacks.
 %
 This approach requires to use adapted modeling structures when it comes to
-defining a specification (\ref{subsec:sota:compmod}).
+defining a specification (\ref{subsec:sota:compmod}), and dedicated verification
+approaches, which enable ``divide and conquer'' strategies to reduce the burden
+of verifying the system (\ref{subsec:sota:compverif}).
 %
-It also requires dedicated verification approaches, which enable ``divide and
-conquer'' strategies to reduce the burden of verifying the system
-(\ref{subsec:sota:compverif}).
+Related work~\ref{subsec:sota:comprelated}
+%
+TODO conclusion
 
 \subsection{Compositional Modeling Structures}
 \label{subsec:sota:compmod}
@@ -1564,6 +1566,7 @@ The \( L* \) algorithm has latterly been adapted to other modeling structure,
 for instance for interface automata\,\cite{emmi2008assume}.
 
 \subsection{Related Work}
+\label{subsec:sota:comprelated}
 
 \paragraph{{\scshape Kami}.}
 %
@@ -1647,12 +1650,7 @@ Logic of Program, but to the best of our knowledge, no implementation.
 %
 \thomasrk[inline]{TODO}
 
-\section{Conclusion: Where this Thesis Stands}
-\label{sec:sota:conclusion}
-
-\thomasrk[inline]{TODO}
-
-\subsection{Compositional Verification of Hardware Architecture}
+\subsection{Conclusion}
 
 Our formal definition of \ac{hse} mechanism assumes there exists a formal model
 of the hardware architecture.
@@ -1702,3 +1700,6 @@ handlers are regular {\scshape Gallina} development.
 %
 As a consequence, we can use the full interactive proof development environment
 of Coq in order to write and validate our proofs.
+
+\section{Conclusion}
+\label{sec:sota:conclusion}
