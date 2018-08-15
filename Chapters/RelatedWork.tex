@@ -731,8 +731,14 @@ software components.
 In this context, verifying a \ac{hse} mechanism consists of proving this set of
 traces satisfies the predicate which characterizes the targeted security policy.
 
-\paragraph{x86 Models.}
+\paragraph{x86 Models by Intel.}
 %
+The trustworthiness of a verification result depends to a large extent on the
+model.
+%
+As such, because x86 is a proprietary product, Intel remains in the best
+position to produce a detailed, trustworthy model of its architecture.
+
 Intel has integrated formal verification in its processors design process for
 more than a decade now.
 %
@@ -757,9 +763,14 @@ Besides, to the extend of our knowledge, Intel has not advertised about a
 working at Intel at the time, discussed the benefits of such a model in
 2011\,\cite{potlapally2011hardwaresecurity}.
 
-Additionally, several x86 model have been proposed by academic researchers over
-the years, but for purposes of formally reasoning about machine-code programs.
+\paragraph{x86 ISA Models.}
 %
+Additionally, several x86 model have been proposed by academic researchers over
+the years for purposes of formally reasoning about machine-code programs.
+%
+To that end, they have modeled the x86 instructions set semantics, often
+referred to as x86 ISA.
+
 Probably the most mature projects include RockSalt by Morissett \emph{et
   al.}\,\cite{morrisett2012rocksalt}, Goel \emph{et al.}
 framework\,\cite{goel2014x86}, and CompCert x86 assembly
@@ -777,19 +788,118 @@ with respect to functional specifications.
 It has been shown in the past that it is possible to extend them, when their
 abstraction is too strong and hides crucial of concrete code execution.
 %
-For instance, Gu \emph{et al.} extended CompCert to reason about
-concurrency\,\cite{gu2016certikos}, and Chen \emph{et al.} developed an approach
-to reason about interruptible programs\,\cite{chen2018interrupt}.
-%
-However, this requires an important level of expertise and understanding of
-fairly complicated formal developments.
+For instance, Chen \emph{et al.} have extended the hardware model of CompCertX,
+a variant of CompCert used in the development of formally verified
+kernels\,\cite{gu2016certikos}, with a notion of input devices and
+interrupts\,\cite{chen2018interrupt}.
 
-As a consequence, we decided to develop an ad-hoc x86 hardware model which
-include the necessary hardware components ---abstracted away in related work---
-to demonstrate in Chapter~\ref{chapter:speccert2} how it is possible to leverage
-our formal definition of \ac{hse} mechanisms presented in
-Chapter~\ref{chapter:speccert} in order to specify and verify a \ac{hse}
-mechanism implemented by the \ac{bios}.
+However, this requires an important level of expertise and understanding of
+fairly complicated formal developments, and the primarily focus of these
+projects is to reason about software components, not the underlying hardware
+architecture.
+
+\paragraph{Ad-hoc x86 Models}
+%
+Finally, a last category of x86 models is ad-hoc models, specially developed to
+verify a dedicated system software component.
+%
+As such, they focus on hardware features used by the target of verification, in
+particular the \ac{mmu} and the interrupt handlers, and trust the hardware will
+behave as expected.
+%
+We now give a quick overview of available, open-source ad-hoc models we could
+reuse.
+
+The seL4 microkernel is, to date, the most advanced and mature verified
+implementation of a microkernel.
+%
+A C implementation of the kernel is proven correct with respect to a functional
+implementation modeled in the Isabelle/HOL theorem prover, and they have show
+that this model correctly enforces security policies including information flow
+control, integrity and confidentiality\,\cite{klein2009sel4}.
+%
+In practice, the hardware model focus on \ac{mmu}, cache and interrupt handling,
+and in large parts the exact behavior of hardware devices is left
+non-deterministic, in order to reduces the assumptions made by the model about
+the hardware.
+%
+In 2016, Jomaa \emph{et al.} have proposed a formal machine-checked proof (in
+Coq) of guests isolation by an idealized protokernel based on a
+\ac{mmu}\,\cite{jomaa2016mmu}.
+%
+Similarly to seL4, their hardware model focus on \ac{mmu} and interrupt
+handling.
+%
+In both cases, there is a separation between the software component model and
+the hardware model, and it may be possible to extract the hardware model and
+reuse it.
+%
+However, their scope does not include the hardware features involved in the
+\ac{hse} mechanisms implemented by the \ac{bios} and described in
+Section~\ref{subsec:usecase:hse:smm}.
+
+Between 2011 and 2014, Gilles Barthe \emph{et al.} have worked on an idealized
+model of a
+hypervisor\,\cite{barthe2011virtcert1,barthe2012virtcert2,barthe2014virtcert3}.
+%
+This model is defined in terms of states, actions and the semantics of actions
+as state trans\-formers.
+%
+The state mixes information about both hardware components (\ac{cpu} execution
+mode, registers, memory content, etc.) and software components (list of guests,
+the current active guest, memory mapping for the hypervisor and the guests,
+etc.).
+%
+The set of actions describes the events which can trigger a transformation of
+the model states.
+%
+For instance, it includes various tasks that the hypervisor must carry out, such
+as scheduling the guests OS, hypercalls handling, or memory management.
+%
+Certain actions also witness the execution of guests, for instance when the
+currently running OS reads from or writes to memory.
+%
+The resulting project, called VirtCert and implemented in the Coq theorem
+prover, is fairly large, with over 50\,000 lines of code.
+%
+The verification results focus on various isolation properties, from the most
+natural and straightforward (\emph{i.e.} an OS guest cannot write to or read
+from a page it does not own) up to non-interference variants including
+protection against cache-timing attacks, notoriously harder to reason with.
+%
+However, the model combines hardware and software components behavior and we
+would have to make significant changes prior to using it.
+
+%
+% First, they showed that the ideal hypervisor
+%%
+% \begin{inparaenum}[(1)]
+% \item ensures strong isolation between guests (two safety properties and one
+%   2-safety property\PC{c'est quoi une ``2-safety property''?}), and
+%%
+% \item eventually processes every request performed by the guests (one liveness
+%   property)\,\cite{barthe2011virtcert1}.
+% \end{inparaenum}
+%%
+% Then, they incorporated the \ac{cpu} cache to their hardware model, and a
+% countermeasure for preventing cache-timing attack to their hypervisor model.
+%%
+% They proved the effectiveness of the countermeasure.
+%%
+% The authors have shown their ideal hypervisor could prevent such attack, at
+% the cost of flushing the cache before each context switch.
+%%
+% Finally, they have taken their approach a step further, by focusing on
+% constant-time cryptography as an effective countermeasure against cache-timing
+% attack\,\cite{barthe2014virtcert3}.
+%%
+% This last work also introduced a static analysis for C program, notably
+% implemented as an extension for CompCert, a certified C
+% compiler\,\cite{leroy2012compcert}.
+%%
+% \PC{trop générique/vague: ``une analyse statique ?'' laquelle ? pour faire
+% quoi}
+
 
 \paragraph{Other Hardware Architecture Models.}
 %
@@ -901,177 +1011,109 @@ theorem proving providing facilities to compensate the cost in terms of
 automation, \emph{e.g.} Coq provides {\scshape Ltac}, a dedicated language to
 automate proof constructions to some extend.
 %
-For instance, in our proofs in Chapter~\ref{speccert:chapter2}, the cache,
+For instance, in our proofs in Chapter~\ref{chapter:speccert2}, the cache,
 \ac{dram} and VGA memories are of arbitrary sizes.
 
-\paragraph{Hardware Models in System Software Components Verification.}
+\paragraph*{}
 %
-Between 2011 and 2014, Gilles Barthe \emph{et al.} have worked on an idealized
-model of a hypervisor.
+We face a 'chicken-and-egg' problem: we need a detailed hardware model to reason
+about \ac{hse} mechanisms, yet such a model does not exist and requires a
+tremendous amount of efforts to be developed, reviewed and validated; which
+means we need to be reasonably certain of our modeling choices for those efforts
+not going to waste.
 %
-This model is defined in terms of states, actions and the semantics of actions
-as state trans\-formers.
+As a consequence, we decided develop an ad-hoc, simplified x86 hardware model
+which includes the necessary hardware components abstracted away in related
+work.
 %
-The state mixes information about both hardware components (\ac{cpu} execution
-mode, registers, memory content, etc.) and software components (list of guests,
-the current active guest, memory mapping for the hypervisor and the guests,
-etc.).
+Using this model, we demonstrate in Chapter~\ref{chapter:speccert2} how it is
+possible to leverage our formal definition of \ac{hse} mechanisms presented in
+Chapter~\ref{chapter:speccert} in order to specify and verify a \ac{hse}
+mechanism implemented by the \ac{bios}.
 %
-The set of actions describes the events which can trigger a transformation of
-the model states.
-%
-For instance, it includes various tasks that the hypervisor must carry out, such
-as scheduling the guests OS, hypercalls handling, or memory management.
-%
-Certain actions also witness the execution of guests, for instance when the
-currently running OS reads from or writes to memory.
-%
-The semantics of actions as state transformers, which describes the set of
-possible transitions for the model, is defined in terms of pre and
-postconditions, where
-%
-\begin{enumerate}
-\item A precondition \( \mathrm{Pre} \) is a predicate on state and action, such
-  that for a couple \( (s, a) \), if the precondition holds, then the action
-  \( a \) can occur from the state \( s \)
-\item A postcondition \( \mathrm{Post} \) is a predicate over triples composed
-  of state, action and state, such that for a triple \( (s, a, s') \), if the
-  postcondition holds, then the model state is updated from \( s \) to \( s' \)
-  after an action \( a \).
-\end{enumerate}
-%
-This means \( (s, a, s') \) is a transition of the model if and only if
-%
-\[
-  \mathrm{Pre}(s, a) \wedge \mathrm{Post}(s, a, s')
-\]
+This experiment allowed us to learn a lot with regard to desirable properties a
+detailed hardware model could have.
 
-They implemented their model and their proofs in the Coq theorem prover.
-%
-First, they showed that the ideal hypervisor
-%
-\begin{inparaenum}[(1)]
-\item ensures strong isolation between guests (two safety properties and one
-  2-safety property\PC{c'est quoi une ``2-safety property''?}), and
-%
-\item eventually processes every request performed by the guests (one liveness
-  property)\,\cite{barthe2011virtcert1}.
-\end{inparaenum}
-%
-Then, they incorporated the \ac{cpu} cache to their hardware model, and a
-countermeasure for preventing cache-timing attack to their hypervisor model.
-%
-They proved the effectiveness of the countermeasure\,\cite{barthe2012virtcert2}.
-%
-The authors have shown their ideal hypervisor could prevent such attack, at the
-cost of flushing the cache before each context switch.
-%
-Finally, they have taken their approach a step further, by focusing on
-constant-time cryptography as an effective countermeasure against cache-timing
-attack\,\cite{barthe2014virtcert3}.
-%
-This last work also introduced a static analysis for C program, notably
-implemented as an extension for CompCert, a certified C
-compiler\,\cite{leroy2012compcert}.
-%
-\PC{trop générique/vague: ``une analyse statique ?'' laquelle ? pour faire quoi}
+% \subsubsection{Machine-Code Program Verification}
+% \label{subsubsec:sota:asw}
 
-The resulting project, called VirtCert, is fairly large.
+% \paragraph{RockSalt.}
+%%
+% A Google service called \ac{nacl} allows for for software developers to
+% distribute their web applications in the form of native executable code.
+%%
+% These native applications are executed directly in the context of the browser.
+%%
+% \ac{nacl} uses \ac{sfi} to prevent arbitrary native applications from
+% tampering with the code and data of the browser.
+%%
+% \ac{sfi} comprises a set of rules native applications have to comply with, and
+% that together form a sandbox policy.
+%%
+% In practice, \ac{nacl} checks that an arbitrary native applications respects
+% the \ac{sfi} rules before loading it to the browser context.
+%%
+% As a consequence, the browser is protected from malicious machine code.
 %
-The Coq development counts over 50\,000 lines of code.
+% From a security perspective, this means there are two requirements over
+% \ac{nacl}:
+%%
+% \begin{inparaenum}[(1)]
+% \item verifying that the rules are indeed sufficient to constrain the
+%   distrusted native applications with respect to the sandbox policy, and
+%%
+% \item the \ac{nacl} checker correctly verifies that native applications
+%   respect these rules.
+% \end{inparaenum}
+%%
+% This is similar to the challenges faced by \ac{hse} mechanisms.
 %
-The verification results focus on various isolation properties, from the most
-natural and straightforward (\emph{i.e.} an OS guest cannot write to or read
-from a page it does not own) up to non-interference variants, notoriously harder
-to reason with.  \PC{idem, on ne voit pas les limites de ce travail, et/ou
-  pourquoi tu ne l'utilise pas directement}
-
-\paragraph{seL4.}
+% Because \ac{nacl} has been shown to have issues regarding these two
+% requirements, Greg Morrisett \emph{et al.} have specified the \ac{nacl}
+% checker in Coq, proven the rules it checks are correct and indeed enforce the
+% targeted sandbox policy, and then manually translated the checker in
+% C\,\cite{morrisett2012rocksalt}.
+%%
+% By doing so, they have addressed the two requirements listed above, provided
+% that their translation is correct.
 %
-Certified microkernel.
+% \paragraph{Moat.}
+%%
+% Intel \ac{sgx} is a recent addition to certain x86 \acp{cpu}, whose purpose is
+% to provide so-called \emph{enclaves} to user land
+% applications\,\cite{costan2016sgxexplained}.
+%%
+% These enclaves supposedly offer an execution environment isolated from the
+% system software.
+%%
+% The functioning of \ac{sgx} can be roughly summarized as follows:
+% \ac{sgx}-capable \acp{cpu} dedicate a special portion of the system memory,
+% called the \ac{epc}, to enclaves.
+%%
+% The system software is responsible for allocating and initializing memory
+% pages of the \ac{epc} (thanks to dedicated instructions), but it cannot read
+% or write to them once it is done.
+%%
+% This is enforced by the memory controller, which encrypts the content of the
+% \ac{epc} transparently from the \ac{cpu}.
+%%
+% Hence, the memory controller only decrypts an \ac{epc}'s page if it is
+% accessed by the enclave which owns it; it will also discard write accesses
+% performed by other software components.
 %
-\thomasrk[inline]{TODO}
-
-\subsubsection{Machine-Code Program Verification}
-\label{subsubsec:sota:asw}
-
-%\paragraph{RockSalt.}
+% Rohit Sinha \emph{et al.} have modeled SGX instructions semantics, to complete
+% an existing model, and have developed an automated information flow analysis
+% tool called Moat, to verify whether a given application code may leak secrets
+% or not\,\cite{sinha2015moat}.
 %%
-%A Google service called \ac{nacl} allows for for software developers to
-%distribute their web applications in the form of native executable code.
+% The work proceeds similarly to RockSalt, where instructions are treated as
+% labeled transition from one state to another.
 %%
-%These native applications are executed directly in the context of the browser.
+% However, Moat also considers an active and passive adversary, with additional
+% capabilities (meaning, additional transitions in the system).
 %%
-%\ac{nacl} uses \ac{sfi} to prevent arbitrary native applications from tampering
-%with the code and data of the browser.
-%%
-%\ac{sfi} comprises a set of rules native applications have to comply with, and
-%that together form a sandbox policy.
-%%
-%In practice, \ac{nacl} checks that an arbitrary native applications respects the
-%\ac{sfi} rules before loading it to the browser context.
-%%
-%As a consequence, the browser is protected from malicious machine code.
-%
-%From a security perspective, this means there are two requirements over
-%\ac{nacl}:
-%%
-%\begin{inparaenum}[(1)]
-%\item verifying that the rules are indeed sufficient to constrain the distrusted
-%  native applications with respect to the sandbox policy, and
-%%
-%\item the \ac{nacl} checker correctly verifies that native applications respect
-%  these rules.
-%\end{inparaenum}
-%%
-%This is similar to the challenges faced by \ac{hse} mechanisms.
-%
-%Because \ac{nacl} has been shown to have issues regarding these two
-%requirements, Greg Morrisett \emph{et al.} have specified the \ac{nacl} checker
-%in Coq, proven the rules it checks are correct and indeed enforce the targeted
-%sandbox policy, and then manually translated the checker in
-%C\,\cite{morrisett2012rocksalt}.
-%%
-%By doing so, they have addressed the two requirements listed above, provided
-%that their translation is correct.
-%
-%\paragraph{Moat.}
-%%
-%Intel \ac{sgx} is a recent addition to certain x86 \acp{cpu}, whose purpose is
-%to provide so-called \emph{enclaves} to user land
-%applications\,\cite{costan2016sgxexplained}.
-%%
-%These enclaves supposedly offer an execution environment isolated from the
-%system software.
-%%
-%The functioning of \ac{sgx} can be roughly summarized as follows:
-%\ac{sgx}-capable \acp{cpu} dedicate a special portion of the system memory,
-%called the \ac{epc}, to enclaves.
-%%
-%The system software is responsible for allocating and initializing memory pages
-%of the \ac{epc} (thanks to dedicated instructions), but it cannot read or write
-%to them once it is done.
-%%
-%This is enforced by the memory controller, which encrypts the content of the
-%\ac{epc} transparently from the \ac{cpu}.
-%%
-%Hence, the memory controller only decrypts an \ac{epc}'s page if it is accessed
-%by the enclave which owns it; it will also discard write accesses performed by
-%other software components.
-%
-%Rohit Sinha \emph{et al.} have modeled SGX instructions semantics, to complete
-%an existing model, and have developed an automated information flow analysis
-%tool called Moat, to verify whether a given application code may leak secrets or
-%not\,\cite{sinha2015moat}.
-%%
-%The work proceeds similarly to RockSalt, where instructions are treated as
-%labeled transition from one state to another.
-%%
-%However, Moat also considers an active and passive adversary, with additional
-%capabilities (meaning, additional transitions in the system).
-%%
-%The approach is similar to what David Lie \emph{et al.} have done for the
-%\ac{xom} architecture\,\cite{lie2003xom}.
+% The approach is similar to what David Lie \emph{et al.} have done for the
+% \ac{xom} architecture\,\cite{lie2003xom}.
 
 \section{Compositional Verification}
 \label{section:sota:compsec}
