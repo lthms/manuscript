@@ -71,12 +71,21 @@ graphic card.
 %
 Several come with their own documentation, often in the form of large datasheet.
 
-\TODO{et? Quel est le lien avec la suite? Il manque ici une transition, annoncant notamment le plan de la section. D'ailleurs, il manque un fil conducteur à cette section.}
+\TODO{et? Quel est le lien avec la suite? Il manque ici une transition,
+annoncant notamment le plan de la section. D'ailleurs, il manque un fil
+conducteur à cette section.}
 
 \subsection{Basics of x86 Architecture}
 
 A simplified x86 hardware architecture is pictured in
-Figure~\ref{fig:usecase:x86arch}. \TODO{Il faudrait préciser que cette figure correspond à une architecture x86 récente (je ne sais plus à partir de quelle nom de code, il faudrait retrouver). Il faudrait en profiter pour souligner que l'architecture x86 a évolué sensiblement depuis sa création et que même aujourd'hui, on peut trouver dans un parc existants des machines avec des architectures sensiblement différentes}
+Figure~\ref{fig:usecase:x86arch}.
+%
+\TODO{Il faudrait préciser que cette figure correspond à une architecture x86
+récente (je ne sais plus à partir de quelle nom de code, il faudrait
+retrouver). Il faudrait en profiter pour souligner que l'architecture x86 a
+évolué sensiblement depuis sa création et que même aujourd'hui, on peut trouver
+dans un parc existants des machines avec des architectures sensiblement
+différentes}
 %
 We now describe how the different hardware components are integrated together to
 form a typical x86 computing platform, from the processor which executes
@@ -341,10 +350,14 @@ locations within the hardware architecture is called the \emph{memory map}.
 The memory map is configurable, that is it can be changed dynamically \emph{via}
 configuration registers exposed by the processor and the \ac{pch}.
 %
-For instance, PCI \TODO{c'est la première fois que tu utilises PCI. Tu dois
-  rapidement expliquer cette acronyme} devices expose a so-called configuration
-space, which is a dedicated memory region with a specific semantics summarized
-in Figure~\ref{fig:usecase:pciconfig}.
+For instance, PCI
+%
+\TODO{c'est la première fois que tu utilises PCI. Tu dois rapidement expliquer
+  cette acronyme}
+%
+devices expose a so-called configuration space, which is a dedicated memory
+region with a specific semantics summarized in
+Figure~\ref{fig:usecase:pciconfig}.
 %
 Registers of the PCI configuration space, such as device and vendor IDs, can be
 accessed \emph{via} PMIO.
@@ -367,9 +380,11 @@ that it becomes possible to interact with the PCI configuration space of a given
 peripherals \emph{via} the system memory.
 %
 As a consequence, when a core reads from or write to the system memory in a
-range specified by a BAR, the processor and the \ac{pch} \TODO{pourquoi "the
-  processor and the PCH" et pas "the PCH" seulement?} dispatches its \IOs to the
-PCI configuration space.
+range specified by a BAR, the processor and the \ac{pch}
+%
+\TODO{pourquoi "the processor and the PCH" et pas "the PCH" seulement?}
+%
+dispatches its \IOs to the PCI configuration space.
 
 \begin{figure}
   \begin{center}
@@ -393,6 +408,273 @@ with its virtualization technology\,\cite[Volume 3, Section
 As such, determining which hardware component will handle a core \IO targeting a
 given virtual address requires to have a complete knowledge of the x86 remapping
 and virtual memory mechanisms and of their exact configurations at a given time.
+
+\paragraph{Cache Memory.}
+%
+Interacting with the \ac{dram} remains slow, in regard to the speed of a
+\ac{cpu}.
+%
+To improve performance, Intel \acp{cpu} come with several levels of caches, from
+the smaller and quicker, to the bigger and slower.
+%
+For instance, Intel Core i7, i5 and i3 processors have three levels of caches.
+%
+More precisely, each core is assigned two levels of cache called L1 and L2,
+while they all share a so-called L3 cache, as pictured in
+Figure~\ref{fig:usecase:l1-l3caches}.
+%
+\TODO{La figure fait apparaître des L3 slice. Il faudrait expliquer à quoi cela
+  correspondre ou simplifier la figure}
+%
+The L1 cache has the particularity of being divided into a cache of instructions
+(used when the core read from memory instructions to execute) and a cache of
+data.
+
+Caches are mostly transparent to the software components.
+%
+For instance, the processor alone enforces the cache coherence, with the notable
+exception of multiprocessor (not multicore) systems, for which ``maintenance of
+cache consistency may, in rare circumstances, require intervention by system
+software.''
+%
+Intel has developed a dedicated protocol called MESIF to that
+end\,\cite{thomadakis2011nehalem}.
+
+\begin{figure}
+  \begin{center}
+    \begin{tikzpicture}
+      \node [draw, inner sep=10pt, rectangle, text width=100pt, text badly
+      centered] (l3-1) {L3 slice};%
+      \node [draw, inner sep=10pt, rectangle, text width=100pt, text badly
+      centered, right=25pt of l3-1] (l3-2) {L3 slice};%
+      \node [draw, inner sep=10pt, rectangle, text width=100pt, text badly
+      centered, below=10pt of l3-2] (l3-3) {L3 slice};%
+      \node [draw, inner sep=10pt, rectangle, text width=100pt, text badly
+      centered, left=25pt of l3-3] (l3-4) {L3 slice};%
+      \node [draw, dashed, inner sep=10pt, fit=(l3-1) (l3-2) (l3-3) (l3-4)] (l3)
+      {};%
+
+      \draw (l3-1) -- (l3-2);%
+      \draw (l3-2) -- (l3-3);%
+      \draw (l3-3) -- (l3-4);%
+      \draw (l3-4) -- (l3-1);%
+
+      % core 1
+      \node [draw, text width=100pt, inner sep=10pt, text badly centered,
+      above=of l3-1] (l2-1) {Cache L2};%
+      \draw (l3-1) -- (l2-1);%
+
+      \node [above=20pt of l2-1] (l1-1) {};%
+      \node [draw, right=0pt of l1-1.center, text badly centered, text
+      width=50pt, inner sep=5pt] (l1-1-i) {Cache L1 {\small (Instruction)}};%
+      \node [draw, left=0pt of l1-1.center, text badly centered, text
+      width=50pt, inner sep=5pt] (l1-1-d) {Cache L1 {\small (Data)}};%
+      \node [draw, text width=100pt, text badly centered, inner sep=10pt,
+      minimum height=40pt, above=20pt of l1-1] (unit-1) {Execution Unit};%
+
+      \draw (unit-1.south) -| (l1-1-d.north);%
+      \draw (unit-1.south) -| (l1-1-i.north);%
+      \draw (l1-1-i.south) |- (l2-1.north);%
+      \draw (l1-1-d.south) |- (l2-1.north);%
+
+      \node [draw, dashed, inner sep=10pt, fit=(unit-1) (l2-1)] (c-1) {};%
+
+      % core 2
+      \node [draw, text width=100pt, inner sep=10pt, text badly centered,
+      above=of l3-2] (l2-2) {Cache L2};%
+      \draw (l3-2) -- (l2-2);%
+
+      \node [above=20pt of l2-2] (l1-2) {};%
+      \node [draw, right=0pt of l1-2.center, text badly centered, text
+      width=50pt, inner sep=5pt] (l1-2-i) {Cache L1 {\small (Instruction)}};%
+      \node [draw, left=0pt of l1-2.center, text badly centered, text
+      width=50pt, inner sep=5pt] (l1-2-d) {Cache L1 {\small (Data)}};%
+      \node [draw, text width=100pt, text badly centered, inner sep=10pt,
+      minimum height=40pt, above=20pt of l1-2] (unit-2) {Execution Unit};%
+
+      \draw (unit-2.south) -| (l1-2-d.north);%
+      \draw (unit-2.south) -| (l1-2-i.north);%
+      \draw (l1-2-i.south) |- (l2-2.north);%
+      \draw (l1-2-d.south) |- (l2-2.north);%
+
+      \node [draw, dashed, inner sep=10pt, fit=(unit-2) (l2-2)] (c-2) {};%
+
+      % core 3
+      \node [draw, text width=100pt, inner sep=10pt, text badly centered,
+      below=of l3-3] (l2-3) {Cache L2};%
+      \draw (l3-3) -- (l2-3);%
+
+      \node [below=20pt of l2-3] (l1-3) {};%
+      \node [draw, right=0pt of l1-3.center, text badly centered, text
+      width=50pt, inner sep=5pt] (l1-3-i) {Cache L1 {\small (Instruction)}};%
+      \node [draw, left=0pt of l1-3.center, text badly centered, text
+      width=50pt, inner sep=5pt] (l1-3-d) {Cache L1 {\small (Data)}};%
+      \node [draw, text width=100pt, text badly centered, inner sep=10pt,
+      minimum height=40pt, below=20pt of l1-3] (unit-3) {Execution Unit};%
+
+      \draw (unit-3.north) -| (l1-3-d.south);%
+      \draw (unit-3.north) -| (l1-3-i.south);%
+      \draw (l1-3-i.north) |- (l2-3.south);%
+      \draw (l1-3-d.north) |- (l2-3.south);%
+
+      \node [draw, dashed, inner sep=10pt, fit=(unit-3) (l2-3)] (c-3) {};%
+
+      % core 3
+      \node [draw, text width=100pt, inner sep=10pt, text badly centered,
+      below=of l3-4] (l2-4) {Cache L2};%
+      \draw (l3-4) -- (l2-4);%
+
+      \node [below=20pt of l2-4] (l1-4) {};%
+      \node [draw, right=0pt of l1-4.center, text badly centered, text
+      width=50pt, inner sep=5pt] (l1-4-i) {Cache L1 {\small (Instruction)}};%
+      \node [draw, left=0pt of l1-4.center, text badly centered, text
+      width=50pt, inner sep=5pt] (l1-4-d) {Cache L1 {\small (Data)}};%
+      \node [draw, text width=100pt, text badly centered, inner sep=10pt,
+      minimum height=40pt, below=20pt of l1-4] (unit-4) {Execution Unit};%
+
+      \draw (unit-4.north) -| (l1-4-d.south);%
+      \draw (unit-4.north) -| (l1-4-i.south);%
+      \draw (l1-4-i.north) |- (l2-4.south);%
+      \draw (l1-4-d.north) |- (l2-4.south);%
+
+      \node [draw, dashed, inner sep=10pt, fit=(unit-4) (l2-4)] (c-4) {};%
+    \end{tikzpicture}
+  \end{center}
+  \caption{Typical caches organization of a x86 processor}
+  \label{fig:usecase:l1-l3caches}
+\end{figure}
+
+When a \ac{cpu} successfully reads the memory at a given address, it keeps a
+copy of the result in its cache.
+%
+Therefore, the next time it needs to read some data at this address, these data
+are retrieved from the cache.
+%
+Regarding write accesses, Intel x86 \acp{cpu} provide five different caching
+strategies (uncacheable, write combining, write-through, write-back and
+write-protected)\,\cite[Volume 3, Chapter~11]{intel2014manual}.
+%
+Fine-grained cache strategy configuration is achieved through several hardware
+mechanisms, including (but not limited to):
+%
+\begin{itemize}
+\item The \texttt{CR0} register has a flag called \texttt{CD}, which enables
+  caching once set.
+%
+\item The \ac{cpu} has several registers called Memory Type Range Registers
+  (MTRR), to specify a cache strategy for pre-defined memory regions.
+%
+\item The Page Table Attribute (PAT) allows for configuring a cache strategy at
+  a memory page granularity.
+\end{itemize}
+%
+The write-back strategy is the most commonly used and is summarized in
+Figure~\ref{fig:usecase:writeback}.
+%
+The purpose of this strategy is to reduce the number of \IO forwarded to the
+\ac{dram}.
+%
+To that end, each cache block \TODO{C'est quoi un cache bloc? Il faudrait
+  l'expliquer rapidement avant (il faudrait brièvement décrire la structure d'un
+  cache).} has a ``dirty bit'' which is set by the cache when its value is
+updated by a write access.
+%
+In case of cache eviction, that is when the cache frees a given cache block
+previously used for a given address in order to use it for another one, it
+verifies the value of the ``dirty bit'', so it can update the underlying memory
+cell if necessary.
+%
+Therefore, as long as the cache block is not evicted, the \ac{cpu} does not
+issue write access to the underlying memory.
+%
+The write-back strategy is not suitable for memories of other hardware
+components mapped into the \ac{cpu} address space.
+%
+For instance, caching \IOs targeting a framebuffer does not make sense, because
+the screen wouldn't be updated.
+%
+This is why Intel provides four complementary strategies.
+%
+The uncacheable strategy disables the cache for the given address, while write
+combining, write-through, write-back and write-protected are similar strategies
+such that copies of the underlying memory are stored in the cache to accelerate
+read accesses, but write accesses are directly forwarded.
+
+% For cache-friendly programs, the gain in performance can be
+% huge. \TODO{utilité de ce dernier paragraphe? en outre, il n'est pas vraiment
+% raccord avec ce qui précède.}
+%%
+% For instance, for a Pentium M Intel stated that access to L1 cache takes 3
+% \ac{cpu} cycles, access to the L2 cache takes 12 cycles and access to the DRAM
+% takes 240 cycles\,\cite{drepper2007memory}.
+
+\begin{figure}
+  \centering
+  \begin{tikzpicture}
+    \node [draw, circle] (EP) {};%
+
+    \node [draw, below=of EP] (Sel) {Select a cache block};%
+    \draw [-latex] (EP) -- (Sel);%
+
+    \node [draw, signal, signal to=east and west, below=of Sel] (CH) {Cache
+      hit?};%
+    \draw [-latex] (Sel) -- (CH);
+
+    \node [below=of CH] (CHbranch) {};%
+    \draw (CH) to node [right] {[Yes]} (CHbranch.center);%
+    \node [left=70pt of CH] (nCHbranch) {};%
+    \draw [below] (CH) to node {[No]} (nCHbranch.center);
+
+    \node [draw, signal, signal to=east and west, below=of nCHbranch.center]
+    (Dirty) {Cache block dirty?};%
+    \draw [-latex] (nCHbranch.center) -- (Dirty);%
+
+    \node [draw, below=of Dirty, text width=70pt, text badly centered] (WB)
+    {Write the content of the cache block back to the DRAM};%
+    \draw [-latex] (Dirty) to node [right] {[Yes]} (WB);%
+
+    \node [draw, below=of WB, text width=80pt, text badly centered] (Rf) {Read
+      data from lower memory and fill the cache block};%
+    \draw [-latex] (WB) -- (Rf);%
+
+    \node [draw, below=of WB, text width=80pt, text badly centered] (Rf) {Read
+      data from lower memory and fill the cache block};%
+    \draw [-latex] (WB) -- (Rf);%
+
+    \node [draw, below=of Rf, text width=80pt, text badly centered] (NotDirty)
+    {Mark the cache block as ``not dirty''};%
+    \draw [-latex] (Rf) -- (NotDirty);%
+
+    \draw (Dirty) to node [below] {[No]} ([xshift=-90pt]Dirty.center);%
+    \draw ([xshift=-90pt]Dirty.center) -- ([xshift=-90pt]Rf.center);%
+    \draw [-latex] ([xshift=-90pt]Rf.center) -- (Rf);%
+    \draw [-latex] (Rf) -- (NotDirty);%
+
+    \node [below=260pt of CHbranch.center] (Join) {};%
+    \node [draw, signal, signal to=east and west, below=5pt of Join] (RxW) {Read
+      or Write?};%
+    \draw [-latex] (CHbranch.center) -- (RxW);%
+    \draw (NotDirty) -| (Join.center);%
+
+    \node [draw, text badly centered, text width=70pt, right=50pt of RxW] (R)
+    {Return data};%
+    \draw [-latex] (RxW) to node [below] {[Read]} (R);%
+    \node [draw, text badly centered, text width=70pt, left=50pt of RxW] (W)
+    {Write new value in cache block};%
+    \draw [-latex] (RxW) to node [below] {[Write]} (W);%
+
+    \node [draw, text badly centered, text width=70pt, below=of W] (MakeDirty)
+    {Mark cache block as dirty};%
+    \draw [-latex] (W) -- (MakeDirty);
+
+    \node [draw, fill=black, below=100pt of RxW, circle] (End) {}; \draw
+    [-latex] (MakeDirty.south) |- (End.west); \draw [-latex] (R.south) |-
+    (End.east);
+  \end{tikzpicture}
+
+  \caption{The Write-Back cache strategy}
+  \label{fig:usecase:writeback}
+\end{figure}
 
 \paragraph{Peripherals \IOs.}
 %
@@ -970,8 +1252,9 @@ isolation from the rest of the software stack.
 % security
 % vulnerability\,\cite{duflot2009smram,wojtczuk2009smram,bulygin2014summary}.
 %
-From the information we gathered in the Intel manuals\TODO{ref} and in the academic literature \TODO{ref},
-the isolation required by the \ac{bios} can be divided into three complementary security policies.
+From the information we gathered in the Intel manual\TODO{ref} and in the
+academic literature \TODO{ref}, the isolation required by the \ac{bios} can be
+divided into three complementary security policies.
 
 \begin{description}
 \item [Volatile Memory Access Control]
@@ -1084,11 +1367,14 @@ SMRAM.
 % a une exception (je suppose)}
 A locked SMRAM can only be accessed by a \ac{cpu} in \ac{smm}.
 %
-More precisely, the physical addresses dedicated to the SMRAM from the \ac{bios}
-perspective are used by the rest of the software stack to access the VGA
-controller memory. \TODO{en fait, c'est le mapping de la mémoire qui est
-  différent. Il faudrait l'expliquer comme çà, c'est un peu implicite dans ton
-  explication et j'ai peur que le lecteur non averti ne comprenne pas.}
+To that end, the memory map is dynamically modified with respect to the current
+state of the processor, and the physical addresses dedicated to the SMRAM from
+the \ac{bios} perspective are used by the rest of the software stack to access
+the VGA controller memory.
+%
+% \TODO{en fait, c'est le mapping de la mémoire qui est différent. Il faudrait
+% l'expliquer comme çà, c'est un peu implicite dans ton explication et j'ai peur
+% que le lecteur non averti ne comprenne pas.}
 %
 The \texttt{SMRAMC} register exposed by the processor controls this access
 control mechanism, \emph{via} its \texttt{D\_LCK} bit.
@@ -1243,261 +1529,8 @@ Loic Duflot \emph{et al.}\,\cite{duflot2009smram} and Rafal Wojtczuk \emph{et
 misplaced when they disclosed the SMRAM Cache Poisoning Attack.
 
 \paragraph{Cache Memory.}
-\TODO{Contrairement à Intel TXT, les caches sont une techno hyper courantes, non spécifiques à Intel et que tout le monde connait. Ce long paragraph de description des caches devrait donc plutôt être placé en section 2.1.1. Ici, tu te contenterais de manière très succinte de rappeler les concepts nécessaire pour comprendre l'attaque en faisant référence à la section décrivant les caches. Cela éviterait cette longue digression qui nous éloigne de la description de l'attaque. Le contenu est intéressant mais doit être mieux placé.}
 %
-Interacting with the \ac{dram} remains slow, in regard to the speed of a
-\ac{cpu}.
-%
-To improve performance, Intel \acp{cpu} come with several levels of caches, from
-the smaller and quicker, to the bigger and slower.
-%
-For instance, Intel Core i7, i5 and i3 processors have three levels of caches.
-%
-More precisely, each core is assigned two levels of cache called L1 and L2,
-while they all share a so-called L3 cache, as pictured in
-Figure~\ref{fig:usecase:l1-l3caches}. \TODO{La figure fait apparaître des L3 slice. Il faudrait expliquer à quoi cela correspondre ou simplifier la figure}
-%
-The L1 cache has the particularity of being divided into a cache of instructions
-(used when the core read from memory instructions to execute) and a cache of
-data.
-
-Caches are mostly transparent to the software components.
-%
-For instance, the processor alone enforces the cache coherence, with the notable
-exception of multiprocessor (not multicore) systems, for which ``maintenance of
-cache consistency may, in rare circumstances, require intervention by system
-software.''
-%
-Intel has developed a dedicated protocol called MESIF to that
-end\,\cite{thomadakis2011nehalem}.
-
-\begin{figure}
-  \begin{center}
-    \begin{tikzpicture}
-      \node [draw, inner sep=10pt, rectangle, text width=100pt, text badly
-      centered] (l3-1) {L3 slice};%
-      \node [draw, inner sep=10pt, rectangle, text width=100pt, text badly
-      centered, right=25pt of l3-1] (l3-2) {L3 slice};%
-      \node [draw, inner sep=10pt, rectangle, text width=100pt, text badly
-      centered, below=10pt of l3-2] (l3-3) {L3 slice};%
-      \node [draw, inner sep=10pt, rectangle, text width=100pt, text badly
-      centered, left=25pt of l3-3] (l3-4) {L3 slice};%
-      \node [draw, dashed, inner sep=10pt, fit=(l3-1) (l3-2) (l3-3) (l3-4)] (l3)
-      {};%
-
-      \draw (l3-1) -- (l3-2);%
-      \draw (l3-2) -- (l3-3);%
-      \draw (l3-3) -- (l3-4);%
-      \draw (l3-4) -- (l3-1);%
-
-      % core 1
-      \node [draw, text width=100pt, inner sep=10pt, text badly centered,
-      above=of l3-1] (l2-1) {Cache L2};%
-      \draw (l3-1) -- (l2-1);%
-
-      \node [above=20pt of l2-1] (l1-1) {};%
-      \node [draw, right=0pt of l1-1.center, text badly centered, text
-      width=50pt, inner sep=5pt] (l1-1-i) {Cache L1 {\small (Instruction)}};%
-      \node [draw, left=0pt of l1-1.center, text badly centered, text
-      width=50pt, inner sep=5pt] (l1-1-d) {Cache L1 {\small (Data)}};%
-      \node [draw, text width=100pt, text badly centered, inner sep=10pt,
-      minimum height=40pt, above=20pt of l1-1] (unit-1) {Execution Unit};%
-
-      \draw (unit-1.south) -| (l1-1-d.north);%
-      \draw (unit-1.south) -| (l1-1-i.north);%
-      \draw (l1-1-i.south) |- (l2-1.north);%
-      \draw (l1-1-d.south) |- (l2-1.north);%
-
-      \node [draw, dashed, inner sep=10pt, fit=(unit-1) (l2-1)] (c-1) {};%
-
-      % core 2
-      \node [draw, text width=100pt, inner sep=10pt, text badly centered,
-      above=of l3-2] (l2-2) {Cache L2};%
-      \draw (l3-2) -- (l2-2);%
-
-      \node [above=20pt of l2-2] (l1-2) {};%
-      \node [draw, right=0pt of l1-2.center, text badly centered, text
-      width=50pt, inner sep=5pt] (l1-2-i) {Cache L1 {\small (Instruction)}};%
-      \node [draw, left=0pt of l1-2.center, text badly centered, text
-      width=50pt, inner sep=5pt] (l1-2-d) {Cache L1 {\small (Data)}};%
-      \node [draw, text width=100pt, text badly centered, inner sep=10pt,
-      minimum height=40pt, above=20pt of l1-2] (unit-2) {Execution Unit};%
-
-      \draw (unit-2.south) -| (l1-2-d.north);%
-      \draw (unit-2.south) -| (l1-2-i.north);%
-      \draw (l1-2-i.south) |- (l2-2.north);%
-      \draw (l1-2-d.south) |- (l2-2.north);%
-
-      \node [draw, dashed, inner sep=10pt, fit=(unit-2) (l2-2)] (c-2) {};%
-
-      % core 3
-      \node [draw, text width=100pt, inner sep=10pt, text badly centered,
-      below=of l3-3] (l2-3) {Cache L2};%
-      \draw (l3-3) -- (l2-3);%
-
-      \node [below=20pt of l2-3] (l1-3) {};%
-      \node [draw, right=0pt of l1-3.center, text badly centered, text
-      width=50pt, inner sep=5pt] (l1-3-i) {Cache L1 {\small (Instruction)}};%
-      \node [draw, left=0pt of l1-3.center, text badly centered, text
-      width=50pt, inner sep=5pt] (l1-3-d) {Cache L1 {\small (Data)}};%
-      \node [draw, text width=100pt, text badly centered, inner sep=10pt,
-      minimum height=40pt, below=20pt of l1-3] (unit-3) {Execution Unit};%
-
-      \draw (unit-3.north) -| (l1-3-d.south);%
-      \draw (unit-3.north) -| (l1-3-i.south);%
-      \draw (l1-3-i.north) |- (l2-3.south);%
-      \draw (l1-3-d.north) |- (l2-3.south);%
-
-      \node [draw, dashed, inner sep=10pt, fit=(unit-3) (l2-3)] (c-3) {};%
-
-      % core 3
-      \node [draw, text width=100pt, inner sep=10pt, text badly centered,
-      below=of l3-4] (l2-4) {Cache L2};%
-      \draw (l3-4) -- (l2-4);%
-
-      \node [below=20pt of l2-4] (l1-4) {};%
-      \node [draw, right=0pt of l1-4.center, text badly centered, text
-      width=50pt, inner sep=5pt] (l1-4-i) {Cache L1 {\small (Instruction)}};%
-      \node [draw, left=0pt of l1-4.center, text badly centered, text
-      width=50pt, inner sep=5pt] (l1-4-d) {Cache L1 {\small (Data)}};%
-      \node [draw, text width=100pt, text badly centered, inner sep=10pt,
-      minimum height=40pt, below=20pt of l1-4] (unit-4) {Execution Unit};%
-
-      \draw (unit-4.north) -| (l1-4-d.south);%
-      \draw (unit-4.north) -| (l1-4-i.south);%
-      \draw (l1-4-i.north) |- (l2-4.south);%
-      \draw (l1-4-d.north) |- (l2-4.south);%
-
-      \node [draw, dashed, inner sep=10pt, fit=(unit-4) (l2-4)] (c-4) {};%
-    \end{tikzpicture}
-  \end{center}
-  \caption{Typical caches organization of a x86 processor}
-  \label{fig:usecase:l1-l3caches}
-\end{figure}
-
-When a \ac{cpu} successfully reads the memory at a given address, it keeps a
-copy of the result in its cache.
-%
-Therefore, the next time it needs to read some data at this address, these data
-are retrieved from the cache.
-%
-Regarding write accesses, Intel x86 \acp{cpu} provide five different caching
-strategies (uncacheable, write combining, write-through, write-back and
-write-protected)\,\cite[Volume 3, Chapter~11]{intel2014manual}.
-%
-Fine-grained cache strategy configuration is achieved through several hardware
-mechanisms, including (but not limited to):
-%
-\begin{itemize}
-\item The \texttt{CR0} register has a flag called \texttt{CD}, which enables
-  caching once set.
-%
-\item The \ac{cpu} has several registers called Memory Type Range Registers
-  (MTRR), to specify a cache strategy for pre-defined memory regions.
-  %
-  Each MTRR \TODO{la phrase n'est pas terminée}
-\item The Page Table Attribute (PAT) allows for configuring a cache strategy at
-  a memory page granularity.
-\end{itemize}
-%
-The write-back strategy is the most commonly used and is summarized in
-Figure~\ref{fig:usecase:writeback}.
-%
-The purpose of this strategy is to reduce the number of \IO forwarded
-to the \ac{dram}.
-%
-To that end, each cache block \TODO{C'est quoi un cache bloc? Il faudrait l'expliquer rapidement avant (il faudrait brièvement décrire la structure d'un cache).} has a ``dirty bit'' which is set by the cache when its value is updated by a write access.
-%
-In case of cache eviction \TODO{c'est quoi cache eviction?}, the cache verifies the value of the ``dirty bit'', so it can update the underlying memory cell if necessary.
-%
-Therefore, as long as the cache block is not evicted, the \ac{cpu} does not
-issue write access to the underlying memory.
-%
-The write-back strategy is not suitable for memories of other hardware components
-mapped into the \ac{cpu} address space.
-%
-For instance, caching \IOs targeting a framebuffer does not make sense, because
-the screen wouldn't be updated.
-%
-This is why Intel provides four complementary strategies.
-%
-The uncacheable strategy disables the cache for the given address, while write
-combining, write-through, write-back and write-protected are similar strategies
-such that write accesses are directly forwarded to the underlying memory. \TODO{euh, du coup c'est quoi la différence entre "uncacheable" et les autres stratégies "similaires". Naivement j'aurais tendance à penser que désactiver le cache revient à rediriger directement l'écriture vers la mémoire. A oui, ok, pour la lecture de contenu non modifié, les stratégies en question te permette une optimisation. Mais il faudrait le préciser car sinon on ne comprends pas trop pourquoi tu distingues ces différents cas.}
-
-%For cache-friendly programs, the gain in performance can be huge. \TODO{utilité de ce dernier paragraphe? en outre, il n'est pas vraiment raccord avec ce qui précède.}
-%%
-%For instance, for a Pentium M Intel  stated that access to L1 cache takes 3
-%\ac{cpu} cycles, access to the L2 cache takes 12 cycles and access to the DRAM
-%takes 240 cycles\,\cite{drepper2007memory}.
-
-\begin{figure}
-  \centering
-  \begin{tikzpicture}
-    \node [draw, circle] (EP) {};%
-
-    \node [draw, below=of EP] (Sel) {Select a cache block};%
-    \draw [-latex] (EP) -- (Sel);%
-
-    \node [draw, signal, signal to=east and west, below=of Sel] (CH) {Cache
-      hit?};%
-    \draw [-latex] (Sel) -- (CH);
-
-    \node [below=of CH] (CHbranch) {};%
-    \draw (CH) to node [right] {[Yes]} (CHbranch.center);%
-    \node [left=70pt of CH] (nCHbranch) {};%
-    \draw [below] (CH) to node {[No]} (nCHbranch.center);
-
-    \node [draw, signal, signal to=east and west, below=of nCHbranch.center]
-    (Dirty) {Cache block dirty?};%
-    \draw [-latex] (nCHbranch.center) -- (Dirty);%
-
-    \node [draw, below=of Dirty, text width=70pt, text badly centered] (WB)
-    {Write the content of the cache block back to the DRAM};%
-    \draw [-latex] (Dirty) to node [right] {[Yes]} (WB);%
-
-    \node [draw, below=of WB, text width=80pt, text badly centered] (Rf) {Read
-      data from lower memory and fill the cache block};%
-    \draw [-latex] (WB) -- (Rf);%
-
-    \node [draw, below=of WB, text width=80pt, text badly centered] (Rf) {Read
-      data from lower memory and fill the cache block};%
-    \draw [-latex] (WB) -- (Rf);%
-
-    \node [draw, below=of Rf, text width=80pt, text badly centered] (NotDirty)
-    {Mark the cache block as ``not dirty''};%
-    \draw [-latex] (Rf) -- (NotDirty);%
-
-    \draw (Dirty) to node [below] {[No]} ([xshift=-90pt]Dirty.center);%
-    \draw ([xshift=-90pt]Dirty.center) -- ([xshift=-90pt]Rf.center);%
-    \draw [-latex] ([xshift=-90pt]Rf.center) -- (Rf);%
-    \draw [-latex] (Rf) -- (NotDirty);%
-
-    \node [below=260pt of CHbranch.center] (Join) {};%
-    \node [draw, signal, signal to=east and west, below=5pt of Join] (RxW) {Read
-      or Write?};%
-    \draw [-latex] (CHbranch.center) -- (RxW);%
-    \draw (NotDirty) -| (Join.center);%
-
-    \node [draw, text badly centered, text width=70pt, right=50pt of RxW] (R)
-    {Return data};%
-    \draw [-latex] (RxW) to node [below] {[Read]} (R);%
-    \node [draw, text badly centered, text width=70pt, left=50pt of RxW] (W)
-    {Write new value in cache block};%
-    \draw [-latex] (RxW) to node [below] {[Write]} (W);%
-
-    \node [draw, text badly centered, text width=70pt, below=of W] (MakeDirty)
-    {Mark cache block as dirty};%
-    \draw [-latex] (W) -- (MakeDirty);
-
-    \node [draw, fill=black, below=100pt of RxW, circle] (End) {}; \draw
-    [-latex] (MakeDirty.south) |- (End.west); \draw [-latex] (R.south) |-
-    (End.east);
-  \end{tikzpicture}
-
-  \caption{The Write-Back cache strategy}
-  \label{fig:usecase:writeback}
-\end{figure}
+TODO
 
 \paragraph{Attack Path.}
 %
@@ -1576,40 +1609,42 @@ protection\,\cite{kovah2015senter}.
 \paragraph{Intel TXT.}
 %
 The Intel Trusted eXecution Technology (TXT)\cite{intel2015txt} is a feature of
-some x86 \acp{cpu}, whose purpose is twofold.
+some x86 \acp{cpu}, whose purpose is twofold: it attests the integrity of the
+system software component program without the need to trust the \ac{bios}, and
+it provides a trusted execution environment to the system software component.
 %
-Firstly, it attests the integrity of the system software component program
-without the need to trust the \ac{bios}.
+Its purpose is to address the limitations of both the Secure Boot and Trusted
+Boot approaches, which both rely on a software root of trust stored on the flash
+memory, by making the processor the new root of trust.
 %
-Secondly, it provides a trusted execution environment to the system software
-component.
-%
-As such, it addresses the main limitation of both the Secure Boot and Trusted
-Boot approaches, previously detailed in
-Subsection~\ref{subsec:usecase:firm:boot}.
-%
-Similarly to the Trusted Boot approach, TXT entrusts measurement of the system
-software component program to the \ac{tpm}.
-%
-These measurements can be leveraged to conditionally seal an encryption key or
-be part of an attestation protocol, as they would have been with in the context
-of a Trusted Boot.
-%
-However, contrary to the Trusted Boot approach, the component responsible for
-measuring the program is the processor itself.
-%
-This makes a big difference regarding the trust we can place in the
-measurements.
-%
-On the one hand, if the root of trust ---which is part of the \ac{bios}--- has
-been corrupted or if the \ac{bios} suffers from an exploitable vulnerability,
-the authenticity of the measurements is no longer guaranteed.
-%
-In such a case, neither the system software component nor a third party involved
-in an attestation protocol has a reliable solution to detect the attack.
-%
-On the other hand, only an error within the implementation of the TXT
-instructions can lead to a similar scenario\,\cite{wojtczuk2011txtbug}. \TODO{Comment çà marche? Comment le processeur sait qu'il doit faire ces mesures sans que le BIOS ne puisse l'influencer sur sa décision? Comme tu as choisi de détailler le fonctionnement de cette techno (ce qui peut s'enterndre) il faudrait que tu nous donnes quelques billes supplémentaire pour qu'on comprenne le principe de fonctionnement.}
+% Similarly to the Trusted Boot approach, TXT entrusts measurement of the system
+% software component program to the \ac{tpm}.
+% %
+% These measurements can be leveraged to conditionally seal an encryption key or
+% be part of an attestation protocol, as they would have been with in the context
+% of a Trusted Boot.
+% %
+% However, contrary to the Trusted Boot approach, the component responsible for
+% measuring the program is the processor itself.
+% %
+% This makes a big difference regarding the trust we can place in the
+% measurements.
+% %
+% On the one hand, if the root of trust ---which is part of the \ac{bios}--- has
+% been corrupted or if the \ac{bios} suffers from an exploitable vulnerability,
+% the authenticity of the measurements is no longer guaranteed.
+% %
+% In such a case, neither the system software component nor a third party involved
+% in an attestation protocol has a reliable solution to detect the attack.
+% %
+% On the other hand, only an error within the implementation of the TXT
+% instructions can lead to a similar scenario\,\cite{wojtczuk2011txtbug}.
+% %
+% \TODO{Comment çà marche? Comment le processeur sait qu'il doit faire ces mesures
+%   sans que le BIOS ne puisse l'influencer sur sa décision? Comme tu as choisi de
+%   détailler le fonctionnement de cette techno (ce qui peut s'enterndre) il
+%   faudrait que tu nous donnes quelques billes supplémentaire pour qu'on
+%   comprenne le principe de fonctionnement.}
 
 \paragraph{Attack Path.}
 %
@@ -1638,18 +1673,27 @@ by the \ac{pch}.
 % flash est inscriptible mais qu'on ne passe pas en SMM du coup n'importe quel
 % logiciel peut modifier le contenu de la flash. C'est un manuscript de
 % thèse. Il en faut pas faire (trop) de digression mais il faut être (très)
-% pédagogique. Tu n'est pas à une page près!}
-\PC{Ack avec Guillaume, la description est trop succinte, et le style
-  télégraphique} \thomasrk[inline]{Est-ce que c’est mieux comme ça ? Au final,
-  la version actuelle n'est pas forcément plus longue, mais elle se concentre
-  plus sur l'essentiel et donne les éléments qui manquaient dans les précédentes
-  itérations.}
-\TODO{Je ne sais pas si c'est mieux qu'avant (je ne me souvient plus) mais je trouve très bien comme çà. Comme tu le dis, la description se concentre sur l'essentiel (en gros, un mécanisme de sécurité qui a été rajouté désactive les SMI). Par contre, on peut se poser la question de l'intérêt de la description de TXT qui précède. Peut-être qu'il est suffisant de dire que TXT est un mécanisme de sécurité additionnel qui a été rajouté par Intel et qui avait la mauvaise idée de désactiver les SMI. Sinon, si tu souhaite détailler TXT, tu détaille  (un peu) actuellement le fonctionnement du mécanisme de vérification d'intégrité mais pas le mécanisme de "trusted execution environment" or c'est celui-là qui est en cause dans l'attaque visiblement...}
+% pédagogique. Tu n'est pas à une page près!}  \PC{Ack avec Guillaume, la
+% description est trop succinte, et le style télégraphique}
+% \thomasrk[inline]{Est-ce que c’est mieux comme ça ? Au final, la version
+% actuelle n'est pas forcément plus longue, mais elle se concentre plus sur
+% l'essentiel et donne les éléments qui manquaient dans les précédentes
+% itérations.}  \TODO{Je ne sais pas si c'est mieux qu'avant (je ne me souvient
+% plus) mais je trouve très bien comme çà. Comme tu le dis, la description se
+% concentre sur l'essentiel (en gros, un mécanisme de sécurité qui a été rajouté
+% désactive les SMI). Par contre, on peut se poser la question de l'intérêt de
+% la description de TXT qui précède. Peut-être qu'il est suffisant de dire que
+% TXT est un mécanisme de sécurité additionnel qui a été rajouté par Intel et
+% qui avait la mauvaise idée de désactiver les SMI. Sinon, si tu souhaite
+% détailler TXT, tu détaille (un peu) actuellement le fonctionnement du
+% mécanisme de vérification d'intégrité mais pas le mécanisme de "trusted
+% execution environment" or c'est celui-là qui est en cause dans l'attaque
+% visiblement...}
 
 \paragraph{Countermeasure.}
 %
-Recent x86 \acp{cpu} do not disable \ac{smi} when using the \texttt{SENTER}
-instructions. \TODO{C'est quoi l'instruction SENTER? Il me semble que tu n'en parles nul part avant}
+Recent x86 \acp{cpu} do not disable \ac{smi} during the initialization of a
+system software component with TXT.
 %
 This means the system software component continues to rely on the \ac{bios} code
 stored in the SMRAM.
@@ -1662,7 +1706,10 @@ remains in a working state.
 As a consequence, Intel is advising system software developers to enable back
 \ac{smi} in the TXT Software Development Guide as ``most systems will not
 function properly if \acp{smi} are disabled for any length of
-time''\,\cite{intel2015txt}. \TODO{ce dernier paragraphe n'est pas claire. De manière générale, l'explication de la contre-mesure n'est pas claire. }
+time''\,\cite{intel2015txt}.
+%
+\TODO{ce dernier paragraphe n'est pas claire. De manière générale, l'explication
+de la contre-mesure n'est pas claire. }
 
 \subsection{Speed Racer}
 \label{subsec:usecase:hse:speed}

@@ -1274,14 +1274,9 @@ For instance, the value of the program counter is updated during a
 \paragraph{Transition-Software Mapping}
 %
 We define \(\textsc{Minx86}\func{\_fetched}\) a transition-software mapping for
-$\formatLTS{Minx86}$ (Definition~\ref{def:speccert2:transsoft}).
-%
-The \(\textsc{Minx86}\func{\_fetched}\) function maps an initial state of a
-transition and the label of this transition with the set of software components
-which own an instruction fetched during this transition.
-%
-\TODO{C'est le cas de tous les transition-software mapping, non? Qu'est-ce qui
-  est spécifique à la version Minx86?}
+$\formatLTS{Minx86}$ (Definition~\ref{def:speccert2:transsoft}), to map an
+initial state of a transition and the label of this transition with the set of
+software components which own an instruction fetched during this transition.
 %
 In the case of \formatLTS{Minx86}, there is only one event which implies
 fetching instructions: \func{Fetch}.
@@ -1592,9 +1587,8 @@ on transitions, we know thanks to Theorem~\ref{theorem:speccert:correcthse} that
 \[
   \begin{array}{l}
     \forall (h, l, h') \in \mathcal{T}(\textsc{Minx86}(\func{context})), \\
-    \qquad \func{hardware\_req}(h) \\
-    \qquad \Rightarrow (l \in L_S \Rightarrow \func{bios\_req}(h, l)) \\
-    \qquad \Rightarrow I_{\mathtt{bios}}(h, l, h')
+    \qquad (\func{hardware\_req}(h)\ \wedge\ (l \in L_S \Rightarrow
+    \func{bios\_req}(h, l))) \Rightarrow I_{\mathtt{bios}}(h, l, h')
   \end{array}
 \]
 %
@@ -1869,7 +1863,7 @@ to \( I \).
   $\Delta_{\mathtt{os}}$.
   %
   We know that the transitions of these traces satisfy respectively
-  $I|U_{\mathtt{os}}$ and $I|U_{\mathtt{bios}}$. \TODO{Que désignent $I|U_{\mathtt{os}}$ and $I|U_{\mathtt{bios}}$? Tu l'as peut-être définis avant, mais c'est loin. IL y a de forte chance que le relecteur soit perdu comme moi. Il faudrait faire un petit rappel et mettre une référence.}
+  $I_{\mathtt{os}}$ and $I_{\mathtt{bios}}$.
   %
   This is enough to conclude, based on the definitions of global and partial
   execution isolation policies. \TODO{Que sont les "global et partial execution isolation policies"?}
