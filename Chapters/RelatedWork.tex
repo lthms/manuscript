@@ -1150,9 +1150,9 @@ Then, we describe what modeling structures have been proposed to model
 components and their interactions (\ref{subsec:sota:compverif}).
 %
 We discuss the already existing approaches which have been proposed to enable
-component-based verification in Coq (\ref{subsec:sota:comprelated}), and
-summarize our motivations to propose our own framework
-(\ref{subsec:sota:compconclu}).
+component-based verification in theorem prover (\ref{subsec:sota:comprelated}),
+and summarize our motivations to propose our own framework for the Coq proof
+assistant (\ref{subsec:sota:compconclu}).
 
 \subsection{Compositional Verification Approaches}
 \label{subsec:sota:compverif}
@@ -1176,23 +1176,23 @@ handles their input.
 %
 In this context, two components which expose the same interface can be freely
 interchange on the condition that they exhibit an equivalent behavior with
-respect to their interface.
-%
-There are many different formalizations of what ``equivalent behavior'' actually
-means.
+respect to their interface, where the meaning ``equivalent behavior'' is really
+specific to each verification problem.
 %
 For instance, in the context of process algebra, trace equivalence or
 bisimulation are two possible definitions of equivalent
 behavior\,\cite{fokkink2013pa}.
 
 Using a behavior equivalence approach, it becomes possible to reason about one
-component by abstracting away the part of the systems it interacts with simpler
-specifications.
+component by abstracting away the part of the systems it interacts with
+functional specifications.
 %
 This is referred to as compositional minimization in model checking.
 %
 The goal is to reduce the complexity of a model, with smaller yet provably
 equivalent components, as pictured in Figure~\ref{fig:sota:minicomp}.
+%
+
 
 \begin{figure}
   \begin{minipage}{0.48\linewidth}
@@ -1239,8 +1239,8 @@ equivalent components, as pictured in Figure~\ref{fig:sota:minicomp}.
 
 \paragraph{Compositional Reasoning.}
 %
-At its simplest, assume-guarantee\,\cite{pnueli1985ag} ---or
-rely-guarantee\,\cite{jones1983tentative}--- reasoning is about proving a
+Assume-guarantee\,\cite{pnueli1985ag} and
+rely-guarantee\,\cite{jones1983tentative} reasoning are about proving a
 component \( C \) guarantees the property \( G \) under the assumptions that a
 property \( A \) is satisfied, then proving the rest of the system \( S' \)
 satisfies \( A \).
@@ -1265,6 +1265,15 @@ for instance for interface automata\,\cite{emmi2008assume}.
 
 \subsection{Compositional Modeling Structures}
 \label{subsec:sota:compmod}
+
+We now detail the popular formalisms which have been used to model components in
+isolation for the purpose of compositional verification.
+%
+Because our long-term objective is to apply a component-based modeling approach
+to a complex hardware architecture, we focus on their applicability.
+%
+A component model should be easy to write, read and exploit in the context of a
+verification problem.
 
 \paragraph{Concurrent Automata.}
 %
@@ -1430,6 +1439,18 @@ can be translated into Kripke structures.
   \end{center}
 \end{example}
 
+Labels of interface automata allows for composing together several transition
+systems by synchronizing their shared transitions.
+%
+However, the manual definition of these components to specify sequences of input
+and output transitions can quickly become cumbersome, as we our experiences with
+the definition of the airlock system controller in
+Example~\ref{example:sota:airlockinterface}.
+%
+Besides, interactions between components are often motivated by the need to
+exchange data, \emph{e.g.} the processor interacts with the \ac{pch} to read
+from or write to peripherals memories.
+
 \paragraph{Process Algebra.}
 %
 Another popular family of approaches which enable compositional modeling of
@@ -1444,8 +1465,8 @@ system for verifying them.
 In process algebra such as Calculus of Communication
 Systems\,\cite{milner1980ccs} or the Communicating Sequential
 Processes\,\cite{hoare1978csp}, concurrent threads run in parallel, and
-synchronization is achieved by sending and waiting for messages rather than
-\emph{via} shared memory.
+synchronization is achieved by sending and waiting for messages, as specified by
+a dedicated language.
 
 \begin{example}[Airlock System in \( \pi \)-calculus]
   \label{example:sota:airlockprocess}
@@ -1540,11 +1561,18 @@ synchronization is achieved by sending and waiting for messages rather than
   (resp. \( d_2 \)).
 \end{example}
 
+Process algebras such as \( \pi \)-calculus are well suited formalisms for
+describing component interactions.
+%
+However, their applicability is limited by the low-level description of the used
+languages and their minimalistic semantic.
+
 \paragraph{Programs with Effects.}
 %
 The relation between one component and the rest of the system it is connected to
 is reminiscent of the programming language to model and verify large programs
-with side effects.
+with side effects realized by an outer environment (\emph{e.g.} an operating
+system).
 %
 Modeling side effects in pure programming language, such as Haskell or {\scshape
   Gallina}, is usually achieved thanks to
@@ -1584,6 +1612,17 @@ request to the handler, and waits for the result.
 
 \subsection{Related Work}
 \label{subsec:sota:comprelated}
+
+In Chapter~\ref{chapter:freespec}, we show how it is possible to model a
+hierarchy of components which interacts \emph{via} their interfaces by means of
+programs with effects and effect handlers.
+%
+The main idea is that a component can be modeled as a handler for the interface
+it exposes, in terms of program with effects of the interface it uses.
+%
+To our surprise, we did not find any generic project to write and verify
+programs with effects and effect handlers written for {\scshape Gallina}, but
+several related approaches exist.
 
 \paragraph{{\scshape Kami}.}
 %
@@ -1661,7 +1700,7 @@ approach reasoning.
 A program with effects can be verified, but the verification of the composition
 of this program with its environment is out of the scope of the project.
 
-\paragraph{Interface-Confined Adversaries.}
+\paragraph{Interface Specifications.}
 %
 Logic of Program, but to the best of our knowledge, no implementation.
 %
