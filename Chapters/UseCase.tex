@@ -59,7 +59,7 @@ these \ac{hse} mechanisms in the past (Section~\ref{sec:usecase:hse}).
 Describing hardware architectures in depth is challenging, because they tend to
 comprise an increasing number of interconnected components of various natures.
 %
-The x86 hardware architecture is a perfect illustration of this, and this \TODO{répétition de "this"} is
+The x86 hardware architecture is a perfect illustration of this, which is
 probably best illustrated by the scale of its documentation.
 %
 At the time of writing this thesis\,\footnote{Spring 2018.}, the \emph{Intel 64
@@ -423,7 +423,7 @@ Not all x86 interrupts come from a hardware component.
 Cores use several of them, for instance to recover from errors.
 %
 For example, if a core is not able to translate a virtual address into a proper
-address, it raises a so-called Page Fault (denoted by \texttt{\#PF} \TODO{tu vas utiliser cette notation plus tard? si ce n'est pas le cas vire cette parenthèse}).
+address, it raises a so-called Page Fault.
 
 \begin{table}
   \centering
@@ -487,10 +487,10 @@ They allow for administering a computer \emph{via} the network, without the need
 for a physical access.
 %
 In practice, the software components responsible for implementing the
-out-of-band management features are not executed by the main processor: the
-network card was implementing \TODO{pourquoi "was implementing"? l'usage de ce temps est bizarre. en outre, cette techno n'est plus présente dans les cartes actuelles?} the ASF technology\,\cite{duflot2010network}, and
-since 2008 x86 \acp{cpu} \TODO{Qu'est ce que veux dire précisemment CPU? Tu as défini avant plusieurs termes (processor, core, PCH) mais pas celui là. En outre tu indique que le ME est intégré au CPU. Je pense qu'il faut dire que le CPU est le packaging vendu par Intel, et qu'un client peut acheter séparemment, comprenant le processeur, le controleur mémoire (généralement un controleur video) et le PCH} embed a so-called Management
-Engine\,\cite{ruan2014me,skochinsky2014intel}.
+out-of-band management features are not executed by the main processor: some
+network cards implement the ASF technology\,\cite{duflot2010network}, and since
+2008 x86 the \acp{cpu} hardware architecture comprises a so-called Management
+Engine to that end\,\cite{ruan2014me,skochinsky2014intel}.
 %
 In 2018, the Management Engine is located inside the \ac{pch}.
 %
@@ -510,16 +510,21 @@ cannot initialize correctly.
 
 \subsection{HSE Mechanisms Targeted Security Policies}
 \label{subsec:usecase:targetedsec}
-\TODO{Le titre est difficile à comprendre. En outre, je ne vois pas bien où tu veux en venir avec cette sous-section. Quelle est son utilité? On ne sais pas si tu veux parler des politique ou des mécanismes permettant d'assurer ces politiques, c'est un peu mélangé. La thèse est essentiellement focalisée sur le BIOS. Or la plupart des exemples cités ici concernent plutot l'OS. Le lecteur est un peu perdu...}
+\TODO{Le titre est difficile à comprendre. En outre, je ne vois pas bien où tu
+  veux en venir avec cette sous-section. Quelle est son utilité? On ne sais pas
+  si tu veux parler des politique ou des mécanismes permettant d'assurer ces
+  politiques, c'est un peu mélangé. La thèse est essentiellement focalisée sur
+  le BIOS. Or la plupart des exemples cités ici concernent plutot l'OS. Le
+  lecteur est un peu perdu...}
 
-As previously stated, x86 computing platforms are formed of concurrent,
-interconnected components \TODO{que veut dire "concurrent components"? Interconnected, je vois. On parle de programme concurrents, mais pour des composants matériels, qui sont en outre interconnecté, je ne vois pas trop... }.
+As previously stated, x86 computing platforms are formed of interconnected
+components.
 %
-Such components share common resources, like the \ac{dram} which can be both modified by the
-cores and \ac{dma}-capable hardware components.
+Such components share common resources, like the \ac{dram} which can be both
+modified by the cores and \ac{dma}-capable hardware components.
 %
-This allows for cooperation, \emph{e.g.} when a network card receives a TCP
-packet, it copies its content to a pre-defined address in \ac{dram} and then
+This allows for cooperation, \emph{e.g.} when a network card receives an
+Ethernet frame, it copies its content to a pre-defined address in \ac{dram} and then
 notifies the operating system by sending an interrupt to the core.
 %
 This also raises a significant challenge from a security perspective.
@@ -540,7 +545,7 @@ where a ``capability'' refers to the right to perform a given \IO.
 In practice, the implementation of this principle is challenging, for various
 reasons.
 
-Firstly, security checks can have an important impact over performance.
+Firstly, security checks can have an important impact on performance.
 %
 Partly for this reason, the hardware components have long been assumed
 trustworthy.
@@ -550,16 +555,17 @@ introduced by the PCI standard, whose purpose is to allow PCI devices to bypass
 security mechanisms designed to reduce their
 privileges\,\cite{daubignard2017protip}.
 %
-Other examples showed blind trust in foreign hardware components
-(\emph{e.g.} USB devices) is not without consequences from a security
+Other examples showed blind trust in foreign hardware components (\emph{e.g.}
+USB devices) is not without consequences from a security
 perspective\,\cite{nohl2014badusb,hudson2015thunderstrike,chifflier2013uefi}.
 %
-Secondly, the ``least privilege'' may vary from one execution to another. \TODO{Cette dernière phrase n'est pas claire. Il faudrait préciser ton idée.}
+Secondly, the ``least privilege'' may vary from one execution to another,
+\emph{e.g.} depending on the software stack executed.
 %
 To handle the numerous use cases of the x86 architecture, its default
 configuration is very permissive, until software components such as the
-\ac{bios} or an operating system modifies it to fit their needs, by
-implementing \ac{hse} mechanisms.
+\ac{bios} or an operating system modifies it to fit their needs, by implementing
+\ac{hse} mechanisms.
 
 % OLD VERSION: For instance, it has also been repeatedly shown that the various
 % physical interface exposed by the computer (\emph{e.g.}
@@ -570,8 +576,12 @@ implementing \ac{hse} mechanisms.
 
 \paragraph{Access Control.}
 %
-The x86 hardware architecture provides many \ac{hse} mechanisms \TODO{Il faudrait mettre ici une liste importante d'exemples avec des ref} to determine
-which \IO each component of the system can or cannot perform.
+The x86 hardware architecture provides many hardware features to be used to
+implement \ac{hse} mechanisms
+%
+\TODO{Il faudrait mettre ici une liste importante d'exemples avec des ref}
+%
+to determine which \IO each component of the system can or cannot perform.
 %
 In other words, these \ac{hse} mechanisms enforce access control
 policies\,\cite{sandhu1994access}.
@@ -631,11 +641,10 @@ x86 computing platform\,\cite{abramson2006vtd}.
 The complexity of the x86 \IO resolution mechanism obliges to take into account
 the numerous redirection features exposed by the architecture.
 %
-Memory locations can have an arbitrary number
-of aliases, in several layered address spaces: the \ac{dram} controller assigns
-an address to each memory cell the \ac{dram} contains; the processor maps
-physical addresses to \ac{dram} addresses; the \ac{mmu} maps virtual addresses
-to physical addresses.
+Memory locations can have an arbitrary number of aliases, in several layered
+address spaces: the \ac{dram} controller assigns an address to each memory cell
+the \ac{dram} contains; the processor maps physical addresses to \ac{dram}
+addresses; the \ac{mmu} maps virtual addresses to physical addresses.
 %
 As a consequence, modifying the content of a memory cell may not be the only way
 at the disposal of attackers to defeat a given access control policy.
@@ -1077,15 +1086,17 @@ A locked SMRAM can only be accessed by a \ac{cpu} in \ac{smm}.
 %
 More precisely, the physical addresses dedicated to the SMRAM from the \ac{bios}
 perspective are used by the rest of the software stack to access the VGA
-controller memory. \TODO{en fait, c'est le mapping de la mémoire qui est différent. Il faudrait l'expliquer comme çà, c'est un peu implicite dans ton explication et j'ai peur que le lecteur non averti ne comprenne pas.}
+controller memory. \TODO{en fait, c'est le mapping de la mémoire qui est
+  différent. Il faudrait l'expliquer comme çà, c'est un peu implicite dans ton
+  explication et j'ai peur que le lecteur non averti ne comprenne pas.}
 %
 The \texttt{SMRAMC} register exposed by the processor controls this access
 control mechanism, \emph{via} its \texttt{D\_LCK} bit.
 %
 The \ac{bios} locks the SMRAM by setting the \texttt{D\_LCK} bit.
 %
-A processor with the \texttt{D\_LCK} bit set will prevent a \ac{cpu} \TODO{"core" plutôt que CPU, non? "A processor .. prevent a CPU" est étrange.} not in
-\ac{smm} to access the SMRAM content.
+A processor with the \texttt{D\_LCK} bit set will prevent a core not in \ac{smm}
+to access the SMRAM content.
 %
 In addition, the only way to clear the \texttt{D\_LCK} bit is by performing a
 complete reboot of the platform.
@@ -1096,24 +1107,22 @@ software component.
 
 \paragraph{System Management Interrupt.}
 
-The \ac{smi} is a hardware interrupt which makes the \ac{cpu} \TODO{tu utilises souvent CPU mais on ne sais pas vraiement si c'est un synonyme de "processor". En outre, tu l'utilise parfois pour désigner un coeur. Il faudrait être précis et notamment bien distinguer ce qui relève de l'ensemble (le processeur) de ce qui est réalisé sur chaque unité d'exécution (les coeurs). En l'occurence, pour une SMI, est-ce seulement un coeurs ou l'ensemble des coeurs qui passent en SMM? } ``enters''
-\ac{smm}.
+The \ac{smi} is a hardware interrupt which makes cores ``enters'' \ac{smm}.
 %
-More precisely, when a \ac{cpu} receives a \ac{smi}, it saves its current state
-(\emph{e.g.} its registers, current execution mode, etc.) in the SMRAM.
-%
-Then, the \ac{cpu} reconfigures itself;
+More precisely, when a core receives a \ac{smi}, it saves its current state
+(\emph{e.g.} its registers, current execution mode, etc.) in the SMRAM, then it
+reconfigures itself;
 %
 in particular, it sets its program counter register to the value
 $\mathtt{SMBASE} + \mathrm{0x8000}$.
 %
-From this point, the \ac{cpu} is in \ac{smm} and starts to execute what should
+From this point, the core is in \ac{smm} and starts to execute what should
 be the \ac{smm} code.
 %
 Once the \ac{smm} code has performed the task it has been requested for, the
 \texttt{rsm} instruction can be used.
 %
-This instruction, specific to the \ac{smm}, tells the \ac{cpu} to exit \ac{smm}
+This instruction, specific to the \ac{smm}, tells the core to exit \ac{smm}
 and to restore its previous state.
 %
 This way, the execution of the software component previously halted by the
@@ -1121,26 +1130,22 @@ This way, the execution of the software component previously halted by the
 %
 From the system point of view, it is almost like if nothing has happened.
 
-It is possible to detect \ac{smm} context switches, the most straightforward way
-being to rely on the Model-Specific Register \texttt{0x34}
-(\texttt{MSR\_SMI\_COUNT}).
-%
-Indeed, the \ac{cpu} increments it every time it handles a
-\ac{smi}\,\cite[Volume 4, Chapter 2]{intel2014manual}.
-%
-An operating system can also spin in a loop to take regular timestamps.
-%
-Variations in the timestamps interval are likely to be explained by a \ac{smm}
-context switch. \TODO{Utilité de ce paragraphe? C'est un peu une digression, qui, je suppose, viennent nuancer la dernière phrase du paragrpahe précédent. Mais a-t-on besoin de rentrer dans ce niveau de détail pour ton sujet...?}
-
 Finally, the \ac{pch} exposes a register called \texttt{APM\_CNT} that a system
 software component can write to in order to make the \ac{pch} triggers a
-\ac{smi}\,\cite{intel2012pch}. \TODO{Il faudrait indiquer que c'est donc un moyen pour l'OS de faire appel à du code du BIOS isolé à runtime. Par exemple pour xxxx}
+\ac{smi}\,\cite{intel2012pch}.
+%
+In practice, this mechanism is used by a system software component in order to
+request the execution of the \ac{bios}, for purpose of carry out a given
+service, \emph{e.g.} modifying the content of a given \ac{uefi}
+variable.
+%
+\footnote{\ac{uefi} variables are stored in the flash memory, alongside
+the \ac{bios} code.}
 
 \paragraph{Flash Memory Lockdown.}
 %
-The content of the flash memory has to be protected from arbitrary tampering \TODO{tu aimes bien "tampering" mais tu l'utilises beaucoup et un peu à toutes les sauces. ici "write access" ne serait-il pas plus approprié?},
-similarly to the SMRAM protection.
+The content of the flash memory has to be protected from arbitrary write
+accesses, similarly to the SMRAM protection.
 %
 That is, only the \ac{smm} code should be able to overwrite the content of the
 flash memory.
@@ -1162,22 +1167,21 @@ the value of the \texttt{BLE} bit.
 If the \texttt{BLE} bit has been set by the \ac{bios} during the boot sequence,
 then the \ac{pch} triggers a \ac{smi}.
 %
-As a consequence, the \ac{cpu} \TODO{CPU? core? processor?} stops its current execution and enters in
-\ac{smm}.
+As a consequence, the \ac{cpu} \TODO{CPU? core? processor?} stops its current
+execution and enters in \ac{smm}.
 %
-This prevents the system software from tampering \TODO{modifying plutôt que tampering? } with the content of the Flash Memory, even if the \ac{pch} now authorizes write accesses.
+This prevents the system software from modifying with the content of the Flash
+Memory, even if the \ac{pch} now authorizes write accesses.
 %
 It is the \ac{smm} code responsibility to clear the \texttt{BIOSWE} bit before
 using the \texttt{rsm} instruction.
 %
 On the contrary, if the \texttt{BLE} bit is not set, setting the \texttt{BIOSWE}
-bit will not cause a \ac{smi}. \TODO{et donc? Il faudrait expliquer que le code exécuté (l'OS par exemple) peut alors librement modifier le contenu de la flash}
+bit will not cause a \ac{smi}, leaving the system software component free to
+modify the content of the flash memory.
 %
 Similarly to the \texttt{D\_LCK} bit of the \texttt{SMRAMC} register, the
 \texttt{BLE} bit cannot be cleared without a reboot.
-
-% GUILLAUME: Parfois tu mets Flash Memory en majuscul, parfois non. Je pense
-% qu'il ne faut pas de majuscule, harmonise à tout le document.
 
 The system software component and the \ac{bios} often use the flash memory
 lockdown mechanism as a communication channel.
@@ -1421,11 +1425,11 @@ The uncacheable strategy disables the cache for the given address, while write
 combining, write-through, write-back and write-protected are similar strategies
 such that write accesses are directly forwarded to the underlying memory. \TODO{euh, du coup c'est quoi la différence entre "uncacheable" et les autres stratégies "similaires". Naivement j'aurais tendance à penser que désactiver le cache revient à rediriger directement l'écriture vers la mémoire. A oui, ok, pour la lecture de contenu non modifié, les stratégies en question te permette une optimisation. Mais il faudrait le préciser car sinon on ne comprends pas trop pourquoi tu distingues ces différents cas.}
 
-For cache-friendly programs, the gain in performance can be huge. \TODO{utilité de ce dernier paragraphe? en outre, il n'est pas vraiment raccord avec ce qui précède.}
-%
-For instance, for a Pentium M Intel  stated that access to L1 cache takes 3
-\ac{cpu} cycles, access to the L2 cache takes 12 cycles and access to the DRAM
-takes 240 cycles\,\cite{drepper2007memory}.
+%For cache-friendly programs, the gain in performance can be huge. \TODO{utilité de ce dernier paragraphe? en outre, il n'est pas vraiment raccord avec ce qui précède.}
+%%
+%For instance, for a Pentium M Intel  stated that access to L1 cache takes 3
+%\ac{cpu} cycles, access to the L2 cache takes 12 cycles and access to the DRAM
+%takes 240 cycles\,\cite{drepper2007memory}.
 
 \begin{figure}
   \centering
@@ -1515,10 +1519,11 @@ The attack proceeds as follows:
 \item They write to the \texttt{APM\_CNT} register in order to provoke the
   triggering of a \ac{smi}.
 %
-\item The \ac{smm} \TODO{BIOS code plutôt que SMM? "SMM code exécuté en SMM" fait bizarre } code is executed in SMM, leading the cache to be filled with
-  copies of that code
+\item The \ac{bios} code stored in SMRAM is executed in SMM, leading the cache
+  to be filled with copies of that code, and the processor leaves \ac{smm} when
+  it executes the \texttt{rsm} instruction.
 %
-\item \TODO{Il faudrait mentionner qu'à la fin de l'étape 3, le processeur a quitté le SMM}Attackers write to an address which belongs to the SMRAM, and because of
+\item Attackers write to an address which belongs to the SMRAM, and because of
   the write-back cache strategy, the \ac{cpu} updates the copies within the
   cache, and does not forward the \IO to the Memory Controller.
 %
@@ -1555,8 +1560,8 @@ The SMRAM Cache Poisoning attack is a textbook case of compositional attacks.
 %
 It is interesting to notice that six years later, Christopher Domas has
 disclosed another x86 vulnerability called Sinkhole\,\cite{domas2015sinkhole},
-which relies on a similar approach to trick a \ac{cpu} in \ac{smm} to execute
-arbitrary instructions. \TODO{Les contre-mesures contre le cache poisoning ne fonctionnaient pas pour Sinkhole? Elles n'étaient pas encore déployées?}
+which relies on a similar approach ---but different hardware features--- to trick a \ac{cpu} in \ac{smm} to execute
+arbitrary instructions.
 %
 Both attacks leave the content of the SMRAM in \ac{dram} intact, and leverage
 only legitimate hardware features.
