@@ -267,6 +267,18 @@ Our choice is motivated by the following reasons:
   %
   This suits well for specifying security properties to be enforced by HSE
   mechanisms, as they can take many forms.
+\item Model checkers and similar automated tools remain subject to the so-called
+  \emph{state explosion problem}\,\cite{clarke2012model} despite improvements to
+  algorithms.
+  %
+  State explosion problem imposes modeling compromises, \emph{e.g.}
+  verification of cache coherency protocols with a fixed number of cores and
+  address spaces limited in size (\emph{e.g.} in \cite{lie2003xom}, the model
+  only considers three cache locations).
+  %
+  Theorem provers allow for modeling \emph{parameterized} systems, so that it
+  becomes possible, for example, to construct a proof which holds for an
+  arbitrary number of similar components\,\cite{vijayaraghavan2015modular}.
 \item The extraction mechanism of Coq allows for transpiling formal
   specifications written in {\scshape Gallina} to OCaml, meaning we can write
   \emph{executable specifications}.
@@ -1093,49 +1105,163 @@ section, impose to model the complete system all at once.
 %
 This raises important challenges for complex systems.
 %
-Model checkers and similar automated tools remain subject to the so-called
-\emph{state explosion problem}\,\cite{clarke2012model} despite improvements to
-algorithms.
-%
-State explosion problem imposes modeling compromises, \emph{e.g.}  verification
-of cache coherency protocols with a fixed number of cores and address spaces
-limited in size (\emph{e.g.} in \cite{lie2003xom}, the model only considers
-three cache locations).
-%
-Theorem provers allow for modeling \emph{parameterized} systems, so that it
-becomes possible, for example, to construct a proof which holds for an arbitrary
-number of similar components\,\cite{vijayaraghavan2015modular}.
-%
-This approach does not address all the challenges posed by the scale of complete
-hardware architectures, built up from smaller ---yet complex--- components.
+Theorem provers allow for leveraging parameterized models to generalize similar
+components (\emph{e.g.} a memory of arbitrary size, an arbitrary number of
+core), but this approach does not address the challenges posed by the
+composition of many different ---and complex--- components.
 %
 A comprehensive hardware model in terms of hardware components would undoubtedly
 make the construction of the proof unbearable for any non-trivial properties,
 yet is a requirement to uncover compositional attacks by the means of formal
 methods.
 %
-\PC{il manque aussi l'argument de la difficulté à maintenir / faire évoluer le
-  modèle si un composant change - or c'est le cas en pratique: de nombreuses
-  archis sont similaires, mais avec quelques différences dans les composants}
+% \PC{il manque aussi l'argument de la difficulté à maintenir / faire évoluer le
+% modèle si un composant change - or c'est le cas en pratique: de nombreuses
+% archis sont similaires, mais avec quelques différences dans les composants}
 
 Compositional verification is a promising (family of) approach(es) to overcome
-the challenges posed by the scale of complex and large systems.
+the challenges posed by the scale of complex and large systems, as it enables to
+locally abstract a subpart of the problem \emph{via} a specification.
 %
-In this approach, the verification work is divided into two steps.
+Traditional compositional approaches in the programming language communities
+---that the Coq community is part of--- include type
+systems%\,\cite{knowles2008compositional}
+(specifications for values manipulated by a program), and Hoare logic systems
+(specifications for the state updates provoked by the execution of a program).
 %
-First, each component is verified in isolation.
+The model checking communities take a different approach, and rather breakdown a
+complex system in several stateful and interacting components.
 %
-Then, the composition of these components is also verified in order to ensure it
-does not make them vulnerable to compositional attacks.
+The verification process proceeds as follow: components are verified in
+isolation, then their composition is verified in order to ensure that local
+properties remain true in the complete system.
+
+We believe component-based verification is a particularly well-suited solution
+to address the scale of hardware architectures verification, notably because it
+mimic their concrete implementations.
 %
-This approach requires to use adapted modeling structures when it comes to
-defining a specification (\ref{subsec:sota:compmod}), and dedicated verification
-approaches, which enable ``divide and conquer'' strategies to reduce the burden
-of verifying the system (\ref{subsec:sota:compverif}).
+The rest of the section proceeds as follwos.
 %
-Related work~\ref{subsec:sota:comprelated}
+We first give an overview of compositional verification approaches which can be
+leveraged to enable ``divide and conquer'' strategies to reason about a
+component-based system (\ref{subsec:sota:compverif}).
 %
-TODO conclusion
+Then, we describe what modeling structures have been proposed to model
+components and their interactions (\ref{subsec:sota:compverif}).
+%
+We discuss the already existing approaches which have been proposed to enable
+component-based verification in Coq (\ref{subsec:sota:comprelated}), and
+summarize our motivations to propose our own framework
+(\ref{subsec:sota:compconclu}).
+
+\subsection{Compositional Verification Approaches}
+\label{subsec:sota:compverif}
+
+Historically, compositional verification\,\cite{peng1998survey} is the answer of
+model checking\,\cite{mcmillan1989compositional} and concurrent programs
+verification\,\cite{jones1983tentative} communities to the state explosion
+problem.
+%
+It can be divided into two complementary approaches: compositional minimization
+and compositional reasoning.
+
+\paragraph{Compositional Minimization.}
+%
+Components of a larger system are primarily identified by the interface they
+expose to their pairs, that is the set of operations they can carry out for the
+rest of the system.
+%
+They also ``hide'' the components they are connected to, and use in order to
+handles their input.
+%
+In this context, two components which expose the same interface can be freely
+interchange on the condition that they exhibit an equivalent behavior with
+respect to their interface.
+%
+There are many different formalizations of what ``equivalent behavior'' actually
+means.
+%
+For instance, in the context of process algebra, trace equivalence or
+bisimulation are two possible definitions of equivalent
+behavior\,\cite{fokkink2013pa}.
+
+Using a behavior equivalence approach, it becomes possible to reason about one
+component by abstracting away the part of the systems it interacts with simpler
+specifications.
+%
+This is referred to as compositional minimization in model checking.
+%
+The goal is to reduce the complexity of a model, with smaller yet provably
+equivalent components, as pictured in Figure~\ref{fig:sota:minicomp}.
+
+\begin{figure}
+  \begin{minipage}{0.48\linewidth}
+    \begin{center}
+      \begin{tikzpicture}
+        \node [draw, inner sep=10pt, minimum height=40pt] (p) {\( P \)};%
+        \node [draw, inner sep=10pt, right=of p, minimum height=40pt] (q)
+        {\( Q \)};%
+
+        \draw ([yshift=5pt]p.east) -- ([yshift=5pt]q.west);%
+        \draw ([yshift=-5pt]p.east) -- ([yshift=-5pt]q.west);%
+
+        \draw ([yshift=10pt, xshift=-25pt]p.west) -- ([yshift=10pt]p.west);%
+        \draw ([xshift=-25pt]p.west) -- (p.west);%
+        \draw ([yshift=-10pt, xshift=-25pt]p.west) -- ([yshift=-10pt]p.west);%
+
+        \draw ([yshift=15pt, xshift=25pt]q.east) -- ([yshift=15pt]q.east);%
+        \draw ([yshift=5pt, xshift=25pt]q.east) -- ([yshift=5pt]q.east);%
+        \draw ([yshift=-5pt, xshift=25pt]q.east) -- ([yshift=-5pt]q.east);%
+        \draw ([yshift=-15pt, xshift=25pt]q.east) -- ([yshift=-15pt]q.east);%
+      \end{tikzpicture}
+    \end{center}
+  \end{minipage}
+  %
+  \begin{minipage}{0.48\linewidth}
+    \begin{center}
+      \begin{tikzpicture}
+        \node [draw, inner sep=10pt, minimum height=40pt] (p) {\( P \)};%
+        \node [draw, inner sep=10pt, right=of p] (q) {\( Q' \)};%
+
+        \draw ([yshift=5pt]p.east) -- ([yshift=5pt]q.west);%
+        \draw ([yshift=-5pt]p.east) -- ([yshift=-5pt]q.west);%
+
+        \draw ([yshift=10pt, xshift=-25pt]p.west) -- ([yshift=10pt]p.west);%
+        \draw ([xshift=-25pt]p.west) -- (p.west);%
+        \draw ([yshift=-10pt, xshift=-25pt]p.west) -- ([yshift=-10pt]p.west);%
+      \end{tikzpicture}
+    \end{center}
+  \end{minipage}
+
+  \caption{Illustration of the compositional minimization paradigm}
+  \label{fig:sota:minicomp}
+\end{figure}
+
+\paragraph{Compositional Reasoning.}
+%
+At its simplest, assume-guarantee\,\cite{pnueli1985ag} ---or
+rely-guarantee\,\cite{jones1983tentative}--- reasoning is about proving a
+component \( C \) guarantees the property \( G \) under the assumptions that a
+property \( A \) is satisfied, then proving the rest of the system \( S' \)
+satisfies \( A \).
+%
+This allows for concluding about the correctness of the system as a whole, that
+is the composition of \( C \) with \( S' \) (denoted by \( C || S' \))
+guarantees \( G \).
+
+First assume-guarantee systems have been developed for model checkers, where
+assumptions and guarantees were defined in temporal logic formulas.
+%
+The main obstacle to the adoption of the assume-guarantee paradigm is the
+necessity for the user to provide additional inputs to the checker, in addition
+to the model and its properties to verify.
+%
+The \( L* \) learning algorithm, originally proposed by
+Augluin\,\cite{angluin1987lstart}, addresses this issue by automatically
+generating appropriate assumptions.
+%
+The \( L* \) algorithm has latterly been adapted to other modeling structure,
+for instance for interface automata\,\cite{emmi2008assume}.
 
 \subsection{Compositional Modeling Structures}
 \label{subsec:sota:compmod}
@@ -1456,115 +1582,6 @@ effect handlers is by the means of coroutines\,\cite{kiselyov2013extensible}.
 When a program with effects requires the result of a given effect, it sends a
 request to the handler, and waits for the result.
 
-\subsection{Compositional Verification Approaches}
-\label{subsec:sota:compverif}
-
-Historically, compositional verification\,\cite{peng1998survey} is the answer of
-model checking\,\cite{mcmillan1989compositional} and concurrent programs
-verification\,\cite{jones1983tentative} communities to the state explosion
-problem.
-%
-It can be divided into two complementary approaches: compositional minimization
-and compositional reasoning.
-
-\paragraph{Compositional Minimization.}
-%
-Components of a larger system are primarily identified by the interface they
-expose to their pairs, that is the set of operations they can carry out for the
-rest of the system.
-%
-They also ``hide'' the components they are connected to, and use in order to
-handles their input.
-%
-In this context, two components which expose the same interface can be freely
-interchange on the condition that they exhibit an equivalent behavior with
-respect to their interface.
-%
-There are many different formalizations of what ``equivalent behavior'' actually
-means.
-%
-For instance, in the context of process algebra, trace equivalence or
-bisimulation are two possible definitions of equivalent
-behavior\,\cite{fokkink2013pa}.
-
-Using a behavior equivalence approach, it becomes possible to reason about one
-component by abstracting away the part of the systems it interacts with simpler
-specifications.
-%
-This is referred to as compositional minimization in model checking.
-%
-The goal is to reduce the complexity of a model, with smaller yet provably
-equivalent components, as pictured in Figure~\ref{fig:sota:minicomp}.
-
-\begin{figure}
-  \begin{minipage}{0.48\linewidth}
-    \begin{center}
-      \begin{tikzpicture}
-        \node [draw, inner sep=10pt, minimum height=40pt] (p) {\( P \)};%
-        \node [draw, inner sep=10pt, right=of p, minimum height=40pt] (q)
-        {\( Q \)};%
-
-        \draw ([yshift=5pt]p.east) -- ([yshift=5pt]q.west);%
-        \draw ([yshift=-5pt]p.east) -- ([yshift=-5pt]q.west);%
-
-        \draw ([yshift=10pt, xshift=-25pt]p.west) -- ([yshift=10pt]p.west);%
-        \draw ([xshift=-25pt]p.west) -- (p.west);%
-        \draw ([yshift=-10pt, xshift=-25pt]p.west) -- ([yshift=-10pt]p.west);%
-
-        \draw ([yshift=15pt, xshift=25pt]q.east) -- ([yshift=15pt]q.east);%
-        \draw ([yshift=5pt, xshift=25pt]q.east) -- ([yshift=5pt]q.east);%
-        \draw ([yshift=-5pt, xshift=25pt]q.east) -- ([yshift=-5pt]q.east);%
-        \draw ([yshift=-15pt, xshift=25pt]q.east) -- ([yshift=-15pt]q.east);%
-      \end{tikzpicture}
-    \end{center}
-  \end{minipage}
-  %
-  \begin{minipage}{0.48\linewidth}
-    \begin{center}
-      \begin{tikzpicture}
-        \node [draw, inner sep=10pt, minimum height=40pt] (p) {\( P \)};%
-        \node [draw, inner sep=10pt, right=of p] (q) {\( Q' \)};%
-
-        \draw ([yshift=5pt]p.east) -- ([yshift=5pt]q.west);%
-        \draw ([yshift=-5pt]p.east) -- ([yshift=-5pt]q.west);%
-
-        \draw ([yshift=10pt, xshift=-25pt]p.west) -- ([yshift=10pt]p.west);%
-        \draw ([xshift=-25pt]p.west) -- (p.west);%
-        \draw ([yshift=-10pt, xshift=-25pt]p.west) -- ([yshift=-10pt]p.west);%
-      \end{tikzpicture}
-    \end{center}
-  \end{minipage}
-
-  \caption{Illustration of the compositional minimization paradigm}
-  \label{fig:sota:minicomp}
-\end{figure}
-
-\paragraph{Compositional Reasoning.}
-%
-At its simplest, assume-guarantee\,\cite{pnueli1985ag} ---or
-rely-guarantee\,\cite{jones1983tentative}--- reasoning is about proving a
-component \( C \) guarantees the property \( G \) under the assumptions that a
-property \( A \) is satisfied, then proving the rest of the system \( S' \)
-satisfies \( A \).
-%
-This allows for concluding about the correctness of the system as a whole, that
-is the composition of \( C \) with \( S' \) (denoted by \( C || S' \))
-guarantees \( G \).
-
-First assume-guarantee systems have been developed for model checkers, where
-assumptions and guarantees were defined in temporal logic formulas.
-%
-The main obstacle to the adoption of the assume-guarantee paradigm is the
-necessity for the user to provide additional inputs to the checker, in addition
-to the model and its properties to verify.
-%
-The \( L* \) learning algorithm, originally proposed by
-Augluin\,\cite{angluin1987lstart}, addresses this issue by automatically
-generating appropriate assumptions.
-%
-The \( L* \) algorithm has latterly been adapted to other modeling structure,
-for instance for interface automata\,\cite{emmi2008assume}.
-
 \subsection{Related Work}
 \label{subsec:sota:comprelated}
 
@@ -1651,6 +1668,7 @@ Logic of Program, but to the best of our knowledge, no implementation.
 \thomasrk[inline]{TODO}
 
 \subsection{Conclusion}
+\label{subsec:sota:compconclu}
 
 Our formal definition of \ac{hse} mechanism assumes there exists a formal model
 of the hardware architecture.
