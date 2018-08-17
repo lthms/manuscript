@@ -1304,11 +1304,23 @@ generating appropriate assumptions.
 The \( L* \) algorithm has latterly been adapted to other modeling structure,
 for instance for interface automata\,\cite{emmi2008assume}.
 
+\paragraph*{}
+%
+We believe assume-guarantee contracts encodes a well-suited reasoning to work
+with \ac{hse} mechanisms, and formally express the informal definition we gave
+in the Introduction of this manuscript (Definition \ref{def:intro:hse}).
+%
+Conceptually, trusted software components are components which interact with a
+core \emph{via} its instructions set; as long as they correctly implement a
+\ac{hse} mechanism, they satisfy the assumption of the core, and therefore are
+guaranteed that the hardware architecture enforces the targeted security policy.
+
 \subsection{Compositional Modeling Structures}
 \label{subsec:sota:compmod}
 
 We now detail the popular formalisms which have been used to model components in
-isolation for the purpose of compositional verification.
+isolation for the purpose of compositional verification, an in particular
+compositional reasoning.
 %
 Because our long-term objective is to apply a component-based modeling approach
 to a complex hardware architecture, we focus on their applicability.
@@ -1668,31 +1680,25 @@ several related approaches exist.
 \paragraph{{\scshape Kami}.}
 %
 In 2017, Joonwon Choi \emph{et al.} have released {\scshape
-  Kami}\,\cite{choi2017kami}, a framework for Coq to model and verify hardware
-components.
+  Kami}\,\cite{choi2017kami}, a framework for Coq to design, verify and extract
+(in the form of BlueSpec\,\cite{nikhil2004bluespec} programs) hardware
+components implementations.
 %
-The resulting hardware models can also be converted into
-BlueSpec\,\cite{nikhil2004bluespec} programs, which can be compiled to Verilog,
-a hardware description language.
-%
-This means it is possible to turn a {\scshape Kami} model into a concrete
-implementation.
-
-In in {\scshape Kami}, a model \( M \) is a particular labeled transition
-system, whose transitions are of the form
+In in {\scshape Kami}, components are defined as modules, where a \( M \) is a
+particular labeled transition system, whose transitions are of the form
 %
 \[
   p \xrightarrow[a]{i} (v, q)
 \]
 %
 where \( p \) is the state of the component before an operation \( i \) which is
-called by another component, \( a \) is a sequence of actions performed by the
+called by another component, \( a \) is a program of actions performed by the
 component in order to compute the result of \( i \), \( v \) is the result of
 \( i \), for the caller to use, and \( q \) is the modified state of the
 component.
 %
 Actions, in this context, are either local manipulation of the component's state
-or calls of operations.
+or calls of operations handled by other components.
 
 To reason about \( M \) with respect to a specification \( M_S \), {\scshape
   Kami} introduces a refinement relation \( \sqsubseteq \).
@@ -1715,6 +1721,25 @@ expression could be
 This approach is related to the compositional minimization, where one component
 is reduced to a simpler, more abstract model, to reduce the complexity of the
 proofs.
+%
+They proved the correctness of a realistic multiprocessor system with respect to
+a simple ISA semantics and Lamport's sequential consistency (SC)\thomasrk{ref
+  lamport} as the memory model.
+%
+Their proofs consist in a succession of refinement proofs from their
+implementation to high-level modules which model their semantics and the SC
+memory model.
+
+{\scshape Kami} provides a general-purpose framework for hardware verification.
+is hardware-specific, thus is not suitable to reason about systems which also
+include software components.
+%
+We believe this is a strong argument in favor of compositional reasoning for
+hardware architectures.
+%
+In comparison, our framework presented in Chapter~\ref{chapter:freespec} is more
+high-level, and focus on compositional reasoning ---in the form of
+assume-guarantee contracts--- rather than minimization reasoning.
 
 \paragraph{\texttt{Coq.io}.}
 %
@@ -1732,7 +1757,7 @@ operating system) would react to the program requests.
 %
 The verification goal is to verify that, under the hypothesis that the
 environment is correct with respect to a scenario, then a program with effects
-is also correct with respect to the trace of side effects operations it
+is also correct with respect to an expected trace of side effects operations it
 produces.
 
 The approach used by \texttt{Coq.io} paves the road towards a compositional
@@ -1740,12 +1765,84 @@ approach reasoning.
 %
 A program with effects can be verified, but the verification of the composition
 of this program with its environment is out of the scope of the project.
+%
+Our framework does not suffer the same limitation.
 
-\paragraph{Interface Specifications.}
+\paragraph{B-Method.}
 %
-Logic of Program, but to the best of our knowledge, no implementation.
+The B-method\,\cite{abrial2005b} is a well-established method of software
+development based on the B formal system.
 %
-\thomasrk[inline]{TODO}
+B allows for the definition of functional specifications, called abstract
+machines, and the refinement of these specifications up to executable code.
+%
+An abstract machine is characterized by a set of variables, and several
+operations which update these variables, with preconditions in form of
+predicates on the machine variables can be attached to a given operation to
+specify when the operation can be used.
+
+B has already been used in order to reason about systems made of components
+which interact \emph{via}
+interfaces\,\cite{souquieres2005verifying,chouali2006proving,lanoix:hal-00105041}.
+%
+In particular, Lanoix \emph{et al.}\,\cite{lanoix:hal-00105041} proposed the
+following reasoning:
+%
+\begin{itemize}
+\item Interfaces and requirements over components which expose these interfaces
+  are defined in the form of an abstract machine, where the operations
+  preconditions models the assumption a user needs to satisfy.
+  %
+\item A component which exposes this interface is expected to be a refinement (a
+  more concrete implementation) of this abstract machine.
+  %
+\item A model of a component which uses an interface can \emph{include} the
+  abstract machine which models this interface and uses its operations.
+\end{itemize}
+%
+Our approach apply a similar process within the Coq proof assistant, but with a
+clearer separation between the operations exposed by an interface and the
+requirements over the component which exposes it.
+%
+This offer use more flexibility to prove that a given component correctly uses
+(satisfy its assumption) or exposes (enforce its guarantee) interface.
+%
+We believe this is a valuable property considering that we want to prove the
+same hardware architecture correct with respect to several \ac{hse} mechanisms.
+
+\paragraph{Compositional Security.}
+
+The projects detailed above focus on verifying functional specifications, but
+the use of component-based modeling to verify security properties of a given
+system is not a novel idea.
+
+Heyman \emph{et al.} have proposed a component-based modelling technique for
+Alloy\,\cite{jackson2012alloy} where components are primarily defined as
+semantics for a set of operations\,\cite{heyman2012securemodel}; a component is
+connected to another when it leverages its operations.
+%
+Alloy leverages a model finder to verify a composition of these components
+against known security patterns, and to assume or verify facts about operations
+semantics.
+%
+However, it lacks an extraction mechanism, which makes it harder to validate the
+model.
+%
+On the contrary, our formalism and framework is compatible with the extraction
+mechanism of Coq, meaning a component model can be extracted in an {\scshape
+  OCaml} program.
+
+Finally, Garg \emph{et al.} have presented in 2010 a formal framework for
+compositional reasoning where components are defined in terms of programs
+written in a dedicated functional language with algebraic
+effects\,\cite{garg2010compositional}.
+%
+Probably the main difference between our two approaches is that they rely on a
+dedicated programming language, while our programs with effects and effect
+handlers are regular {\scshape Gallina} terms.
+%
+As a consequence, we can use the full interactive proof development environment
+of Coq in order to write and validate our proofs.
 
 \subsection{Conclusion}
 \label{subsec:sota:compconclu}
@@ -1761,9 +1858,6 @@ Otherwise, it would make the proof burden hard to bear.
 %
 Compositional verification is a very important domain research for the
 verification of large, realistic model.
-%
-However, it is a discipline mostly dominated by automated verification, like
-model checking for instance.
 
 With FreeSpec\,\cite{letan2018freespeccode}, we aim to provide a generic
 compositional reasoning framework for Coq.
@@ -1789,15 +1883,9 @@ achieves\,\cite{choi2017kami}, but is not hardware specific.
 In addition, our abstract specifications allow for compositional verification,
 while {\scshape Kami} focuses on refinement proofs.
 %
-To the best of our knowledge, the closest related research is the work of Deepak
-Garg \emph{et al.}\,\cite{garg2010compositional}.
-%
-Probably the main difference between our two approaches is that they rely on a
-dedicated programming language, while our programs with effects and effect
-handlers are regular {\scshape Gallina} development.
-%
-As a consequence, we can use the full interactive proof development environment
-of Coq in order to write and validate our proofs.
+To the best of our knowledge, the closest related research is the work of Garg
+\emph{et al.}\,\cite{garg2010compositional}, with the difference than we
+leverage the Coq proof assistant to verify our models.
 
 \section{Conclusion}
 \label{sec:sota:conclusion}
