@@ -82,7 +82,7 @@ The rest of this Chapter proceeds as follows.
 First, we introduce in Section~\ref{sec:sota:fm} the key concepts of formal
 methods which support the formal verification process by providing tools to
 construct proofs, and we justify our choice to use the Coq theorem prover in our
-experiments.
+approach.
 %
 We then explain in Section~\ref{sec:sota:formalisms} how transition systems are
 used as modeling structures to verify the correctness of a system with respect
@@ -102,6 +102,10 @@ represent statements which can either be true or false.
 %
 A formal system relies on a set of axioms, that are formulas known to be true,
 and inference rules which allow for deriving new formulas.
+
+\GH{Est-ce que tous les concepts que tu présentes par la suite s'appliquent à toutes les méthodes formelles (interprétation abstraite, méthode B, model checking...)?}
+
+\GH{Il me semble que tu rentres assez vite dans des détails, certes (trop) facilement compréhensibles, mais qui sont spécifiques à la preuve de théorème. Je préfererais que tu abordes l'ensemble des méthodes formelles disponibles puis que tu sélectionnes assez rapidement, en le justifiant, (par une approche "entonoire", le type de méthode formelle que tu va utiliser dans ton approche. Ensuite, tu pourras faire un état de l'art plus détaillé sur ce type de méthode.}
 
 \subsection{Propositions and Inference Rules.}
 %
@@ -187,8 +191,7 @@ a checker to automatically verify these proofs.
 Therefore, the quality of a theorem prover is measured by its capacity to reject
 ill-formed proofs.
 %
-Modern theorem provers are built as certified layers around a trusted kernel as
-small and simple as possible.
+Modern theorem provers are built as certified layers \GH{ca veut dire quoi "certified layers"? Que ces couches ont été prouvée avec le theorem prover?} around a trusted kernel which is kept as small and simple as possible.
 %
 The idea is that, as long as the kernel does not contain a bug, advanced
 features implemented inside a certified layer cannot introduce inconsistency in
@@ -198,7 +201,7 @@ This greatly diminishes the risk to have inconsistencies in the proof checker,
 although it happened in the
 past\,\cite{claret2015falso,griffioen1998comparison}.
 
-Another common approach is to rely on an algorithm whose correctness has been
+Another common approach \GH{a quoi renvoie "another approach"? Theorem prover? } is to rely on an algorithm whose correctness has been
 formally established to handle a well-defined class of problems.
 %
 This allows for automating the verification process.
@@ -249,13 +252,13 @@ higher-order logic.
 %
 On the other hand, \emph{automated} theorem provers (\emph{e.g.}
 Vampire\,\cite{riazanov2002vampire}, Z3\,\cite{de2008z3}) are based on
-first-order logic.
+first-order logic. \GH{tu devrais parler rapidement de SAT, SMT...}
 
 Finally, modal logic\,\cite{chagrov1997modal} is a formal system which extends
 first-order logic with modal operators.
 %
 Temporal logic forms a family of modal logic systems, including \emph{e.g.}
-Linear Temporal Logic (LTL)\,\cite{sistla1985ltl} Computation Logic Tree
+Linear Temporal Logic (LTL)\,\cite{sistla1985ltl} and Computation Logic Tree
 (CTL)\,\cite{clarke1981ctl}.
 %
 Examples of LTL modular operators are \( \square P \) (\( P \) is always true),
@@ -281,20 +284,22 @@ Other approaches can be used to that end ---for instance Gilles Barthe \emph{et
 Coq\,\cite{barthe2011virtcert1}--- yet model checkers have the benefit of
 automation and counter-example generation.
 
+\GH{Je trouve que ce tour d'horizon des méthodes formelles est un peu rapide. Il gagnerait à être plus complet et mieux structuré.}
+
 \subsection{Conclusion}
 
 We have implemented our proofs of concepts in the Coq proof assistant.
 %
-Our choice is motivated by the following reasons:
+Our choice is motivated by the following reasons \GH{Comme on te l'a déjà dit, il faudrait que le choix de ton approche soit distillé au fur et à mesure. La conclusion ne devrait être qu'une synthèse.}:
 %
 \begin{itemize}
 \item {\scshape Gallina}, the specification of Coq, is an expressive formal
   language, that combines both a higher-order logic and a powerful dependent
-  type system, while {\scshape Ltac}, the proof tactic language of Coq, enables
-  powerful automation features.
+  type system \GH{c'est quoi un "type dependent system"?}, while {\scshape Ltac}, the proof tactic language of Coq, enables
+  powerful automation features. \GH{vu que Coq va être central dans ton approche, tu devrais le décrire un peu plus en détail (lui consacrer un chapitre).}
   %
   This suits well for specifying security properties to be enforced by HSE
-  mechanisms, as they can take many forms.
+  mechanisms, as they can take many forms. \GH{Cette affirmation est un peu gratuite. Tu devrais développer un peu cette idée et montrer en quoi les propriétés de sécurité nécessite une logique d'ordre supérieur (donner des exemples...)}
 \item Model checkers and similar automated tools remain subject to the so-called
   \emph{state explosion problem}\,\cite{clarke2012model} despite improvements to
   algorithms.
@@ -302,11 +307,11 @@ Our choice is motivated by the following reasons:
   State explosion problem imposes modeling compromises, \emph{e.g.}
   verification of cache coherency protocols with a fixed number of cores and
   address spaces limited in size (\emph{e.g.} in \cite{lie2003xom}, the model
-  only considers three cache locations).
+  only considers three cache locations). \GH{En pratique, l'implémentation aura bien un nombre limité de coeurs, un espace d'adressage limité... Donc est-ce réellement un problème? En outre, est-ce que cela serait une limitation pour ton approche telle qu'elle est utilisée actuellement ou bien est-ce un argument pour le futur?}
   %
   Theorem provers allow for modeling \emph{parameterized} systems, so that it
   becomes possible, for example, to construct a proof which holds for an
-  arbitrary number of similar components\,\cite{vijayaraghavan2015modular}.
+  arbitrary number of similar components\,\cite{vijayaraghavan2015modular}. \GH{et? il faut remettre cet argument dans le contexte de ton travail. En quoi cela serait-il utile pour ce que tu fais?}
 \item The extraction mechanism of Coq allows for transpiling formal
   specifications written in {\scshape Gallina} to OCaml, meaning we can write
   \emph{executable specifications}.
@@ -319,11 +324,13 @@ Our choice is motivated by the following reasons:
     utilisée durant ta thèse}
 \end{itemize}
 
+\GH{De manière générale, cette première partie de l'état de l'art est à revoir. Il faut mieux positionner ton travail, de manière plus systématique et "carré"}
+
 \section{Formal Verification of Transition Systems}
 \label{sec:sota:formalisms}
 
 Transition systems have long been used to study the behavior of discrete
-systems.
+systems.  \GH{ref} 
 %
 Over time, many different definitions of transition system have been proposed,
 to address different classes of verification problems.
