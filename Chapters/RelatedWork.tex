@@ -1157,10 +1157,10 @@ model of the related hardware architecture.
 On the one hand, hardware design verification often focus on properties
 transparent to the executed software components (\emph{e.g.} cache
 coherency\,\cite{stern1995cachecoherence}, linearizability of SGX
-instructions\,\cite{leslie2015linsgx}, hardware-based memory
+instructions\,\cite{leslie2015linsgx}, or hardware-based memory
 isolation\,\cite{lie2003xom}).
 %
-Security gap in interactions of multiple platform components are less subject to
+Security gap in interactions \GH{Que veut dire "security gap in interaction"?} of multiple platform components are less subject to
 formal verification, due to their increasing
 complexity\,\cite{potlapally2011hardwaresecurity}, and we are not aware of any
 x86 hardware model comprehensive in terms of hardware components and hardware
@@ -1177,9 +1177,9 @@ Thus, we face a 'chicken-and-egg' problem: we need a detailed hardware model to
 reason about \ac{hse} mechanisms, yet such a model does not exist and requires a
 tremendous amount of efforts to be developed, reviewed and validated; which
 means we need to be reasonably certain of our modeling choices for those efforts
-not going to waste.
+not going to waste. \GH{Je trouve cet argumentaire un peu casse-gueule... Tu laisse entendre que les modèles existants sont incomplet et spécifique à un mécanisme. Or tu as développé un modèle largement incomplet et dédié à la vérification d'un seul mécanisme (même s'il pourrait sans doute être étendu). }
 %
-We decided develop an ad-hoc, simplified x86 hardware model which includes the
+We decided to develop an ad-hoc, simplified x86 hardware model which includes the
 necessary hardware components abstracted away in related work.
 %
 Using this model, we demonstrate in Chapter~\ref{chapter:speccert2} how it is
