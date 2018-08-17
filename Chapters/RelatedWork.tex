@@ -182,8 +182,6 @@ represented as follows:
   \label{fig:sota:inference}
 \end{figure}
 
-Constructing a proof and verifying its correctness quickly becomes challenging.
-%
 Theorem provers such as Coq\,\cite{coq} or
 Isabelle/HOL\,\cite{nipkow2002isabelle} provide facilities to write proofs, and
 a checker to automatically verify these proofs.
@@ -191,7 +189,9 @@ a checker to automatically verify these proofs.
 Therefore, the quality of a theorem prover is measured by its capacity to reject
 ill-formed proofs.
 %
-Modern theorem provers are built as certified layers \GH{ca veut dire quoi "certified layers"? Que ces couches ont été prouvée avec le theorem prover?} around a trusted kernel which is kept as small and simple as possible.
+Modern theorem provers are built around a kernel which is kept as small and
+simple as possible, and their advanced features are implemented in additional
+layers verified by this kernel.
 %
 The idea is that, as long as the kernel does not contain a bug, advanced
 features implemented inside a certified layer cannot introduce inconsistency in
@@ -201,8 +201,9 @@ This greatly diminishes the risk to have inconsistencies in the proof checker,
 although it happened in the
 past\,\cite{claret2015falso,griffioen1998comparison}.
 
-Another common approach \GH{a quoi renvoie "another approach"? Theorem prover? } is to rely on an algorithm whose correctness has been
-formally established to handle a well-defined class of problems.
+Rather than constructing a proof for each specific system, for a specific set of
+properties, it is also possible to rely on an algorithm whose correctness has
+been formally established to handle a well-defined class of problems.
 %
 This allows for automating the verification process.
 %
@@ -233,28 +234,7 @@ characterized by:
   (there exists a value).
 \end{itemize}
 
-First-order logic quantifiers can only be applied on sets of terms (\emph{e.g.}
-natural numbers, booleans, states of an airlock system).
-%
-Higher-order logic\,\cite{leivant1994hol} does not suffer the same limitation,
-since they allow quantification over sets of sets, functions and predicates.
-%
-Hence, it becomes possible to express statements such as \emph{for all sets with
-  a total order \( < \), for all pair of values \( \alpha, \beta \), then either
-  \( \alpha < \beta \) or \( \beta < \alpha \) or \( \alpha = \beta \)}.
-%
-Therefore, higher order logic is more expressive than first-order logic, but it
-comes at a cost in terms of automation.
-%
-On the one hand, \emph{interactive} theorem provers (\emph{e.g.}  Coq,
-Isabelle/HOL, or more recently Lean\,\cite{de2015lean}) are based on
-higher-order logic.
-%
-On the other hand, \emph{automated} theorem provers (\emph{e.g.}
-Vampire\,\cite{riazanov2002vampire}, Z3\,\cite{de2008z3}) are based on
-first-order logic. \GH{tu devrais parler rapidement de SAT, SMT...}
-
-Finally, modal logic\,\cite{chagrov1997modal} is a formal system which extends
+Modal logic\,\cite{chagrov1997modal} is a formal system which extends
 first-order logic with modal operators.
 %
 Temporal logic forms a family of modal logic systems, including \emph{e.g.}
@@ -284,53 +264,136 @@ Other approaches can be used to that end ---for instance Gilles Barthe \emph{et
 Coq\,\cite{barthe2011virtcert1}--- yet model checkers have the benefit of
 automation and counter-example generation.
 
-\GH{Je trouve que ce tour d'horizon des méthodes formelles est un peu rapide. Il gagnerait à être plus complet et mieux structuré.}
+First-order logic quantifiers can only be applied on sets of terms (\emph{e.g.}
+natural numbers, booleans, states of an airlock system).
+%
+Higher-order logic\,\cite{leivant1994hol} does not suffer the same limitation,
+since they allow quantification over sets of sets, functions and predicates.
+%
+Hence, it becomes possible to express statements such as \emph{for all sets with
+  a total order \( < \), for all pair of values \( \alpha, \beta \), then either
+  \( \alpha < \beta \) or \( \beta < \alpha \) or \( \alpha = \beta \)}.
+%
+Therefore, higher order logic is more expressive than first-order logic, but it
+comes at a cost in terms of automation.
+%
+On the one hand, \emph{interactive} theorem provers (\emph{e.g.}  Coq,
+Isabelle/HOL, or more recently Lean\,\cite{de2015lean}) are based on
+higher-order logic.
+%
+On the other hand, \emph{automated} theorem provers (\emph{e.g.}
+Vampire\,\cite{riazanov2002vampire}, Z3\,\cite{de2008z3}) are based on
+first-order logic. \GH{tu devrais parler rapidement de SAT, SMT...}
+
+\GH{Je trouve que ce tour d'horizon des méthodes formelles est un peu rapide. Il
+  gagnerait à être plus complet et mieux structuré.}
+
+In the context of this thesis, our initial goal is to propose a formal
+definition of \ac{hse} mechanisms.
+%
+In this context, we need higher-order logic to prove generic reason not related
+to a given hardware architecture.
+%
+For instance, in Section~\ref{subsec:speccert2:coop}, we reason about the
+composition of two \ac{hse} mechanisms whose only the targeted security policies
+are known ---even the hardware model is left as a parameter of the proof.
+%
+Such a statement is out of the scope of any first-order logic.
+%
+Similarly, we propose a generic framework to reason about composition
+of components in Chapter~\ref{chapter:freespec}, and thanks to higher-order
+logic, our theorems can be applied to a large class of component-based systems.
+%
+In both case, we wrote our proofs in the Coq theorem prover to increase our
+confidence in our results.
+
+To verify a specific \ac{hse} mechanism which can be implemented on a specific
+hardware architecture, the need for higher-logic is less prominent.
+%
+As a consequence, if someone wants to leverage our formal definitions to guide
+its verification process, they can consider a large class of tools, including
+model checkers which has the benefit of automation.
 
 \subsection{Conclusion}
 
-We have implemented our proofs of concepts in the Coq proof assistant.
+Formal verification requires to construct proofs, by the means of formal
+methods.
 %
-Our choice is motivated by the following reasons \GH{Comme on te l'a déjà dit, il faudrait que le choix de ton approche soit distillé au fur et à mesure. La conclusion ne devrait être qu'une synthèse.}:
+The choice of an approach to construct these proofs is necessarily a compromise
+between automation on the one hand, and expressiveness on the other.
 %
-\begin{itemize}
-\item {\scshape Gallina}, the specification of Coq, is an expressive formal
-  language, that combines both a higher-order logic and a powerful dependent
-  type system \GH{c'est quoi un "type dependent system"?}, while {\scshape Ltac}, the proof tactic language of Coq, enables
-  powerful automation features. \GH{vu que Coq va être central dans ton approche, tu devrais le décrire un peu plus en détail (lui consacrer un chapitre).}
-  %
-  This suits well for specifying security properties to be enforced by HSE
-  mechanisms, as they can take many forms. \GH{Cette affirmation est un peu gratuite. Tu devrais développer un peu cette idée et montrer en quoi les propriétés de sécurité nécessite une logique d'ordre supérieur (donner des exemples...)}
-\item Model checkers and similar automated tools remain subject to the so-called
-  \emph{state explosion problem}\,\cite{clarke2012model} despite improvements to
-  algorithms.
-  %
-  State explosion problem imposes modeling compromises, \emph{e.g.}
-  verification of cache coherency protocols with a fixed number of cores and
-  address spaces limited in size (\emph{e.g.} in \cite{lie2003xom}, the model
-  only considers three cache locations). \GH{En pratique, l'implémentation aura bien un nombre limité de coeurs, un espace d'adressage limité... Donc est-ce réellement un problème? En outre, est-ce que cela serait une limitation pour ton approche telle qu'elle est utilisée actuellement ou bien est-ce un argument pour le futur?}
-  %
-  Theorem provers allow for modeling \emph{parameterized} systems, so that it
-  becomes possible, for example, to construct a proof which holds for an
-  arbitrary number of similar components\,\cite{vijayaraghavan2015modular}. \GH{et? il faut remettre cet argument dans le contexte de ton travail. En quoi cela serait-il utile pour ce que tu fais?}
-\item The extraction mechanism of Coq allows for transpiling formal
-  specifications written in {\scshape Gallina} to OCaml, meaning we can write
-  \emph{executable specifications}.
-  %
-  We could leverage this feature to validate a model against a real
-  implementation.
-  %
-  \GH{Tu pourrais rajouter une footnote disant que bien qu'il s'agisse d'une
-    propriété intéressante qui a notamment motivé ton choix, tu ne l'as pas
-    utilisée durant ta thèse}
-\end{itemize}
+Automated approaches such as model checking rely on algorithm which have been
+proven correct (they give the right answer) for a given class of well-identified
+problems.
+%
+Theorem provers or paper proofs allows for considering more expressive
+statements, but the construction of the proofs requires human intervention.
+%
+In this thesis, we have proposed a generic definition of \ac{hse} mechanisms and
+a generic approach to verify component-based system, which required the use of
+higher-order logic, and the proofs presented in this manuscript have been
+written within the Coq theorem prover, to increase our confidence in our
+results.
 
-\GH{De manière générale, cette première partie de l'état de l'art est à revoir. Il faut mieux positionner ton travail, de manière plus systématique et "carré"}
+% We have implemented our proofs of concepts in the Coq proof assistant.
+%%
+% Our choice is motivated by the following reasons \GH{Comme on te l'a déjà dit,
+% il faudrait que le choix de ton approche soit distillé au fur et à mesure. La
+% conclusion ne devrait être qu'une synthèse.}:
+%%
+% \begin{itemize}
+% \item {\scshape Gallina}, the specification of Coq, is an expressive formal
+%   language, that combines both a higher-order logic and a powerful dependent
+%   type system \GH{c'est quoi un "type dependent system"?}, while {\scshape
+%   Ltac}, the proof tactic language of Coq, enables powerful automation
+%   features. \GH{vu que Coq va être central dans ton approche, tu devrais le
+%   décrire un peu plus en détail (lui consacrer un chapitre).}
+%  %
+%   This suits well for specifying security properties to be enforced by HSE
+%   mechanisms, as they can take many forms. \GH{Cette affirmation est un peu
+%   gratuite. Tu devrais développer un peu cette idée et montrer en quoi les
+%   propriétés de sécurité nécessite une logique d'ordre supérieur (donner des
+%   exemples...)}
+% \item Model checkers and similar automated tools remain subject to the
+%   so-called \emph{state explosion problem}\,\cite{clarke2012model} despite
+%   improvements to algorithms.
+%  %
+%   State explosion problem imposes modeling compromises, \emph{e.g.}
+%   verification of cache coherency protocols with a fixed number of cores and
+%   address spaces limited in size (\emph{e.g.} in \cite{lie2003xom}, the model
+%   only considers three cache locations). \GH{En pratique, l'implémentation
+%   aura bien un nombre limité de coeurs, un espace d'adressage limité... Donc
+%   est-ce réellement un problème? En outre, est-ce que cela serait une
+%   limitation pour ton approche telle qu'elle est utilisée actuellement ou bien
+%   est-ce un argument pour le futur?}
+%  %
+%   Theorem provers allow for modeling \emph{parameterized} systems, so that it
+%   becomes possible, for example, to construct a proof which holds for an
+%   arbitrary number of similar
+%   components\,\cite{vijayaraghavan2015modular}. \GH{et? il faut remettre cet
+%   argument dans le contexte de ton travail. En quoi cela serait-il utile pour
+%   ce que tu fais?}
+% \item The extraction mechanism of Coq allows for transpiling formal
+%   specifications written in {\scshape Gallina} to OCaml, meaning we can write
+%   \emph{executable specifications}.
+%  %
+%   We could leverage this feature to validate a model against a real
+%   implementation.
+%  %
+%   \GH{Tu pourrais rajouter une footnote disant que bien qu'il s'agisse d'une
+%   propriété intéressante qui a notamment motivé ton choix, tu ne l'as pas
+%   utilisée durant ta thèse}
+% \end{itemize}
+
+\GH{De manière générale, cette première partie de l'état de l'art est à
+  revoir. Il faut mieux positionner ton travail, de manière plus systématique et
+  "carré"}
 
 \section{Formal Verification of Transition Systems}
 \label{sec:sota:formalisms}
 
 Transition systems have long been used to study the behavior of discrete
-systems.  \GH{ref} 
+systems.  \GH{ref}
 %
 Over time, many different definitions of transition system have been proposed,
 to address different classes of verification problems.
@@ -468,12 +531,16 @@ each variant better suited to tackle a particular class of systems.
 %
 For instance, the Kripke structure\,\cite{kripke1971semantical} is a prominent
 definition of transition systems used in model checking\,\cite{clarke1999model}.
-%
-Besides, Petri net\,\cite{peterson1981petri}, process
-algebra\,\cite{bergstra1984process} or interface
-automata\,\cite{de2001interface} are better suited to model concurrent systems. \GH{et? Quelle structure vas-tu utiliser dans ton approche? Pourquoi?}
+%%
+%Besides, Petri net\,\cite{peterson1981petri}, process
+%algebra\,\cite{bergstra1984process} or interface
+%automata\,\cite{de2001interface} are better suited to model concurrent
+%systems. \GH{et? Quelle structure vas-tu utiliser dans ton approche? Pourquoi?}
 
-\GH{Tel quel, cette sous-section est un peu vague. Elle gagnerait à être un peu plus étoffée et surtout présentée de manière plus rigoureuse, carré. On ne comprend pas vraiment pourquoi tu nous parles de LTS sinon que d'autres le fond alors çà a l'air d'être une bonne idée...}
+\GH{Tel quel, cette sous-section est un peu vague. Elle gagnerait à être un peu
+plus étoffée et surtout présentée de manière plus rigoureuse, carré. On ne
+comprend pas vraiment pourquoi tu nous parles de LTS sinon que d'autres le fond
+alors çà a l'air d'être une bonne idée...}
 
 \subsection{Specifying Security Policies}
 \label{subsec:sota:security}
