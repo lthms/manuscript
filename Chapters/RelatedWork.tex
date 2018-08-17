@@ -346,26 +346,30 @@ literature in order to verify hardware and software systems
 (\ref{subsec:sota:ltsrelated}).
 %
 We conclude with a summary of our motivations for not reusing an existing x86
-model for our experiments (\ref{subsec:sota:ltsconclusion}).
+model for our experiments (\ref{subsec:sota:ltsconclusion}). \GH{Cette phrase n'est pas très élégante. Plutôt que de partir sur la négative, je ferais plutôt une affirmation positive : qu'est-ce qui t'a poussé à définir un nouveau modèle de l'architecture x86?}
 
 \subsection{Defining Specifications}
 \label{subsec:sota:ltsdef}
 
+\GH{Ce que tu appelles "spécification" dans ton titre n'a pas l'air de coller à ta définition initiale}
+
 The formal verification of discrete systems, such as computing systems, commonly
 rely on some sort of \emph{transition systems} to describe the behavior of the
-subject of study.
+subject of study. \GH{Ref} \GH{Il faudrait en outre insister sur ton contexte. Est-ce que ces systèmes sont très utilisé pour modéliser les architectures hardware et pourquoi?}
 %
 More precisely, the system is characterized by a set of \emph{states} and by a
 set of state transformation, called \emph{transitions}.
 %
 Transitions occur when the system interacts with its environment (\emph{e.g.} a
 hardware circuit receives a clock signal, a hardware controller receives a
-message from a bus, an operating system handles a syscall).
+message from a bus, or an operating system handles a syscall).
+
+\GH{Il faut que tu définisse un peu mieux ce qu'est un LTS et surtout la forme de LTS que tu va utiliser et pourquoi. (approche entonnoire). ENSUITE tu peux nous parler de ton exemple. Actuellement, il vient comme un cheveux sur la soupe...}
 
 Throughout this Chapter, we will use the airlock system in order to act as a
 running example to illustrate the introduced definitions, since it is both
 simple ---our examples remain of manageable size--- and rich ---our examples do
-not feel far-fetched.
+not feel far-fetched \GH{je ne sais pas si cette expression est bien appropriée dans un manuscrit de thèse. Je dirai que cet exemple est suffisamment simple (manageable size) tout en étant suffisamment riche pour illustrer les différentes problématiques que tu souhaite aborder.}.
 %
 An airlock system is a device made of two doors, and an intermediary chamber.
 %
@@ -382,7 +386,7 @@ second door, and exits the chamber.
 %
   A labeled transition system is a tuple \( \langle S, L, R \rangle \), such
   that \( S \) is a set of states, \( L \) is a set of labels, and
-  \( R \subseteq S \times L \times S \) is the transition relation.
+  \( R \subseteq S \times L \times S \) is the transition relation. \GH{Cette définition ne devrait pas être dans l'exemple!}
   Figure~\ref{fig:sota:airlock-lts} gives a definition of an idealized airlock
   system, modeled as a labeled transition system.
 
@@ -467,7 +471,9 @@ definition of transition systems used in model checking\,\cite{clarke1999model}.
 %
 Besides, Petri net\,\cite{peterson1981petri}, process
 algebra\,\cite{bergstra1984process} or interface
-automata\,\cite{de2001interface} are better suited to model concurrent systems.
+automata\,\cite{de2001interface} are better suited to model concurrent systems. \GH{et? Quelle structure vas-tu utiliser dans ton approche? Pourquoi?}
+
+\GH{Tel quel, cette sous-section est un peu vague. Elle gagnerait à être un peu plus étoffée et surtout présentée de manière plus rigoureuse, carré. On ne comprend pas vraiment pourquoi tu nous parles de LTS sinon que d'autres le fond alors çà a l'air d'être une bonne idée...}
 
 \subsection{Specifying Security Policies}
 \label{subsec:sota:security}
