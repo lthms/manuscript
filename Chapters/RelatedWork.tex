@@ -829,10 +829,10 @@ where \( s \xrightarrow{l} s' \) is a transition of the system from a state
 
 \subsection{Related Work}
 \label{subsec:sota:ltsrelated}
-
+\GH{Je n'aime pas le titre Related Work, qui est trop vague. Je préfère un titre explicite. Quel est (sont) le(s) point(s) commun(s) des travaux que tu vas présenter par la suite?}
 Throughout this Section, we have detailed how we can model a target of
 verification as a transition system in order to verify its correctness with
-respect to security policies specified as predicates on set of model traces.
+respect to security policies specified as predicates on set of model traces. \GH{Je ne comprend pas trop cette phrase. Est-ce que tu fais un résumé de ce qui a été présenté avant (ce que suggère l'emplois du passé)? Dans ce cas, il faudrait la faire suivre pas une phrase indiquant ce que tu va présenter maintenant dans cette sous-section.}
 
 \paragraph{Model Prerequisites.}
 %
@@ -875,21 +875,23 @@ software components.
 In this context, verifying a \ac{hse} mechanism consists of proving this set of
 traces satisfies the predicate which characterizes the targeted security policy.
 
+\GH{Ces explications sont très intéressantes (et importantes) mais elle ne sont pas à la bonne place. On ne voit pas trop ce qu'elles font dans l'état de l'art. Elles devraient typiquement ce trouver à la fin du 3.2.1 et faire la transition avec le 3.2.2. On a besoin d'exprimer des propriétés de sécurité sur les modèles hardware car ils ne sont pas safe par défaut.}
+
+\GH{A ce stage, on ne sait pas trop sur quoi va porter le reste de l'état de l'art : les modèles hardware? des techniques de vérification? des politiques? }
 \paragraph{x86 Models by Intel.}
 %
 The trustworthiness of a verification result depends to a large extent on the
 model.
 %
 As such, because x86 is a proprietary product, Intel remains in the best
-position to produce a detailed, trustworthy model of its architecture.
+position to produce a detailed, trustworthy model of its architecture. \GH{Je supprimerais ces deux premières phrases qui sont subjectives et n'apportent pas grand chose.}
 
 Intel has integrated formal verification in its processors design process for
 more than a decade now.
 %
 Intel engineers first verified arithmetic operations performed by the
 processors\,\cite{harrison2000x86}, then increased the verification scope to
-cover the complete execution unit responsible for executing assembly
-instruction\,\cite{kaivola2009formalintel}.
+cover the complete execution unit\,\cite{kaivola2009formalintel}.
 %
 More recently, the SGX instructions ---which allow system software components to
 create and manage enclaves\,\cite{costan2016sgxexplained}--- have been verified
@@ -899,13 +901,13 @@ specification\,\cite{leslie2015linsgx}.
 Each project focused on one aspect of the x86 architecture and led to uncover
 logic errors and inconsistencies in processor designs.
 %
-However, models and tools are rarely publicly available, making it difficult to
-formally specify and verify \ac{hse} mechanisms.
+However, the models and tools used by Intel are rarely publicly available, making it difficult to
+formally specify and verify \ac{hse} mechanisms. \GH{Phrase à reformuler de manière simple. Si les modèles et les outils ne sont pas disponibles, on ne peut pas les réutiliser pour ton approche. point}
 %
 Besides, to the extend of our knowledge, Intel has not advertised about a
 ``global'' model of its architecture, even though Nachiketh Potlapally, who was
 working at Intel at the time, discussed the benefits of such a model in
-2011\,\cite{potlapally2011hardwaresecurity}.
+2011\,\cite{potlapally2011hardwaresecurity}. \GH{J'enfoncerait un peu plus le clou en précisant que chaque modèle a été réalisé indépendamment des autres et ne couvre qu'un aspect très réduit de l'architecture (voir seulement du processeur). A l'inverse, nous avons besoins d'un modèle dont le périmètre est large (même si tous les composants ne sont pas nécessairement décrit avec un niveau de détail important)}
 
 \paragraph{x86 ISA Models.}
 %
@@ -921,7 +923,7 @@ framework\,\cite{goel2014x86}, and CompCert x86 assembly
 model\,\cite{leroy2012compcert}.
 %
 These models have in common to focus on the execution of one particular software
-component, remain focused on the semantics of the x86 instructions set, and
+component \GH{il serait bien de préciser quel software component pour chacun des travaux.}. They also remain focused on the semantics of the x86 instructions set and
 abstract away as many hardware details as possible to increase the applicability
 of the model, \emph{e.g.} are limited to the \ac{dram}.
 %
@@ -930,41 +932,33 @@ hardware features, as applications typically do, and to reason about correction
 with respect to functional specifications.
 %
 It has been shown in the past that it is possible to extend them, when their
-abstraction is too strong and hides crucial of concrete code execution.
+abstraction is too strong and hides crucial \GH{crucial quoi? il manque un nom?} of concrete code execution.
 %
 For instance, Chen \emph{et al.} have extended the hardware model of CompCertX,
 a variant of CompCert used in the development of formally verified
 kernels\,\cite{gu2016certikos}, with a notion of input devices and
 interrupts\,\cite{chen2018interrupt}.
 
-However, this requires an important level of expertise and understanding of
-fairly complicated formal developments, and the primarily focus of these
-projects is to reason about software components, not the underlying hardware
+However  the primarily focus of these projects is to reason about software components, not the underlying hardware
 architecture.
 
 \paragraph{Ad-hoc x86 Models}
 %
-Finally, a last category of existing x86 models is ad-hoc models, specially
-developed to verify a dedicated system software component.
+Finally,\GH{finally ne me semble pas adéquat, puisqu'il reste une dernière catégorie (Other Hardware Architecture Models)} a last category of existing x86 models is ad-hoc models, specially developed to verify a dedicated system software component.
 %
-As such, they focus on hardware features used by the target of verification, in
-particular the \ac{mmu} and the interrupt handlers, and trust the hardware will
-behave as expected.
-%
-We now give a quick overview of available, open-source ad-hoc models we could
-reuse.
+As such, they focus on hardware features used by the target of verification, \emph{e.g.} the \ac{mmu} or the interrupt handlers. The objective of these approaches is to verify the software component and so they suppose the hardware will behave as expected. \GH{il faudrait en rajoutant une couche en disant que de notre côté c'est l'inverse, on fait des hypothèse sur le software et on vérifier que le comportement du hard satisfait une propriétés de sécurité sous ces hypothèses}
 
-The seL4 microkernel is, to date, the most advanced and mature verified
+The seL4 microkernel \GH{ref ou url vers le projet en footnote} is, to date, the most advanced and mature verified
 implementation of a microkernel.
 %
 A C implementation of the kernel is proven correct with respect to a functional
-implementation modeled in the Isabelle/HOL theorem prover, and they have show
+implementation modeled in the Isabelle/HOL theorem prover, and they \GH{a qui renvoie "they"?} have show
 that this model correctly enforces security policies including information flow
 control, integrity and confidentiality\,\cite{klein2009sel4}.
 %
 In practice, the hardware model focus on \ac{mmu}, cache and interrupt handling,
 and in large parts the exact behavior of hardware devices is left
-non-deterministic, in order to reduces the assumptions made by the model about
+non-deterministic, in order to reduce the assumptions made by the model about
 the hardware.
 %
 In 2016, Jomaa \emph{et al.} have proposed a formal machine-checked proof (in
@@ -974,7 +968,7 @@ Coq) of guests isolation by an idealized protokernel based on a
 Similarly to seL4, their hardware model focus on \ac{mmu} and interrupt
 handling.
 %
-In both cases, there is a separation between the software component model and
+In both cases, there is a clear separation between the software component model and
 the hardware model, and it may be possible to extract the hardware model and
 reuse it.
 %
@@ -1050,8 +1044,6 @@ would have to make significant changes prior to using it.
 The x86 architecture is not the only hardware architecture which has been the
 object of formal verification projects.
 %
-We give an overview of the approaches implemented to model and verify them.
-
 The two latest versions of the ARM processors have been formally
 specified\,\cite{fox2010armv7,reid2016armv8}.
 %
@@ -1061,10 +1053,10 @@ architectures\footnote{There are three variants of the ARM Architecture, for as
   allow an operating system to manage applications, the R-class processors are
   dedicated to real-time systems, and the M-class are used in microcontrollers.}
 is the result of an important 5 year effort by ARM Ltd to integrate formal
-specification definition to their regular specification process.
+specification definition to their regular specification process. \GH{ref!}
 %
 The formal specification of ARMv8 architectures is written in a dedicated
-language called ARM Specification Language, and have been intensively validated
+language called ARM Specification Language, and has been intensively validated
 against the ARM internal conformance testsuit.
 %
 Once the level of trustworthiness of the ASL specifications have been asserted,
@@ -1079,11 +1071,11 @@ This represent an exciting opportunity for research targeting ARM architectures,
 and we can only hope that it eventually becomes a standard in the industry.
 %
 However, it would not make sense to use the ASL language ourselves to specify
-the x86 architecture.
+the x86 architecture. \GH{Pourquoi? Il est trop spécifique à l'architecture ARM? Il faudrait le dire explicitement. En outre, même si on ne peut pas le réutiliser tel quel, peut-on s'en inspirer? Ou pas?}
 %
 Indeed, ASL is used to \emph{describe} the architecture in an unambiguous
-fashion, but it cannot be used as is to reason about the correctness of this
-architecture.
+fashion, but it cannot be used as it to reason about the correctness of this
+architecture. \GH{Cette phrase n'est pas très claire. Et surtout, on ne comprend pas en quoi ASL (ou quelque chose s'en inspirant) n'est pas adapté à ton approche.}
 
 The \ac{xom} microprocessor architecture maintains separate so-called
 \emph{compartments} for applications\,\cite{lie2000architectural}.
@@ -1134,8 +1126,9 @@ The verification proceeds as follows:
 %
 In the process of verifying \ac{xom}, the authors have been able to show with
 their model that the \ac{xom} architecture was subject to several replay
-attacks, and that their countermeasures were effective.
+attacks, and that their countermeasures \GH{plutôt "the countermeasures they proposed"? } were effective.
 
+\GH{Il faudrait placer ici un commentaire plutot positif en disant que c'est le travaux qui se rapproche le plus du tient et que tu penses que les concepts x et y sont intéressants. Ensuite tu peux parler des limites qui justifie tes travaux.}
 We believe the necessity to manually maintain a merge of two transition systems
 reduces its applicability in the long run, as new architecture versions are
 released frequently.
@@ -1149,14 +1142,6 @@ in order to reduce the state combinatory.
 From a security perspective, simplifying the model comes with the risk to hide
 an attack path.
 %
-Theorem proving has been shown as a viable alternative to model checking to
-overcome the state explosion problem to verify hardware designs, with modern
-theorem proving providing facilities to compensate the cost in terms of
-automation, \emph{e.g.} Coq provides {\scshape Ltac}, a dedicated language to
-automate proof constructions to some extend.
-%
-For instance, in our proofs in Chapter~\ref{chapter:speccert2}, the cache,
-\ac{dram} and VGA memories are of arbitrary sizes.
 
 \subsection{Conclusion}
 %
