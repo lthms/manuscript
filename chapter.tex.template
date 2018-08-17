@@ -38,6 +38,7 @@
 \usepackage{todonotes}
 \newcommandx{\thomasrk}[2][1=]{}
 \newcommand\TODO[1]{}
+\newcommand\GH[1]{}
 \newcommand\PC[1]{}
 
 \usepackage{mdframed}
