@@ -14,6 +14,7 @@
   surpris que tu ne parle pas de \textbf{modèle} (en introduisant le concept) au
   lieu de système. Le modèle peut correspondre ou non à l'implémentation réelle}
 \thomasrk[inline]{Mieux ?}
+\GH{Je ne suis pas fan d'utiliser un terme connu par tout le monde dans un sens différent. Donc, ici, je ne suis pas fan d'utiliser "implémentation" dans le sens ou tu l'utilises. Je ne sais pas comment les choses sont présentées dans un (bon) cours sur les méthodes formelles. Mais de ce que je comprends, la vérification formelle à proprement parler est réalisé sur un modèle (mathématique) du système étudié. Ce pose ensuite la question de l'adéquation entre ce modèle et l'implémentation (code exécutable, code exécuté (ce qui suppose que le matériel se comporte comme prévu), circuit logique, VHDL...) Cette adéquation peut-être garantie par extraction automatique du modèle (c'est le cas lorsqu'on dispose d'une sémantique formelle du langage source et que le compilateur a été prouvé) ou au contraire génération automatique de l'implémentation (génération automatique de code dans CoQ), par test (si la spec est exécutable), par insertion de pré/post condition, etc. Quels sont les termes utilisé par ton bouquin en référence?}
 %
 \noindent
 %
@@ -39,11 +40,11 @@ policies.
 %
 The same formal description of a system design can serve both as an
 implementation in a first verification problem, and as a functional
-specification for a more concrete implementation of the system.
+specification for a more concrete implementation of the system. \GH{Je ne comprens pas cette phrase mais c'est surement lié à ma première remarque}
 
 In the context of this thesis, we focus on verifying the correctness of
 implementations defined in the form of idealized models with respect to
-non-functional specifications which characterize security policies.
+non-functional specifications which characterize security policies. \GH{Cette phrase est longue. Et "idealized model" ne veut pas dire grande chose. Ce qu'il faudrait dire c'est trois choses (donc trois phrases). 1) dans ton cas le modèle (que tu appelles implémentation) est spécifié manuellement à partir de la spécification informelle (papier) fournit par les constructeurs. 2) on s'intéresse à des spécifications non-fonctionnelles. 3) on s'intéresse à la sécurité donc ces spécification forment une politique de sécurité}
 %
 % In particular, we do not cover \emph{model validation}, that is the
 % verification that a model is a correct abstraction of the concrete system it
@@ -51,17 +52,15 @@ non-functional specifications which characterize security policies.
 %
 The rest of this Chapter proceeds as follows.
 %
-First, we introduce the key concepts of formal methods which support the formal
+First, we introduce in Section~\ref{sec:sota:fm} the key concepts of formal methods which support the formal
 verification process by providing tools to construct proofs, and we justify our
-choice to use the Coq theorem prover in our experiments
-(Section~\ref{sec:sota:fm}).
+choice to use the Coq theorem prover in our experiments.
 %
-We explain how transition systems are used as modeling structures to verify the
+We then explain in Section~\ref{sec:sota:formalisms} how transition systems are used as modeling structures to verify the
 correctness of a system with respect to security policies, and where does our
-formal definition of \ac{hse} mechanisms stands with respect to previous work
-(Section~\ref{sec:sota:formalisms}).
+formal definition of \ac{hse} mechanisms stands with respect to previous work.
 %
-Then, we introduce compositional verification approaches, which enable the
+Finaly, we introduce compositional verification approaches, which enable the
 ``divide and conquer'' strategy to reduce the burden of verifying large and
 complex systems, and compare our compositional framework for Coq with existing
 solutions (Section~\ref{section:sota:compsec}).
