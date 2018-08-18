@@ -1212,18 +1212,18 @@ methods.
 % modèle si un composant change - or c'est le cas en pratique: de nombreuses
 % archis sont similaires, mais avec quelques différences dans les composants}
 
-Compositional verification is a promising (family of) approach(es) to overcome
+Compositional verification is a promising family of approaches to overcome
 the challenges posed by the scale of complex and large systems, as it enables to
 locally abstract a subpart of the problem \emph{via} a specification.
 %
 Traditional compositional approaches in the programming language communities
 ---that the Coq community is part of--- include type
-systems%\,\cite{knowles2008compositional}
-(specifications for values manipulated by a program), and Hoare logic systems
-(specifications for the state updates provoked by the execution of a program).
+systems %\,\cite{knowles2008compositional}
+(specifications for values manipulated by a program) \GH{ref sur composition dans les types system}, and Hoare logic systems
+(specifications for the state updates provoked by the execution of a program) \GH{composition sur la logic de Hoare (que tu n'a pas évoqué avant..., tu devrais le mentionner dans ta première section)}.
 %
 The model checking communities take a different approach, and rather breakdown a
-complex system in several stateful and interacting components.
+complex system in several stateful and interacting components \GH{ref sur composition dans Model Checking }.
 %
 The verification process proceeds as follow: components are verified in
 isolation, then their composition is verified in order to ensure that local
@@ -1233,13 +1233,13 @@ We believe component-based verification is a particularly well-suited solution
 to address the scale of hardware architectures verification, notably because it
 mimic their concrete implementations.
 %
-The rest of the section proceeds as follwos.
+The rest of the section proceeds as follows.
 %
 We first give an overview of compositional verification approaches which can be
 leveraged to enable ``divide and conquer'' strategies to reason about a
 component-based system (\ref{subsec:sota:compverif}).
 %
-Then, we describe what modeling structures have been proposed to model
+Then, we describe the modeling structures that have been proposed to model
 components and their interactions (\ref{subsec:sota:compverif}).
 %
 We discuss the already existing approaches which have been proposed to enable
@@ -1264,8 +1264,8 @@ Components of a larger system are primarily identified by the interface they
 expose to their pairs, that is the set of operations they can carry out for the
 rest of the system.
 %
-They also ``hide'' the components they are connected to, and use in order to
-handles their input.
+They \GH{A quoi renvoie "they"? "Components"? "Interfaces"? "operations"?} also ``hide'' the components they are connected to, and use in order to
+handle their input.
 %
 In this context, two components which expose the same interface can be freely
 interchange on the condition that they exhibit an equivalent behavior with
@@ -1278,13 +1278,14 @@ behavior\,\cite{fokkink2013pa}.
 
 Using a behavior equivalence approach, it becomes possible to reason about one
 component by abstracting away the part of the systems it interacts with
-functional specifications.
+functional specifications \GH{la phrase n'est pas très claire. Je ne suis pas sur que "abstract away ... with" soit correct. La construction habituelle est "the model abstract away something from details"}.
 %
 This is referred to as compositional minimization in model checking.
 %
-The goal is to reduce the complexity of a model, with smaller yet provably
-equivalent components, as pictured in Figure~\ref{fig:sota:minicomp}.
+The goal is to reduce the complexity of a model, with smaller \GH{que veut dire "smaller" ici? Simpler?} yet provably
+equivalent components, as pictured in Figure~\ref{fig:sota:minicomp}. \GH{Je ne comprends pas la figure et surtout je ne vois pas en quoi elle illustre la réduction de la complexité par des composants plus petit et équivalent. Je propose de la supprimer.}
 %
+\GH{et? que devons nous penser de ces approches? Sont-elles adapté a ton approche? Quelles sont les "bonnes" idées que tu voudrais reprendre? Quelles sont les limitations?}
 
 
 \begin{figure}
@@ -1330,12 +1331,13 @@ equivalent components, as pictured in Figure~\ref{fig:sota:minicomp}.
   \label{fig:sota:minicomp}
 \end{figure}
 
+\GH{Il manque une transition avec "compositional Reasoning". Il faudriait notamment bien faire ressortir les différences entre les deux concepts (actuellement, ce n'est pas très claire).}
 \paragraph{Compositional Reasoning.}
 %
 Assume-guarantee\,\cite{pnueli1985ag} and
 rely-guarantee\,\cite{jones1983tentative} reasoning are about proving a
 component \( C \) guarantees the property \( G \) under the assumptions that a
-property \( A \) is satisfied, then proving the rest of the system \( S' \)
+property \( A \) is satisfied, and then proving that the rest of the system \( S' \)
 satisfies \( A \).
 %
 This allows for concluding about the correctness of the system as a whole, that
@@ -1343,15 +1345,15 @@ is the composition of \( C \) with \( S' \) (denoted by \( C || S' \))
 guarantees \( G \).
 
 First assume-guarantee systems have been developed for model checkers, where
-assumptions and guarantees were defined in temporal logic formulas.
+assumptions and guarantees were defined in temporal logic formulas \GH{ref}.
 %
 The main obstacle to the adoption of the assume-guarantee paradigm is the
 necessity for the user to provide additional inputs to the checker, in addition
-to the model and its properties to verify.
+to the model and the properties to verify. \GH{A quoi correspondent ces "additional inputs"?}
 %
 The \( L* \) learning algorithm, originally proposed by
-Augluin\,\cite{angluin1987lstart}, addresses this issue by automatically
-generating appropriate assumptions.
+Angluin\,\cite{angluin1987lstart}, addresses this issue by automatically
+generating appropriate assumptions. \GH{de ce que je connais, L* est un algorithme permettant d'apprendre automatiquement un automate de manière active, en requêtant une implémentation et en observant les réponses. Je ne vois pas le lien avec ce qui est présenté ici. Il faut expliquer un peu plus ce que permet cet algorithme dans ce contexte.}
 %
 The \( L* \) algorithm has latterly been adapted to other modeling structure,
 for instance for interface automata\,\cite{emmi2008assume}.
@@ -1359,13 +1361,13 @@ for instance for interface automata\,\cite{emmi2008assume}.
 \paragraph*{}
 %
 We believe assume-guarantee contracts encodes a well-suited reasoning to work
-with \ac{hse} mechanisms, and formally express the informal definition we gave
+with \ac{hse} mechanisms, and formally express the definition we gave
 in the Introduction of this manuscript (Definition \ref{def:intro:hse}).
 %
-Conceptually, trusted software components are components which interact with a
-core \emph{via} its instructions set; as long as they correctly implement a
-\ac{hse} mechanism, they satisfy the assumption of the core, and therefore are
-guaranteed that the hardware architecture enforces the targeted security policy.
+Conceptually, a trusted software component interacts with some hardware components, which provide the hardware features of the \ac{hse},
+ \emph{via} their interfaces, \emph{e.g.} CPU instruction sets. As long as the trusted software component correctly implements the
+\ac{hse} mechanism, it satisfies the assumption of the hardware components, and therefore is
+guaranteed that the hardware architecture enforces the targeted security policy. \GH{J'ai un peu remanié ce paragraphe en le rendant plus générique. Peux-tu vérifier?}
 
 \subsection{Compositional Modeling Structures}
 \label{subsec:sota:compmod}
@@ -1736,7 +1738,7 @@ In 2017, Joonwon Choi \emph{et al.} have released {\scshape
 (in the form of BlueSpec\,\cite{nikhil2004bluespec} programs) hardware
 components implementations.
 %
-In in {\scshape Kami}, components are defined as modules, where a \( M \) is a
+In {\scshape Kami}, components are defined as modules, where a \( M \) is a
 particular labeled transition system, whose transitions are of the form
 %
 \[
