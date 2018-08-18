@@ -79,261 +79,20 @@ non-functional specifications which characterize security policies.
 %
 The rest of this Chapter proceeds as follows.
 %
-First, we introduce in Section~\ref{sec:sota:fm} the key concepts of formal
+First, we introduce the key concepts of formal
 methods which support the formal verification process by providing tools to
 construct proofs, and we justify our choice to use the Coq theorem prover in our
-approach.
+approach (Section~\ref{sec:sota:fm}).
 %
-We then explain in Section~\ref{sec:sota:formalisms} how transition systems are
-used as modeling structures to verify the correctness of a system with respect
-to security policies, and where does our formal definition of \ac{hse}
-mechanisms stands with respect to previous work.
+We then explain how transition systems are used as modeling structures to verify
+the correctness of a system with respect to security policies, and where does
+our formal definition of \ac{hse} mechanisms stands with respect to previous
+work (Section~\ref{sec:sota:formalisms})
 %
 Finaly, we introduce compositional verification approaches, which enable the
 ``divide and conquer'' strategy to reduce the burden of verifying large and
 complex systems, and compare our compositional framework for Coq with existing
 solutions (Section~\ref{section:sota:compsec}).
-
-\section{Introduction to Formal Methods}
-\label{sec:sota:fm}
-
-In a formal system, formulas (also called propositions) of a formal language
-represent statements which can either be true or false.
-%
-A formal system relies on a set of axioms, that are formulas known to be true,
-and inference rules which allow for deriving new formulas.
-
-\GH{Est-ce que tous les concepts que tu présentes par la suite s'appliquent à toutes les méthodes formelles (interprétation abstraite, méthode B, model checking...)?}
-
-\GH{Il me semble que tu rentres assez vite dans des détails, certes (trop) facilement compréhensibles, mais qui sont spécifiques à la preuve de théorème. Je préfererais que tu abordes l'ensemble des méthodes formelles disponibles puis que tu sélectionnes assez rapidement, en le justifiant, (par une approche "entonoire", le type de méthode formelle que tu va utiliser dans ton approche. Ensuite, tu pourras faire un état de l'art plus détaillé sur ce type de méthode.}
-
-\subsection{Propositions and Inference Rules.}
-%
-The statement that a proposition \( P \) is true is commonly denoted by
-\( \vdash P \).
-%
-A proposition \( P \) may also be true on the condition that propositions
-\( Q_0, Q_1, ..., \text{ and } Q_n \) are also true.
-%
-This statement is denoted by \( Q_0, Q_1, ... Q_n \vdash P \).
-%
-A statement is proven true when it is part of the base of axioms or if we use
-inference rules to derive it from already proven statements.
-%
-By doing so, we construct a \emph{proof}.
-%
-For example, a well-known inference rule is the \emph{Modus ponens}, which
-states that if a proposition \( P \) is true, and the proposition
-\( P \Rightarrow Q \) is also true, then the proposition \( Q \) is true, that
-is
-%
-\[
-  P\text{, }(P \Rightarrow Q) \vdash Q
-\]
-%
-Using the \emph{Modus ponens}, it becomes possible to construct a proof of
-\( \vdash Q \) from a proof of \( \vdash P \) and a proof of
-\( \vdash P \Rightarrow Q \).
-%
-Figure~\ref{fig:sota:inference} gives a list of common inference rules.
-%
-Conditional statements, once proven, become new inference rules to be used to
-construct proofs.
-
-Constructing a proof can quickly become cumbersome as propositions become more
-complex.
-%
-They can be described in the form of carefully worded sentences.
-%
-Another popular approach is to write them as so-called proof trees.
-%
-Each node of the tree is a proof step.
-%
-The children of a given proof obligation are proofs which allows for concluding
-about the node judgment, by using an inference rule of the system.
-%
-By convention, a node and its children are separated by a line labeled with the
-name of the inference rule.
-%
-The leaves of the trees are the statements known to be true, either because they
-are part of the system axioms or because they have already been proven before.
-%
-Therefore, a proof which only consists in applying the \emph{Modus ponen} can be
-represented as follows:
-%
-\begin{prooftree}
-  \AxiomC{\( P \)} \AxiomC{\( P \Rightarrow Q \)} \RightLabel{\small {\scshape
-      Modus Ponens}} \BinaryInfC{\( Q \)}
-\end{prooftree}
-
-\begin{figure}
-  \begin{center}
-    \begin{tabular}{ll}
-      {\scshape Modus ponens} & \( P \Rightarrow Q\text{, }P \vdash Q \) \\
-      {\scshape Modus tollens} &
-                                 \( P \Rightarrow Q\text{, }\neg Q \vdash \neg P \) \\
-      {\scshape Conjunction:} & \( P\text{, }Q \vdash P \wedge Q \) \\
-      {\scshape Addition:} & \( P \vdash P \vee Q \) \\
-      {\scshape Contradiction:} & \( P, \neg P \vdash Q \)
-    \end{tabular}
-  \end{center}
-
-  \caption{List of common inference rules}
-  \label{fig:sota:inference}
-\end{figure}
-
-Theorem provers such as Coq\,\cite{coq} or
-Isabelle/HOL\,\cite{nipkow2002isabelle} provide facilities to write proofs, and
-a checker to automatically verify these proofs.
-%
-Therefore, the quality of a theorem prover is measured by its capacity to reject
-ill-formed proofs.
-%
-Modern theorem provers are built around a kernel which is kept as small and
-simple as possible, and their advanced features are implemented in additional
-layers verified by this kernel.
-%
-The idea is that, as long as the kernel does not contain a bug, advanced
-features implemented inside a certified layer cannot introduce inconsistency in
-the proof-checking process.
-%
-This greatly diminishes the risk to have inconsistencies in the proof checker,
-although it happened in the
-past\,\cite{claret2015falso,griffioen1998comparison}.
-
-Rather than constructing a proof for each specific system, for a specific set of
-properties, it is also possible to rely on an algorithm whose correctness has
-been formally established to handle a well-defined class of problems.
-%
-This allows for automating the verification process.
-%
-Once the algorithm has been proven correct, it becomes possible to trust its
-output.
-%
-Abstract interpretation\,\cite{cousot1977absint} and model
-checking\,\cite{clarke2018modelc} are two classical instances of this approach.
-
-\subsection{Formal Systems.}
-%
-Choosing a formal language is a key part of the verification process of a
-system.
-%
-It decides the expressiveness of the statements that can be proven, and the
-tools that can be leveraged to construct their proofs.
-
-The most common formal system is the first-order logic\,\cite{smullyan2012fol},
-characterized by:
-%
-\begin{itemize}
-\item \emph{Terms}, which represents objects.
-\item \emph{Logical operators}, such as conjunction \( \wedge \), disjunction
-  \( \vee \), implication \( \Rightarrow \), negation \( \neg \).
-\item \emph{Predicates}, that is parameterized formulas that can be true or
-  false with respect to the applied terms.
-\item \emph{Quantifiers}, such as \( \forall \) (all values) or \( \exists \)
-  (there exists a value).
-\end{itemize}
-
-Modal logic\,\cite{chagrov1997modal} is a formal system which extends
-first-order logic with modal operators.
-%
-Temporal logic forms a family of modal logic systems, including \emph{e.g.}
-Linear Temporal Logic (LTL)\,\cite{sistla1985ltl} and Computation Logic Tree
-(CTL)\,\cite{clarke1981ctl}.
-%
-Examples of LTL modular operators are \( \square P \) (\( P \) is always true),
-\( \Diamond P \) (\( P \) will eventually become true), \( \bigcirc P \)
-(\( P \) will be true after the next transition of the system).
-%
-CTL considers trees of possible futures (by opposition to a \emph{linear}
-future).
-%
-CTL modal operator includes \( \mathbf{A} P \) (\( P \) is true for all possible
-futures) and \( \mathbf{E} P \) (there exists at least one path where \( P \)
-becomes true).
-%
-That is, temporal logic operators allow for reasoning about propositions over
-time.
-%
-Temporal logic formulas are commonly verified thanks to model checkers,
-\emph{e.g.}  NuSMV\,\cite{cimatti2002nusmv}, SPIN\,\cite{holzmann1997spin} or
-TLA+\,\cite{lamport2002tla}.
-%
-Other approaches can be used to that end ---for instance Gilles Barthe \emph{et
-  al.} have encoded \( \square \) and \( \Diamond \) in
-Coq\,\cite{barthe2011virtcert1}--- yet model checkers have the benefit of
-automation and counter-example generation.
-
-First-order logic quantifiers can only be applied on sets of terms (\emph{e.g.}
-natural numbers, booleans, states of an airlock system).
-%
-Higher-order logic\,\cite{leivant1994hol} does not suffer the same limitation,
-since they allow quantification over sets of sets, functions and predicates.
-%
-Hence, it becomes possible to express statements such as \emph{for all sets with
-  a total order \( < \), for all pair of values \( \alpha, \beta \), then either
-  \( \alpha < \beta \) or \( \beta < \alpha \) or \( \alpha = \beta \)}.
-%
-Therefore, higher order logic is more expressive than first-order logic, but it
-comes at a cost in terms of automation.
-%
-On the one hand, \emph{interactive} theorem provers (\emph{e.g.}  Coq,
-Isabelle/HOL, or more recently Lean\,\cite{de2015lean}) are based on
-higher-order logic.
-%
-On the other hand, \emph{automated} theorem provers (\emph{e.g.}
-Vampire\,\cite{riazanov2002vampire}, Z3\,\cite{de2008z3}) are based on
-first-order logic. \GH{tu devrais parler rapidement de SAT, SMT...}
-
-\GH{Je trouve que ce tour d'horizon des méthodes formelles est un peu rapide. Il
-  gagnerait à être plus complet et mieux structuré.}
-
-In the context of this thesis, our initial goal is to propose a formal
-definition of \ac{hse} mechanisms.
-%
-In this context, we need higher-order logic to prove generic reason not related
-to a given hardware architecture.
-%
-For instance, in Section~\ref{subsec:speccert2:coop}, we reason about the
-composition of two \ac{hse} mechanisms whose only the targeted security policies
-are known ---even the hardware model is left as a parameter of the proof.
-%
-Such a statement is out of the scope of any first-order logic.
-%
-Similarly, we propose a generic framework to reason about composition
-of components in Chapter~\ref{chapter:freespec}, and thanks to higher-order
-logic, our theorems can be applied to a large class of component-based systems.
-%
-In both case, we wrote our proofs in the Coq theorem prover to increase our
-confidence in our results.
-
-To verify a specific \ac{hse} mechanism which can be implemented on a specific
-hardware architecture, the need for higher-logic is less prominent.
-%
-As a consequence, if someone wants to leverage our formal definitions to guide
-its verification process, they can consider a large class of tools, including
-model checkers which has the benefit of automation.
-
-\subsection{Conclusion}
-
-Formal verification requires to construct proofs, by the means of formal
-methods.
-%
-The choice of an approach to construct these proofs is necessarily a compromise
-between automation on the one hand, and expressiveness on the other.
-%
-Automated approaches such as model checking rely on algorithm which have been
-proven correct (they give the right answer) for a given class of well-identified
-problems.
-%
-Theorem provers or paper proofs allows for considering more expressive
-statements, but the construction of the proofs requires human intervention.
-%
-In this thesis, we have proposed a generic definition of \ac{hse} mechanisms and
-a generic approach to verify component-based system, which required the use of
-higher-order logic, and the proofs presented in this manuscript have been
-written within the Coq theorem prover, to increase our confidence in our
-results.
 
 % We have implemented our proofs of concepts in the Coq proof assistant.
 %%
@@ -542,30 +301,49 @@ plus étoffée et surtout présentée de manière plus rigoureuse, carré. On ne
 comprend pas vraiment pourquoi tu nous parles de LTS sinon que d'autres le fond
 alors çà a l'air d'être une bonne idée...}
 
+\paragraph{Model Prerequisites.}
+%
+Our objective is to apply these concepts in order to verify \ac{hse} mechanisms,
+with the hope to uncover compositional attacks.
+%
+To that end, it is important to consider that
+%
+\begin{inparaenum}[(1)]
+\item \label{needreuse}%
+  hardware architectures often allow for implementing several \ac{hse}
+  mechanisms, and
+  %
+\item \label{needreduce}%
+  hardware features involved in \ac{hse} mechanisms are not safe by default,
+  hence the role played by trusted software components to configure them.
+\end{inparaenum}
+%
+In this thesis, we advocate for defining \ac{hse} mechanisms of a given hardware
+architecture against a generic functional specification of this architecture,
+rather than relying on ad-hoc models dedicated to specific \ac{hse} mechanisms.
+%
+Our hypothesis is that a pre-existing model which is comprehensive in terms of
+hardware features is a prerequisite to address the threat posed by compositional
+attacks.
+%
+Besides, this means the same model can be reused for several \ac{hse}
+mechanisms, reducing the overall verification effort induced by
+(\ref{needreuse}).
+%
+However, (\ref{needreduce}) means models of hardware architectures necessarily
+contains traces which are legitimate with respect to the functional
+specifications, but violate the security policy.
+
+As a consequence, a formal definition of \ac{hse} mechanisms, like the one we
+present in Chapter~\ref{chapter:speccert}, shall allow for identifying the
+subset of traces wherein the mechanism is correctly implemented by the trusted
+software components.
+%
+In this context, verifying a \ac{hse} mechanism consists of proving this set of
+traces satisfies the predicate which characterizes the targeted security policy.
+
 \subsection{Specifying Security Policies}
 \label{subsec:sota:security}
-
-The verification of a system is \emph{always} relative to certain properties (in
-our case, the correct enforcement of a security policy).
-%
-The definition of a specification of the system to allow for formally reasoning
-about its behavior is a key step in the verification process.
-%
-The formalization of the targeted property is as important, if not more.
-%
-Indeed, the challenge posed by a potential gap between an implementation and its
-specification can be abated by an appropriate correspondence proof. \GH{Ce début de sous-section est difficile à suivre et surtout semble hors sujet. Si tu voulais évoquer l'adéquation du modèle et de l'implémentation, il fallait le faire dans la section précédente et surtout de manière plus argumentée, avec des citations, etc.}
-%
-As for the targeted properties, a gap between its characterization using a
-particular logic and its semantics should not be understated.
-%
-For instance, Mathy Vanhoef \emph{et al.} disclosed a critical vulnerability
-named KRACK targeting the WPA2 protocol\,\cite{vanhoef2017key}, despite previous
-formal verification results (\emph{e.g.} \cite{he2004analysis}).
-%
-The reason remains simple: KRACK does not violate the security properties proven
-in the formal analysis of the protocol, yet these security properties were not
-strong enough. \GH{Je ne vois pas trop ce que cette digression apporte et elle me semble un peu casse-gueule. Surtout en début de section. Je préfererais que tu présentes plus simplement comment spécifier des politiques de sécurité en LTS. Après on pourrait éventuellement discuter de la pertinence des propriétés que tu adoptes.}
 
 The theory of properties of a transition system is now well understood, with an
 intuitive classification of properties, such that:
@@ -827,64 +605,211 @@ where \( s \xrightarrow{l} s' \) is a transition of the system from a state
 %   snooping)
 % \end{itemize}
 
+\subsection{Approaches and Tools (TODO: Find better name)}
+
+\GH{Je trouve que ce tour d'horizon des méthodes formelles est un peu rapide. Il
+  gagnerait à être plus complet et mieux structuré.}
+%
+\GH{Il me semble que tu rentres assez vite dans des détails, certes (trop)
+  facilement compréhensibles, mais qui sont spécifiques à la preuve de
+  théorème. Je préfererais que tu abordes l'ensemble des méthodes formelles
+  disponibles puis que tu sélectionnes assez rapidement, en le justifiant, (par
+  une approche "entonoire", le type de méthode formelle que tu va utiliser dans
+  ton approche. Ensuite, tu pourras faire un état de l'art plus détaillé sur ce
+  type de méthode.}
+%
+\thomasrk[inline]{Suite à notre conversation téléphonique, j’ai changé mon fusil
+  d’épaule. J’ai enlevé la partie sur la construction de la preuve (sans doute
+  intéressante, mais pas forcément utile), et j'ai changé la mentalité de la
+  présentation des différentes logiques pour en faire une présentation des
+  outils dispo et pourquoi on a choisit Coq.}
+
+Formal verification leverages two classes of approaches with their dedicated
+tools.
+%
+On the one hand, the most generic approach is the construction a proof, that is
+a succession of inference rules to derive the statement to be proven from
+formulas known to be true.
+%
+Theorem provers such as Coq\,\cite{coq} or
+Isabelle/HOL\,\cite{nipkow2002isabelle} provide facilities to write proofs, and
+a checker to automatically verify these proofs.
+%
+On the other hand, it is possible to rely on algorithms whose correctness have
+been formally established to handle a well-defined class of problems.
+%
+Model checking\,\cite{clarke2018modelc}, SAT and SMT solvers\thomasrk{ref} are
+two classical instances of this approach.
+
+The choice of one approach over another for a given verification problem is a
+compromise constrained by requirements in terms of expressiveness, automation
+and applicability.
+%
+More expressiveness for formal language increase the scope of verification
+problem it can cover, but it also reduces the level of automation of the tools
+used to verify its statements.
+%
+Fully automated procedures rely on algorithms whose computational complexity
+impair their applicability for more complex problems, \emph{e.g.}  model
+checking and the \emph{state explosion problem}.
+
+We now give an overview of state of the art tools which are commonly leveraged
+for formal verification of hardware and software components.
+%
+We have organized it according to the formal language they rely on.
+
+\paragraph{Propositional and First-Order Logic.}
+%
+Propositional logic is characterized by \emph{terms}, which represents objects,
+and \emph{logical operators}, such as conjunction \( \wedge \), disjunction
+\( \vee \), implication \( \Rightarrow \), negation \( \neg \).
+%
+First-order logic\,\cite{smullyan2012fol} extends propositional logic with
+\emph{predicates}, that is parameterized formulas that can be true or false with
+respect to the applied terms, and \emph{quantifier}, such as \( \forall \) (all
+values) or \( \exists \) (there exists a value).
+%
+SAT solvers (REF) form a class of tools whose purpose is to determine whether a
+given propositional formula with boolean variables is satisfiable, by finding
+appropriate instances for these variables.
+
+SMT solvers have a similar purpose, but they target first-order logic formula
+---without quantifiers--- and are not limited to boolean variables (SMT stands
+for satisfiability modulo theories).
+%
+Hence, in the theory of natural numbers, a SMT solver will find that the formula
+\( x > y \wedge x + y = 5 \) is satisfiable with \( \{ x = 3, y = 2 \} \), but
+the formula \( x - y = 0 \wedge x \neq y \) is not.
+%
+The lack of quantifiers has a significant impact on formulas expressiveness
+which reduces its applicability when it comes to formal verification,
+\emph{e.g.} we cannot express an invariant of the form ``at any point in a
+trace, a predicate \( P \) is satisfied'' if we consider a system can operate
+during an infinitely.
+
+% Finally, automated theorem provers (\emph{e.g.}
+% Vampire\,\cite{riazanov2002vampire}, Z3\,\cite{de2008z3}) construct proofs of
+% first-order logic formulas with quantifiers.
+
+\paragraph{Temporal Logic.}
+%
+Modal logic\,\cite{chagrov1997modal} is a formal system which extends
+first-order logic with modal operators.
+%
+Temporal logic forms a family of modal logic systems, including \emph{e.g.}
+Linear Temporal Logic (LTL)\,\cite{sistla1985ltl} and Computation Logic Tree
+(CTL)\,\cite{clarke1981ctl}.
+%
+Examples of LTL modular operators are \( \square P \) (\( P \) is always true),
+\( \Diamond P \) (\( P \) will eventually become true), \( \bigcirc P \)
+(\( P \) will be true after the next transition of the system).
+%
+CTL considers trees of possible futures (by opposition to a \emph{linear}
+future).
+%
+CTL modal operator includes \( \mathbf{A} P \) (\( P \) is true for all possible
+futures) and \( \mathbf{E} P \) (there exists at least one path where \( P \)
+becomes true).
+%
+Temporal logic operators allow for reasoning about propositions over time on
+infinite traces.
+%
+Temporal logic formulas are commonly verified thanks to model checkers,
+\emph{e.g.}  NuSMV\,\cite{cimatti2002nusmv}, SPIN\,\cite{holzmann1997spin} or
+TLA+\,\cite{lamport2002tla}.
+
+Despite improvements in algorithms, model checkers remains subject to the
+\emph{state explosion problem}, which imposes modeling compromises, \emph{e.g.}
+verification of cache coherency protocols with a fixed number of cores and
+address spaces limited in size (\emph{e.g.} in \cite{lie2003xom}, the model only
+considers three cache locations).
+%
+% Other approaches can be used to that end ---for instance Gilles Barthe
+% \emph{et al.} have encoded \( \square \) and \( \Diamond \) in
+% Coq\,\cite{barthe2011virtcert1}--- yet model checkers have the benefit of
+% automation and counter-example generation.
+%
+Bounded model checkers (REF) overcome this limitation by considering only finite
+traces.
+%
+As a consequence, temporal logic formula can be translated into acceptable
+inputs for SMT solvers, but this can abate the verification results, in
+particular if the chosen maximum length of traces is too low.
+
+\paragraph{Higher-order Logic.}
+%
+First-order logic quantifiers can only be applied on sets of terms (\emph{e.g.}
+natural numbers, booleans, states of an airlock system).
+%
+Higher-order logic\,\cite{leivant1994hol} does not suffer the same limitation,
+since they allow quantification over sets of sets, functions and predicates.
+%
+Hence, it becomes possible to express statements such as \emph{for all sets with
+  a total order \( < \), for all pair of values \( \alpha, \beta \), then either
+  \( \alpha < \beta \) or \( \beta < \alpha \) or \( \alpha = \beta \)}.
+%
+Therefore, higher order logic is more expressive than first-order logic, but it
+comes at a cost in terms of automation.
+%
+Interactive theorem provers (\emph{e.g.}  Coq, Isabelle/HOL, or more recently
+Lean\,\cite{de2015lean}) are based on higher-order logic.
+
+\paragraph*{}
+%
+In the context of this thesis, our initial goal is to propose a formal
+definition of \ac{hse} mechanisms.
+%
+In this context, we need higher-order logic to prove generic statements not
+related to a given hardware architecture.
+%
+For instance, in Section~\ref{subsec:speccert2:coop}, we reason about the
+composition of two \ac{hse} mechanisms whose only the targeted security policies
+are known ---even the hardware model is left as a parameter of the proof--- and
+such a statement is out of the scope of any first-order logic.
+%
+To increase our confidence in our results, we systemically wrote our proofs in
+the Coq theorem prover, and we made the resulting projects available under free
+software license\,\cite{letan2016speccertcode,letan2018freespeccode}.
+
+To verify a specific \ac{hse} mechanism which can be implemented on a specific
+hardware architecture, the need for higher-logic is less prominent.
+%
+As a consequence, if someone wants to leverage our formal definition of \ac{hse}
+mechanism to verify guide its verification process, they can consider a large
+class of tools, including model checkers which has the benefit of automation.
+%
+TODO suite
+
 \subsection{Related Work}
 \label{subsec:sota:ltsrelated}
-\GH{Je n'aime pas le titre Related Work, qui est trop vague. Je préfère un titre explicite. Quel est (sont) le(s) point(s) commun(s) des travaux que tu vas présenter par la suite?}
-Throughout this Section, we have detailed how we can model a target of
-verification as a transition system in order to verify its correctness with
-respect to security policies specified as predicates on set of model traces. \GH{Je ne comprend pas trop cette phrase. Est-ce que tu fais un résumé de ce qui a été présenté avant (ce que suggère l'emplois du passé)? Dans ce cas, il faudrait la faire suivre pas une phrase indiquant ce que tu va présenter maintenant dans cette sous-section.}
 
-\paragraph{Model Prerequisites.}
+\GH{Je n'aime pas le titre Related Work, qui est trop vague. Je préfère un titre
+  explicite. Quel est (sont) le(s) point(s) commun(s) des travaux que tu vas
+  présenter par la suite?}
 %
-Our objective is to apply these concepts in order to verify \ac{hse} mechanisms,
-with the hope to uncover compositional attacks.
+Throughout this Section, we have detailed how we can
+model a target of verification as a transition system in order to verify its
+correctness with respect to security policies specified as predicates on set of
+model traces.
 %
-To that end, it is important to consider that
-%
-\begin{inparaenum}[(1)]
-\item \label{needreuse}%
-  hardware architectures often allow for implementing several \ac{hse}
-  mechanisms, and
-  %
-\item \label{needreduce}%
-  hardware features involved in \ac{hse} mechanisms are not safe by default,
-  hence the role played by trusted software components to configure them.
-\end{inparaenum}
-%
-In this thesis, we advocate for defining \ac{hse} mechanisms of a given hardware
-architecture against a generic functional specification of this architecture,
-rather than relying on ad-hoc models dedicated to specific \ac{hse} mechanisms.
-%
-Our hypothesis is that a pre-existing model which is comprehensive in terms of
-hardware features is a prerequisite to address the threat posed by compositional
-attacks.
-%
-Besides, this means the same model can be reused for several \ac{hse}
-mechanisms, reducing the overall verification effort induced by
-(\ref{needreuse}).
-%
-However, (\ref{needreduce}) means models of hardware architectures necessarily
-contains traces which are legitimate with respect to the functional
-specifications, but violate the security policy.
+\GH{Je ne comprend pas trop cette phrase. Est-ce que tu fais un
+  résumé de ce qui a été présenté avant (ce que suggère l'emplois du passé)?
+  Dans ce cas, il faudrait la faire suivre pas une phrase indiquant ce que tu va
+  présenter maintenant dans cette sous-section.}
 
-As a consequence, a formal definition of \ac{hse} mechanisms, like the one we
-present in Chapter~\ref{chapter:speccert}, shall allow for identifying the
-subset of traces wherein the mechanism is correctly implemented by the trusted
-software components.
-%
-In this context, verifying a \ac{hse} mechanism consists of proving this set of
-traces satisfies the predicate which characterizes the targeted security policy.
 
-\GH{Ces explications sont très intéressantes (et importantes) mais elle ne sont pas à la bonne place. On ne voit pas trop ce qu'elles font dans l'état de l'art. Elles devraient typiquement ce trouver à la fin du 3.2.1 et faire la transition avec le 3.2.2. On a besoin d'exprimer des propriétés de sécurité sur les modèles hardware car ils ne sont pas safe par défaut.}
-
-\GH{A ce stage, on ne sait pas trop sur quoi va porter le reste de l'état de l'art : les modèles hardware? des techniques de vérification? des politiques? }
+\GH{A ce stage, on ne sait pas trop sur quoi va porter le reste de l'état de
+  l'art : les modèles hardware? des techniques de vérification? des politiques?
+}
 \paragraph{x86 Models by Intel.}
 %
 The trustworthiness of a verification result depends to a large extent on the
 model.
 %
 As such, because x86 is a proprietary product, Intel remains in the best
-position to produce a detailed, trustworthy model of its architecture. \GH{Je supprimerais ces deux premières phrases qui sont subjectives et n'apportent pas grand chose.}
+position to produce a detailed, trustworthy model of its architecture. \GH{Je
+  supprimerais ces deux premières phrases qui sont subjectives et n'apportent
+  pas grand chose.}
 
 Intel has integrated formal verification in its processors design process for
 more than a decade now.
@@ -901,13 +826,21 @@ specification\,\cite{leslie2015linsgx}.
 Each project focused on one aspect of the x86 architecture and led to uncover
 logic errors and inconsistencies in processor designs.
 %
-However, the models and tools used by Intel are rarely publicly available, making it difficult to
-formally specify and verify \ac{hse} mechanisms. \GH{Phrase à reformuler de manière simple. Si les modèles et les outils ne sont pas disponibles, on ne peut pas les réutiliser pour ton approche. point}
+However, the models and tools used by Intel are rarely publicly available,
+making it difficult to formally specify and verify \ac{hse}
+mechanisms. \GH{Phrase à reformuler de manière simple. Si les modèles et les
+  outils ne sont pas disponibles, on ne peut pas les réutiliser pour ton
+  approche. point}
 %
 Besides, to the extend of our knowledge, Intel has not advertised about a
 ``global'' model of its architecture, even though Nachiketh Potlapally, who was
 working at Intel at the time, discussed the benefits of such a model in
-2011\,\cite{potlapally2011hardwaresecurity}. \GH{J'enfoncerait un peu plus le clou en précisant que chaque modèle a été réalisé indépendamment des autres et ne couvre qu'un aspect très réduit de l'architecture (voir seulement du processeur). A l'inverse, nous avons besoins d'un modèle dont le périmètre est large (même si tous les composants ne sont pas nécessairement décrit avec un niveau de détail important)}
+2011\,\cite{potlapally2011hardwaresecurity}. \GH{J'enfoncerait un peu plus le
+  clou en précisant que chaque modèle a été réalisé indépendamment des autres et
+  ne couvre qu'un aspect très réduit de l'architecture (voir seulement du
+  processeur). A l'inverse, nous avons besoins d'un modèle dont le périmètre est
+  large (même si tous les composants ne sont pas nécessairement décrit avec un
+  niveau de détail important)}
 
 \paragraph{x86 ISA Models.}
 %
@@ -923,38 +856,50 @@ framework\,\cite{goel2014x86}, and CompCert x86 assembly
 model\,\cite{leroy2012compcert}.
 %
 These models have in common to focus on the execution of one particular software
-component \GH{il serait bien de préciser quel software component pour chacun des travaux.}. They also remain focused on the semantics of the x86 instructions set and
-abstract away as many hardware details as possible to increase the applicability
-of the model, \emph{e.g.} are limited to the \ac{dram}.
+component \GH{il serait bien de préciser quel software component pour chacun des
+  travaux.}. They also remain focused on the semantics of the x86 instructions
+set and abstract away as many hardware details as possible to increase the
+applicability of the model, \emph{e.g.} are limited to the \ac{dram}.
 %
 This approach works well when software components use a limited amount of
 hardware features, as applications typically do, and to reason about correction
 with respect to functional specifications.
 %
 It has been shown in the past that it is possible to extend them, when their
-abstraction is too strong and hides crucial \GH{crucial quoi? il manque un nom?} of concrete code execution.
+abstraction is too strong and hides crucial \GH{crucial quoi? il manque un nom?}
+of concrete code execution.
 %
 For instance, Chen \emph{et al.} have extended the hardware model of CompCertX,
 a variant of CompCert used in the development of formally verified
 kernels\,\cite{gu2016certikos}, with a notion of input devices and
 interrupts\,\cite{chen2018interrupt}.
 
-However  the primarily focus of these projects is to reason about software components, not the underlying hardware
-architecture.
+However the primarily focus of these projects is to reason about software
+components, not the underlying hardware architecture.
 
 \paragraph{Ad-hoc x86 Models}
 %
-Finally,\GH{finally ne me semble pas adéquat, puisqu'il reste une dernière catégorie (Other Hardware Architecture Models)} a last category of existing x86 models is ad-hoc models, specially developed to verify a dedicated system software component.
+Finally,\GH{finally ne me semble pas adéquat, puisqu'il reste une dernière
+  catégorie (Other Hardware Architecture Models)} a last category of existing
+x86 models is ad-hoc models, specially developed to verify a dedicated system
+software component.
 %
-As such, they focus on hardware features used by the target of verification, \emph{e.g.} the \ac{mmu} or the interrupt handlers. The objective of these approaches is to verify the software component and so they suppose the hardware will behave as expected. \GH{il faudrait en rajoutant une couche en disant que de notre côté c'est l'inverse, on fait des hypothèse sur le software et on vérifier que le comportement du hard satisfait une propriétés de sécurité sous ces hypothèses}
+As such, they focus on hardware features used by the target of verification,
+\emph{e.g.} the \ac{mmu} or the interrupt handlers. The objective of these
+approaches is to verify the software component and so they suppose the hardware
+will behave as expected. \GH{il faudrait en rajoutant une couche en disant que
+  de notre côté c'est l'inverse, on fait des hypothèse sur le software et on
+  vérifier que le comportement du hard satisfait une propriétés de sécurité sous
+  ces hypothèses}
 
-The seL4 microkernel \GH{ref ou url vers le projet en footnote} is, to date, the most advanced and mature verified
-implementation of a microkernel.
+The seL4 microkernel \GH{ref ou url vers le projet en footnote} is, to date, the
+most advanced and mature verified implementation of a microkernel.
 %
 A C implementation of the kernel is proven correct with respect to a functional
-implementation modeled in the Isabelle/HOL theorem prover, and they \GH{a qui renvoie "they"?} have show
-that this model correctly enforces security policies including information flow
-control, integrity and confidentiality\,\cite{klein2009sel4}.
+implementation modeled in the Isabelle/HOL theorem prover, and they \GH{a qui
+  renvoie "they"?} have show that this model correctly enforces security
+policies including information flow control, integrity and
+confidentiality\,\cite{klein2009sel4}.
 %
 In practice, the hardware model focus on \ac{mmu}, cache and interrupt handling,
 and in large parts the exact behavior of hardware devices is left
@@ -968,8 +913,8 @@ Coq) of guests isolation by an idealized protokernel based on a
 Similarly to seL4, their hardware model focus on \ac{mmu} and interrupt
 handling.
 %
-In both cases, there is a clear separation between the software component model and
-the hardware model, and it may be possible to extract the hardware model and
+In both cases, there is a clear separation between the software component model
+and the hardware model, and it may be possible to extract the hardware model and
 reuse it.
 %
 However, their scope does not include the hardware features involved in the
@@ -1071,11 +1016,15 @@ This represent an exciting opportunity for research targeting ARM architectures,
 and we can only hope that it eventually becomes a standard in the industry.
 %
 However, it would not make sense to use the ASL language ourselves to specify
-the x86 architecture. \GH{Pourquoi? Il est trop spécifique à l'architecture ARM? Il faudrait le dire explicitement. En outre, même si on ne peut pas le réutiliser tel quel, peut-on s'en inspirer? Ou pas?}
+the x86 architecture. \GH{Pourquoi? Il est trop spécifique à l'architecture ARM?
+  Il faudrait le dire explicitement. En outre, même si on ne peut pas le
+  réutiliser tel quel, peut-on s'en inspirer? Ou pas?}
 %
 Indeed, ASL is used to \emph{describe} the architecture in an unambiguous
 fashion, but it cannot be used as it to reason about the correctness of this
-architecture. \GH{Cette phrase n'est pas très claire. Et surtout, on ne comprend pas en quoi ASL (ou quelque chose s'en inspirant) n'est pas adapté à ton approche.}
+architecture. \GH{Cette phrase n'est pas très claire. Et surtout, on ne comprend
+  pas en quoi ASL (ou quelque chose s'en inspirant) n'est pas adapté à ton
+  approche.}
 
 The \ac{xom} microprocessor architecture maintains separate so-called
 \emph{compartments} for applications\,\cite{lie2000architectural}.
@@ -1126,12 +1075,15 @@ The verification proceeds as follows:
 %
 In the process of verifying \ac{xom}, the authors have been able to show with
 their model that the \ac{xom} architecture was subject to several replay
-attacks, and that their countermeasures \GH{plutôt "the countermeasures they proposed"? } were effective.
+attacks, and that their countermeasures \GH{plutôt "the countermeasures they
+  proposed"? } were effective.
 
-\GH{Il faudrait placer ici un commentaire plutot positif en disant que c'est le travaux qui se rapproche le plus du tient et que tu penses que les concepts x et y sont intéressants. Ensuite tu peux parler des limites qui justifie tes travaux.}
-We believe the necessity to manually maintain a merge of two transition systems
-reduces its applicability in the long run, as new architecture versions are
-released frequently.
+\GH{Il faudrait placer ici un commentaire plutot positif en disant que c'est le
+  travaux qui se rapproche le plus du tient et que tu penses que les concepts x
+  et y sont intéressants. Ensuite tu peux parler des limites qui justifie tes
+  travaux.}  We believe the necessity to manually maintain a merge of two
+transition systems reduces its applicability in the long run, as new
+architecture versions are released frequently.
 %
 This is why our formal definition of \ac{hse} mechanism is characterized by a
 subset of traces of a model, rather than an additional, idealized model.
@@ -1142,7 +1094,6 @@ in order to reduce the state combinatory.
 From a security perspective, simplifying the model comes with the risk to hide
 an attack path.
 %
-
 \subsection{Conclusion}
 %
 \label{subsec:sota:ltsconclusion}
@@ -1160,11 +1111,11 @@ coherency\,\cite{stern1995cachecoherence}, linearizability of SGX
 instructions\,\cite{leslie2015linsgx}, or hardware-based memory
 isolation\,\cite{lie2003xom}).
 %
-Security gap in interactions \GH{Que veut dire "security gap in interaction"?} of multiple platform components are less subject to
-formal verification, due to their increasing
-complexity\,\cite{potlapally2011hardwaresecurity}, and we are not aware of any
-x86 hardware model comprehensive in terms of hardware components and hardware
-features exposed by these components
+Security gap in interactions \GH{Que veut dire "security gap in interaction"?}
+of multiple platform components are less subject to formal verification, due to
+their increasing complexity\,\cite{potlapally2011hardwaresecurity}, and we are
+not aware of any x86 hardware model comprehensive in terms of hardware
+components and hardware features exposed by these components
 %
 On the other hand, low-level software components such as
 seL4\,\cite{klein2009sel4} or CertiKOS\,\cite{gu2016certikos} use the features
@@ -1177,10 +1128,14 @@ Thus, we face a 'chicken-and-egg' problem: we need a detailed hardware model to
 reason about \ac{hse} mechanisms, yet such a model does not exist and requires a
 tremendous amount of efforts to be developed, reviewed and validated; which
 means we need to be reasonably certain of our modeling choices for those efforts
-not going to waste. \GH{Je trouve cet argumentaire un peu casse-gueule... Tu laisse entendre que les modèles existants sont incomplet et spécifique à un mécanisme. Or tu as développé un modèle largement incomplet et dédié à la vérification d'un seul mécanisme (même s'il pourrait sans doute être étendu). }
+not going to waste. \GH{Je trouve cet argumentaire un peu casse-gueule... Tu
+  laisse entendre que les modèles existants sont incomplet et spécifique à un
+  mécanisme. Or tu as développé un modèle largement incomplet et dédié à la
+  vérification d'un seul mécanisme (même s'il pourrait sans doute être
+  étendu). }
 %
-We decided to develop an ad-hoc, simplified x86 hardware model which includes the
-necessary hardware components abstracted away in related work.
+We decided to develop an ad-hoc, simplified x86 hardware model which includes
+the necessary hardware components abstracted away in related work.
 %
 Using this model, we demonstrate in Chapter~\ref{chapter:speccert2} how it is
 possible to leverage our formal definition of \ac{hse} mechanisms presented in
