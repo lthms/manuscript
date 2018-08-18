@@ -10,149 +10,72 @@
 
   \hfill\footnotesize --- Ellen Ullman}
 
-\vspace{1cm} \PC{je suis toujours dubitatif sur cette première phrase. Je suis
-  surpris que tu ne parle pas de \textbf{modèle} (en introduisant le concept) au
-  lieu de système. Le modèle peut correspondre ou non à l'implémentation
-  réelle}%
-\thomasrk[inline]{Mieux ?}%
-\GH{Je ne suis pas fan d'utiliser un terme connu par tout le monde dans un sens
-  différent. Donc, ici, je ne suis pas fan d'utiliser "implémentation" dans le
-  sens ou tu l'utilises. Je ne sais pas comment les choses sont présentées dans
-  un (bon) cours sur les méthodes formelles. Mais de ce que je comprends, la
-  vérification formelle à proprement parler est réalisé sur un modèle
-  (mathématique) du système étudié. Ce pose ensuite la question de l'adéquation
-  entre ce modèle et l'implémentation (code exécutable, code exécuté (ce qui
-  suppose que le matériel se comporte comme prévu), circuit logique, VHDL...)
-  Cette adéquation peut-être garantie par extraction automatique du modèle
-  (c'est le cas lorsqu'on dispose d'une sémantique formelle du langage source et
-  que le compilateur a été prouvé) ou au contraire génération automatique de
-  l'implémentation (génération automatique de code dans CoQ), par test (si la
-  spec est exécutable), par insertion de pré/post condition, etc. Quels sont les
-  termes utilisé par ton bouquin en référence?}
+% \GH{Se pose ensuite la question de l'adéquation entre ce modèle et
+% l'implémentation (code exécutable, code exécuté (ce qui suppose que le
+% matériel se comporte comme prévu), circuit logique, VHDL...)  Cette adéquation
+% peut-être garantie par extraction automatique du modèle (c'est le cas
+% lorsqu'on dispose d'une sémantique formelle du langage source et que le
+% compilateur a été prouvé) ou au contraire génération automatique de
+% l'implémentation (génération automatique de code dans CoQ), par test (si la
+% spec est exécutable), par insertion de pré/post condition, etc. Quels sont les
+% termes utilisé par ton bouquin en référence?}
 %
 \noindent
 %
-The formal verification of a system consists of proving the correctness of an
-\emph{implementation} with respect to a
-\emph{specification}\,\cite{gupta1992formal}.
+The formal verification of a system consists of proving its correctness with
+respect to a \emph{specification}\,\cite{gupta1992formal}, that is a description
+of properties targeted by the system.
 %
-In this context, the terms ``implementation'' and ``specification'' differ from
-their usual meaning in software engineering, and are always subjective to a
-given verification problem.
+To that end, a model of the system is defined, to allow a formal reasoning of
+the system behavior by means of formal methods.
 %
-An implementation is a description of the system design at any level of
-abstraction, \emph{e.g.} a program written in a language whose semantics has
-been formally specified, a model used to represent a concrete implementation.
+% We distinguish between \emph{functional} specifications, which describe
+% expected behaviors of their implementations, and \emph{non-functional}
+% specifications, which notably include security policies.
 %
-A specification is a description of properties targeted by an implementation.
+In this thesis, our objective is to give a formal definition of \ac{hse}
+mechanisms in the form of requirements trusted software components have to
+satisfy, and to verify that these requirements do effectively provide the
+enforcement of targeted security policies.
 %
-We distinguish between \emph{functional} specifications, which describe expected
-behaviors of their implementations,
-% in terms of inputs they handle and outputs they produce
-and \emph{non-functional} specifications, which notably include security
-policies.
+We steer a middle course between two domains: hardware verification and system
+software verification.
 %
-The same formal description of a system design can serve both as a functional
-specification in a first verification problem, and as an implementation in
-second one.
-% implementation in a first verification problem, and as a functional
-% specification for a more concrete implementation of the system.
+Generally, hardware verification focus on properties which are transparent to
+the executed software (\emph{e.g.} \emph{e.g.} cache
+coherency\,\cite{stern1995cachecoherence}, linearizability of SGX
+instructions\,\cite{leslie2015linsgx}, or hardware-based memory
+isolation\,\cite{lie2003xom}), and system software verification relies on
+hardware models which abstracts as much as possible of the architecture
+complexity.
 %
-\GH{Je ne comprens pas cette phrase mais c'est surement lié à ma première
-  remarque}
+To the extent of our knowledge, the closest related project research is the work
+of Jomaa \emph{et al.}\,\cite{jomaa2016mmu}, who specified what are the
+requirement a microkernel must satisfy in order for a \ac{mmu} to enforce memory
+isolation at all times, but this remains an isolated initiative.
+%
+As a consequence, the interactions of the numerous configurable hardware
+features is less subject to formal verification.
+%
+In Chapter~\ref{chapter:speccert}, we propose a more general-purpose approach.
 
-In the context of this thesis, we focus on verifying the correctness of
-implementations defined in the form of idealized models with respect to
-non-functional specifications which characterize security policies.
-%
-\GH{Cette phrase est longue. Et "idealized model" ne veut pas dire grande
-  chose. Ce qu'il faudrait dire c'est trois choses (donc trois phrases). 1) dans
-  ton cas le modèle (que tu appelles implémentation) est spécifié manuellement à
-  partir de la spécification informelle (papier) fournit par les
-  constructeurs. 2) on s'intéresse à des spécifications non-fonctionnelles. 3)
-  on s'intéresse à la sécurité donc ces spécification forment une politique de
-  sécurité}
-%
-% In particular, we do not cover \emph{model validation}, that is the
-% verification that a model is a correct abstraction of the concrete system it
-% supposedly describes.
-%
 The rest of this Chapter proceeds as follows.
 %
-First, we introduce the key concepts of formal
-methods which support the formal verification process by providing tools to
-construct proofs, and we justify our choice to use the Coq theorem prover in our
-approach (Section~\ref{sec:sota:fm}).
+We detail how transition systems have been widely and successfully used in order
+to verify hardware and software systems, and where does our formal definition of
+\ac{hse} mechanisms stands with respect to previous work
+(Section~\ref{sec:sota:formalisms})
 %
-We then explain how transition systems are used as modeling structures to verify
-the correctness of a system with respect to security policies, and where does
-our formal definition of \ac{hse} mechanisms stands with respect to previous
-work (Section~\ref{sec:sota:formalisms})
-%
-Finaly, we introduce compositional verification approaches, which enable the
-``divide and conquer'' strategy to reduce the burden of verifying large and
-complex systems, and compare our compositional framework for Coq with existing
-solutions (Section~\ref{section:sota:compsec}).
-
-% We have implemented our proofs of concepts in the Coq proof assistant.
-%%
-% Our choice is motivated by the following reasons \GH{Comme on te l'a déjà dit,
-% il faudrait que le choix de ton approche soit distillé au fur et à mesure. La
-% conclusion ne devrait être qu'une synthèse.}:
-%%
-% \begin{itemize}
-% \item {\scshape Gallina}, the specification of Coq, is an expressive formal
-%   language, that combines both a higher-order logic and a powerful dependent
-%   type system \GH{c'est quoi un "type dependent system"?}, while {\scshape
-%   Ltac}, the proof tactic language of Coq, enables powerful automation
-%   features. \GH{vu que Coq va être central dans ton approche, tu devrais le
-%   décrire un peu plus en détail (lui consacrer un chapitre).}
-%  %
-%   This suits well for specifying security properties to be enforced by HSE
-%   mechanisms, as they can take many forms. \GH{Cette affirmation est un peu
-%   gratuite. Tu devrais développer un peu cette idée et montrer en quoi les
-%   propriétés de sécurité nécessite une logique d'ordre supérieur (donner des
-%   exemples...)}
-% \item Model checkers and similar automated tools remain subject to the
-%   so-called \emph{state explosion problem}\,\cite{clarke2012model} despite
-%   improvements to algorithms.
-%  %
-%   State explosion problem imposes modeling compromises, \emph{e.g.}
-%   verification of cache coherency protocols with a fixed number of cores and
-%   address spaces limited in size (\emph{e.g.} in \cite{lie2003xom}, the model
-%   only considers three cache locations). \GH{En pratique, l'implémentation
-%   aura bien un nombre limité de coeurs, un espace d'adressage limité... Donc
-%   est-ce réellement un problème? En outre, est-ce que cela serait une
-%   limitation pour ton approche telle qu'elle est utilisée actuellement ou bien
-%   est-ce un argument pour le futur?}
-%  %
-%   Theorem provers allow for modeling \emph{parameterized} systems, so that it
-%   becomes possible, for example, to construct a proof which holds for an
-%   arbitrary number of similar
-%   components\,\cite{vijayaraghavan2015modular}. \GH{et? il faut remettre cet
-%   argument dans le contexte de ton travail. En quoi cela serait-il utile pour
-%   ce que tu fais?}
-% \item The extraction mechanism of Coq allows for transpiling formal
-%   specifications written in {\scshape Gallina} to OCaml, meaning we can write
-%   \emph{executable specifications}.
-%  %
-%   We could leverage this feature to validate a model against a real
-%   implementation.
-%  %
-%   \GH{Tu pourrais rajouter une footnote disant que bien qu'il s'agisse d'une
-%   propriété intéressante qui a notamment motivé ton choix, tu ne l'as pas
-%   utilisée durant ta thèse}
-% \end{itemize}
-
-\GH{De manière générale, cette première partie de l'état de l'art est à
-  revoir. Il faut mieux positionner ton travail, de manière plus systématique et
-  "carré"}
+Then, we introduce and justify our interest in compositional verification
+approaches, which enable the ``divide and conquer'' strategy to reduce the
+burden of verifying large and complex systems, and compare our compositional
+framework for Coq with existing solutions (Section~\ref{section:sota:compsec}).
 
 \section{Formal Verification of Transition Systems}
 \label{sec:sota:formalisms}
 
 Transition systems have long been used to study the behavior of discrete
-systems.  \GH{ref}
+systems. \GH{ref}
 %
 Over time, many different definitions of transition system have been proposed,
 to address different classes of verification problems.
@@ -167,17 +90,20 @@ Finally, we describe how the concepts of this section have been used in the
 literature in order to verify hardware and software systems
 (\ref{subsec:sota:ltsrelated}).
 %
-We conclude with a summary of our motivations for not reusing an existing x86
-model for our experiments (\ref{subsec:sota:ltsconclusion}). \GH{Cette phrase n'est pas très élégante. Plutôt que de partir sur la négative, je ferais plutôt une affirmation positive : qu'est-ce qui t'a poussé à définir un nouveau modèle de l'architecture x86?}
+We conclude with a summary of our motivations for implementing an ad-hoc x86
+model for our experiments (\ref{subsec:sota:ltsconclusion}).
 
-\subsection{Defining Specifications}
+\subsection{Transition System as a Modeling Structure}
 \label{subsec:sota:ltsdef}
-
-\GH{Ce que tu appelles "spécification" dans ton titre n'a pas l'air de coller à ta définition initiale}
 
 The formal verification of discrete systems, such as computing systems, commonly
 rely on some sort of \emph{transition systems} to describe the behavior of the
-subject of study. \GH{Ref} \GH{Il faudrait en outre insister sur ton contexte. Est-ce que ces systèmes sont très utilisé pour modéliser les architectures hardware et pourquoi?}
+subject of study.
+%
+\GH{Ref}
+%
+\GH{Il faudrait en outre insister sur ton contexte. Est-ce que ces systèmes sont
+  très utilisé pour modéliser les architectures hardware et pourquoi?}
 %
 More precisely, the system is characterized by a set of \emph{states} and by a
 set of state transformation, called \emph{transitions}.
@@ -186,12 +112,18 @@ Transitions occur when the system interacts with its environment (\emph{e.g.} a
 hardware circuit receives a clock signal, a hardware controller receives a
 message from a bus, or an operating system handles a syscall).
 
-\GH{Il faut que tu définisse un peu mieux ce qu'est un LTS et surtout la forme de LTS que tu va utiliser et pourquoi. (approche entonnoire). ENSUITE tu peux nous parler de ton exemple. Actuellement, il vient comme un cheveux sur la soupe...}
+\GH{Il faut que tu définisse un peu mieux ce qu'est un LTS et surtout la forme
+  de LTS que tu va utiliser et pourquoi. (approche entonnoire). ENSUITE tu peux
+  nous parler de ton exemple. Actuellement, il vient comme un cheveux sur la
+  soupe...}
 
 Throughout this Chapter, we will use the airlock system in order to act as a
 running example to illustrate the introduced definitions, since it is both
 simple ---our examples remain of manageable size--- and rich ---our examples do
-not feel far-fetched \GH{je ne sais pas si cette expression est bien appropriée dans un manuscrit de thèse. Je dirai que cet exemple est suffisamment simple (manageable size) tout en étant suffisamment riche pour illustrer les différentes problématiques que tu souhaite aborder.}.
+not feel far-fetched \GH{je ne sais pas si cette expression est bien appropriée
+  dans un manuscrit de thèse. Je dirai que cet exemple est suffisamment simple
+  (manageable size) tout en étant suffisamment riche pour illustrer les
+  différentes problématiques que tu souhaite aborder.}.
 %
 An airlock system is a device made of two doors, and an intermediary chamber.
 %
@@ -208,7 +140,10 @@ second door, and exits the chamber.
 %
   A labeled transition system is a tuple \( \langle S, L, R \rangle \), such
   that \( S \) is a set of states, \( L \) is a set of labels, and
-  \( R \subseteq S \times L \times S \) is the transition relation. \GH{Cette définition ne devrait pas être dans l'exemple!}
+  \( R \subseteq S \times L \times S \) is the transition relation.
+  %
+  \GH{Cette définition ne devrait pas être dans l'exemple!}
+  %
   Figure~\ref{fig:sota:airlock-lts} gives a definition of an idealized airlock
   system, modeled as a labeled transition system.
 
@@ -291,15 +226,16 @@ each variant better suited to tackle a particular class of systems.
 For instance, the Kripke structure\,\cite{kripke1971semantical} is a prominent
 definition of transition systems used in model checking\,\cite{clarke1999model}.
 %%
-%Besides, Petri net\,\cite{peterson1981petri}, process
-%algebra\,\cite{bergstra1984process} or interface
-%automata\,\cite{de2001interface} are better suited to model concurrent
-%systems. \GH{et? Quelle structure vas-tu utiliser dans ton approche? Pourquoi?}
+% Besides, Petri net\,\cite{peterson1981petri}, process
+% algebra\,\cite{bergstra1984process} or interface
+% automata\,\cite{de2001interface} are better suited to model concurrent
+% systems. \GH{et? Quelle structure vas-tu utiliser dans ton approche?
+% Pourquoi?}
 
 \GH{Tel quel, cette sous-section est un peu vague. Elle gagnerait à être un peu
-plus étoffée et surtout présentée de manière plus rigoureuse, carré. On ne
-comprend pas vraiment pourquoi tu nous parles de LTS sinon que d'autres le fond
-alors çà a l'air d'être une bonne idée...}
+  plus étoffée et surtout présentée de manière plus rigoureuse, carré. On ne
+  comprend pas vraiment pourquoi tu nous parles de LTS sinon que d'autres le
+  fond alors çà a l'air d'être une bonne idée...}
 
 \paragraph{Model Prerequisites.}
 %
@@ -371,21 +307,24 @@ The most generic definition of a trace of a transition system is a (potentially
 infinite) sequence of states generated by successive transitions.
 %
 Each modeling structure has its own definition of traces, which takes into
-account the specificities of the model. \GH{Cette phrase est vague. Plutôt que de viser la généricité et rester vague, il faudrait mieux dès le départ se focaliser sur un cadre, en justifiant ce choix et ensuite décrire plus précisemment les notions pour ce cadre}
+account the specificities of the model. \GH{Cette phrase est vague. Plutôt que
+  de viser la généricité et rester vague, il faudrait mieux dès le départ se
+  focaliser sur un cadre, en justifiant ce choix et ensuite décrire plus
+  précisemment les notions pour ce cadre}
 %
-For instance, traces labeled transition system \GH{que veut dire "traces labeled transition system"?} will interleave a label between
-each state\,\cite{vijayaraghavan2015modular}, to characterize the nature of the
-transition which led to the transformation of a state of the sequence with its
-successor. \GH{J'ai l'impression que tu décris les LTS ici, alors qu'ils devraient être décris dans la sous-section précédente}
+For instance, traces of labeled transition system will interleave a label
+between each state\,\cite{vijayaraghavan2015modular}, to characterize the nature
+of the transition which led to the transformation of a state of the sequence
+with its successor.
+%
+\GH{J'ai l'impression que tu décris les LTS ici, alors qu'ils devraient être
+  décris dans la sous-section précédente}
 %
 Afterwards, we write \( \Sigma(M) \) for the set of traces of a specification
 \( M \).
 
 Simplest properties can be defined in terms of predicates on
 traces\,\cite{alpern1987recognizing,schneider2000enforceable,basin2013enforceable}.
-%
-We assume a specification \( M \) whose set of states is \( S \) and whose
-traces only contain states \GH{Pourquoi cette dernière remarque? Tu devrais d'abord définir proprement les traces puis ensuite les propriétés}.
 %
 \( M \) is said to be correct with respect to a property modeled as a predicate
 on traces \( P \) when
@@ -412,12 +351,12 @@ On the other hand, liveness properties are characterized by a predicate
   P(\rho) \triangleq \exists n > 0, \eta(\rho_{[..n]}) \vee P(\rho_{[1..]}),
 \]
 %
-where \( \rho_{[..n]} \) is the subtrace made with the \( n \) first elements
-of \( \rho \).
+where \( \rho_{[..n]} \) is the subtrace made with the \( n \) first elements of
+\( \rho \).
 
 \begin{example}[Airlock Safety and Liveness Properties]
-  A typical \emph{safety} property for an airlock
-  system is that at least one door shall be close at any time.
+  A typical \emph{safety} property for an airlock system is that at least one
+  door shall be close at any time.
   %
   We formalize this property with the invariant \( \iota \), defined as follows:
   %
@@ -437,8 +376,32 @@ of \( \rho \).
     \forall ((d_1, d_2), l, (d_1', d_2')) \in R, \iota(d_1, d_2) \Rightarrow
     \iota(d_1', d_2')
   \]
-  %
-  Such a proof is given in Figure~\ref{fig:sota:proofsafety}. \GH{Que veux dire le "see "carré"" dans la figure?}
+
+  \begin{proof}
+    By definition of \( R \), there are four transitions to consider, and our
+    proof consists in an enumeration of these cases.
+    %
+    Case 1, both doors are close, that is \( d_1 = d_2 = \mathtt{close} \).  The
+    system opens the first door, that is \( l = \mathtt{Open}_1 \). At the end
+    of the transition, only the first door is open, that is
+    \( d_1' = \mathtt{open} \) and \( d_2' = \mathtt{close} \).
+      %
+    By definition of \( \iota \), the statement to prove becomes
+      %
+    \[
+      \mathtt{close} = \mathtt{close} \vee \mathtt{close} = \mathtt{close}
+      \Rightarrow \mathtt{open} = \mathtt{close} \vee \mathtt{close} =
+      \mathtt{close}
+    \]
+      %
+    By definition of the disjunction \( \vee \), the statement reduces to
+    \( \mathrm{True} \Rightarrow \mathrm{True} \), which is \( \mathrm{True} \)
+    by definition of the implication \( \Rightarrow \).
+    %
+    The three other cases follow the exact same procedure.
+    %
+    \hfill \( \square \)
+  \end{proof}
 
   In addition, we can also prove that both doors of the airlock will
   \emph{eventually} be close.
@@ -460,89 +423,14 @@ of \( \rho \).
     d_2')
   \]
 
+  \begin{proof}
+    Again, the proof proceeds by case enumeration with respect to the definition
+    of \( R \), and after unfolding \( \eta \), we conclude thanks to the
+    definition of \( \wedge \) and \( \vee \).
+    %
+    \hfill \( \square \)
+  \end{proof}
 \end{example}
-
-\begin{figure}
-  \bigcentering%
-  {\footnotesize \AxiomC{} \RightLabel{\footnotesize
-      \( \vee,\Rightarrow \){\scshape -Def}} \UnaryInfC{\(
-      \begin{array}{l}
-        (\mathtt{close} = \mathtt{close} \\
-        \vee \mathtt{close} = \mathtt{close}) \\
-        \Rightarrow (\mathtt{open} = \mathtt{close} \\
-        \qquad \vee \mathtt{close} = \mathtt{close})
-      \end{array}
-      \)}%
-    \RightLabel{\footnotesize \( \iota \){\scshape -Def}} \UnaryInfC{\(
-      \begin{array}{l}
-        \iota(\mathtt{close}, \mathtt{close}) \\
-        \Rightarrow
-        \iota(\mathtt{open}, \mathtt{close})
-      \end{array} \)}%
-    \AxiomC{}
-    \RightLabel{\footnotesize \( \vee,\Rightarrow \){\scshape -Def}}
-    \UnaryInfC{\(
-      \begin{array}{l}
-        (\mathtt{close} = \mathtt{close} \\
-        \vee \mathtt{close} = \mathtt{close}) \\
-        \Rightarrow (\mathtt{close} = \mathtt{close} \\
-        \qquad \vee \mathtt{open} = \mathtt{close})
-      \end{array}
-      \)}%
-    \RightLabel{\footnotesize \( \iota \){\scshape -Def}} \UnaryInfC{\(
-      \begin{array}{l}
-        \iota(\mathtt{close}, \mathtt{close}) \\
-        \Rightarrow
-        \iota(\mathtt{close}, \mathtt{open})
-      \end{array} \)}%
-    \AxiomC{}
-    \RightLabel{\footnotesize \( \vee,\Rightarrow \){\scshape -Def}}
-    \UnaryInfC{\(
-      \begin{array}{l}
-        (\mathtt{open} = \mathtt{close} \\
-        \vee \mathtt{close} = \mathtt{close}) \\
-        \Rightarrow (\mathtt{close} = \mathtt{close} \\
-        \qquad \vee \mathtt{close} = \mathtt{close})
-      \end{array}
-      \)}%
-    \RightLabel{\footnotesize \( \iota \){\scshape -Def}} \UnaryInfC{\(
-      \begin{array}{l}
-        \iota(\mathtt{open}, \mathtt{close}) \\
-        \Rightarrow
-        \iota(\mathtt{close}, \mathtt{close})
-      \end{array} \)}%
-    \AxiomC{See \( \square \)}
-    \RightLabel{\footnotesize \( R \){\scshape -Def}}
-    \QuaternaryInfC{\( \forall ((d_1, d_2), l, (d_1', d_2')) \in R, \iota(d_1,
-      d_2) \Rightarrow \iota(d_1', d_2') \)}%
-    \DisplayProof}
-
-  \vspace{2em}
-
-  {\footnotesize \AxiomC{} \RightLabel{\footnotesize
-      \( \vee,\Rightarrow \){\scshape -Def}} \UnaryInfC{\(
-      \begin{array}{l}
-        (\mathtt{close} = \mathtt{close} \\
-        \vee \mathtt{open} = \mathtt{close}) \\
-        \Rightarrow (\mathtt{close} = \mathtt{close} \\
-        \qquad \vee \mathtt{close} = \mathtt{close})
-      \end{array}
-      \)}%
-    \RightLabel{\footnotesize \( \iota \){\scshape -Def}} \UnaryInfC{\(
-      \begin{array}{l}
-        \iota(\mathtt{close}, \mathtt{open}) \\
-        \Rightarrow
-        \iota(\mathtt{close}, \mathtt{close})
-      \end{array} \)}%
-    \UnaryInfC{\( \square \)}
-    \DisplayProof}
-
-  \caption{Airlock system proof of correctness with respect to a safety
-    property}
-  \label{fig:sota:proofsafety}
-\end{figure}
-
-\PC{la figure~\ref{fig:sota:proofsafety} n'est pas très lisible}
 
 Not all security policies can be formalized with predicates on traces.
 %
@@ -560,26 +448,34 @@ As a consequence, such policies are characterized by sets of sets of traces;
 they are called \emph{hyperproperties}\,\cite{marr2002hypertheading}.
 %
 Verifying a system with respect to a hyperproperty is harder in the general
-case, but certain hyperproperties, called \( k \)-safety properties \GH{ref!}, can be
-reduced to an invariant.
+case, but certain hyperproperties, called \( k \)-safety
+properties\,\cite{marr2002hypertheading}, can be reduced to an invariant
+enforcement which is more manageable to prove.
 %
-For instance, we assume \( M \) handles inputs which can be either secret or
-public.
-%
-Let \( \equiv \) be the binary relation, such that two states \( s \) and
-\( r \) satisfies this relation (\( s \equiv r \)) if and only if they
-characterize two instances of the system which have handled the same public
-inputs and produced the same visible behavior.
-%
-Similarly to Gilles Barthe \emph{et al.}\,\cite{barthe2011virtcert1}, we can
-prove \( M \) \GH{Je n'aime pas cette formulation ambigue "we can prove". Est-ce que tu es en train de dire que Barthe a utilisé cette technique pour prouver le résultat? Dans ce cas, utilise la troisième personne : Barthe prove....} enforces noninterference if for any public input \( l \), then
-%
-\[
-  \forall (s, r) \in S \times S, s \equiv r \Rightarrow (s \xrightarrow{l} s'
-  \wedge r \xrightarrow{l} r') \Rightarrow s' \equiv r',
-\]
-where \( s \xrightarrow{l} s' \) is a transition of the system from a state
-\( s \) to a state \( s' \) wherein the input \( l \) is handled. \GH{et? Tu donnes des détails sur la non-interférence mais pas assez pour qu'on voit ou tu veux en venir. Donc soit tu t'en tiens à "certain hyperproperties ... can be reduced to an invariant" (avec une ref). Soit tu expliques un peu plus ce que tu veux nous faire comprendre...}
+% For instance, we assume \( M \) handles inputs which can be either secret or
+% public.
+%%
+% Let \( \equiv \) be the binary relation, such that two states \( s \) and
+% \( r \) satisfies this relation (\( s \equiv r \)) if and only if they
+% characterize two instances of the system which have handled the same public
+% inputs and produced the same visible behavior.
+%%
+% Similarly to Gilles Barthe \emph{et al.}\,\cite{barthe2011virtcert1}, we can
+% prove \( M \) \GH{Je n'aime pas cette formulation ambigue "we can
+% prove". Est-ce que tu es en train de dire que Barthe a utilisé cette technique
+% pour prouver le résultat? Dans ce cas, utilise la troisième personne : Barthe
+% prove....} enforces noninterference if for any public input \( l \), then
+%%
+% \[
+%   \forall (s, r) \in S \times S, s \equiv r \Rightarrow (s \xrightarrow{l} s'
+%   \wedge r \xrightarrow{l} r') \Rightarrow s' \equiv r',
+% \]
+% where \( s \xrightarrow{l} s' \) is a transition of the system from a state
+% \( s \) to a state \( s' \) wherein the input \( l \) is handled. \GH{et? Tu
+% donnes des détails sur la non-interférence mais pas assez pour qu'on voit ou
+% tu veux en venir. Donc soit tu t'en tiens à "certain hyperproperties ... can
+% be reduced to an invariant" (avec une ref). Soit tu expliques un peu plus ce
+% que tu veux nous faire comprendre...}
 
 % \subsection{Adversary Model}
 %
@@ -787,15 +683,14 @@ TODO suite
   explicite. Quel est (sont) le(s) point(s) commun(s) des travaux que tu vas
   présenter par la suite?}
 %
-Throughout this Section, we have detailed how we can
-model a target of verification as a transition system in order to verify its
-correctness with respect to security policies specified as predicates on set of
-model traces.
+Throughout this Section, we have detailed how we can model a target of
+verification as a transition system in order to verify its correctness with
+respect to security policies specified as predicates on set of model traces.
 %
-\GH{Je ne comprend pas trop cette phrase. Est-ce que tu fais un
-  résumé de ce qui a été présenté avant (ce que suggère l'emplois du passé)?
-  Dans ce cas, il faudrait la faire suivre pas une phrase indiquant ce que tu va
-  présenter maintenant dans cette sous-section.}
+\GH{Je ne comprend pas trop cette phrase. Est-ce que tu fais un résumé de ce qui
+  a été présenté avant (ce que suggère l'emplois du passé)?  Dans ce cas, il
+  faudrait la faire suivre pas une phrase indiquant ce que tu va présenter
+  maintenant dans cette sous-section.}
 
 
 \GH{A ce stage, on ne sait pas trop sur quoi va porter le reste de l'état de
@@ -1167,18 +1062,22 @@ methods.
 % modèle si un composant change - or c'est le cas en pratique: de nombreuses
 % archis sont similaires, mais avec quelques différences dans les composants}
 
-Compositional verification is a promising family of approaches to overcome
-the challenges posed by the scale of complex and large systems, as it enables to
+Compositional verification is a promising family of approaches to overcome the
+challenges posed by the scale of complex and large systems, as it enables to
 locally abstract a subpart of the problem \emph{via} a specification.
 %
 Traditional compositional approaches in the programming language communities
 ---that the Coq community is part of--- include type
 systems %\,\cite{knowles2008compositional}
-(specifications for values manipulated by a program) \GH{ref sur composition dans les types system}, and Hoare logic systems
-(specifications for the state updates provoked by the execution of a program) \GH{composition sur la logic de Hoare (que tu n'a pas évoqué avant..., tu devrais le mentionner dans ta première section)}.
+(specifications for values manipulated by a program) \GH{ref sur composition
+  dans les types system}, and Hoare logic systems (specifications for the state
+updates provoked by the execution of a program) \GH{composition sur la logic de
+  Hoare (que tu n'a pas évoqué avant..., tu devrais le mentionner dans ta
+  première section)}.
 %
 The model checking communities take a different approach, and rather breakdown a
-complex system in several stateful and interacting components \GH{ref sur composition dans Model Checking }.
+complex system in several stateful and interacting components \GH{ref sur
+  composition dans Model Checking }.
 %
 The verification process proceeds as follow: components are verified in
 isolation, then their composition is verified in order to ensure that local
@@ -1219,8 +1118,9 @@ Components of a larger system are primarily identified by the interface they
 expose to their pairs, that is the set of operations they can carry out for the
 rest of the system.
 %
-They \GH{A quoi renvoie "they"? "Components"? "Interfaces"? "operations"?} also ``hide'' the components they are connected to, and use in order to
-handle their input.
+They \GH{A quoi renvoie "they"? "Components"? "Interfaces"? "operations"?} also
+``hide'' the components they are connected to, and use in order to handle their
+input.
 %
 In this context, two components which expose the same interface can be freely
 interchange on the condition that they exhibit an equivalent behavior with
@@ -1233,14 +1133,21 @@ behavior\,\cite{fokkink2013pa}.
 
 Using a behavior equivalence approach, it becomes possible to reason about one
 component by abstracting away the part of the systems it interacts with
-functional specifications \GH{la phrase n'est pas très claire. Je ne suis pas sur que "abstract away ... with" soit correct. La construction habituelle est "the model abstract away something from details"}.
+functional specifications \GH{la phrase n'est pas très claire. Je ne suis pas
+  sur que "abstract away ... with" soit correct. La construction habituelle est
+  "the model abstract away something from details"}.
 %
 This is referred to as compositional minimization in model checking.
 %
-The goal is to reduce the complexity of a model, with smaller \GH{que veut dire "smaller" ici? Simpler?} yet provably
-equivalent components, as pictured in Figure~\ref{fig:sota:minicomp}. \GH{Je ne comprends pas la figure et surtout je ne vois pas en quoi elle illustre la réduction de la complexité par des composants plus petit et équivalent. Je propose de la supprimer.}
+The goal is to reduce the complexity of a model, with smaller \GH{que veut dire
+  "smaller" ici? Simpler?} yet provably equivalent components, as pictured in
+Figure~\ref{fig:sota:minicomp}. \GH{Je ne comprends pas la figure et surtout je
+  ne vois pas en quoi elle illustre la réduction de la complexité par des
+  composants plus petit et équivalent. Je propose de la supprimer.}
 %
-\GH{et? que devons nous penser de ces approches? Sont-elles adapté a ton approche? Quelles sont les "bonnes" idées que tu voudrais reprendre? Quelles sont les limitations?}
+\GH{et? que devons nous penser de ces approches? Sont-elles adapté a ton
+  approche? Quelles sont les "bonnes" idées que tu voudrais reprendre? Quelles
+  sont les limitations?}
 
 
 \begin{figure}
@@ -1286,43 +1193,61 @@ equivalent components, as pictured in Figure~\ref{fig:sota:minicomp}. \GH{Je ne 
   \label{fig:sota:minicomp}
 \end{figure}
 
-\GH{Il manque une transition avec "compositional Reasoning". Il faudriait notamment bien faire ressortir les différences entre les deux concepts (actuellement, ce n'est pas très claire).}
+\GH{Il manque une transition avec "compositional Reasoning". Il faudriait
+  notamment bien faire ressortir les différences entre les deux concepts
+  (actuellement, ce n'est pas très claire).}
 \paragraph{Compositional Reasoning.}
 %
 Assume-guarantee\,\cite{pnueli1985ag} and
 rely-guarantee\,\cite{jones1983tentative} reasoning are about proving a
 component \( C \) guarantees the property \( G \) under the assumptions that a
-property \( A \) is satisfied, and then proving that the rest of the system \( S' \)
-satisfies \( A \).
+property \( A \) is satisfied, and then proving that the rest of the system
+\( S' \) satisfies \( A \).
 %
 This allows for concluding about the correctness of the system as a whole, that
 is the composition of \( C \) with \( S' \) (denoted by \( C || S' \))
 guarantees \( G \).
+%
+Assume-guarantee systems have been developed for model checkers, where
+assumptions and guarantees are defined in temporal logic formulas \GH{ref}.
 
-First assume-guarantee systems have been developed for model checkers, where
-assumptions and guarantees were defined in temporal logic formulas \GH{ref}.
-%
-The main obstacle to the adoption of the assume-guarantee paradigm is the
-necessity for the user to provide additional inputs to the checker, in addition
-to the model and the properties to verify. \GH{A quoi correspondent ces "additional inputs"?}
-%
-The \( L* \) learning algorithm, originally proposed by
-Angluin\,\cite{angluin1987lstart}, addresses this issue by automatically
-generating appropriate assumptions. \GH{de ce que je connais, L* est un algorithme permettant d'apprendre automatiquement un automate de manière active, en requêtant une implémentation et en observant les réponses. Je ne vois pas le lien avec ce qui est présenté ici. Il faut expliquer un peu plus ce que permet cet algorithme dans ce contexte.}
-%
-The \( L* \) algorithm has latterly been adapted to other modeling structure,
-for instance for interface automata\,\cite{emmi2008assume}.
+%%
+% The main obstacle to the adoption of the assume-guarantee paradigm is the
+% necessity for the user to provide additional inputs to the checker, in
+% addition to the model and the properties to verify.
+%%
+% \GH{A quoi correspondent ces "additional inputs"?}
+%%
+% The \( L* \) learning algorithm, originally proposed by
+% Angluin\,\cite{angluin1987lstart}, addresses this issue by automatically
+% generating appropriate assumptions.
+%%
+% \GH{de ce que je connais, L* est un algorithme permettant d'apprendre
+% automatiquement un automate de manière active, en requêtant une implémentation
+% et en observant les réponses. Je ne vois pas le lien avec ce qui est présenté
+% ici. Il faut expliquer un peu plus ce que permet cet algorithme dans ce
+% contexte.}
+%%
+% The \( L* \) algorithm has latterly been adapted to other modeling structure,
+% for instance for interface automata\,\cite{emmi2008assume}.
 
 \paragraph*{}
 %
 We believe assume-guarantee contracts encodes a well-suited reasoning to work
-with \ac{hse} mechanisms, and formally express the definition we gave
-in the Introduction of this manuscript (Definition \ref{def:intro:hse}).
+with \ac{hse} mechanisms, and formally express the definition we gave in the
+Introduction of this manuscript (Definition \ref{def:intro:hse}).
 %
-Conceptually, a trusted software component interacts with some hardware components, which provide the hardware features of the \ac{hse},
- \emph{via} their interfaces, \emph{e.g.} CPU instruction sets. As long as the trusted software component correctly implements the
-\ac{hse} mechanism, it satisfies the assumption of the hardware components, and therefore is
-guaranteed that the hardware architecture enforces the targeted security policy. \GH{J'ai un peu remanié ce paragraphe en le rendant plus générique. Peux-tu vérifier?}
+Conceptually, a trusted software component interacts with some hardware
+components, which provide the hardware features of the \ac{hse}, \emph{via}
+their interfaces, \emph{e.g.} CPU instruction sets.
+%
+As long as the trusted software component correctly implements the \ac{hse}
+mechanism, it satisfies the assumption of the hardware components, and therefore
+is guaranteed that the hardware architecture enforces the targeted security
+policy.
+%
+\GH{J'ai un peu remanié ce paragraphe en le rendant plus générique. Peux-tu
+  vérifier?}
 
 \subsection{Compositional Modeling Structures}
 \label{subsec:sota:compmod}
