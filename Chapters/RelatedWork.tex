@@ -1257,7 +1257,7 @@ isolation for the purpose of compositional verification, an in particular
 compositional reasoning.
 %
 Because our long-term objective is to apply a component-based modeling approach
-to a complex hardware architecture, we focus on their applicability.
+to a complex hardware architecture, we focus on their applicability \GH{to such context?}.
 %
 A component model should be easy to write, read and exploit in the context of a
 verification problem.
@@ -1304,7 +1304,7 @@ Interface automata\,\cite{de2001interfaceautomata} are similar to I/O automata,
 except they do not require to be input enabled.
 %
 As a consequence, the definition of an interface automaton captures its
-requirements over the rest of the system.
+requirements over the rest of the system. \GH{Je ne comprends pas cette dernière phrase}
 
 Another popular modeling structure is the Moore Machine, as they play a key role
 in compositional model checking\,\cite{mcmillan1989compositional}, because they
@@ -1430,13 +1430,13 @@ Labels of interface automata allows for composing together several transition
 systems by synchronizing their shared transitions.
 %
 However, the manual definition of these components to specify sequences of input
-and output transitions can quickly become cumbersome, as we our experiences with
+and output transitions can quickly become cumbersome, as we our experiences \GH{"as we our experiences" à revoir} with
 the definition of the airlock system controller in
-Example~\ref{example:sota:airlockinterface}.
+Example~\ref{example:sota:airlockinterface} \GH{peut-être que définir cet example n'a pas été facile pour toi mais tel qu'il est présenté, il ne semble pas difficile. Du coup, pas sur qu'il illustre bien ce que tu veux dire ici.}.
 %
 Besides, interactions between components are often motivated by the need to
 exchange data, \emph{e.g.} the processor interacts with the \ac{pch} to read
-from or write to peripherals memories.
+from or write to peripherals memories. \GH{et? que veux tu dire? Que les I/O automata ne permettent pas de modéliser ces échanges de données? Il faut que tu développes et que tu dises explicitement l'idée que tu veux exprimer.}
 
 \paragraph{Process Algebra.}
 %
@@ -1446,7 +1446,7 @@ complex systems is process algebra.
 Process algebra has been developed to reason about programs executed in
 parallel.
 %
-It is a formal system to describe interacting systems, together with a proof
+It is a formal system to describe interacting systems \GH{répétition sur system}, together with a proof
 system for verifying them.
 %
 In process algebra such as Calculus of Communication
@@ -1552,14 +1552,15 @@ Process algebras such as \( \pi \)-calculus are well suited formalisms for
 describing component interactions.
 %
 However, their applicability is limited by the low-level description of the used
-languages and their minimalistic semantic.
+languages and their minimalistic semantic. \GH{Cette conclusion est un peu rapide et minimaliste. Difficile à comprendre en outre. Que veux dire "low-level description" et "minimalist semantic"? Si on remet dans le context de ton approche, en quoi sont-ils peu adaptés?}
 
 \paragraph{Programs with Effects.}
 %
 The relation between one component and the rest of the system it is connected to
 is reminiscent of the programming language to model and verify large programs
 with side effects realized by an outer environment (\emph{e.g.} an operating
-system).
+system). \GH{phrase trop longue et difficile à comprendre}
+\GH{Ce paragraph est plus difficile à suivre que les autres. Tu enchaînes beaucoup de notions assez nouvelles par rapport au reste et trop rapidement. En outre, tu nous parles brusquement de langage pure et fonctionnel et on ne voit pas le rapport avec ce qui a été présenté jusqu'à maintenant. Il faut à mon avis mieux introduire cette partie et mieux faire comprendre pourquoi tu t'y intéresse, d'autant plus que c'est l'approche que tu vas utiliser!}
 %
 Modeling side effects in pure programming language, such as Haskell or {\scshape
   Gallina}, is usually achieved thanks to
@@ -1596,6 +1597,8 @@ effect handlers is by the means of coroutines\,\cite{kiselyov2013extensible}.
 %
 When a program with effects requires the result of a given effect, it sends a
 request to the handler, and waits for the result.
+
+\GH{et? que doit-on penser de tout çà? Est-ce intéressant pour ton problème? Quelles sont les éventuelles limitations?}
 
 \subsection{Related Work}
 \label{subsec:sota:comprelated}
