@@ -1560,12 +1560,11 @@ The relation between one component and the rest of the system it is connected to
 is reminiscent of the programming language to model and verify large programs
 with side effects realized by an outer environment (\emph{e.g.} an operating
 system). \GH{phrase trop longue et difficile à comprendre}
-\GH{Ce paragraph est plus difficile à suivre que les autres. Tu enchaînes beaucoup de notions assez nouvelles par rapport au reste et trop rapidement. En outre, tu nous parles brusquement de langage pure et fonctionnel et on ne voit pas le rapport avec ce qui a été présenté jusqu'à maintenant. Il faut à mon avis mieux introduire cette partie et mieux faire comprendre pourquoi tu t'y intéresse, d'autant plus que c'est l'approche que tu vas utiliser!}
+\GH{Ce paragraph est plus difficile à suivre que les autres. Tu enchaînes beaucoup de notions assez nouvelles (Monad, Effect, Effect Handler...) par rapport au reste et trop rapidement. En outre, tu nous parles brusquement de langage pure et fonctionnel et on ne voit pas le rapport avec ce qui a été présenté jusqu'à maintenant. Il faut à mon avis mieux introduire cette partie et mieux faire comprendre pourquoi tu t'y intéresse, d'autant plus que c'est l'approche que tu vas utiliser!}
 %
 Modeling side effects in pure programming language, such as Haskell or {\scshape
   Gallina}, is usually achieved thanks to
-Monads\,\cite{wadler1990comprehending,jones2005io}, \emph{e.g.} the State Monad
-to seamlessly write computations which manipulate a global state, or the List
+Monads\,\cite{wadler1990comprehending,jones2005io}, \emph{e.g.} the State Monad \GH{n'utilise pas de majuscule pour des noms communs! D'ailleurs, plus loin, tu n'utilises plus de majuscule pour "monad"} to seamlessly write computations which manipulate a global state, or the List
 Monad to abstract non-determinism,
 %
 However, Monads have a reputation not to compose very
@@ -1603,15 +1602,17 @@ request to the handler, and waits for the result.
 \subsection{Related Work}
 \label{subsec:sota:comprelated}
 
+\GH{Sur quoi porte cet état de l'art? Il faudrait un titre de sous-section plus précis.}
+
 In Chapter~\ref{chapter:freespec}, we show how it is possible to model a
 hierarchy of components which interacts \emph{via} their interfaces by means of
-programs with effects and effect handlers.
+programs with effects and effect handlers. \GH{Référence en avant. Beurk. En gros tu dis : "j'ai utilisé telle technique, donc je vais vous en parler dans l'état de l'art". Il faudrait plutôt que ta manière de présenter l'état de l'art amène naturellement le lecteur à se persuader que cette technique est la bonne pour le problème que tu adresses. Il sera alors beaucoup plus enclin à lire un état de l'art détaillé sur la technique en question. Il faut revoir la fin de la sous-section précédente et l'introduction de cette sous-section en ce sens.}
 %
 The main idea is that a component can be modeled as a handler for the interface
 it exposes, in terms of program with effects of the interface it uses.
 %
 To our surprise, we did not find any generic project to write and verify
-programs with effects and effect handlers written for {\scshape Gallina}, but
+programs with effects and effect handlers for {\scshape Gallina}, but
 several related approaches exist.
 
 \paragraph{{\scshape Kami}.}
@@ -1621,17 +1622,16 @@ In 2017, Joonwon Choi \emph{et al.} have released {\scshape
 (in the form of BlueSpec\,\cite{nikhil2004bluespec} programs) hardware
 components implementations.
 %
-In {\scshape Kami}, components are defined as modules, where a \( M \) is a
+In {\scshape Kami}, components are defined as modules \( M \). Each module is a
 particular labeled transition system, whose transitions are of the form
 %
 \[
   p \xrightarrow[a]{i} (v, q)
 \]
 %
-where \( p \) is the state of the component before an operation \( i \) which is
-called by another component, \( a \) is a program of actions performed by the
+where  \( i \)  is an operation called by another component, \( p \) is the state of the component before the operation \( i \), \( a \) is a program of actions performed by the
 component in order to compute the result of \( i \), \( v \) is the result of
-\( i \), for the caller to use, and \( q \) is the modified state of the
+\( i \) that is returned to the caller, and \( q \) is the modified state of the
 component.
 %
 Actions, in this context, are either local manipulation of the component's state
@@ -1655,27 +1655,27 @@ expression could be
   M \sqsubseteq N \wedge R \sqsubseteq S \Rightarrow M + R \sqsubseteq N + S
 \]
 %
-This approach is related to the compositional minimization, where one component
+This approach is related to compositional minimization, where one component
 is reduced to a simpler, more abstract model, to reduce the complexity of the
 proofs.
 %
 They proved the correctness of a realistic multiprocessor system with respect to
-a simple ISA semantics and Lamport's sequential consistency (SC)\thomasrk{ref
-  lamport} as the memory model.
+a simple ISA semantics and Lamport's sequential consistency (SC) \thomasrk{ref
+  lamport} \GH{oui, il faut une ref! :-)} as the memory model.
 %
 Their proofs consist in a succession of refinement proofs from their
 implementation to high-level modules which model their semantics and the SC
 memory model.
 
 {\scshape Kami} provides a general-purpose framework for hardware verification.
-is hardware-specific, thus is not suitable to reason about systems which also
+\GH{Il manque le début de la phrase} is hardware-specific, thus is not suitable to reason about systems which also
 include software components.
 %
 We believe this is a strong argument in favor of compositional reasoning for
-hardware architectures.
+hardware architectures. \GH{Cet argument n'est pas très claire. Tu as bien présenté Kami, on comprend bien qu'il correspond à la catégorie "minimization reasoning". Tu dis qu'il est centré sur le hardware seulement, ok.  Mais je ne vois pas en quoi çà permet de conclure que "minimization reasoning" et plus adapté que "compositionnal reasoning" pour ton approche. Pourrais-on adapter Kami pour inclure des composants software? Soit, a priori, tu peux établir qu'une famille (compositionnal  ou minimization reasoning) est plus adaptée que l'autre et dans ce cas il faudrait l'expliquer plus tôt, quand tu présentes les deux familles, et t'appuyer sur cet argument déjà présenté pour critique Kami ici. Soit il faut mieux expliquer.}
 %
 In comparison, our framework presented in Chapter~\ref{chapter:freespec} is more
-high-level, and focus on compositional reasoning ---in the form of
+high-level \GH{çà veut dire quoi "high level"?}, and focus on compositional reasoning ---in the form of
 assume-guarantee contracts--- rather than minimization reasoning.
 
 \paragraph{\texttt{Coq.io}.}
@@ -1714,7 +1714,7 @@ B allows for the definition of functional specifications, called abstract
 machines, and the refinement of these specifications up to executable code.
 %
 An abstract machine is characterized by a set of variables, and several
-operations which update these variables, with preconditions in form of
+operations which update these variables. Preconditions in form of
 predicates on the machine variables can be attached to a given operation to
 specify when the operation can be used.
 
@@ -1734,29 +1734,29 @@ following reasoning:
   more concrete implementation) of this abstract machine.
   %
 \item A model of a component which uses an interface can \emph{include} the
-  abstract machine which models this interface and uses its operations.
+  abstract machine which models this interface and uses its operations. \GH{cette dernière phrase n'est pas très claire}
 \end{itemize}
 %
 Our approach apply a similar process within the Coq proof assistant, but with a
 clearer separation between the operations exposed by an interface and the
 requirements over the component which exposes it.
 %
-This offer use more flexibility to prove that a given component correctly uses
+This offer use more flexibility \GH{que veux "use more flexibility"? Est-ce que "Our approach offers more flexibility" n'est pas plus approprié?} to prove that a given component correctly uses
 (satisfy its assumption) or exposes (enforce its guarantee) interface.
 %
 We believe this is a valuable property considering that we want to prove the
-same hardware architecture correct with respect to several \ac{hse} mechanisms.
+same hardware architecture correct \GH{correctness} with respect to several \ac{hse} mechanisms.
 
 \paragraph{Compositional Security.}
 
 The projects detailed above focus on verifying functional specifications, but
-the use of component-based modeling to verify security properties of a given
-system is not a novel idea.
+the use of component-based modeling has also been used to verify security properties of a given
+system.
 
 Heyman \emph{et al.} have proposed a component-based modelling technique for
-Alloy\,\cite{jackson2012alloy} where components are primarily defined as
+Alloy\,\cite{jackson2012alloy} \GH{c'est quoi Alloy?}. In their approach, components are primarily defined as
 semantics for a set of operations\,\cite{heyman2012securemodel}; a component is
-connected to another when it leverages its operations.
+connected to another when it leverages its operations. \GH{Ce n'est pas très claire. Difficile de comprendre sans connaitre le papier}
 %
 Alloy leverages a model finder to verify a composition of these components
 against known security patterns, and to assume or verify facts about operations
@@ -1767,7 +1767,7 @@ model.
 %
 On the contrary, our formalism and framework is compatible with the extraction
 mechanism of Coq, meaning a component model can be extracted in an {\scshape
-  OCaml} program.
+  OCaml} program. \GH{Mouais, en même temps, tu n'utilises pas cette fonctionnalité dans ton approche, donc je ne trouve pas que c'est un argument "fort", bien qu'on puisse le noter également. Tu n'as pas d'autres critères de comparaison plus en phase avec ce que tu as fait?}
 
 Finally, Garg \emph{et al.} have presented in 2010 a formal framework for
 compositional reasoning where components are defined in terms of programs
@@ -1793,8 +1793,8 @@ monolithic.
 %
 Otherwise, it would make the proof burden hard to bear.
 %
-Compositional verification is a very important domain research for the
-verification of large, realistic model.
+Compositional verification is thus a very important domain of research for the
+verification of large, realistic models.
 
 With FreeSpec\,\cite{letan2018freespeccode}, we aim to provide a generic
 compositional reasoning framework for Coq.
@@ -1822,7 +1822,9 @@ while {\scshape Kami} focuses on refinement proofs.
 %
 To the best of our knowledge, the closest related research is the work of Garg
 \emph{et al.}\,\cite{garg2010compositional}, with the difference than we
-leverage the Coq proof assistant to verify our models.
+leverage the Coq proof assistant to verify our models. \GH{Il faudrait insister sur le fait que Garg ne fait pas de vérification, ce qui est implicite dans ta phrase. On pourrait penser qu'il ont simplement utilisé un autre outil que Coq}
 
 \section{Conclusion}
 \label{sec:sota:conclusion}
+
+\GH{Il faudrait faire ici une conclusion rapide qui résume les deux problèmes auxquels tu t'es attelé et fasse la transition avec tes deux parties suivantes. Rapide, concis, claire ;-)}
