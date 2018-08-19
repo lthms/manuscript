@@ -2,9 +2,6 @@
 \chapter{State of the Art}
 \label{chapter:relatedwork}
 
-\PC{tu annonce un état de l'art complet, mais en pratique il est plus limité aux
-  transition systems - titre à revoir ?}
-
 \endquote{``\emph{We build our computers the way we build our cities: over time,
     without a plan, on top of ruins.}''
 
@@ -42,7 +39,7 @@ We steer a middle course between two domains: hardware verification and system
 software verification.
 %
 Generally, hardware verification focus on properties which are transparent to
-the executed software (\emph{e.g.} \emph{e.g.} cache
+the executed software (\emph{e.g.} cache
 coherency\,\cite{stern1995cachecoherence}, linearizability of SGX
 instructions\,\cite{leslie2015linsgx}, or hardware-based memory
 isolation\,\cite{lie2003xom}), and system software verification relies on
@@ -52,78 +49,114 @@ complexity.
 To the extent of our knowledge, the closest related project research is the work
 of Jomaa \emph{et al.}\,\cite{jomaa2016mmu}, who specified what are the
 requirement a microkernel must satisfy in order for a \ac{mmu} to enforce memory
-isolation at all times, but this remains an isolated initiative.
+isolation at all times.
 %
-As a consequence, the interactions of the numerous configurable hardware
-features is less subject to formal verification.
+Such approach remains an isolated initiative, hence the interactions of the
+numerous configurable hardware features is less subject to formal verification.
 %
-In Chapter~\ref{chapter:speccert}, we propose a more general-purpose approach.
+In Chapter~\ref{chapter:speccert}, we propose a general-purpose approach, which
+is not related to one hardware mechanism in particular, but rather aim to
+provide a general framework to reason about \ac{hse} mechanisms.
 
 The rest of this Chapter proceeds as follows.
 %
 We detail how transition systems have been widely and successfully used in order
 to verify hardware and software systems, and where does our formal definition of
-\ac{hse} mechanisms stands with respect to previous work
-(Section~\ref{sec:sota:formalisms})
+\ac{hse} mechanisms and experiment on using this formal definition stand with
+respect to previous work (Section~\ref{sec:sota:formalisms})
 %
 Then, we introduce and justify our interest in compositional verification
 approaches, which enable the ``divide and conquer'' strategy to reduce the
 burden of verifying large and complex systems, and compare our compositional
 framework for Coq with existing solutions (Section~\ref{section:sota:compsec}).
 
-\section{Formal Verification of Transition Systems}
+\section{Towards the Formal Verification of HSE Mechanisms}
 \label{sec:sota:formalisms}
 
-Transition systems have long been used to study the behavior of discrete
-systems. \GH{ref}
+In a verification problem, the definition of a model allows for unambiguously
+describing, by means of formal methods, the set of possible behaviors of the
+system.
 %
-Over time, many different definitions of transition system have been proposed,
-to address different classes of verification problems.
+The system is characterized by a set of \emph{states} and by a set of state
+transformations, called \emph{transitions} (\ref{subsec:sota:ltsdef}).
 %
-We explain how it is possible to model a system with transition systems
-(\ref{subsec:sota:ltsdef}).
+A sequence of transitions of the model, commonly called \emph{trace}, describes
+how the system has operated over time, that is which behavior it has exhibited.
 %
-Then, we focus on characterizing security policies in terms of properties of
-transition systems (\ref{subsec:sota:security}).
+As a consequence, by reasoning about the set of traces of the model, we reason
+about the set of all possible behaviors of the system, \emph{e.g.} to verify
+that security policies are enforced at all time (\ref{subsec:sota:security}).
 %
-Finally, we describe how the concepts of this section have been used in the
-literature in order to verify hardware and software systems
+To support this reasoning, many approaches and tools which implement them have
+been proposed, and to choose between one of these tools means making a necessary
+compromise between expressiveness, automation and applicability
+(\ref{subsec:sota:tools}).
+%
+In this thesis, we advocate for defining \ac{hse} mechanisms of a given hardware
+architecture against a general-purpose model of this architecture, comprehensive
+in terms of hardware components, rather than verifying each \ac{hse} mechanism
+against a specific model.
+%
+Many x86 models have been proposed over years, but to the extent of our
+knowledge, none of them aims to describe the x86 architecture as a whole
 (\ref{subsec:sota:ltsrelated}).
 %
-We conclude with a summary of our motivations for implementing an ad-hoc x86
-model for our experiments (\ref{subsec:sota:ltsconclusion}).
+To experiment with our formal definition of \ac{hse} mechanisms, we compromise
+and relied on a ad-hoc model, with the aim of identifying desirable properties
+for a large-scale model that would optimize the applicability of our approach
+(\ref{subsec:sota:ltsconclusion})
 
-\subsection{Transition System as a Modeling Structure}
+\subsection{Modeling a Hardware Architecture}
 \label{subsec:sota:ltsdef}
 
-The formal verification of discrete systems, such as computing systems, commonly
-rely on some sort of \emph{transition systems} to describe the behavior of the
-subject of study.
+\GH{Ref} A system is characterized by a set of states (\emph{e.g.} the state of
+a processor core typically includes the values of its registers, its execution
+mode) and a set of state transformations (\emph{e.g.}  the value of a register
+will change when a core execute certain instructions) which occur over times as
+the system operates.
 %
-\GH{Ref}
+To formally define these two sets means constructing a model of the system.
 %
-\GH{Il faudrait en outre insister sur ton contexte. Est-ce que ces systèmes sont
-  très utilisé pour modéliser les architectures hardware et pourquoi?}
+The literature has a rich collection of formalisms which can be leveraged to
+that end, each of them being well-suited for dedicated classes of problem.
+% \emph{e.g.}  the Kripke structure\,\cite{kripke1971semantical} is a prominent
+% definition of transition systems used in model
+% checking\,\cite{clarke1999model}.
 %
-More precisely, the system is characterized by a set of \emph{states} and by a
-set of state transformation, called \emph{transitions}.
-%
-Transitions occur when the system interacts with its environment (\emph{e.g.} a
-hardware circuit receives a clock signal, a hardware controller receives a
-message from a bus, or an operating system handles a syscall).
+In practice, labeled transition systems\,\cite{loiseaux1995lts} form a prominent
+class of transition systems, characterized by the use of labels to distinguish
+between transitions.
 
-\GH{Il faut que tu définisse un peu mieux ce qu'est un LTS et surtout la forme
-  de LTS que tu va utiliser et pourquoi. (approche entonnoire). ENSUITE tu peux
-  nous parler de ton exemple. Actuellement, il vient comme un cheveux sur la
-  soupe...}
+\begin{definition}[Labeled Transition System]
+  A labeled transition system is a tuple \( \langle S, L, R \rangle \), such
+  that \( S \) is a set of states, \( L \) is a set of labels, and
+  \( R \subseteq S \times L \times S \) is the transition relation, that is
+  \( (s, l, s') \in R \) is a transition of the LTS.
+\end{definition}
+
+There is a myriad of names which have been used to designate these labels,
+\emph{e.g.} input variables\,\cite{cimatti2002nusmv},
+operations\,\cite{jackson2012alloy}, rules\,\cite{murphi},
+actions\,\cite{barthe2011virtcert1}.
+%
+Although the name changes, the motivation remains to characterize the nature of
+the transition.
+%
+They are also well-suited to reason about the interactions of a system with its
+environment, \emph{e.g.} hypercalls handled by a
+hypervisor\,\cite{barthe2011virtcert1}, \IOs provoked by the execution of
+machine instructions\,\cite{lie2003xom}.
+%
+Similarly to that last example\,\cite{lie2003xom}, we use labels to reason about
+the interactions between the hardware architecture and the software components
+which are executed by this architecture.
+%
+It allows us to define requirements trusted software components have to satisfy
+to implement a given \ac{hse} mechanism.
 
 Throughout this Chapter, we will use the airlock system in order to act as a
-running example to illustrate the introduced definitions, since it is both
-simple ---our examples remain of manageable size--- and rich ---our examples do
-not feel far-fetched \GH{je ne sais pas si cette expression est bien appropriée
-  dans un manuscrit de thèse. Je dirai que cet exemple est suffisamment simple
-  (manageable size) tout en étant suffisamment riche pour illustrer les
-  différentes problématiques que tu souhaite aborder.}.
+running example, since it is both simple ---our examples remain of manageable
+size--- and rich ---we can use it to illustrate the definitions we introduce.
 %
 An airlock system is a device made of two doors, and an intermediary chamber.
 %
@@ -134,18 +167,8 @@ second door, and exits the chamber.
 \begin{example}[Airlock System]
   \label{example:sota:airlocklts}
 
-  \emph{Labeled} transition systems distinguish between classes of transitions
-  \emph{via} the use of labels\,\cite{loiseaux1995lts} (\emph{e.g.} one label
-  per syscall).
-%
-  A labeled transition system is a tuple \( \langle S, L, R \rangle \), such
-  that \( S \) is a set of states, \( L \) is a set of labels, and
-  \( R \subseteq S \times L \times S \) is the transition relation.
-  %
-  \GH{Cette définition ne devrait pas être dans l'exemple!}
-  %
-  Figure~\ref{fig:sota:airlock-lts} gives a definition of an idealized airlock
-  system, modeled as a labeled transition system.
+  We model our airlock system with a labeled transition system
+  \( \rangle S, L, R \langle \), such that:
 
   \begin{itemize}
   \item A door of the system can be either \( \mathtt{open} \) or
@@ -153,78 +176,80 @@ second door, and exits the chamber.
     %
     The set of states of the airlock system reflects the Cartesian product of
     the doors states.
-  \item A transition is characterized by the opening (\( \mathtt{Open}_i\), with
-    \( i \in \{1, 2\} \)) and closing (\( \mathtt{Close}_i \), with
-    \( i \in \{1, 2\} \)) of a door of the system.
+    %
+    \[
+      \begin{array}{rcl}
+        S & \triangleq & \{ \mathtt{open}, \mathtt{close} \} \times \{ \mathtt{open},
+                         \mathtt{close} \}
+      \end{array}
+    \]
+    %
+  \item A transition is characterized by a request to open
+    (\( \mathtt{Open}_i\), with \( i \in \{1, 2\} \)) or close
+    (\( \mathtt{Close}_i \), with \( i \in \{1, 2\} \)) a door of the system.
+    %
+    \[
+      \begin{array}{rcl}
+        L & \triangleq & \{ \mathtt{Open}_1, \mathtt{Close}_1, \mathtt{Open}_2,
+                         \mathtt{Close}_2 \}
+      \end{array}
+    \]
     %
   \item The model does not allow the simultaneous opening of both doors, as
     stated by the definition of \( R \) which does not contain a transition
     which leads to the state \( (\mathtt{open}, \mathtt{open}) \).
+    \[
+      \begin{array}{rcl}
+        R & \triangleq & \{ (\mathtt{close}, \mathtt{close}), \mathtt{Open_1},
+                         (\mathtt{open}, \mathtt{close}), \\
+          & & \ (\mathtt{close}, \mathtt{close}), \mathtt{Open_2},
+              (\mathtt{close}, \mathtt{open}), \\
+          & & \ (\mathtt{open}, \mathtt{close}), \mathtt{Close_1},
+              (\mathtt{close}, \mathtt{close}), \\
+          & & \ (\mathtt{close}, \mathtt{open}), \mathtt{Close_2},
+              (\mathtt{close}, \mathtt{close}) \}
+      \end{array}
+    \]
   \end{itemize}
+
+  The resulting labeled transition system is pictured in
+  Figure~\ref{fig:sota:airlock-lts}.
 \end{example}
 
 \begin{figure}
   \begin{center}
-    % the mathematical definition
-    \begin{minipage}[c]{0.55\linewidth}
-      \[
-        \begin{array}{rcl}
-          S & \triangleq & \{ \mathtt{open}, \mathtt{close} \}^2 \\
-          L & \triangleq & \{ \mathtt{Open}_1, \mathtt{Close}_1, \mathtt{Open}_2,
-                           \mathtt{Close}_2 \} \\
-          R & \triangleq & \{ (\mathtt{close}, \mathtt{close}), \mathtt{Open_1},
-                           (\mathtt{open}, \mathtt{close}), \\
-            & & \ (\mathtt{close}, \mathtt{close}), \mathtt{Open_2},
-                (\mathtt{close}, \mathtt{open}), \\
-            & & \ (\mathtt{open}, \mathtt{close}), \mathtt{Close_1},
-                (\mathtt{close}, \mathtt{close}), \\
-            & & \ (\mathtt{close}, \mathtt{open}), \mathtt{Close_2},
-                (\mathtt{close}, \mathtt{close}) \}
-        \end{array}
-      \]
-    \end{minipage}
-    \hfill
     % a tikzpicture to illustrate the resulting automata
-    \begin{minipage}[c]{0.40\linewidth}
-      \begin{center}
-        \begin{tikzpicture}
-          \node [draw, circle split, text width=30pt, text badly centered] (cc)
-          {\( \mathtt{close} \) \nodepart{lower} \( \mathtt{close} \)};%
-          \node [right=of cc] (x) {};%
-          \node [draw, circle split, above=of x, text width=30pt, text badly
-          centered] (oc) {\( \mathtt{open} \) \nodepart{lower}
-            \( \mathtt{close} \)};%
-          \node [draw, circle split, below=of x, text width=30pt, text badly
-          centered] (co) {\( \mathtt{close} \) \nodepart{lower}
-            \( \mathtt{open} \)};%
-          \node [draw, circle split, right=of x, text width=30pt, text badly
-          centered] (oo) {\( \mathtt{open} \) \nodepart{lower}
-            \( \mathtt{open} \)};%
+    \begin{tikzpicture}
+      \node [draw, circle split, text width=30pt, text badly centered] (cc)
+      {\( \mathtt{close} \) \nodepart{lower} \( \mathtt{close} \)};%
+      \node [right=of cc] (x) {};%
+      \node [draw, circle split, above=of x, text width=30pt, text badly
+      centered] (oc) {\( \mathtt{open} \) \nodepart{lower}
+        \( \mathtt{close} \)};%
+      \node [draw, circle split, below=of x, text width=30pt, text badly
+      centered] (co) {\( \mathtt{close} \) \nodepart{lower}
+        \( \mathtt{open} \)};%
+      \node [draw, circle split, right=of x, text width=30pt, text badly
+      centered] (oo) {\( \mathtt{open} \) \nodepart{lower} \( \mathtt{open}
+        \)};%
 
-          \draw [-latex] (cc) edge [bend left] node [xshift=-5pt, left]
-          {\( \mathtt{Open}_1 \)} (oc);%
-          \draw [-latex] (oc) edge [bend left] node [xshift=5pt, right]
-          {\( \mathtt{Close}_1 \)} (cc);%
+      \draw [-latex] (cc) edge [bend left] node [xshift=-5pt, left]
+      {\( \mathtt{Open}_1 \)} (oc);%
+      \draw [-latex] (oc) edge [bend left] node [xshift=5pt, right]
+      {\( \mathtt{Close}_1 \)} (cc);%
 
-          \draw [-latex] (cc) edge [bend left] node [xshift=5pt, right]
-          {\( \mathtt{Open}_2 \)} (co);%
-          \draw [-latex] (co) edge [bend left] node [xshift=-5pt, left]
-          {\( \mathtt{Close}_2 \)} (cc);%
+      \draw [-latex] (cc) edge [bend left] node [xshift=5pt, right]
+      {\( \mathtt{Open}_2 \)} (co);%
+      \draw [-latex] (co) edge [bend left] node [xshift=-5pt, left]
+      {\( \mathtt{Close}_2 \)} (cc);%
 
-        \end{tikzpicture}
-      \end{center}
-    \end{minipage}
+    \end{tikzpicture}
 
     \caption{A simple airlock system modeled as a labeled transition system}
     \label{fig:sota:airlock-lts}
   \end{center}
 \end{figure}
 
-There are many modeling structures for characterizing transition systems, with
-each variant better suited to tackle a particular class of systems.
-%
-For instance, the Kripke structure\,\cite{kripke1971semantical} is a prominent
-definition of transition systems used in model checking\,\cite{clarke1999model}.
 %%
 % Besides, Petri net\,\cite{peterson1981petri}, process
 % algebra\,\cite{bergstra1984process} or interface
@@ -232,15 +257,8 @@ definition of transition systems used in model checking\,\cite{clarke1999model}.
 % systems. \GH{et? Quelle structure vas-tu utiliser dans ton approche?
 % Pourquoi?}
 
-\GH{Tel quel, cette sous-section est un peu vague. Elle gagnerait à être un peu
-  plus étoffée et surtout présentée de manière plus rigoureuse, carré. On ne
-  comprend pas vraiment pourquoi tu nous parles de LTS sinon que d'autres le
-  fond alors çà a l'air d'être une bonne idée...}
-
-\paragraph{Model Prerequisites.}
-%
-Our objective is to apply these concepts in order to verify \ac{hse} mechanisms,
-with the hope to uncover compositional attacks.
+Our objective is to verify \ac{hse} mechanisms, therefore we need to be able to
+model them.
 %
 To that end, it is important to consider that
 %
@@ -254,29 +272,19 @@ To that end, it is important to consider that
   hence the role played by trusted software components to configure them.
 \end{inparaenum}
 %
-In this thesis, we advocate for defining \ac{hse} mechanisms of a given hardware
-architecture against a generic functional specification of this architecture,
-rather than relying on ad-hoc models dedicated to specific \ac{hse} mechanisms.
+By defining \ac{hse} mechanisms of a given hardware architecture against a
+general-purpose model of this architecture, rather than relying on ad-hoc models
+dedicated to specific \ac{hse} mechanisms, we believe we reduce the overall
+verification effort induced by (\ref{needreuse}), and address the threat posed
+by by compositional attacks.
 %
-Our hypothesis is that a pre-existing model which is comprehensive in terms of
-hardware features is a prerequisite to address the threat posed by compositional
-attacks.
+However, (\ref{needreduce}) means such a general-purpose model of hardware
+architectures necessarily embeds behavior which are legitimate with respect to
+the hardware architecture functional specification, but violate targeted
+security policies.
 %
-Besides, this means the same model can be reused for several \ac{hse}
-mechanisms, reducing the overall verification effort induced by
-(\ref{needreuse}).
-%
-However, (\ref{needreduce}) means models of hardware architectures necessarily
-contains traces which are legitimate with respect to the functional
-specifications, but violate the security policy.
-
-As a consequence, a formal definition of \ac{hse} mechanisms, like the one we
-present in Chapter~\ref{chapter:speccert}, shall allow for identifying the
-subset of traces wherein the mechanism is correctly implemented by the trusted
-software components.
-%
-In this context, verifying a \ac{hse} mechanism consists of proving this set of
-traces satisfies the predicate which characterizes the targeted security policy.
+This is the case, for instance, if the \ac{bios} leaves the SMRAM unlocked at
+the end of the boot sequence.
 
 \subsection{Specifying Security Policies}
 \label{subsec:sota:security}
@@ -300,28 +308,29 @@ shall never happen.
 An availability policy is a liveness property: the system shall eventually
 satisfy the service.
 
-Safety and liveness properties are expressed against the transition systems
-\emph{traces}.
+Safety and liveness properties are expressed against sequences of transitions,
+commonly called \emph{traces} in the literature.
 %
-The most generic definition of a trace of a transition system is a (potentially
-infinite) sequence of states generated by successive transitions.
+Each formalism has its own definition of traces, which takes into account its
+characteristic.
 %
-Each modeling structure has its own definition of traces, which takes into
-account the specificities of the model. \GH{Cette phrase est vague. Plutôt que
-  de viser la généricité et rester vague, il faudrait mieux dès le départ se
-  focaliser sur un cadre, en justifiant ce choix et ensuite décrire plus
-  précisemment les notions pour ce cadre}
-%
-For instance, traces of labeled transition system will interleave a label
-between each state\,\cite{vijayaraghavan2015modular}, to characterize the nature
-of the transition which led to the transformation of a state of the sequence
-with its successor.
-%
-\GH{J'ai l'impression que tu décris les LTS ici, alors qu'ils devraient être
-  décris dans la sous-section précédente}
-%
-Afterwards, we write \( \Sigma(M) \) for the set of traces of a specification
-\( M \).
+As for the labeled transition systems, their traces interleaves a label between
+each state\,\cite{vijayaraghavan2015modular}.
+
+\begin{example}[Airlock System Trace]
+  The crossing, by a user, of the airlock system is characterized by the
+  following trace:
+  \[
+    \footnotesize (\mathtt{close}, \mathtt{close})%
+    \!\xrightarrow{\mathtt{Open}_1}\!(\mathtt{open}, \mathtt{close})%
+    \!\xrightarrow{\mathtt{Close}_1}\!(\mathtt{close}, \mathtt{close})%
+    \!\xrightarrow{\mathtt{Open}_2}\!(\mathtt{close}, \mathtt{open})%
+    \!\xrightarrow{\mathtt{Close}_2}\!(\mathtt{close}, \mathtt{close})
+  \]
+\end{example}
+
+Afterwards, we write \( \Sigma(M) \) for the set of traces of a labeled
+transition system \( M \).
 
 Simplest properties can be defined in terms of predicates on
 traces\,\cite{alpern1987recognizing,schneider2000enforceable,basin2013enforceable}.
@@ -501,7 +510,25 @@ enforcement which is more manageable to prove.
 %   snooping)
 % \end{itemize}
 
+\paragraph*{}
+%
+In the context of formal verification, a security policy is characterized by a
+(set of) set(s) of traces wherein the policy is enforced at all times.
+%
+Because hardware features are unsafe, \emph{i.e.} they need to be configured by
+trusted software components which implements \ac{hse} mechanisms, legitimate
+traces of a general-purpose x86 model will not be part of the ``secure'' traces.
+%
+Our formal definition of \ac{hse} mechanisms allows for identifying the subset
+of traces wherein the mechanism is correctly implemented by the trusted software
+components, and verifying a \ac{hse} mechanism consists of proving this set of
+traces satisfies the predicate which characterizes the targeted security policy.
+%
+Because of the complexity of a typical x86 architecture, this work cannot be
+achieved manually and we need the support of an appropriate tooling.
+
 \subsection{Approaches and Tools (TODO: Find better name)}
+\label{subsec:sota:tools}
 
 \GH{Je trouve que ce tour d'horizon des méthodes formelles est un peu rapide. Il
   gagnerait à être plus complet et mieux structuré.}
@@ -650,62 +677,33 @@ comes at a cost in terms of automation.
 Interactive theorem provers (\emph{e.g.}  Coq, Isabelle/HOL, or more recently
 Lean\,\cite{de2015lean}) are based on higher-order logic.
 
-\paragraph*{}
-%
-In the context of this thesis, our initial goal is to propose a formal
-definition of \ac{hse} mechanisms.
-%
-In this context, we need higher-order logic to prove generic statements not
-related to a given hardware architecture.
-%
-For instance, in Section~\ref{subsec:speccert2:coop}, we reason about the
-composition of two \ac{hse} mechanisms whose only the targeted security policies
-are known ---even the hardware model is left as a parameter of the proof--- and
-such a statement is out of the scope of any first-order logic.
+We leverage a higher-order logic to propose our formal definition of \ac{hse}
+mechanisms, which allows us to reason about high-level properties implying
+\ac{hse} mechanisms, \emph{e.g.} in Section~\ref{subsec:speccert2:coop}, we
+reason about the composition of two \ac{hse} mechanisms whose only the targeted
+security policies are known ---even the hardware model is left as a parameter of
+the proof.
 %
 To increase our confidence in our results, we systemically wrote our proofs in
 the Coq theorem prover, and we made the resulting projects available under free
 software license\,\cite{letan2016speccertcode,letan2018freespeccode}.
 
-To verify a specific \ac{hse} mechanism which can be implemented on a specific
-hardware architecture, the need for higher-logic is less prominent.
-%
-As a consequence, if someone wants to leverage our formal definition of \ac{hse}
-mechanism to verify guide its verification process, they can consider a large
-class of tools, including model checkers which has the benefit of automation.
-%
-TODO suite
-
-\subsection{Related Work}
+\subsection{Tour of Existing x86 Models}
 \label{subsec:sota:ltsrelated}
 
-\GH{Je n'aime pas le titre Related Work, qui est trop vague. Je préfère un titre
-  explicite. Quel est (sont) le(s) point(s) commun(s) des travaux que tu vas
-  présenter par la suite?}
+To experiment with our approach, we decided to specify the \ac{hse} mechanism
+implemented by the \ac{bios} at runtime to remain isolated from the rest of the
+software stack and verify its correctness with the security policy it aims to
+enforce.
 %
-Throughout this Section, we have detailed how we can model a target of
-verification as a transition system in order to verify its correctness with
-respect to security policies specified as predicates on set of model traces.
+To do that, we needed a x86 model which integrates the related hardware
+features, and allows for reasoning about the execution of several software
+components.
 %
-\GH{Je ne comprend pas trop cette phrase. Est-ce que tu fais un résumé de ce qui
-  a été présenté avant (ce que suggère l'emplois du passé)?  Dans ce cas, il
-  faudrait la faire suivre pas une phrase indiquant ce que tu va présenter
-  maintenant dans cette sous-section.}
+We now give an overview of existing x86 models.
 
-
-\GH{A ce stage, on ne sait pas trop sur quoi va porter le reste de l'état de
-  l'art : les modèles hardware? des techniques de vérification? des politiques?
-}
 \paragraph{x86 Models by Intel.}
 %
-The trustworthiness of a verification result depends to a large extent on the
-model.
-%
-As such, because x86 is a proprietary product, Intel remains in the best
-position to produce a detailed, trustworthy model of its architecture. \GH{Je
-  supprimerais ces deux premières phrases qui sont subjectives et n'apportent
-  pas grand chose.}
-
 Intel has integrated formal verification in its processors design process for
 more than a decade now.
 %
@@ -761,8 +759,7 @@ hardware features, as applications typically do, and to reason about correction
 with respect to functional specifications.
 %
 It has been shown in the past that it is possible to extend them, when their
-abstraction is too strong and hides crucial \GH{crucial quoi? il manque un nom?}
-of concrete code execution.
+abstraction is too strong.
 %
 For instance, Chen \emph{et al.} have extended the hardware model of CompCertX,
 a variant of CompCert used in the development of formally verified
@@ -774,36 +771,34 @@ components, not the underlying hardware architecture.
 
 \paragraph{Ad-hoc x86 Models}
 %
-Finally,\GH{finally ne me semble pas adéquat, puisqu'il reste une dernière
-  catégorie (Other Hardware Architecture Models)} a last category of existing
-x86 models is ad-hoc models, specially developed to verify a dedicated system
-software component.
+Another category of x86 models is ad-hoc models, specially developed to verify a
+dedicated system software component.
 %
 As such, they focus on hardware features used by the target of verification,
 \emph{e.g.} the \ac{mmu} or the interrupt handlers. The objective of these
 approaches is to verify the software component and so they suppose the hardware
-will behave as expected. \GH{il faudrait en rajoutant une couche en disant que
-  de notre côté c'est l'inverse, on fait des hypothèse sur le software et on
-  vérifier que le comportement du hard satisfait une propriétés de sécurité sous
-  ces hypothèses}
+will behave as expected.
+%
+On the contrary, we aim to specify requirements on software components, and to
+use these requirements as assumptions to verify the underlying architecture.
 
-The seL4 microkernel \GH{ref ou url vers le projet en footnote} is, to date, the
-most advanced and mature verified implementation of a microkernel.
+The seL4 microkernel\,\cite{sel4website} is, to date, the most advanced and
+mature verified implementation of a microkernel.
 %
 A C implementation of the kernel is proven correct with respect to a functional
-implementation modeled in the Isabelle/HOL theorem prover, and they \GH{a qui
-  renvoie "they"?} have show that this model correctly enforces security
-policies including information flow control, integrity and
-confidentiality\,\cite{klein2009sel4}.
+implementation modeled in the Isabelle/HOL theorem prover, and the authors have
+proven this model correctly enforces security policies including information
+flow control, integrity and confidentiality\,\cite{klein2009sel4}.
 %
 In practice, the hardware model focus on \ac{mmu}, cache and interrupt handling,
 and in large parts the exact behavior of hardware devices is left
 non-deterministic, in order to reduce the assumptions made by the model about
 the hardware.
 %
-In 2016, Jomaa \emph{et al.} have proposed a formal machine-checked proof (in
-Coq) of guests isolation by an idealized protokernel based on a
-\ac{mmu}\,\cite{jomaa2016mmu}.
+We already mentioned the work of Jomaa \emph{et al.}\,\cite{jomaa2016mmu}.
+%
+In 2016, they have proposed a formal machine-checked proof (in Coq) of guests
+isolation by an idealized protokernel based on a \ac{mmu}\,\cite{jomaa2016mmu}.
 %
 Similarly to seL4, their hardware model focus on \ac{mmu} and interrupt
 handling.
@@ -848,37 +843,6 @@ protection against cache-timing attacks, notoriously harder to reason with.
 However, the model combines hardware and software components behavior and we
 would have to make significant changes prior to using it.
 
-%
-% First, they showed that the ideal hypervisor
-%%
-% \begin{inparaenum}[(1)]
-% \item ensures strong isolation between guests (two safety properties and one
-%   2-safety property\PC{c'est quoi une ``2-safety property''?}), and
-%%
-% \item eventually processes every request performed by the guests (one liveness
-%   property)\,\cite{barthe2011virtcert1}.
-% \end{inparaenum}
-%%
-% Then, they incorporated the \ac{cpu} cache to their hardware model, and a
-% countermeasure for preventing cache-timing attack to their hypervisor model.
-%%
-% They proved the effectiveness of the countermeasure.
-%%
-% The authors have shown their ideal hypervisor could prevent such attack, at
-% the cost of flushing the cache before each context switch.
-%%
-% Finally, they have taken their approach a step further, by focusing on
-% constant-time cryptography as an effective countermeasure against cache-timing
-% attack\,\cite{barthe2014virtcert3}.
-%%
-% This last work also introduced a static analysis for C program, notably
-% implemented as an extension for CompCert, a certified C
-% compiler\,\cite{leroy2012compcert}.
-%%
-% \PC{trop générique/vague: ``une analyse statique ?'' laquelle ? pour faire
-% quoi}
-
-
 \paragraph{Other Hardware Architecture Models.}
 %
 The x86 architecture is not the only hardware architecture which has been the
@@ -893,7 +857,8 @@ architectures\footnote{There are three variants of the ARM Architecture, for as
   allow an operating system to manage applications, the R-class processors are
   dedicated to real-time systems, and the M-class are used in microcontrollers.}
 is the result of an important 5 year effort by ARM Ltd to integrate formal
-specification definition to their regular specification process. \GH{ref!}
+specification definition to their regular specification
+process\,\cite{reid2016armv8}.
 %
 The formal specification of ARMv8 architectures is written in a dedicated
 language called ARM Specification Language, and has been intensively validated
@@ -970,75 +935,86 @@ The verification proceeds as follows:
 %
 In the process of verifying \ac{xom}, the authors have been able to show with
 their model that the \ac{xom} architecture was subject to several replay
-attacks, and that their countermeasures \GH{plutôt "the countermeasures they
-  proposed"? } were effective.
-
-\GH{Il faudrait placer ici un commentaire plutot positif en disant que c'est le
-  travaux qui se rapproche le plus du tient et que tu penses que les concepts x
-  et y sont intéressants. Ensuite tu peux parler des limites qui justifie tes
-  travaux.}  We believe the necessity to manually maintain a merge of two
-transition systems reduces its applicability in the long run, as new
-architecture versions are released frequently.
+attacks, and that the countermeasures they proposed were effective.
+%
+The formalism used to define the actual model follows a logic which is
+approaching our expectation.
+%
+The labels of the transitions characterize the execution of a software component
+by the architecture, without any detail in the model about its behavior or its
+implementation.
+%
+However, we believe the necessity to manually maintain a merge of two transition
+systems reduces its applicability in the long run, as new architecture versions
+are released frequently.
 %
 This is why our formal definition of \ac{hse} mechanism is characterized by a
 subset of traces of a model, rather than an additional, idealized model.
 %
-Besides, the state explosion problem forces the authors to simplify their model,
-in order to reduce the state combinatory.
-%
-From a security perspective, simplifying the model comes with the risk to hide
-an attack path.
-%
+% Besides, the state explosion problem forces the authors to simplify their
+% model, in order to reduce the state combinatory.
+%%
+% From a security perspective, simplifying the model comes with the risk to hide
+% an attack path.
+
 \subsection{Conclusion}
-%
 \label{subsec:sota:ltsconclusion}
 
-Transition systems are a popular formalism to reason about the correctness of
-computing system, and have been successfully applied to model and reason about
-(part of) hardware architectures.
+We face a 'chicken-and-egg' problem:
 %
-In order to specify and verify \ac{hse} mechanisms, we need a comprehensive
-model of the related hardware architecture.
+\begin{inparaenum}[(1)]
+\item our approach assumes the existence of a general-purpose hardware model,
+  comprehensive it terms of hardware feature,
+  %
+\item the existing models focuses on providing an abstraction of a x86 hardware
+  architecture to reason about machine-code, or on a particular sets of hardware
+  features to verify them in isolation or because they are leveraged by a system
+  software component,
+  %
+\item we anticipate a great care should taken in defining our required model, to
+  manage the scale of the x86 hardware architecture.
+\end{inparaenum}
 %
-On the one hand, hardware design verification often focus on properties
-transparent to the executed software components (\emph{e.g.} cache
-coherency\,\cite{stern1995cachecoherence}, linearizability of SGX
-instructions\,\cite{leslie2015linsgx}, or hardware-based memory
-isolation\,\cite{lie2003xom}).
+It would require a tremendous amount of efforts to be developed, reviewed and
+validated, and the question of its applicability in a verification process would
+have to be demonstrated.
 %
-Security gap in interactions \GH{Que veut dire "security gap in interaction"?}
-of multiple platform components are less subject to formal verification, due to
-their increasing complexity\,\cite{potlapally2011hardwaresecurity}, and we are
-not aware of any x86 hardware model comprehensive in terms of hardware
-components and hardware features exposed by these components
+Therefore, we decided to compromise and experiment on an ad-hoc model with the
+aim of identifying desirable properties for a large-scale, general-purpose model
+that would optimize the applicability of our approach; and because the scope of
+existing models does not cover the features that a \ac{bios} relies on to
+enforce its isolation, we developed our own minimal model.
 %
-On the other hand, low-level software components such as
-seL4\,\cite{klein2009sel4} or CertiKOS\,\cite{gu2016certikos} use the features
-exposed by these components, and are verified against \emph{ad hoc} hardware
-models, whose scope is driven by their target of verification.
-%
-As a consequence, we would need to make significant changes prior to using them.
+\GH{Je trouve cet argumentaire un peu casse-gueule... Tu laisse entendre que les
+  modèles existants sont incomplet et spécifique à un mécanisme. Or tu as
+  développé un modèle largement incomplet et dédié à la vérification d'un seul
+  mécanisme (même s'il pourrait sans doute être étendu).}%
+\thomasrk[inline]{Est-ce que ça te semble mieux ?}
 
-Thus, we face a 'chicken-and-egg' problem: we need a detailed hardware model to
-reason about \ac{hse} mechanisms, yet such a model does not exist and requires a
-tremendous amount of efforts to be developed, reviewed and validated; which
-means we need to be reasonably certain of our modeling choices for those efforts
-not going to waste. \GH{Je trouve cet argumentaire un peu casse-gueule... Tu
-  laisse entendre que les modèles existants sont incomplet et spécifique à un
-  mécanisme. Or tu as développé un modèle largement incomplet et dédié à la
-  vérification d'un seul mécanisme (même s'il pourrait sans doute être
-  étendu). }
+To verify a specific \ac{hse} mechanism, the need for higher-logic is less
+prominent as first-order logic quantifiers are expressive enough.
 %
-We decided to develop an ad-hoc, simplified x86 hardware model which includes
-the necessary hardware components abstracted away in related work.
+Therefore, we can theoretically leverage a large class of tools, in particular
+model checkers which have the benefit of automation.
 %
-Using this model, we demonstrate in Chapter~\ref{chapter:speccert2} how it is
-possible to leverage our formal definition of \ac{hse} mechanisms presented in
-Chapter~\ref{chapter:speccert} in order to specify and verify a \ac{hse}
-mechanism implemented by the \ac{bios}.
+We anticipate two factors would reduce the applicability of model checkers in
+our context:
 %
-This experiment allowed us to learn a lot with regard to desirable properties a
-detailed hardware model could have.
+\begin{inparaenum}[(1)]
+\item the scale of the x86 hardware architecture, with hundreds of
+  interdependent, would make a general-purpose model subject to the state
+  explosion problem, and
+  %
+\item because model checkers exhaustively explore models, we would need to
+  derive one dedicated model per \ac{hse} mechanism.
+\end{inparaenum}
+%
+Hardware verification by means of theorem provers has proven to be a practical
+alternative to model checking\thomasrk{ref}, and a successful solution to
+address the state explosion problem.
+%
+For these reasons, we decided to implement our model and proofs using the Coq
+theorem prover.
 
 \section{Compositional Verification}
 \label{section:sota:compsec}
@@ -1257,7 +1233,8 @@ isolation for the purpose of compositional verification, an in particular
 compositional reasoning.
 %
 Because our long-term objective is to apply a component-based modeling approach
-to a complex hardware architecture, we focus on their applicability \GH{to such context?}.
+to a complex hardware architecture, we focus on their applicability \GH{to such
+  context?}.
 %
 A component model should be easy to write, read and exploit in the context of a
 verification problem.
@@ -1304,7 +1281,8 @@ Interface automata\,\cite{de2001interfaceautomata} are similar to I/O automata,
 except they do not require to be input enabled.
 %
 As a consequence, the definition of an interface automaton captures its
-requirements over the rest of the system. \GH{Je ne comprends pas cette dernière phrase}
+requirements over the rest of the system. \GH{Je ne comprends pas cette dernière
+  phrase}
 
 Another popular modeling structure is the Moore Machine, as they play a key role
 in compositional model checking\,\cite{mcmillan1989compositional}, because they
@@ -1430,13 +1408,18 @@ Labels of interface automata allows for composing together several transition
 systems by synchronizing their shared transitions.
 %
 However, the manual definition of these components to specify sequences of input
-and output transitions can quickly become cumbersome, as we our experiences \GH{"as we our experiences" à revoir} with
-the definition of the airlock system controller in
-Example~\ref{example:sota:airlockinterface} \GH{peut-être que définir cet example n'a pas été facile pour toi mais tel qu'il est présenté, il ne semble pas difficile. Du coup, pas sur qu'il illustre bien ce que tu veux dire ici.}.
+and output transitions can quickly become cumbersome, as we our experiences
+\GH{"as we our experiences" à revoir} with the definition of the airlock system
+controller in Example~\ref{example:sota:airlockinterface} \GH{peut-être que
+  définir cet example n'a pas été facile pour toi mais tel qu'il est présenté,
+  il ne semble pas difficile. Du coup, pas sur qu'il illustre bien ce que tu
+  veux dire ici.}.
 %
 Besides, interactions between components are often motivated by the need to
 exchange data, \emph{e.g.} the processor interacts with the \ac{pch} to read
-from or write to peripherals memories. \GH{et? que veux tu dire? Que les I/O automata ne permettent pas de modéliser ces échanges de données? Il faut que tu développes et que tu dises explicitement l'idée que tu veux exprimer.}
+from or write to peripherals memories. \GH{et? que veux tu dire? Que les I/O
+  automata ne permettent pas de modéliser ces échanges de données? Il faut que
+  tu développes et que tu dises explicitement l'idée que tu veux exprimer.}
 
 \paragraph{Process Algebra.}
 %
@@ -1446,8 +1429,8 @@ complex systems is process algebra.
 Process algebra has been developed to reason about programs executed in
 parallel.
 %
-It is a formal system to describe interacting systems \GH{répétition sur system}, together with a proof
-system for verifying them.
+It is a formal system to describe interacting systems \GH{répétition sur
+  system}, together with a proof system for verifying them.
 %
 In process algebra such as Calculus of Communication
 Systems\,\cite{milner1980ccs} or the Communicating Sequential
@@ -1552,7 +1535,10 @@ Process algebras such as \( \pi \)-calculus are well suited formalisms for
 describing component interactions.
 %
 However, their applicability is limited by the low-level description of the used
-languages and their minimalistic semantic. \GH{Cette conclusion est un peu rapide et minimaliste. Difficile à comprendre en outre. Que veux dire "low-level description" et "minimalist semantic"? Si on remet dans le context de ton approche, en quoi sont-ils peu adaptés?}
+languages and their minimalistic semantic. \GH{Cette conclusion est un peu
+  rapide et minimaliste. Difficile à comprendre en outre. Que veux dire
+  "low-level description" et "minimalist semantic"? Si on remet dans le context
+  de ton approche, en quoi sont-ils peu adaptés?}
 
 \paragraph{Programs with Effects.}
 %
@@ -1597,7 +1583,8 @@ effect handlers is by the means of coroutines\,\cite{kiselyov2013extensible}.
 When a program with effects requires the result of a given effect, it sends a
 request to the handler, and waits for the result.
 
-\GH{et? que doit-on penser de tout çà? Est-ce intéressant pour ton problème? Quelles sont les éventuelles limitations?}
+\GH{et? que doit-on penser de tout çà? Est-ce intéressant pour ton problème?
+  Quelles sont les éventuelles limitations?}
 
 \subsection{Related Work}
 \label{subsec:sota:comprelated}
