@@ -171,7 +171,7 @@ whole.
 
 The significant impact of previously disclosed compositional
 attacks\,\cite{duflot2009smram,wojtczuk2009smram,domas2015sinkhole,kallenberg2015racecondition,kovah2015senter}
-have motivated our will to formally specify HSE mechanisms.
+have motivated our will to formally specify \GH{and verify?} HSE mechanisms.
 %
 We believe this would benefit both hardware designers and software developers.
 %
@@ -240,20 +240,19 @@ impact on the proofs already written.
 During the first stage of this thesis, we propose a formal definition of
 \ac{hse} mechanisms in the form of requirements trusted software components have
 to satisfy to see a targeted security policy enforced at all time by the
-hardware architecture.
+hardware architecture. \GH{couper la phrase en deux. j'aime pas "to see"}
 %
 To evaluate our approach, we formally specify and verify a \ac{hse} mechanism
 implemented by the \ac{bios} of x86-based computing platform at runtime to
 remain isolated from the rest of the software stack.
 %
 Our choice has been motivated by the prominent position of the Intel hardware
-architecture on the personal computer market, the compositional attacks
-previously disclosed, and the large number of publications of the security
-research community which form a significant addition to its documentation.
+architecture on the personal computer market. Moreover compositional attacks targeting this architecture have been
+ disclosed \GH{refs}.
 %
 The resulting formal definition assumes as little as possible about the actual
 implementation of the \ac{bios}, and constitutes, to the extent of our
-knowledge, the first formalization of the \ac{bios} security model at runtime.
+knowledge, the first formalization \GH{formalisation? anglais US ou GB?} of the \ac{bios} security model at runtime.
 %
 Our model and its related proofs of correctness have been implemented in the Coq
 theorem prover, to increase our confidence in our result.
@@ -265,7 +264,7 @@ Besides, the resulting project, called SpecCert, has been made available as a
 free software\,\cite{letan2016speccertcode}.
 
 After this first contribution, we focus our attention on the challenge posed by
-the modeling of a hardware architecture as complex as x86.
+the modeling of a complexe hardware architecture like the x86 architecture.
 %
 In this thesis, we advocate for the use of a general-purpose model of a hardware
 architecture to support the specification of \ac{hse} mechanisms which can be
@@ -305,7 +304,7 @@ architecture and the particular role played by the \ac{bios}, in order to
 present three illustrative compositional attacks.
 %
 In Chapter~\ref{chapter:relatedwork}, we review existing formal verification
-approaches that have been successfully used in order to verify hardware and
+approaches that have been proposed to verify hardware and
 software system.
 %
 We justify, in this context, our choices in terms of formalism and tools.
