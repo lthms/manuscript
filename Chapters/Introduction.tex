@@ -38,10 +38,9 @@ security\,\cite{yang2016a2}, and the platform firmware has been used as a
 persistent attack vector across machine restarts\,\cite{embleton2013smm}.
 %
 On the other hand, one layer may constrain the execution of its successors, with
-respect to a targeted security policy, \emph{e.g.}  an OS enforces
-availability ---fair share of \ac{cpu} time---, confidentiality and integrity
----exclusive partition of physical memories--- properties for the applications
-it manages.
+respect to a targeted security policy, \emph{e.g.}  an OS enforces availability
+---fair share of processor time---, confidentiality and integrity ---exclusive
+partition of physical memories--- properties for the applications it manages.
 
 \section{Hardware-based Security Enforcement Mechanisms}
 
@@ -58,7 +57,7 @@ For instance, system software components often leverage among other mechanisms a
 Thus, when an application is executed, it can only access a subset of the system
 memory.
 %
-Besides, the \ac{cpu} can leverage a hardware timer to stop applications
+Besides, the processor can leverage a hardware timer to stop applications
 execution, without the need for these applications to cooperate.
 %
 This scenario characterizes a class of security mechanisms we call \ac{hse}
@@ -192,13 +191,13 @@ documentation, because they gather at one place information that is normally
 scattered across many documents which sometimes suffer from lack of security
 focus.
 %
-%\TODO{Cet argumentaire est repris à plusieurs endroits (dans l'abstract, ici
-%  dans l'intro et dans la section 5.5. Il faut à la fois s'assurer que ces
-%  différentes occurences sont cohérentes dans la manière de présenter les choses
-%  (il faudrait s'en assurer en les comparants car les différentes parties ont
-%  évoluées à des rythmes différent) et que ces différentes occurences ne sont
-%  pas redondantes. En gros, il faut que chaque nouvelle occurrence apporte
-%  quelque chose (un peu plus de détail, une mise en contexte, etc.}
+% \TODO{Cet argumentaire est repris à plusieurs endroits (dans l'abstract, ici
+% dans l'intro et dans la section 5.5. Il faut à la fois s'assurer que ces
+% différentes occurences sont cohérentes dans la manière de présenter les choses
+% (il faudrait s'en assurer en les comparants car les différentes parties ont
+% évoluées à des rythmes différent) et que ces différentes occurences ne sont
+% pas redondantes. En gros, il faut que chaque nouvelle occurrence apporte
+% quelque chose (un peu plus de détail, une mise en contexte, etc.}
 %
 % Thomas: J’ai un peu épuré la version de l’abstract, parce que je ne voyais pas
 % vraiment comment déveloper de manière non artificielle cette occurrence-ci.
@@ -211,11 +210,11 @@ the executed software, and require no configuration from its part, while
 software verification abstract as much as possible of the hardware architecture
 complexity.
 %
-However, compositional attacks can come from unsuspected places, with no apparent link
-with the considered security mechanism.
+However, compositional attacks can come from unsuspected places, with no
+apparent link with the considered security mechanism.
 %
 For instance, the SENTER Sandman attack\,\cite{kovah2015senter} leveraged a
-dedicated execution mode of x86 \acp{cpu} to disable the protection of the flash
+dedicated execution mode of x86 processor to disable the protection of the flash
 memory wherein the \ac{bios} code is stored.
 %
 Hence, the composition of the numerous configurable hardware features is less
@@ -316,12 +315,11 @@ We justify, in this context, our choices in terms of formalism and tools.
 Part~\ref{part:speccert} focuses on our first contribution.
 %
 In Chapter~\ref{chapter:speccert}, we present our general-purpose definition to
-support the specification and verification of
-\ac{hse} mechanisms.
+support the specification and verification of \ac{hse} mechanisms.
 %
-In Chapter~\ref{chapter:speccert2}, we leverage this definition to reason
-about the \ac{hse} mechanism implemented by the \ac{bios} to remain isolated
-from the rest of the software stack at runtime.
+In Chapter~\ref{chapter:speccert2}, we leverage this definition to reason about
+the \ac{hse} mechanism implemented by the \ac{bios} to remain isolated from the
+rest of the software stack at runtime.
 
 Part~\ref{part:freespec} focuses on our second contribution.
 %
