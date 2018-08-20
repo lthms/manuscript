@@ -70,7 +70,7 @@ Several come with their own documentation, often in the form of large datasheet.
 
 Figure~\ref{fig:usecase:x86arch} pictures how the most important hardware
 components are interconnected in a modern x86 computing platform (generation
-\emph{Nehalem} and newer).
+\emph{Nehalem}\,\cite{thomadakis2011nehalem} and newer).
 %
 The two main components are the processor ---responsible to execute the software
 stack--- directly connected to peripherals high-speed hardware components
@@ -895,12 +895,6 @@ For instance, the Management Engine can download from the Internet an executable
 image, provoke the reboot of the computing platform and force the main \ac{cpu}
 to execute the software components within the image it has
 downloaded\,\cite{kumar2009active}.
-%
-It becomes harder and harder to completely disable the Management Engine on a
-typical x86 computing platform \TODO{ref!}.
-%
-The Management Engine will notably provoke the reboot of the platform if it
-cannot initialize correctly.
 
 \subsection*{Conclusion}
 
@@ -936,10 +930,8 @@ The \ac{bios} program is stored inside a small flash memory connected to the
 \ac{pch} through the Serial Peripheral Interface (SPI) bus on modern x86
 computing platform.
 %
-When the \ac{cpu} is powered up, it is programmed \TODO{Comment? Par qui? un
-  code en mémoire morte? Programmed laisse à penser que c'est du soft qui est
-  exécuté} to fetch the code stored at a hard-coded address within the flash
-memory.
+When the \ac{cpu} is powered up, it fetches the code stored at a hard-coded
+address within the flash memory.
 %
 The first task of the \ac{bios} is to initialize the hardware
 architecture\,\cite{salihun2006bios}.
@@ -971,84 +963,78 @@ as the root of trust\,\cite{rutkowska2015intel} for the software stack.
 %
 As such, the integrity of the \ac{bios} code is primordial, and several
 strategies have been proposed to detect \ac{bios} code corruption during the
-boot sequence, with the two most predominant being Secure Boot \TODO{ref} and
-Trusted Boot\TODO{ref}.
-
-\TODO{En quoi Secure Boot et Trusted Boot permettent de détecter des corruptions
-  du BIOS?}  \TODO{Cette sous-section n'est pas censé parler de sécurité (si
-  j'ai bien compris le plan çà vient en 2.2.3) mais finalement tu t'attardes
-  beaucoup à décrire des méanismes de sécurité. Ce n'est peut-être pas le bon
-  endroit }
+boot sequence, with the two most predominant being Secure
+Boot\,\cite{rosenbaum2012secboot} and Trusted Boot\,\cite{trustedboot}.
 %
-The \ac{uefi} standard defines a security mechanism called Secure
-Boot\,\cite{rosenbaum2012secboot}.
-%
-When Secure Boot is enabled, \ac{uefi}-compliant \acp{bios} should only execute
-applications which provide valid cryptographic signature, with respect to a key
-hierarchy. \TODO{Il faudrait développer un peu en expliquant que le BIOS
-  contient les clés publiques des fournisseurs de code supposé de
-  confiance. D'ailleurs, peut-on ajouter des clés? Cela permet de s'assurer que
-  seules des applications UEFI provenant de ces fournisseurs seront chargé puis
-  exécuté par le BIOS. Si je ne me trompe pas, la verification à lieu lors du
-  chargement (donc c'est le binaire qui est vérifié). }
-%
-The \ac{tcg} has standardized a hardware component called the \ac{tpm}, which is
-the foundation of the Trusted Boot. \TODO{Il faudrait mieux marquer la
-  séparation avec le Secure Boot. On a l'impression que tu continues d'expliquer
-  le Secure Boot.}
-%
-Each component of the boot sequence should measure any software component it
-initiates prior to starting its execution, and to entrust these measurements to
-the \ac{tpm}.
-%
-If one of the software components executed during the boot sequence has been
-corrupted, the difference is captured by the \ac{tpm}, because its measurements
-are different than expected. \TODO{Ca veut donc dire qu'il existe une
-  référence. Comment cette référence est-elle injectée dans le TPM? Qui peut le
-  faire? Il faudrait commencer par expliquer çà.}
-%
-The measurements entrusted to the \ac{tpm} can be leveraged at the end of the
-boot sequence in at least two ways.
-%
-The \ac{tpm} can cryptographically sign the measurements during a protocol
-called remote attestation\,\cite{coker2011remoteattestation} which allows a
-third party to verify that a given computing platform executes the code it is
-supposed to.
-%
-Another popular approach is to entrust to the \ac{tpm} the encryption key which
-protects sensitive information that a corrupted \ac{bios} should not be allowed
-to access.
-%
-In this scenario, the access to the encryption key is correlated to the
-measurements received by the \ac{tpm}.
-
 Secure Boot and Trusted Boot can uncover \ac{bios} corruptions prior to the
 execution of the illegitimate code.
 %
-However, they both rely on a root of trust which is neither measured nor
-verified against a cryptographic signature. \TODO{Il faut expliquer que cette
-  root of trust c'est le code initial du BIOS}
+However, they both rely on a so-called \emph{root of trust}, which is the
+initial code of the \ac{bios}, whose integrity cannot be guaranteed for certain
+because it is not stored on a read-only memory.
 %
 Recent efforts have been expended to overcome this limitation.
 %
 For instance, in 2013 HP has introduced a security mechanism called
 SureStart\,\cite{hp2016surestart} whose purpose is to move the root of trust
-within another hardware component. \TODO{Difficile de comprendre pourquoi çà
-  résoud le problème. Ce qu'il faut expliquer, c'est que la root of trust
-  initial (le code du BIOS) est malheureusement (du point de vue de la sécurité)
-  modifiable. Cela permet de mettre à jour le BIOS. Il est en effet stocké en
-  mémorie flash, donc modifiable. La principale mesure pour garantir l'intégrité
-  du code du BIOS consiste à vérifier l'intégrité du code lors de mise à
-  jours. Comme le BIOS est le composant le plus privilégié, seul le BIOS peut
-  effectuer la mise à jour à proprement parler. HP rajoute un niveau de
-  confiance supplémentaire en s'appuyant sur une version non modifiable du BIOS,
-  stockée en ROM, qui peut-être restaurée par un composant hardardware isolé
-  s'il détecte que le BIOS actuellement stocké en flash n'est pas intègre.}
+within another hardware component, leaving most attackers unable to modify its
+code.
 %
 More recently, the NIST has published the Special Communication 800-193
 ---\emph{Platform Firmware Resiliency
-  Guidelines}\,\cite{regenscheid2018nist800193}--- on this subject. \TODO{Sur
-  quel sujet précisemment?}
+  Guidelines}\,\cite{regenscheid2018nist800193}--- which specifically tackles
+the challenge posed by illegitimate firmware modification.
+
+These approaches have all in common to aim at enforcing the correct
+initialization of the platform by the \ac{bios}.
+
+% \TODO{En quoi Secure Boot et Trusted Boot permettent de détecter des
+% corruptions du BIOS?}  \TODO{Cette sous-section n'est pas censé parler de
+% sécurité (si j'ai bien compris le plan çà vient en 2.2.3) mais finalement tu
+% t'attardes beaucoup à décrire des méanismes de sécurité. Ce n'est peut-être
+% pas le bon endroit }
+% %
+% The \ac{uefi} standard defines a security mechanism called Secure
+% Boot\,\cite{rosenbaum2012secboot}.
+% %
+% When Secure Boot is enabled, \ac{uefi}-compliant \acp{bios} should only
+% execute applications which provide valid cryptographic signature, with respect
+% to a key hierarchy. \TODO{Il faudrait développer un peu en expliquant que le
+% BIOS contient les clés publiques des fournisseurs de code supposé de
+% confiance. D'ailleurs, peut-on ajouter des clés? Cela permet de s'assurer que
+% seules des applications UEFI provenant de ces fournisseurs seront chargé puis
+% exécuté par le BIOS. Si je ne me trompe pas, la verification à lieu lors du
+% chargement (donc c'est le binaire qui est vérifié). }
+% %
+% The \ac{tcg} has standardized a hardware component called the \ac{tpm}, which
+% is the foundation of the Trusted Boot. \TODO{Il faudrait mieux marquer la
+% séparation avec le Secure Boot. On a l'impression que tu continues d'expliquer
+% le Secure Boot.}
+% %
+% Each component of the boot sequence should measure any software component it
+% initiates prior to starting its execution, and to entrust these measurements
+% to the \ac{tpm}.
+% %
+% If one of the software components executed during the boot sequence has been
+% corrupted, the difference is captured by the \ac{tpm}, because its
+% measurements are different than expected. \TODO{Ca veut donc dire qu'il existe
+% une référence. Comment cette référence est-elle injectée dans le TPM? Qui peut
+% le faire? Il faudrait commencer par expliquer çà.}
+% %
+% The measurements entrusted to the \ac{tpm} can be leveraged at the end of the
+% boot sequence in at least two ways.
+% %
+% The \ac{tpm} can cryptographically sign the measurements during a protocol
+% called remote attestation\,\cite{coker2011remoteattestation} which allows a
+% third party to verify that a given computing platform executes the code it is
+% supposed to.
+% %
+% Another popular approach is to entrust to the \ac{tpm} the encryption key
+% which protects sensitive information that a corrupted \ac{bios} should not be
+% allowed to access.
+% %
+% In this scenario, the access to the encryption key is correlated to the
+% measurements received by the \ac{tpm}.
 
 \subsection{At runtime}
 \label{subsec:usecase:firm:runtime}
@@ -1112,7 +1098,7 @@ of the software stack.
 As such, the \ac{bios} remains the most privilege software component of the
 software stack, even after the end of the boot sequence.
 
-\subsection{Security Model}
+\subsection{HSE Mechanisms Implemented by the BIOS}
 \label{subsec:usecase:firm:sec}
 
 The \ac{bios} is provided by the manufacturer of the hardware architecture.
@@ -1126,7 +1112,7 @@ erroneous or malicious software stack.
 %
 To that end, the \ac{bios} relies on several \ac{hse} mechanisms to enforce its
 isolation from the rest of the software stack.
-
+%
 % To the best of our knowledge, the security policy targeted by the \ac{bios} as
 % runtime is always discussed through the prism of the \ac{hse} mechanism used
 % to enforced this policy.
@@ -1153,9 +1139,10 @@ isolation from the rest of the software stack.
 % security
 % vulnerability\,\cite{duflot2009smram,wojtczuk2009smram,bulygin2014summary}.
 %
-From the information we gathered in the Intel manual\TODO{ref} and in the
-academic literature \TODO{ref}, the isolation required by the \ac{bios} can be
-divided into three complementary security policies.
+From the information we gathered in the Intel manual\,\cite{intel2014manual} and
+datasheets\,\cite{intel2009mch,intel2012pch} and in the academic
+literature\,\cite{bulygin2014summary}, the isolation required by the \ac{bios}
+can be divided into three complementary security policies.
 
 \begin{description}
 \item [Volatile Memory Access Control]
@@ -1163,14 +1150,6 @@ divided into three complementary security policies.
   The \ac{bios} is assigned a region of the volatile memory to support its
   execution at runtime. This region is protected against \IOs issued by the rest
   of the software stack.
-  %
-  Besides, the \ac{bios} can rely on a \emph{secure channel} \thomasrk{ref?}
-  \TODO{oui, ref!} to manipulate this volatile memory, \emph{e.g.} an adversary
-  cannot modify the memory map in order to intercept \IOs issued by the
-  \ac{bios} and targeting this volatile memory.
-  %
-  \PC{Cette notion de \textit{secure channel} est-elle importante~?  Si oui,
-    ajoute un emph et sors-là de ce paragraphe, IMHO}
   %
 \item [Availability]
   %
@@ -1188,14 +1167,11 @@ divided into three complementary security policies.
   according to their needs and provoke a reboot of the platform.
 \end{description}
 
-\subsection{HSE Mechanisms Implemented by the BIOS}
-\label{subsec:usecase:hse:smm}
-
-The isolation of the \ac{bios} at runtime, as detailed in the previous
-subsection, directly involves three different hardware components: the
-processor, the \ac{dram} and the \ac{pch}. \TODO{la flash aussi (au même titre
-  que la DRAM. On pourrait aussi parler du memory controleur} \TODO{il manque
-  ici une phrase de transition avec la suite /annonce de plan}
+These three security policies are implemented by the means of \ac{hse}
+mechanisms which rely on hardware features exposed by the processor and the
+\ac{pch}.
+%
+% \TODO{il manque ici une phrase de transition avec la suite /annonce de plan}
 
 \paragraph{System Management Mode.}
 %
@@ -1233,12 +1209,8 @@ Chapter 34]{intel2014manual}, introduced in the Intel manual as follows:
     Manual}
 \end{quote}
 
-The \ac{smm} is the foundation of the \ac{bios} execution at runtime, but it is
-not sufficient. \TODO{Sauf erreur de ma part, tout le code du BIOS exécuté à
-  runtime ne s'exécute par en SMM. Je pense que les routines ACPI par exemple
-  s'exécutent dans le contexte du code appelant. En revanche, SMM est le moyen
-  matériel utilisé par le BIOS pour s'isoler à runtime. Le code critique du BIOS
-  est exécuté à runtime en SMM}
+The \ac{smm} is the foundation of the \ac{bios} isolation at runtime, but it is
+not sufficient.
 
 \paragraph{System Management RAM.}
 %
@@ -1358,8 +1330,8 @@ the value of the \texttt{BLE} bit.
 If the \texttt{BLE} bit has been set by the \ac{bios} during the boot sequence,
 then the \ac{pch} triggers a \ac{smi}.
 %
-As a consequence, the \ac{cpu} \TODO{CPU? core? processor?} stops its current
-execution and enters in \ac{smm}.
+As a consequence, the cores stop their current
+executions and enter in \ac{smm}.
 %
 This prevents the system software from modifying with the content of the Flash
 Memory, even if the \ac{pch} now authorizes write accesses.
@@ -1422,7 +1394,7 @@ led to modifying the content of the flash memory
 The Speed Racer attack resulted into an authorized modification of the flash
 memory as well (\ref{subsec:usecase:hse:speed}).
 
-\subsection{SMRAM Cache Poisoning Attack} % -------------------------------
+\subsection{SMRAM Cache Poisoning Attack}
 \label{subsec:usecase:hse:smram}
 
 Between 1986, when the \ac{smm} has first been introduced, and 2009, it was
@@ -1433,14 +1405,11 @@ Loic Duflot \emph{et al.}\,\cite{duflot2009smram} and Rafal Wojtczuk \emph{et
   al.}\,\cite{wojtczuk2009smram} independently showed that this belief was
 misplaced when they disclosed the SMRAM Cache Poisoning Attack.
 
-\paragraph{Cache Memory.}
-%
-TODO
-
 \paragraph{Attack Path.}
 %
-The SMRAM Cache Poisoning leverages the write-back strategy of the \ac{cpu}
-cache to circumvent the \texttt{D\_LCK} bit protection.
+The SMRAM Cache Poisoning leverages the write-back strategy
+(\ref{subsec:usecase:cachemem}) of the \ac{cpu} cache to circumvent the
+\texttt{D\_LCK} bit protection.
 %
 The attack proceeds as follows:
 
@@ -1504,9 +1473,55 @@ trick a \ac{cpu} in \ac{smm} to execute arbitrary instructions.
 Both attacks leave the content of the SMRAM in \ac{dram} intact, and leverage
 only legitimate hardware features.
 
+\subsection{Speed Racer}
+\label{subsec:usecase:hse:speed}
+
+In 2015, Corey Kallenberg \emph{et al.} showed that the scenario detailed
+previously, such that setting \texttt{BIOSWE} triggers a \ac{smi} to suspend the
+execution of the system software, suffered from a race condition if two cores
+cooperate\,\cite{kallenberg2015racecondition}.
+
+\paragraph{Attack Path.}
+%
+On a typical x86 hardware architecture, all the x86 cores of the platform will
+\emph{eventually} enter \ac{smm} when a \ac{smi} is triggered.
+%
+On the contrary, the \texttt{BIOSWE} flag is set as soon as the
+\texttt{BIOS\_CNTL} register is modified.
+%
+If two cores cooperate, they can benefit from a sufficient window for action and
+successfully tamper with the Flash Memory content.
+%
+The attack proceeds as follows:
+
+\begin{enumerate}
+\item One core tries \emph{ad infinitum} to overwrite the content of the Flash
+  Memory.
+  %
+  Because the \texttt{BIOSWE} bit is initially clear, the \ac{pch} discards its
+  attempts, and the Flash Memory content is correctly protected.
+%
+\item At the same time, another core set the \texttt{BIOSWE} bit.
+%
+\item A \ac{smi} is triggered, but by the time it propagates to the first core,
+  it may have successfully modified the flash memory content.
+%
+\end{enumerate}
+
+\paragraph{Countermeasure.}
+%
+To prevent this race condition, Intel has introduced a new configuration bit to
+the \texttt{BIOS\_CNTL} register: the \texttt{SMM\_BWP} (\ac{smm} \ac{bios}
+Write Protection).
+%
+If the \texttt{SMM\_BWP} is set, the \ac{pch} discards any write access which
+targets the Flash Memory \emph{unless all processors are in \ac{smm}}.
+
 \subsection{SENTER Sandman}
 \label{subsec:usecase:hse:sandman}
 
+Another attack has defeated the flash memory lockdown protection.
+%
 In 2015, Xeno Kovah \emph{et al.} showed it was possible to leverage the Intel
 TXT technology to circumvent the flash memory lockdown
 protection\,\cite{kovah2015senter}.
@@ -1598,84 +1613,24 @@ by the \ac{pch}.
 
 \paragraph{Countermeasure.}
 %
-Recent x86 \acp{cpu} do not disable \ac{smi} during the initialization of a
-system software component with TXT.
+The \texttt{SMM\_BWP} configuration bit makes this attack ineffective.
 %
-This means the system software component continues to rely on the \ac{bios} code
-stored in the SMRAM.
-%
-In practice, even the first version of TXT was not changing that fact.
-%
-Indeed, the \ac{bios} plays a key role in making sure the computing platform
-remains in a working state.
-%
-As a consequence, Intel is advising system software developers to enable back
-\ac{smi} in the TXT Software Development Guide as ``most systems will not
-function properly if \acp{smi} are disabled for any length of
-time''\,\cite{intel2015txt}.
-%
-\TODO{ce dernier paragraphe n'est pas claire. De manière générale, l'explication
-  de la contre-mesure n'est pas claire. }
-
-\subsection{Speed Racer}
-\label{subsec:usecase:hse:speed}
-
-Another attack has defeated the flash memory lockdown protection.
-%
-In 2015, Corey Kallenberg \emph{et al.} showed that the scenario detailed
-previously, such that setting \texttt{BIOSWE} triggers a \ac{smi} to suspend the
-execution of the system software, suffered from a race condition if two cores
-cooperate\,\cite{kallenberg2015racecondition}.
-
-\paragraph{Attack Path.}
-%
-On a typical x86 hardware architecture, all the x86 cores of the platform will
-\emph{eventually} enter \ac{smm} when a \ac{smi} is triggered.
-%
-On the contrary, the \texttt{BIOSWE} flag is set as soon as the
-\texttt{BIOS\_CNTL} register is modified.
-%
-If two cores cooperate, they can benefit from a sufficient window for action and
-successfully tamper with the Flash Memory content.
-%
-The attack proceeds as follows:
-
-\begin{enumerate}
-\item One core tries \emph{ad infinitum} to overwrite the content of the Flash
-  Memory.
-  %
-  Because the \texttt{BIOSWE} bit is initially clear, the \ac{pch} discards its
-  attempts, and the Flash Memory content is correctly protected.
-%
-\item At the same time, another core set the \texttt{BIOSWE} bit.
-%
-\item A \ac{smi} is triggered, but by the time it propagates to the first core,
-  it may have successfully modified the flash memory content.
-%
-\end{enumerate}
-
-\paragraph{Countermeasure.}
-%
-To prevent this race condition, Intel has introduced a new configuration bit to
-the \texttt{BIOS\_CNTL} register: the \texttt{SMM\_BWP} (\ac{smm} \ac{bios}
-Write Protection).
-%
-If the \texttt{SMM\_BWP} is set, the \ac{pch} discards any write access which
-targets the Flash Memory \emph{unless all processors are in \ac{smm}}.
+Besides, recent x86 \acp{cpu} do not disable \ac{smi} during the initialization of a
+system software component with TXT anymore.
 
 \section{Conclusion}
 \label{sec:usecase:conclusion}
 
-In this Chapter, \TODO{Attention, ce chapitre ne parle pas que du BIOS. Le début
-  décrit l'architecture w86. Il faudrait le rappeler dans la conclusion. C'est
-  la conclusion de tout le chapitre, pas de la dernière section} we have
-detailed the relevant x86 hardware mechanisms involved in the \ac{hse} mechanism
-implemented by the \ac{bios} at runtime to stay isolated from the system
-software.
+In this Chapter, we gave an overview of the x86 hardware architecture and of the
+role played by the \ac{bios} within the software stack.
 %
-In addition, we have presented three compositional attacks, to better illustrate
+We then have detailed how the \ac{bios} rely on several hardware features to
+remain isolated from the rest of the software stack to illustrate real life
+\ac{hse} mechanisms.
+%
+Finally, we have presented three compositional attacks, to better illustrate
 the threats they pose.
-%
+
 The rest of this manuscript will use the SMRAM Cache Poisoning Attack as a
 recurring application use case for our contributions, because it has motivated
 our will to formally specify and verify \ac{hse} mechanisms, and it is a good

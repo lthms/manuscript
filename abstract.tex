@@ -24,7 +24,8 @@ hardware component to circumvent the HSE mechanism provided by another one.
 For instance, cache poisoning attacks leverage inconsistencies between cache
 and DRAM's access control mechanisms.
 %
-We call this class of security vulnerabilities \emph{architectural attacks} \TODO{Ce n'est pas très cohérent d'appeler des vulnerabilité des "attaques". Pour être cohérent, on pourrait dire que l'exploitation de ces vulnérabilités de spécification s'appelle des "architectural attacks".}.
+We call this class of attacks, where an attacker leverages inconsistencies in
+hardware specifications, \emph{compositional attacks}.
 
 Our goal is to explore approaches to specify and verify HSE mechanisms using
 formal methods.
@@ -33,7 +34,7 @@ We believe this would benefit both hardware designers and software developers.
 %
 Firstly, a formal specification of HSE mechanisms can be leveraged as a
 foundation for a systematic approach to verify hardware specifications, in the
-hope of uncovering potential architectural attacks ahead of time.
+hope of uncovering potential compositional attacks ahead of time.
 %
 Secondly, it provides unambiguous specifications to software developers, in the
 form of a list of requirements.
@@ -43,7 +44,7 @@ for the hardware architecture to enforce the targeted security policy.
 %
 We believe these specifications can be a valuable addition to the existing
 documentation, and should eventually be leveraged in a software verification
-process as well. \TODO{Je suis en phase avec l'argumentaire développé ici (firstly... et secondly...). Tu devrais le reprendre (en le développant) dans ta conclusion en section 5.5 ou l'arguentaire est moins claire et ne semble pas "calqué" sur celui là (il devrait).}
+process as well.
 
 Our contribution is two-fold:
 %
@@ -60,18 +61,17 @@ Our contribution is two-fold:
   %
   We have written machine-checked proofs in the Coq proof assistant to that
   end.
-\item We propose a novel approach to verify compositions of components inspired
-  by algebraic effects, to enable modular verification of complex hardware
-  architectures. \TODO{Cette description est un peu vague et surtout ne fait pas assez le lien avec la contribution précédente.}
+\item We propose a novel approach inspired by algebraic effects to enable
+  modular verification of complex systems made of interconnected components in a
+  theorem prover, as a first step towards addressing the challenge posed by the
+  scale of the x86 hardware architecture.
   %
   This approach is not specific to hardware models, and could also be leveraged
-  to reason about software applications as well.
+  to reason about composition of software components as well.
   %
-  In addition, we have implemented FreeSpec, a framework for the Coq proof
-  assistant. \TODO{Tu nommes explicitement FreeSpec, en tant que "framework" alors que tu ne nommes pas "SpecCert et que tu le cantonnes à des preuves vérifiées en Coq. Ce sont deux travaux de la même importances pour moi et qui devrait être présentée de manière homogène}
-  %
-  FreeSpec is a complete implementation of our approach, and takes advantages of
-  the proof automation features of Coq to ease the verification process. \TODO{C'est aussi le cas de SpecCert. Peut-être virer cette phrase ou englober les deux implémentations}
+  In addition, we have implemented our approach in the Coq theorem prover, and
+  the resulting framework takes advantages of Coq proof automation features to
+  provide general-purpose facilities to reason about components interactions.
 \end{itemize}
 
 \paragraph{Keywords:}
