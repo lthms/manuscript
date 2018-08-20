@@ -24,10 +24,10 @@ From a security perspective, each layer is often more privileged than its
 successors.
 %
 For instance, system software components (\emph{e.g.} an Operating System (OS) \GH{utiliser un  acronyme pour OS} or a
-hypervisor) manage the life cycle of upper layers (\emph{e.g.} applications or 
+hypervisor) manage the life cycle of upper layers (\emph{e.g.} applications or
 guest OSes).
 %
-In such context, one layer implicitly trusts its predecessors.
+In such a context, one layer implicitly trusts its predecessors.
 %
 On the one hand, it is important to keep this fact in mind when we consider the
 security of the computing platform.
@@ -66,7 +66,7 @@ mechanisms.
 \begin{definition}[Hardware-based Security Enforcement Mechanism]
   \label{def:intro:hse}
   %
-  A \ac{hse} mechanism consists in the configuration by a trusted software
+  A \ac{hse} mechanism consists of the configuration by a trusted software
   component of the underlying hardware architecture in order to constrain the
   execution of untrusted software components with respect to a targeted security
   policy.
@@ -122,8 +122,7 @@ implementation bugs\,\cite{wojtczuk2011txtbug,sang2010iommu}.
 This is not surprising, as novel hardware features tend to be more and more
 complex.
 %
-Hence, using advanced, novel hardware features in a security-sensitive context
-may be counterproductive \GH{peut-être un peu exagéré}.
+In extreme scenarios, novel hardware features have been turned into attack vectors\,\cite{wojtczuk2011txtbug}.
 %
 In addition to these implementation errors, the fact that hardware architectures
 often comprise hundreds of features implemented by dozens of interconnected
@@ -304,8 +303,7 @@ architecture and the particular role played by the \ac{bios}, in order to
 present three illustrative compositional attacks.
 %
 In Chapter~\ref{chapter:relatedwork}, we review existing formal verification
-approaches that have been proposed to verify hardware and
-software system.
+approaches that have been proposed to verify hardware and software systems.
 %
 We justify, in this context, our choices in terms of formalism and tools.
 
