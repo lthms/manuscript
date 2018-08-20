@@ -13,27 +13,22 @@
 From a market share perspective, x86 \acp{cpu} are widely used for laptops,
 desktops and servers.
 %
-Intel has introduced several \ac{hse} mechanisms over the past decades:
-hardware-based virtualization (VT-x, VT-d)\,\cite[Volume 3, Chapter
-23]{intel2014manual}, dynamic root of trust (TXT)\,\cite{intel2015txt}, or
-applicative enclaves (SGX)\,\cite[Volume 3, Chapter
-36]{intel2014manual}\cite{costan2016sgxexplained}.
+Intel has introduced several security features to support \ac{hse} mechanism
+over the past decades: hardware-based virtualization (VT-x, VT-d)\,\cite[Volume
+  3, Chapter 23]{intel2014manual}, dynamic root of trust
+(TXT)\,\cite{intel2015txt}, or applicative enclaves (SGX)\,\cite[Volume 3,
+  Chapter 36]{intel2014manual}\cite{costan2016sgxexplained}.
 %
-The BIOS is the most privileged piece of software executed by the hardware
-architecture, and implements several \ac{hse} mechanisms to remain isolated from
-the rest of the software stack.
+As for the \ac{bios}, it is the most privileged piece of software executed by
+the hardware architecture, and implements several \ac{hse} mechanisms to remain
+isolated from the rest of the software stack.
 %
 The correctness of these mechanisms is therefore of key importance; yet they
 have been the object of several compositional
 attacks\,\cite{duflot2009smram,wojtczuk2009smram,domas2015sinkhole,kallenberg2015racecondition,kovah2015senter}.
 %
-Our motivation to formally specify and verify \ac{hse} mechanisms comes from
-various compositional attacks targeting the x86 hardware
-architecture\,\cite{duflot2009smram,wojtczuk2009smram,kallenberg2015racecondition,domas2015sinkhole,kovah2015senter}.
-%
 These attacks have motivated our effort to provide a formal framework for
-reasoning about \ac{hse} mechanisms which address the threat posed by
-compositional attacks.
+reasoning about \ac{hse} mechanisms.
 %
 However, it is important to emphasize that other mainstream architectures
 (\emph{e.g.}  ARM) work on a similar basis, potentially suffer similar issues,
