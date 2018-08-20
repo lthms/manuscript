@@ -10,8 +10,8 @@
 \vspace{1cm}%
 \noindent
 %
-From a market share perspective, x86 \acp{cpu} are widely used for laptops,
-desktops and servers.
+From a market share perspective, the x86 hardware architecture is widely used
+for laptops, desktops and servers.
 %
 Intel has introduced several security features to support \ac{hse} mechanism
 over the past decades: hardware-based virtualization (VT-x, VT-d)\,\cite[Volume
@@ -39,8 +39,8 @@ The rest of this Chapter proceeds as follows.
 %
 We provide the necessary details on how a typical x86 hardware architecture
 works (Section~\ref{sec:usecase:architecture}) and we explain why and how the
-\ac{bios} needs to remain isolated from the rest of the software stack at
-runtime (Section~\ref{sec:usecase:firmware}).
+\ac{bios} remains isolated from the rest of the software stack at runtime
+(Section~\ref{sec:usecase:firmware}).
 %
 This background allows us to describe the critical compositional attacks we
 already mentioned (Section~\ref{sec:usecase:hse}).
@@ -67,11 +67,11 @@ Figure~\ref{fig:usecase:x86arch} pictures how the most important hardware
 components are interconnected in a modern x86 computing platform (generation
 \emph{Nehalem}\,\cite{thomadakis2011nehalem} and newer).
 %
-The two main components are the processor ---responsible to execute the software
-stack--- directly connected to peripherals high-speed hardware components
-(\emph{e.g.}  DRAM, a display controller), and a companion chipset called the
-Platform Controller which handles interactions with the rest of the peripherals
-(\emph{e.g.} USB devices, hard drives).
+The two main components are the processor ---responsible for executing the
+software stack--- directly connected to peripherals high-speed hardware
+components (\emph{e.g.}  DRAM, a display controller), and a companion chipset
+called the Platform Controller which handles interactions with the rest of the
+peripherals (\emph{e.g.} USB devices, hard drives).
 %
 The x86 architecture has seen many iterations over the years, and it is quite
 common to find in the same computer park different versions of the x86
@@ -91,7 +91,7 @@ processor to reduce the latency induced by these interactions
 (\ref{subsec:usecase:cachemem}).
 %
 Finally, we explain how peripherals of the hardware platform actively
-communicates with the processor (\ref{subsec:usecase:periphio}).
+communicate with the processor (\ref{subsec:usecase:periphio}).
 
 \begin{figure}
   \centering
@@ -148,10 +148,13 @@ communicates with the processor (\ref{subsec:usecase:periphio}).
 
 The main component of the architecture is the \emph{processor}.
 %
-It embeds several execution units called \emph{cores}.
-%
-They are responsible for executing sequences of assembly instructions which form
+It embeds several execution units called \emph{cores}, which are
+responsible for executing sequences of assembly instructions which form
 software component programs.
+%
+It also integrates several additional hardware module to connect the cores to
+the rest of the hardware architecture, \emph{e.g.} a memory controller to manage
+\IOs targeting the DRAM.
 %
 The concrete hardware implementation of the processor is often referred as the
 Intel microarchitecture, in opposition to the Intel architecture which describes
@@ -232,8 +235,8 @@ semantics of several x86 instructions it
 implements\,\cite{johnson2015patentsgx}--- is partly determined by the microcode
 it has loaded.
 %
-In practice, x86 \acp{cpu} only load microcode updates which have been signed by
-Intel.
+In practice, x86 processors only load microcode updates which have been signed
+by Intel.
 %
 To the best of our knowledge, x86 microcode has never been successfully used as
 an attack vector.
@@ -305,7 +308,7 @@ computer screen.
 
 \paragraph{Address Spaces.}
 %
-\acp{cpu} interact with memories \emph{via} two distinct memory address spaces,
+Cores interact with memories \emph{via} two distinct memory address spaces,
 characterized by a set of addresses and a set of instructions.
 %
 The most important address space is the \emph{system memory}, and most of the
@@ -328,7 +331,7 @@ these two address spaces overlap, as peripheral memories and registers can be
 exposed to the cores \emph{via} the system memory thanks to \emph{memory-mapped}
 \IOs.
 %
-That is, \emph{it is possible to read from or write the same memory location
+That is, \emph{it is possible to read from or write to the same memory location
   using two different address spaces}.
 %
 % PC: “a memory mapping” plutôt ? La “memory map” c'est l'ensemble de tous les
@@ -352,7 +355,7 @@ specific semantics summarized in Figure~\ref{fig:usecase:pciconfig}.
 Registers of the PCI configuration space, such as device and vendor IDs, can be
 accessed \emph{via} PMIO.
 %
-Indeed, the \ac{pch} exposes two ``ports'' to that end.
+Indeed, the \ac{pch} exposes two ports to that end.
 %
 First, software components modify the content of the
 \texttt{PCI\_CONFIG\_ADDRESS} port, to tell the \ac{pch} which PCI configuration
@@ -399,7 +402,7 @@ and virtual memory mechanisms and of their exact configurations at a given time.
 \paragraph{Access Control for Software Components.}
 %
 The x86 hardware architecture provides a rich collection of hardware
-features\,\cite[Chapter 3]{intel2014manual} to implement a fine-grained access
+features\,\cite[Volume 3]{intel2014manual} to implement fine-grained access
 control policies about software components \IOs.
 %
 Subjects of these policies include the software and hardware components of the
@@ -413,7 +416,7 @@ perspective, it is also common to distinguish between reading data and reading
 instructions.
 
 For instance, the \ac{mmu} is probably the most well-know hardware feature to
-implement access an control policy.
+implement an access control policy.
 %
 Thanks to the \ac{mmu}, an operating system can attribute ranges of \ac{dram} to
 user applications it manages and isolates its code and data from these
@@ -465,11 +468,10 @@ with \( v \).
 \subsection{Cache Memory}
 \label{subsec:usecase:cachemem}
 %
-Interacting with the \ac{dram} remains slow, in regard to the speed of a
-\ac{cpu}.
+Interacting with the \ac{dram} remains slow, in regard to the speed of cores.
 %
-To improve performance, Intel \acp{cpu} come with several levels of caches, from
-the smaller and quicker, to the bigger and slower.
+To improve performance, Intel processors come with several levels of caches,
+from the smaller and quicker, to the bigger and slower.
 %
 For instance, Intel Core i7, i5 and i3 processors have three levels of caches.
 %
@@ -607,13 +609,13 @@ end\,\cite{thomadakis2011nehalem}.
   \label{fig:usecase:l1-l3caches}
 \end{figure}
 
-When a \ac{cpu} successfully reads the memory at a given address, it keeps a
-copy of the result in its cache.
+When a core successfully reads the memory at a given address, it keeps a
+copy of the result in its caches.
 %
 Therefore, the next time it needs to read some data at this address, these data
 are retrieved from the cache.
 %
-Regarding write accesses, Intel x86 \acp{cpu} provide five different caching
+Regarding write accesses, Intel x86 processors provide five different caching
 strategies (uncacheable, write combining, write-through, write-back and
 write-protected)\,\cite[Volume 3, Chapter~11]{intel2014manual}.
 %
@@ -624,7 +626,7 @@ mechanisms, including (but not limited to):
 \item The \texttt{CR0} register has a flag called \texttt{CD}, which enables
   caching once set.
 %
-\item The \ac{cpu} has several registers called Memory Type Range Registers
+\item The processor has several registers called Memory Type Range Registers
   (MTRR), to specify a cache strategy for pre-defined memory regions.
 %
 \item The Page Table Attribute (PAT) allows for configuring a cache strategy at
@@ -645,11 +647,11 @@ previously used for a given address in order to use it for another one, it
 verifies the value of the ``dirty bit'', so it can update the underlying memory
 cell if necessary.
 %
-Therefore, as long as the cache line is not evicted, the \ac{cpu} does not issue
-write access to the underlying memory.
+Therefore, as long as the cache line is not evicted, the processor does not
+issue write access to the underlying memory.
 %
 The write-back strategy is not suitable for memories of other hardware
-components mapped into the \ac{cpu} address space.
+components mapped into the system memory.
 %
 For instance, caching \IOs targeting a framebuffer does not make sense, because
 the screen wouldn't be updated.
@@ -878,7 +880,7 @@ for a physical access.
 In practice, the software components responsible for implementing the
 out-of-band management features are not executed by the main processor: some
 network cards implement the ASF technology\,\cite{duflot2010network}, and since
-2008 x86 the \acp{cpu} hardware architecture comprises a so-called Management
+2008, the x86 hardware architecture comprises a so-called Management
 Engine to that end\,\cite{ruan2014me,skochinsky2014intel}.
 %
 In 2018, the Management Engine is located inside the \ac{pch}.
@@ -887,7 +889,7 @@ ASF-capable network cards and the Management Engine require important
 capabilities to implement their features.
 %
 For instance, the Management Engine can download from the Internet an executable
-image, provoke the reboot of the computing platform and force the main \ac{cpu}
+image, provoke the reboot of the computing platform and force the processor
 to execute the software components within the image it has
 downloaded\,\cite{kumar2009active}.
 
@@ -906,7 +908,7 @@ that end.
 
 The \ac{bios} plays a significant role in Intel x86 computing platform.
 %
-It is the first piece of software executed by the \ac{cpu}, which initializes
+It is the first piece of software executed by the processor, which initializes
 the hardware components and initiates the execution of the software stack during
 the boot sequence (\ref{subsec:usecase:firm:boot}).
 %
@@ -925,8 +927,8 @@ The \ac{bios} program is stored inside a small flash memory connected to the
 \ac{pch} through the Serial Peripheral Interface (SPI) bus on modern x86
 computing platform.
 %
-When the \ac{cpu} is powered up, it fetches the code stored at a hard-coded
-address within the flash memory.
+When the computing platform is powered up, the processor starts executing the
+code stored at a hard-coded address within the flash memory.
 %
 The first task of the \ac{bios} is to initialize the hardware
 architecture\,\cite{salihun2006bios}.
@@ -1082,7 +1084,7 @@ through its interfaces, the \ac{bios} carries out several hardware-specific
 tasks which are not publicly documented.
 %
 This includes and is not limited to handling hardware errors, checking thermal
-zones, adjusting \acp{cpu} speed, and configuring hardware workarounds.
+zones, adjusting cores speed, and configuring hardware workarounds.
 %
 Some \acp{bios} also emulate complete hardware devices to the system software
 component.
@@ -1171,11 +1173,11 @@ mechanisms which rely on hardware features exposed by the processor and the
 \paragraph{System Management Mode.}
 %
 To handle several software components with different levels of privilege, Intel
-\acp{cpu} provide several execution modes, which can be assimilated to sets of
+processors provide several execution modes, which can be assimilated to sets of
 hardware capabilities.
 %
-For instance, in a given execution mode, a \ac{cpu} may refuse to execute
-certain assembly instructions.
+For instance, in a given execution mode, a core may refuse to execute certain
+assembly instructions.
 %
 Contrary to common belief, x86 execution modes are not organized in a linear
 hierarchy, but are rather a matrix of complementary hardware features:
@@ -1214,7 +1216,7 @@ The SMRAM is the name given by Intel to a memory region located inside the
 %
 The exact location and size of the SMRAM are architecture dependent.
 %
-To locate it, the \ac{cpu} uses a dedicated register named \texttt{SMBASE}.
+To locate it, the processor uses a dedicated register named \texttt{SMBASE}.
 %
 The \ac{bios} should configure it during the boot sequence.
 %
@@ -1238,7 +1240,7 @@ SMRAM.
 % \TODO{expliquer ce que veut dire invisible -> la mémoire n'est plus mappé dans
 % la plage d'adresse et soit le processeur accède à une autre mémoire soit il y
 % a une exception (je suppose)}
-A locked SMRAM can only be accessed by a \ac{cpu} in \ac{smm}.
+A locked SMRAM can only be accessed by a processor in \ac{smm}.
 %
 To that end, the memory map is dynamically modified with respect to the current
 state of the processor, and the physical addresses dedicated to the SMRAM from
@@ -1249,20 +1251,20 @@ the VGA controller memory.
 % l'expliquer comme çà, c'est un peu implicite dans ton explication et j'ai peur
 % que le lecteur non averti ne comprenne pas.}
 %
-The \texttt{SMRAMC} register exposed by the processor controls this access
-control mechanism, \emph{via} its \texttt{D\_LCK} bit.
+The \texttt{SMRAMC} register, exposed by the processor, controls this access
+control mechanism \emph{via} its \texttt{D\_LCK} bit.
 %
 The \ac{bios} locks the SMRAM by setting the \texttt{D\_LCK} bit.
 %
-A processor with the \texttt{D\_LCK} bit set will prevent a core not in \ac{smm}
-to access the SMRAM content.
+The memory controller of a processor with the \texttt{D\_LCK} bit set will
+prevent \IOs targeting the SMRAM if the processor is not in \ac{smm}.
 %
 In addition, the only way to clear the \texttt{D\_LCK} bit is by performing a
 complete reboot of the platform.
 %
-This leaves no opportunity for the system software to tamper with the SMRAM
-content, because the \ac{bios} will lock it again prior to executing another
-software component.
+This leaves no opportunity for the rest of the software stack to modify the
+content of the SMRAM, because the \ac{bios} will lock it again during the boot
+sequence, prior to executing another software component.
 
 \paragraph{System Management Interrupt.}
 
@@ -1368,7 +1370,7 @@ code execution, \emph{i.e} intercept or mask \acp{smi}.
 
 To stay isolated from the rest of the software stack at runtime, the \ac{bios}
 implements a \ac{hse} mechanism whose key hardware feature is the \ac{smm}, a
-dedicated execution mode of x86 \acp{cpu} (\ref{subsec:usecase:hse:smm}).
+dedicated execution mode of x86 processor (\ref{subsec:usecase:hse:smm}).
 %
 The \ac{smm} provides the necessary features to enforce its isolation from the
 rest of the software stack.
@@ -1403,7 +1405,7 @@ misplaced when they disclosed the SMRAM Cache Poisoning Attack.
 \paragraph{Attack Path.}
 %
 The SMRAM Cache Poisoning leverages the write-back strategy
-(\ref{subsec:usecase:cachemem}) of the \ac{cpu} cache to circumvent the
+(\ref{subsec:usecase:cachemem}) of the cache to circumvent the
 \texttt{D\_LCK} bit protection.
 %
 The attack proceeds as follows:
@@ -1416,7 +1418,6 @@ The attack proceeds as follows:
   malicious application under certain circumstances (for instance, if an
   operating system exposes a software interface to manage the cache from the
   userland).
-
 %
 \item They write to the \texttt{APM\_CNT} register in order to provoke the
   triggering of a \ac{smi}.
@@ -1426,19 +1427,19 @@ The attack proceeds as follows:
   it executes the \texttt{rsm} instruction.
 %
 \item Attackers write to an address which belongs to the SMRAM, and because of
-  the write-back cache strategy, the \ac{cpu} updates the copies within the
-  cache, and does not forward the \IO to the Memory Controller.
+  the write-back cache strategy, the processor updates the copies within the
+  cache, and does not forward the \IO to the memory controller.
 %
-\item Attacker trigger another \ac{smi}, and the \ac{cpu} uses the tampered copy
-  of the \ac{smm} code inside its cache.
+\item Attacker trigger another \ac{smi}, and the processor uses the modified
+  copy of the \ac{smm} code inside its cache.
 \end{enumerate}
 %
 This attack is a perfect illustration of an compositional attack:
 %
-both the Memory Controller and the \ac{cpu} cache work as expected.
+both the memory controller and the cache work as expected.
 %
 The former prevents authorized accesses to the SMRAM, that is a subset of the
-\ac{dram}, by a \ac{cpu} not in \ac{smm};
+\ac{dram}, by a processor not in \ac{smm};
 %
 the latter is keeping copies of successful accesses to decrease latency due to
 memory accesses.
@@ -1463,7 +1464,7 @@ The SMRAM Cache Poisoning attack is a textbook case of compositional attacks.
 It is interesting to notice that six years later, Christopher Domas has
 disclosed another x86 vulnerability called Sinkhole\,\cite{domas2015sinkhole},
 which relies on a similar approach ---but different hardware features--- to
-trick a \ac{cpu} in \ac{smm} to execute arbitrary instructions.
+trick a processor in \ac{smm} to execute arbitrary instructions.
 %
 Both attacks leave the content of the SMRAM in \ac{dram} intact, and leverage
 only legitimate hardware features.
@@ -1524,7 +1525,7 @@ protection\,\cite{kovah2015senter}.
 \paragraph{Intel TXT.}
 %
 The Intel Trusted eXecution Technology (TXT)\cite{intel2015txt} is a feature of
-some x86 \acp{cpu}, whose purpose is twofold: it attests the integrity of the
+some x86 processor, whose purpose is twofold: it attests the integrity of the
 system software component program without the need to trust the \ac{bios}, and
 it provides a trusted execution environment to the system software component.
 %
@@ -1572,10 +1573,10 @@ To that end, the \ac{pch} triggers a \ac{smi} at the same time as it unlocks the
 flash memory.
 %
 This mechanism was introduced at a time when software components could not
-configure x86 \acp{cpu} to ignore \acp{smi}.
+configure x86 processors to ignore \acp{smi}.
 %
 This assumption became incorrect when Intel introduced the first version of TXT,
-whose ``trusted execution environment'' provided by TXT-capable \acp{cpu}
+whose ``trusted execution environment'' provided by TXT-capable processors
 explicitly disabled \acp{smi} handling.
 %
 As a consequence, adversarial system software components whose execution were
@@ -1610,7 +1611,7 @@ by the \ac{pch}.
 %
 The \texttt{SMM\_BWP} configuration bit makes this attack ineffective.
 %
-Besides, recent x86 \acp{cpu} do not disable \ac{smi} during the initialization of a
+Besides, recent x86 processors do not disable \ac{smi} during the initialization of a
 system software component with TXT anymore.
 
 \section{Conclusion}
