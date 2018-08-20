@@ -207,13 +207,13 @@ hardware configurations which constrain the execution of untrusted software
 components with respect to a targeted security policy.
 %
 On the other hand, the purpose of the requirements over software transitions is
-to prevent mistrusted software components to reach a hardware configuration
+to prevent untrusted software components to reach a hardware configuration
 wherein the requirements over state are not satisfied.
 %
 Requirements over software transitions should only constrain the execution of
 trusted software components, which implement the \ac{hse} mechanism.
 %
-We consider an adversary model where attackers control mistrusted software
+We consider an adversary model where attackers control untrusted software
 components, and therefore we do not consider any hypotheses on their behavior.
 
 These two classes of requirements allow us to determine a subset of compliant
@@ -254,8 +254,8 @@ executed when the \ac{cpu} is in ring 3, with a particular page table setup.
   state and returns the software component currently executed.
 \end{definition}
 
-We say a software transition is trusted (respectively mistrusted) when it is
-generated from a state associated to a trusted (respectively mistrusted)
+We say a software transition is trusted (respectively untrusted) when it is
+generated from a state associated to a trusted (respectively untrusted)
 software component.
 %
 A hardware-software mapping is mandatory to define requirements over software
@@ -369,7 +369,7 @@ In both cases, this is really implementation dependent.
   \( T = \{ \mathtt{bios} \} \).
   %
   This means the rest of the software stack (\emph{e.g.} the operating system
-  and its applications) are mistrusted and therefore assumed to be under the
+  and its applications) are untrusted and therefore assumed to be under the
   control of attackers.
   %
   The hardware-software \( \func{context} \) maps \acp{cpu} in \ac{smm} with the
@@ -462,7 +462,7 @@ states, despite the correct implementation of the mechanism by the trusted
 software components.
 %
 In such a condition, the hardware architecture may stop to constrain the
-execution of mistrusted software components with respect to the targeted
+execution of untrusted software components with respect to the targeted
 security policy.
 %
 This could mean that constrains over trusted software components execution are

@@ -9,8 +9,6 @@
 
 \vspace{1cm}\noindent
 %
-\TODO{Remarque générale : je trouve ton intro un peu trop longue. Surtout, les paragraphes avant le 1.1 sont long et parlent d'un point très spécifique (l'architecture en couche d'une plateforme x86). Je pense qu'il faudrait placer ces paragraphes dans une sous-section à part et réserver les paragraphes situés avant 1.1 à une description générale de la problématique abordées dans cette thèse.}
-
 To manage complexity, computing platforms are commonly built as successions of
 abstraction layers, from the hardware components to high-level software
 applications.
@@ -21,202 +19,31 @@ more constrained set of functionalities for its successors.
 This enables separation of concerns ---each layer encapsulates one dimension of
 the overall complexity--- and modularity ---two layers which expose the same
 interface can be seamlessly interchanged.
+
+From a security perspective, each layer is often more privileged than its
+successors.
 %
-The typical computing platform can be broken down to the following layers:
+For instance, system software components (\emph{e.g.} an operating system, a
+hypervisor) manage the life cycle of upper layers (\emph{e.g.} applications,
+guest OSes).
 %
-\begin{description}
-\item [Hardware Architecture]
-  %
-  A computer is made of several inter\-connected, physical hardware components.
-  %
-  Hardware components take many forms and serve as different purposes, from the
-  \ac{cpu}, which executes the pieces of software that together form the upper
-  layers of abstraction, to the various input/output devices, which allow users
-  to interact with the computing platform.
-  %
-\item [Firmware/BIOS]
-  %
-  Hardware components often require some firm\-ware, \emph{i.e.} a dedicated
-  piece of software, to operate.
-  %
-  Hardware manufacturers tend to embed some features in their firmware for
-  several reasons.
-  %
-  To begin with, updating software is easier than updating hardware, as the
-  latter often requires a recall.
-  %
-  Vendors can also implement additional high-level, business focus features in
-  their firmware to differentiate from competitors.
-  %
-  For instance, Intel has started to provide out-of-band management features to
-  its processors in 2008\,\cite{ruan2014me}.
-  %
-  In addition, a dedicated piece of firmware is responsible for the
-  initialization and runtime management of the platform as a whole.
-  %
-  Afterwards, when we refer to this specific type of firmware, we use the term
-  \ac{bios}.
-  %
-  Notably, the \ac{uefi}\,\cite{uefi2017uefi} is a standard whose purpose is to
-  describe the role and software architecture for modern \ac{bios}.
-  %
-  \PC{(Pas seulement ici): Le style est assez haché, beaucoup de petites phrases
-    qui rendent la lecture un peu difficile.  Il faudrait lisser un peu}
-  %
-\item [System Software]
-  %
-  The computing environment provided by the hardware architecture alone is very
-  generic.
-  %
-  As a consequence, it requires a non-trivial amount of configuration.
-  %
-  System software components leverage this environment to provide high-level
-  interfaces.
-  %
-  For instance, operating systems expose a set of system calls to applications.
-  %
-  Thus, applications often do not care about which particular hardware
-  architecture they are executed on.
-  %
-  System software components also deal with the complexity implied by the
-  concurrent execution of several applications.
-  %
-\item [Applications]
-  %
-  Applications leverage the high-level interface exposed by the system software
-  component in order to provide services to users of the computing platform.
-  %
-  The previous layers only exist so that applications can be executed on a
-  powerful computing platform, yet only focus on business logic.
-\end{description}
-
-\begin{figure}
-  \centering
-  \begin{tikzpicture}
-    %% HARDWARE
-    \node [draw, inner sep=8pt, text width=100pt, minimum height=40pt, text
-    badly centered] (Core) {CPU};%
-    \node [draw, inner sep=8pt, left=5pt of Core, text width=60pt, minimum
-    height=40pt, text badly centered] (Card) {Graphic Card};%
-    \node [draw, inner sep=8pt, right=5pt of Core, text width=60pt, minimum
-    height=40pt, text badly centered] (MC) {Memory Controller};%
-
-    \draw [dotted] ([yshift=5pt,xshift=-5pt]Card.north west) --
-    ([yshift=5pt,xshift=125pt]MC.north east);%
-
-    %% FIRMWARE
-    \node [draw, inner sep=8pt, above=10pt of Card, text width=60pt, minimum
-    height=135.5pt, text badly centered, dashed] (CardFW) {};%
-    \node [draw, inner sep=8pt, above=10pt of MC, text width=60pt, minimum
-    height=135.5pt, text badly centered, dashed] (MCFW) {};%
-    \node [draw, inner sep=8pt, above=10pt of Core, text width=100pt, minimum
-    height=25pt, text badly centered] (CoreFW) {CPU Microcode};%
-    \node [draw, inner sep=8pt, above=5pt of CoreFW, text width=100pt, minimum
-    height=25pt, text badly centered] (BIOS) {BIOS};%
-
-    \draw [dotted] ([yshift=71pt,xshift=-5pt]Card.north west) --
-    ([yshift=71pt,xshift=125pt]MC.north east);%
-
-    %% OS
-    \node [draw, inner sep=8pt, above=10pt of BIOS, text width=100pt, minimum
-    height=30pt, text badly centered] (OS) {Operating System};%
-
-    \draw [dotted] ([yshift=111pt,xshift=-5pt]Card.north west) --
-    ([yshift=111pt, xshift=125pt]MC.north east);%
-
-    %% Applications
-    \node [draw, above=10pt of OS, text width=29, minimum height=30pt, text
-    badly centered] (App1) {App};%
-    \node [draw, right=5pt of App1, text width=28.5, minimum height=30pt, text
-    badly centered] (App2) {App};%
-    \node [draw, left=5pt of App1, text width=28, minimum height=30pt, text
-    badly centered] (App3) {App};%
-
-    %% LINKS
-
-    \draw [dashed] (Card) -- (CardFW);%
-    \draw (Card) -- (Core);%
-    \draw (MC) -- (Core);%
-    \draw [dashed] (MC) -- (MCFW);%
-    \draw (Core) -- (CoreFW);%
-    \draw (CoreFW) -- (BIOS);%
-    \draw (BIOS) -- (OS);%
-    \draw (App1) -- (OS);%
-    \draw (App2.south) |- (OS.north);%
-    \draw (App3.south) |- (OS.north);%
-
-    %% LAYERS
-    \node [right=of MC] (Hardware) {\scshape Hardware};%
-    \node [right=of MC, yshift=60pt] (Hardware) {\scshape Firmware};%
-    \node [right=of MC, yshift=110pt] (Hardware) {\scshape System Software};%
-    \node [right=of MC, yshift=150pt] (Hardware) {\scshape Applications};%
-  \end{tikzpicture}
-
-  \caption{Layers of abstractions in a hypothetical computing platform}
-  \label{fig:intro:layers}
-\end{figure}
-
-Variations of these abstraction layers exist.
-%
-For instance, for embedded devices, it is common that the system software and
-the applications form one single software component, executed within the same
-hardware context.
-%
-On the contrary, for mainstream computers, the system software can be formed by
-an operating system only, or by the combination of one hypervisor and several
-operating systems.
-%
-The latter case is common in the context of cloud computing, where mainstream
-hypervisors (\emph{e.g.} Xen\,\cite{barham2003xen},
-Hyper-V\,\cite{velte2009hyperv}) provide powerful features such as virtual
-machines snapshots or migrations.
-%
-It is also frequent that application internals are themselves built as
-abstraction layers (\emph{e.g.} applicative framework, core logic, plugins).
-
-Figure~\ref{fig:intro:layers} pictures the abstraction layers of an hypothetical
----yet inspired by the Intel x86 hardware architecture--- computing platform.
-%
-The \ac{cpu} is connected to two other hardware components, a graphic card and a
-memory controller.
-%
-These three hardware components execute a software stack each.
-%
-Some features of the \ac{cpu} are implemented in the form of ``microcode''
-programs\,\cite{chen2014microcode}, which determine, in part, the semantics of
-the instruction set.
-%
-The \ac{cpu} executes the \ac{bios}, an operating system (system software) and
-several applications.
-%
-Both the graphic card and the memory controller execute their own software
-stack, which may be broken down into several abstraction layers as well.
-
-\section{Hardware-based Security Enforcement Mechanisms}
-
-From a security perspective, layers are often used for privilege separation, and
-each layer is often more privileged than its successors.
-%
-For instance, system software components manage the life cycle of the
-applications, by actively tampering \TODO{c'est la première fois que tu utilises le termes tampering et tu ne l'as pas définis avant. Je pense que, dans le sens où tu veux l'utiliser, le termes n'est pas fréquent dans la littérature} with their execution.
-
-As a consequence, each layer implicitly trusts its predecessors.
+In such context, one layer implicitly trusts its predecessors.
 %
 On the one hand, it is important to keep this fact in mind when we consider the
 security of the computing platform.
 %
-Trust in lower levels of abstraction can be misplaced: hardware implants and
-backdoors pose a significant threat to the platform security\,\cite{yang2016a2},
-the \ac{bios} has been used as an attack vector to tamper with its execution \TODO{tu utilises à mon avis trop souvent "tamper with". Ce n'est pas courant, et c'est un tic de langage. En outre, je ne vois pas à quoi renvois "its execution"}
-even after a machine restart\,\cite{embleton2013smm}, etc.
+Trust in lower levels of abstraction can be misplaced, \emph{e.g.} hardware
+implants and backdoors pose a significant threat to the platform
+security\,\cite{yang2016a2}, and the platform firmware has been used as a
+persistent attack vector across machine restarts\,\cite{embleton2013smm}.
 %
 On the other hand, one layer may constrain the execution of its successors, with
-respect to a targeted security policy.
-%
-For instance, an operating system shares hardware resources among several
-applications, and therefore \TODO{le lien de cause à effet ne me parait pas évident. L'OS doit partager les ressources et il doit le faire correctement.} is able to enforce availability ---fair share of
-\ac{cpu} time---, confidentiality and integrity ---exclusive partition of
-physical memories--- properties.
+respect to a targeted security policy, \emph{e.g.}  an operating system enforces
+availability ---fair share of \ac{cpu} time---, confidentiality and integrity
+---exclusive partition of physical memories--- properties for the applications
+it manages.
+
+\section{Hardware-based Security Enforcement Mechanisms}
 
 Constraining an execution can be achieved in various ways.
 %
@@ -313,13 +140,13 @@ When Intel introduced TXT\,\cite{intel2015txt}, they did not anticipate that
 this novel security feature had the particular side effect of disabling the
 hardware interrupt used to protect the flash memory\,\cite{kovah2015senter}.
 %
-This corresponds to a class of security vulnerability called compositional
-attacks\,\cite{wing2003compositionalattack}. \TODO{Tu sembles maintenant utiliser le termes de compositional attack. Attention, dans l'abstract tu continues de parler de architectural attack}
+Such inconsistencies in hardware specifications pave the road toward
+compositional attacks\,\cite{wing2003compositionalattack}.
 
 \begin{definition}[Compositional Attack]
-  Compositional attacks is the class of security vulnerabilities \TODO{meme remarque que dans l'abstract tu utilises "attack" pour désigner une vulnérabilité, ce qui n'est pas cohérent}, where each
-  component is working as expected in isolation, yet their composition creates
-  an attack path which prevents end-to-end security enforcement.
+  Compositional attacks characterize scenarios where each component is working
+  as expected in isolation, yet their composition creates an attack path which
+  prevents end-to-end security enforcement.
 \end{definition}
 
 In the context of \ac{hse} mechanisms, this means untrusted software components
@@ -342,13 +169,14 @@ whole.
 \section{Formal Verification of HSE Mechanisms}
 \label{sec:intro:verif}
 
-The significant impact of previously disclosed compositional attacks \TODO{ajouter ici des ref concernant ces " previously disclosed compositional attacks"} have
-motivated our will to formally specify HSE mechanisms.
+The significant impact of previously disclosed compositional
+attacks\,\cite{duflot2009smram,wojtczuk2009smram,domas2015sinkhole,kallenberg2015racecondition,kovah2015senter}
+have motivated our will to formally specify HSE mechanisms.
 %
 We believe this would benefit both hardware designers and software developers.
 %
 Firstly, a formal specification of HSE mechanisms can be leveraged as a
-foundation for a systemic approach to verify hardware specifications.
+foundation for a systematic approach to verify hardware specifications.
 %
 For each novel hardware feature introduced, it is necessary to check that the
 previous proofs hold, meaning this feature does not introduce any compositional
@@ -361,29 +189,43 @@ provided security properties.
 We believe these specifications are a valuable addition to the existing
 documentation, because they gather at one place information that is normally
 scattered across many documents which sometimes suffer from lack of security
-focus. \TODO{Cet argumentaire est repris à plusieurs endroits (dans l'abstract, ici dans l'intro et dans la section 5.5. Il faut à la fois s'assurer que ces différentes occurences sont cohérentes dans la manière de présenter les choses (il faudrait s'en assurer en les comparants car les différentes parties ont évoluées à des rythmes différent) et que ces différentes occurences ne sont pas redondantes. En gros, il faut que chaque nouvelle occurrence apporte quelque chose (un peu plus de détail, une mise en contexte, etc.}
-
-To specify a HSE mechanism, we have to model the hardware architecture and the
-scale of the task represents a significant challenge.
+focus.
 %
-Compositional attacks can come from unsuspected places, with no apparent link
+%\TODO{Cet argumentaire est repris à plusieurs endroits (dans l'abstract, ici
+%  dans l'intro et dans la section 5.5. Il faut à la fois s'assurer que ces
+%  différentes occurences sont cohérentes dans la manière de présenter les choses
+%  (il faudrait s'en assurer en les comparants car les différentes parties ont
+%  évoluées à des rythmes différent) et que ces différentes occurences ne sont
+%  pas redondantes. En gros, il faut que chaque nouvelle occurrence apporte
+%  quelque chose (un peu plus de détail, une mise en contexte, etc.}
+%
+% Thomas: J’ai un peu épuré la version de l’abstract, parce que je ne voyais pas
+% vraiment comment déveloper de manière non artificielle cette occurrence-ci.
+
+We steer a middle course between two domains: hardware and system software
+verification.
+%
+Generally, hardware verification focuses on properties that are transparent to
+the executed software, and require no configuration from its part, while
+software verification abstract as much as possible of the hardware architecture
+complexity.
+%
+However, compositional attacks can come from unsuspected places, with no apparent link
 with the considered security mechanism.
 %
 For instance, the SENTER Sandman attack\,\cite{kovah2015senter} leveraged a
 dedicated execution mode of x86 \acp{cpu} to disable the protection of the flash
 memory wherein the \ac{bios} code is stored.
 %
-As a consequence, it is necessary to consider the whole computing platform.
+Hence, the composition of the numerous configurable hardware features is less
+subject to formal verification.
 %
-At the same time, some components are individually complex:
+At the same time, some components are individually complex: for example, the
+Intel Architectures Software Developer Manual\,\cite{intel2014manual} is 4842
+pages long, the Memory Controller Hub datasheet\,\cite{intel2009mch} is 430
+pages long, and the Platform Controller Hub datasheet\,\cite{intel2012pch} is
+988 pages long.
 %
-for example, the Intel Architectures Software Developer Manual\,\cite{intel2014manual} is
-4842 pages long,
-%
-the Memory Controller Hub datasheet\,\cite{intel2009mch} is 430 pages long, and
-%
-the Platform Controller Hub datasheet\,\cite{intel2012pch} is 988 pages long.
-
 Besides, new hardware components and new versions of already existing components
 are frequently released.
 %
@@ -393,84 +235,96 @@ practicable our approach becomes.
 Otherwise, each modification of the hardware architecture will have an important
 impact on the proofs already written.
 
-\paragraph{}
-%
-While we intend to propose generic formalisms which can potentially be applied
-to large ranges of problems, we have decided to systematically implement and
-evaluate them on the x86 architecture.
-%
-Because of its predominant position on the personal computer market, the x86
-hardware architecture has been extensively studied.
-%
-Our decision to explore this research field was based on our experience with
-several compositional attacks which have affected the x86 hardware architecture.
+\section{Contributions}
 
-\section{Contributions and Outline}
-
-\TODO{Tu mélanges plan et contribution. J'aime pas trop. La contribution est du coup noyée dans le plan. Je préferais deux parties (paragraphes) distincts.}
-
-In Part~\ref{part:context}, we elaborate on the context in which our works fall, \emph{i.e.} the security of lower levels of abstraction (hardware components and firmware).
+During the first stage of this thesis, we propose a formal definition of
+\ac{hse} mechanisms in the form of requirements trusted software components have
+to satisfy to see a targeted security policy enforced at all time by the
+hardware architecture.
 %
-In Chapter~\ref{chapter:usecase}, we give an introduction to the x86 hardware
-architecture and the particular role played by the \ac{bios}.
+To evaluate our approach, we formally specify and verify a \ac{hse} mechanism
+implemented by the \ac{bios} of x86-based computing platform at runtime to
+remain isolated from the rest of the software stack.
 %
-We then detail some representative compositional attacks which have
-been disclosed over the past decade.
+Our choice has been motivated by the prominent position of the Intel hardware
+architecture on the personal computer market, the compositional attacks
+previously disclosed, and the large number of publications of the security
+research community which form a significant addition to its documentation.
 %
-% PC: attention, on comprend que tu vas décrire tout x86 en détails
+The resulting formal definition assumes as little as possible about the actual
+implementation of the \ac{bios}, and constitutes, to the extent of our
+knowledge, the first formalization of the \ac{bios} security model at runtime.
 %
-In Chapter~\ref{chapter:relatedwork}, we revisit existing works \TODO{Je crois que yann t'a fait la remarque que related work est singulier. Je ne sais pas si c'est le cas mais il faut être cohérent dans tout le document} and approaches
-in line with the two challenges we tackle in this thesis, that is:
-%
-\begin{inparaenum}[(1)]
-\item formally specifying and verifying \ac{hse} mechanisms against a hardware
-  model, and
-%
-\item modularly defining hardware models in terms of compositions of
-  sub-components, with the objective of scaling to realistic ---that is, large
-  and complex--- hardware architectures.
-\end{inparaenum}
-
-In Part~\ref{part:speccert}, we describe our first contribution.
-%
-In Chapter~\ref{chapter:speccert}, we present a generic formalism to specify and
-verify HSE mechanisms against a hardware model.
-%
-In Chapter~\ref{chapter:speccert2}, we leverage our formal definition to reason
-about HSE mechanisms which isolate software components from each other within a
-software stack.
-%
-We have implemented SpecCert, a framework for the Coq proof assistant based on
-this formalism.
-%
-Moreover, we have specified {\scshape Minx86}, a minimal x86 model, and we
-have verified a HSE mechanism implemented by x86 BIOSes against {\scshape
-  Minx86}.
-%
-This HSE mechanism relies on a high-privileged execution mode of x86 \acp{cpu}
-called the System Management Mode\,\cite{intel2014manual}.
+Our model and its related proofs of correctness have been implemented in the Coq
+theorem prover, to increase our confidence in our result.
 %
 This work has been presented at the $21^{th}$ International Symposium on Formal
 Methods (FM2016)\,\cite{letan2016speccert}.
-
-Part~\ref{part:freespec} is dedicated to our second contribution.
 %
-In Chapter~\ref{chapter:freespec}, we present a compositional reasoning
-framework to modularly specify and verify systems organized as trees of
+Besides, the resulting project, called SpecCert, has been made available as a
+free software\,\cite{letan2016speccertcode}.
+
+After this first contribution, we focus our attention on the challenge posed by
+the modeling of a hardware architecture as complex as x86.
+%
+In this thesis, we advocate for the use of a general-purpose model of a hardware
+architecture to support the specification of \ac{hse} mechanisms which can be
+implemented on this architecture.
+%
+Our experiment with our formal definition of \ac{hse} mechanisms convinced us
+that such a general-purpose model should obey certain requirements, notably in
+terms of readability and modularity, so it could remain applicable to real life
+verification problem.
+%
+Our second contribution is a novel approach, inspired by algebraic effects, to
+enable modular verification of complex systems made of interconnected
 components.
 %
-We apply ideas from verification of computer programs with side effects to the
-domain of component-based modelling. The resulting approach can be used for
-verifying the composition of hardware components and software components alike.
-%
-In addition, we have developed FreeSpec, a framework for the Coq proof
-assistant.
-%
-FreeSpec provides the necessary definitions and theorems to specify components,
-and automation features to guide their verification.
+This approach is not specific to hardware models, and could also be leveraged to
+reason about composition of software components as well.
 %
 This work has been presented at the $22^{th}$ International Symposium on Formal
 Methods (FM2018)\,\cite{letan2018freespec}.
+%
+Besides, we have implemented our approach in Coq, and the resulting framework,
+called FreeSpec, takes advantages of theorem prover automation features to
+provide general-purpose facilities to reason about components interactions.
+%
+Similarly to SpecCert, FreeSpec has been published as a free
+software\,\cite{letan2018freespeccode}.
+
+\section{Outline}
+
+The rest of this manuscript proceeds as follows.
+
+First of all, Part~\ref{part:context} provides the context in which this thesis
+falls.
+%
+In Chapter~\ref{chapter:usecase}, we give an introduction to the x86 hardware
+architecture and the particular role played by the \ac{bios}, in order to
+present three illustrative compositional attacks.
+%
+In Chapter~\ref{chapter:relatedwork}, we review existing formal verification
+approaches that have been successfully used in order to verify hardware and
+software system.
+%
+We justify, in this context, our choices in terms of formalism and tools.
+
+Part~\ref{part:speccert} focuses on our first contribution.
+%
+In Chapter~\ref{chapter:speccert}, we present our general-purpose definition to
+support the specification and verification of
+\ac{hse} mechanisms.
+%
+In Chapter~\ref{chapter:speccert2}, we leverage this definition to reason
+about the \ac{hse} mechanism implemented by the \ac{bios} to remain isolated
+from the rest of the software stack at runtime.
+
+Part~\ref{part:freespec} focuses on our second contribution.
+%
+In Chapter~\ref{chapter:freespec}, we present our compositional reasoning
+framework for Coq, to modularly specify and verify systems made of
+interconnected components
 
 Finally, we conclude this thesis in Chapter~\ref{chapter:conclusion}, where we
-suggest some possible directions for future works.
+suggest some possible directions for future work.
