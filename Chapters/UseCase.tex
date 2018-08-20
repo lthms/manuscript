@@ -68,14 +68,12 @@ components are interconnected in a modern x86 computing platform (generation
 \emph{Nehalem}\,\cite{thomadakis2011nehalem} and newer).
 %
 The two main components are the processor ---responsible for executing the
-software stack--- directly connected to peripherals high-speed hardware
-components (\emph{e.g.}  DRAM, a display controller), and a companion chipset
+software stack--- directly connected to high-speed peripherals  (\emph{e.g.}  DRAM, a display controller), and a companion chipset
 called the Platform Controller which handles interactions with the rest of the
 peripherals (\emph{e.g.} USB devices, hard drives).
 %
 The x86 architecture has seen many iterations over the years, and it is quite
-common to find in the same computer park different versions of the x86
-architecture.
+common to find in the same computer park different versions of this architecture.
 %
 For instance the processor was previously connected to a \emph{northbrige}
 (low-latency), which was itself connected to a \emph{southbridge} (slower \IOs).
@@ -149,10 +147,9 @@ communicate with the processor (\ref{subsec:usecase:periphio}).
 The main component of the architecture is the \emph{processor}.
 %
 It embeds several execution units called \emph{cores}, which are
-responsible for executing sequences of assembly instructions which form
-software component programs.
+responsible for executing assembly instructions of software component programs.
 %
-It also integrates several additional hardware module to connect the cores to
+It also integrates several additional hardware modules to connect the cores to
 the rest of the hardware architecture, \emph{e.g.} a memory controller to manage
 \IOs targeting the DRAM.
 %
@@ -279,11 +276,11 @@ an attack vector.
 Besides cores, \emph{memories} are the most important components of a computing
 platform.
 %
-Cores interact with these memories during so-called \IOs, for Input/Output: a
+Cores interact with these memories during so-called \IOs, for Input/Output \GH{tu as utilisé le terme I/O avant}: a
 core receives data during an input and it sends data during an output.
 %
 The x86 architecture integrates several sources of memories, along with several
-mechanisms cores can use to interact with these memories.
+mechanisms that can be used by the cores to interact with these memories.
 
 The main target of cores \IOs is the \ac{dram}.
 %
@@ -292,7 +289,7 @@ they manipulate.
 %
 A core decides the semantics of a given memory cell depending on the context,
 and the same binary sequence can be first decoded as an instruction, then
-interpreted as an operand of an arithmetical operation.
+interpreted as an operand of an arithmetical operation. \GH{and then? En outre, c'est un exemple parmi d'autre, non?}
 %
 In addition, other hardware components also provide additional memory regions
 cores can read from or write to.
@@ -315,8 +312,8 @@ The most important address space is the \emph{system memory}, and most of the
 x86 instructions (\emph{e.g.} \texttt{mov} variants, arithmetic operations such
 as \texttt{sub} and \texttt{add}) are designed to manipulate it.
 %
-Addresses of the system memory are often refer to as physical addresses, and the
-majority of the system memory is made of \ac{dram}.
+Addresses of the system memory are often refer to \GH{refer to?} as physical addresses, and the
+majority of the system memory is made of \ac{dram}. \GH{pas très claire.}
 %
 Besides, cores use another address space characterized by two dedicated
 instructions ---\texttt{in} and \texttt{out}--- to target the memories exposed
@@ -343,7 +340,7 @@ That is, \emph{it is possible to read from or write to the same memory location
 The mapping between addresses of the system memory and their concrete memory
 locations within the hardware architecture is called the \emph{memory map}.
 %
-The memory map is configurable, that is it can be changed dynamically \emph{via}
+This memory map is configurable, that is it can be changed dynamically \emph{via}
 configuration registers exposed by the processor and the \ac{pch}.
 
 For instance, the Peripheral Component Interconnect (PCI) standard ---whose aim
@@ -436,7 +433,7 @@ ring~0 is the most privileged and ring~3 the least.
 %
 Ring~3 imposes several restrictions on software components, including the
 capability to modify the \texttt{CR3} register which identifies the base of the
-page table hierarchy used byt the \ac{mmu}.
+page table hierarchy used by the \ac{mmu}.
 %
 This is why ring~3 is commonly dedicated to the execution of applications.
 
