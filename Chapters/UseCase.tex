@@ -489,7 +489,7 @@ nature of the address associated with cache block indexes, and the nature of the
 address used to tag cache line.
 %
 For instance, Intel L2 and L3 caches are \emph{physically-indexed,
-  physically-tagged}, meaning they use physical address both to compute the
+  physically-tagged}, meaning they use physical address to compute both the
 index and the tag.
 
 Caches are mostly transparent to the software components.
@@ -914,8 +914,8 @@ limited to platform-specific events, device emulation, or \ac{bios} updates
 management (\ref{subsec:usecase:firm:runtime}).
 %
 As such, it can only operate properly if certain security requirements are met
-(\ref{subsec:usecase:firm:sec}), and implements several \ac{hse} mechanisms to
-that end (\ref{subsec:usecase:hse:smm}).
+and implements several \ac{hse} mechanisms to that end
+(\ref{subsec:usecase:firm:sec}).
 
 \subsection{During the boot sequence}
 \label{subsec:usecase:firm:boot}
@@ -960,8 +960,8 @@ strategies have been proposed to detect \ac{bios} code corruption during the
 boot sequence, with the two most predominant being Secure
 Boot\,\cite{rosenbaum2012secboot} and Trusted Boot\,\cite{trustedboot}.
 %
-Secure Boot and Trusted Boot can uncover \ac{bios} corruptions prior to the
-execution of the illegitimate code.
+Secure Boot and Trusted Boot can uncover certain \ac{bios} corruptions prior to
+the execution of the illegitimate code.
 %
 However, they both rely on a so-called \emph{root of trust}, which is the
 initial code of the \ac{bios}, whose integrity cannot be guaranteed for certain
