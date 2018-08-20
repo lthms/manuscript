@@ -643,7 +643,7 @@ its value is updated by a write access.
 In case of cache eviction, that is when the cache frees a given cache line
 previously used for a given address in order to use it for another one, it
 verifies the value of the ``dirty bit'', so it can update the underlying memory
-cell if necessary.
+cell if necessary. \GH{fait 2 phrases. une pour décrire cache eviction, une pour décrire ce que l'on fait dans ce cas.}
 %
 Therefore, as long as the cache line is not evicted, the processor does not
 issue write access to the underlying memory.
@@ -767,7 +767,7 @@ Not all x86 interrupts come from a hardware component.
 Cores use several of them, for instance to recover from errors.
 %
 For example, if a core is not able to translate a virtual address into a proper
-address, it raises a so-called Page Fault.
+address, it raises a so-called Page Fault \GH{Pourquoi des majuscules?}.
 
 \begin{table}
   \centering
@@ -840,7 +840,6 @@ x86 computing platform\,\cite{abramson2006vtd}.
 
 In practice, the correct enforcement of an access control policy for hardware
 components remains challenging, for various reasons.
-
 Firstly, security checks can have an important impact on performance.
 %
 Partly for this reason, the hardware components have long been assumed
@@ -866,6 +865,7 @@ configuration is very permissive, until software components such as the
 \thomasrk[inline]{J'en viens à me demander si on ne peut juste pas virer la
   section sur le ME. Ou alors, la réduire et la fusionner avec la précédente,
   pour montrer les limites de l’IOMMU. Des avis~?}
+  \GH{Je pense que çà serait mieux en effet. Tel quel, çà vient un peu comme une cheveu sur la soupe} 
 %
 \paragraph{Autonomous Subsystem.}
 %
@@ -891,7 +891,7 @@ image, provoke the reboot of the computing platform and force the processor
 to execute the software components within the image it has
 downloaded\,\cite{kumar2009active}.
 
-\subsection*{Conclusion}
+\subsection{Conclusion}
 
 This introduction to the x86 hardware architecture provides the necessary
 background to understand the challenges related to the implementation of a
@@ -978,9 +978,7 @@ code.
 More recently, the NIST has published the Special Communication 800-193
 ---\emph{Platform Firmware Resiliency
   Guidelines}\,\cite{regenscheid2018nist800193}--- which specifically tackles
-the challenge posed by illegitimate firmware modification.
-
-These approaches have all in common to aim at enforcing the correct
+the challenge posed by illegitimate firmware modification. These approaches have all in common to aim at enforcing the correct
 initialization of the platform by the \ac{bios}.
 
 % \TODO{En quoi Secure Boot et Trusted Boot permettent de détecter des
@@ -1054,7 +1052,7 @@ etc.).
 %
 Nowadays, \ac{uefi}-capable \acp{bios} expose so-called \emph{Runtime Services}
 to system software component\,\cite[Chapter 5]{zimmer2017uefi} under the form of
-a function pointers table.
+a table of function pointers.
 
 In either case, these interfaces act as an intermediary layer between a system
 software component and the hardware architecture.
@@ -1066,7 +1064,7 @@ Sometimes, their use is optional, and \acp{bios} only provide them as a
 facility.
 %
 Other are mandatory gates towards certain computing platform features, because
-they are related to critical features of the platform and the hardware vendors
+they are related to critical mechanisms of the platform and the hardware vendors
 do not want to rely on a (potentially vulnerable or malicious) system software
 component.
 %
@@ -1085,7 +1083,7 @@ This includes and is not limited to handling hardware errors, checking thermal
 zones, adjusting cores speed, and configuring hardware workarounds.
 %
 Some \acp{bios} also emulate complete hardware devices to the system software
-component.
+component. \GH{ref?}
 
 The execution of the \ac{bios} in this context should be transparent to the rest
 of the software stack.
@@ -1134,8 +1132,8 @@ isolation from the rest of the software stack.
 % security
 % vulnerability\,\cite{duflot2009smram,wojtczuk2009smram,bulygin2014summary}.
 %
-From the information we gathered in the Intel manual\,\cite{intel2014manual} and
-datasheets\,\cite{intel2009mch,intel2012pch} and in the academic
+From the information we gathered in the Intel manual\,\cite{intel2014manual}, 
+datasheets\,\cite{intel2009mch,intel2012pch}, and in the academic
 literature\,\cite{bulygin2014summary}, the isolation required by the \ac{bios}
 can be divided into three complementary security policies.
 
@@ -1328,7 +1326,7 @@ then the \ac{pch} triggers a \ac{smi}.
 As a consequence, the cores stop their current
 executions and enter in \ac{smm}.
 %
-This prevents the system software from modifying with the content of the Flash
+This prevents the system software from modifying with \GH{modifying with?} the content of the Flash
 Memory, even if the \ac{pch} now authorizes write accesses.
 %
 It is the \ac{smm} code responsibility to clear the \texttt{BIOSWE} bit before
@@ -1368,7 +1366,7 @@ code execution, \emph{i.e} intercept or mask \acp{smi}.
 
 To stay isolated from the rest of the software stack at runtime, the \ac{bios}
 implements a \ac{hse} mechanism whose key hardware feature is the \ac{smm}, a
-dedicated execution mode of x86 processor (\ref{subsec:usecase:hse:smm}).
+dedicated execution mode of x86 processor (\ref{subsec:usecase:hse:smm}) \GH{cette référence est cassée}.
 %
 The \ac{smm} provides the necessary features to enforce its isolation from the
 rest of the software stack.
