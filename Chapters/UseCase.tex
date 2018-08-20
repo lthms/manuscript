@@ -45,10 +45,10 @@ The rest of this Chapter proceeds as follows.
 We provide the necessary details on how a typical x86 hardware architecture
 works (Section~\ref{sec:usecase:architecture}) and we explain why and how the
 \ac{bios} needs to remain isolated from the rest of the software stack at
-runtime (Section~\ref{sec:usercase:firmware}).
+runtime (Section~\ref{sec:usecase:firmware}).
 %
 This background allows us to describe the critical compositional attacks we
-already mentioned (Section~\ref{sec:usecase:architecture}).
+already mentioned (Section~\ref{sec:usecase:hse}).
 
 \section{Introduction to x86 Architecture}
 \label{sec:usecase:architecture}
@@ -68,26 +68,35 @@ graphic card.
 %
 Several come with their own documentation, often in the form of large datasheet.
 
-\TODO{et? Quel est le lien avec la suite? Il manque ici une transition,
-  annoncant notamment le plan de la section. D'ailleurs, il manque un fil
-  conducteur à cette section.}
-
-\subsection{Basics of x86 Architecture}
-
-A simplified x86 hardware architecture is pictured in
-Figure~\ref{fig:usecase:x86arch}.
+Figure~\ref{fig:usecase:x86arch} pictures how the most important hardware
+components are interconnected in a modern x86 computing platform (generation
+\emph{Nehalem} and newer).
 %
-\TODO{Il faudrait préciser que cette figure correspond à une architecture x86
-  récente (je ne sais plus à partir de quelle nom de code, il faudrait
-  retrouver). Il faudrait en profiter pour souligner que l'architecture x86 a
-  évolué sensiblement depuis sa création et que même aujourd'hui, on peut
-  trouver dans un parc existants des machines avec des architectures
-  sensiblement différentes}
+The two main components are the processor ---responsible to execute the software
+stack--- directly connected to peripherals high-speed hardware components
+(\emph{e.g.}  DRAM, a display controller), and a companion chipset called the
+Platform Controller which handles interactions with the rest of the peripherals
+(\emph{e.g.} USB devices, hard drives).
 %
-We now describe how the different hardware components are integrated together to
-form a typical x86 computing platform, from the processor which executes
-software components to various peripherals which allows the system to interact
-with the rest of the world.
+The x86 architecture has seen many iterations over the years, and it is quite
+common to find in the same computer park different versions of the x86
+architecture.
+%
+For instance the processor was previously connected to a \emph{northbrige}
+(low-latency), which was itself connected to a \emph{southbridge} (slower \IOs).
+
+This section proceeds as follow.
+%
+First, we describe the internals of a x86 processor (\ref{subsec:usecase:proc}).
+%
+We detail the mechanisms which play a part in the the interactions between the
+processor and the memories scattered inside the hardware architecture
+(\ref{subsec:usecase:mem}), then focus on the caches embedded inside the
+processor to reduce the latency induced by these interactions
+(\ref{subsec:usecase:cachemem}).
+%
+Finally, we explain how peripherals of the hardware platform actively
+communicates with the processor (\ref{subsec:usecase:periphio}).
 
 \begin{figure}
   \centering
@@ -139,8 +148,9 @@ with the rest of the world.
   \label{fig:usecase:x86arch}
 \end{figure}
 
-\paragraph{Processor, Architecture and Microarchitecture.}
-%
+\subsection{Processor, Architecture and Microarchitecture.}
+\label{subsec:usecase:proc}
+
 The main component of the architecture is the \emph{processor}.
 %
 It embeds several execution units called \emph{cores}.
@@ -265,7 +275,8 @@ an attack vector.
 %   arbitrary value (\emph{e.g.} with jump instructions).
 % \end{enumerate}
 
-\paragraph{Memories and Cores \IOs.}
+\subsection{Memories and Cores \IOs}
+\label{subsec:usecase:mem}
 %
 Besides cores, \emph{memories} are the most important components of a computing
 platform.
@@ -296,16 +307,6 @@ frame buffer to the cores.
 %
 By writing to the frame buffer, a core changes the pictures displayed by the
 computer screen.
-
-In practice, the processor handles \IOs with high-speed hardware components
-(\emph{e.g.} \ac{dram}, display controller, etc.).
-%
-In addition, it is connected to a companion chipset, called the
-\ac{pch}\,\cite{turley2014introx86}, which handles slower hardware components
-(\emph{e.g.}  hard drives, USB devices, PCI devices, etc.)\,\footnote{In
-  previous iterations of the architecture, the processor was connected to a
-  \emph{northbrige} (low-latency), which was itself connected to a
-  \emph{southbridge} (slower \IOs).}.
 
 \paragraph{Address Spaces.}
 %
@@ -346,15 +347,12 @@ locations within the hardware architecture is called the \emph{memory map}.
 %
 The memory map is configurable, that is it can be changed dynamically \emph{via}
 configuration registers exposed by the processor and the \ac{pch}.
-%
-For instance, PCI
-%
-\TODO{c'est la première fois que tu utilises PCI. Tu dois rapidement expliquer
-  cette acronyme}
-%
-devices expose a so-called configuration space, which is a dedicated memory
-region with a specific semantics summarized in
-Figure~\ref{fig:usecase:pciconfig}.
+
+For instance, the Peripheral Component Interconnect (PCI) standard ---whose aim
+is to propose a standard local bus and communication protocol to connect
+hardware components to a computing platform--- introduces a so-called
+configuration space per PCI device, which is a dedicated memory region with a
+specific semantics summarized in Figure~\ref{fig:usecase:pciconfig}.
 %
 Registers of the PCI configuration space, such as device and vendor IDs, can be
 accessed \emph{via} PMIO.
@@ -376,12 +374,9 @@ The purposte of the \texttt{BAR}s is to configure a memory-mapped mechanism, so
 that it becomes possible to interact with the PCI configuration space of a given
 peripherals \emph{via} the system memory.
 %
-As a consequence, when a core reads from or write to the system memory in a
-range specified by a BAR, the processor and the \ac{pch}
-%
-\TODO{pourquoi "the processor and the PCH" et pas "the PCH" seulement?}
-%
-dispatches its \IOs to the PCI configuration space.
+As a consequence, a core which reads from or write to the system memory in a
+range specified by a BAR sees its \IO dispatched to the configuration space of
+the related PCI device.
 
 \begin{figure}
   \begin{center}
@@ -406,7 +401,74 @@ As such, determining which hardware component will handle a core \IO targeting a
 given virtual address requires to have a complete knowledge of the x86 remapping
 and virtual memory mechanisms and of their exact configurations at a given time.
 
-\paragraph{Cache Memory.}
+\paragraph{Access Control for Software Components.}
+%
+The x86 hardware architecture provides a rich collection of hardware
+features\,\cite[Chapter 3]{intel2014manual} to implement a fine-grained access
+control policies about software components \IOs.
+%
+Subjects of these policies include the software and hardware components of the
+system.
+%
+Objects ultimately come down to the memory locations of various natures
+scattered within the hardware architecture.
+%
+Actions comprise reading from and writing to a memory location. From a core
+perspective, it is also common to distinguish between reading data and reading
+instructions.
+
+For instance, the \ac{mmu} is probably the most well-know hardware feature to
+implement access an control policy.
+%
+Thanks to the \ac{mmu}, an operating system can attribute ranges of \ac{dram} to
+user applications it manages and isolates its code and data from these
+applications.
+%
+The \ac{mmu} alone is not sufficient, because its scope does not cover its own
+configuration.
+%
+That is, it is not possible to configure the \ac{mmu} in order to prevent a
+software component to modify the \ac{mmu} configuration.
+%
+As a consequence, an additional hardware feature has to be used: the protection
+rings\,\cite[Volume 3, Section 5.5]{intel2014manual}.
+%
+The x86 cores can operate in 4 different so-called rings, from 0 to 3, where
+ring~0 is the most privileged and ring~3 the least.
+%
+Ring~3 imposes several restrictions on software components, including the
+capability to modify the \texttt{CR3} register which identifies the base of the
+page table hierarchy used byt the \ac{mmu}.
+%
+This is why ring~3 is commonly dedicated to the execution of applications.
+
+%
+% GUILLAUME: Ce qu'il faudrait dire, c'est que le CPU et la RAM sont des
+% ressources partagées par les différents composants logiciels et matériels. Du
+% coup, d'un point de vue de la sécurité, comme ces composants ne se font pas
+% nécessairement confiance (parsqu'ils viennent de fournisseur différent,
+% parqsu'il peuvent être malveillant ou vulnérables, etc.) il est nécessaire de
+% les isoler les un les autres. La plupart des mécanismes de sécurité de la
+% plateforme fournisse don c un mécanisme d'isolation}
+%
+
+The complexity of the x86 \IO resolution mechanism obliges to take into account
+the numerous redirection features exposed by the architecture.
+%
+Memory locations can have an arbitrary number of aliases, in several layered
+address spaces: the \ac{dram} controller assigns an address to each memory cell
+the \ac{dram} contains; the processor maps physical addresses to \ac{dram}
+addresses; the \ac{mmu} maps virtual addresses to physical addresses.
+%
+As a consequence, modifying the content of a memory cell may not be the only way
+at the disposal of attackers to defeat a given access control policy.
+%
+For instance, if the access control policy refers to virtual addresses \( v \),
+modifying the \ac{mmu} configuration results in modifying the content associated
+with \( v \).
+
+\subsection{Cache Memory}
+\label{subsec:usecase:cachemem}
 %
 Interacting with the \ac{dram} remains slow, in regard to the speed of a
 \ac{cpu}.
@@ -580,16 +642,16 @@ Figure~\ref{fig:usecase:writeback}.
 The purpose of this strategy is to reduce the number of \IO forwarded to the
 \ac{dram}.
 %
-To that end, each cache line has a ``dirty bit'' which is set by the cache when its value is
-updated by a write access.
+To that end, each cache line has a ``dirty bit'' which is set by the cache when
+its value is updated by a write access.
 %
 In case of cache eviction, that is when the cache frees a given cache line
 previously used for a given address in order to use it for another one, it
 verifies the value of the ``dirty bit'', so it can update the underlying memory
 cell if necessary.
 %
-Therefore, as long as the cache line is not evicted, the \ac{cpu} does not
-issue write access to the underlying memory.
+Therefore, as long as the cache line is not evicted, the \ac{cpu} does not issue
+write access to the underlying memory.
 %
 The write-back strategy is not suitable for memories of other hardware
 components mapped into the \ac{cpu} address space.
@@ -680,8 +742,9 @@ read accesses, but write accesses are directly forwarded.
   \label{fig:usecase:writeback}
 \end{figure}
 
-\paragraph{Peripherals \IOs.}
-%
+\subsection{Peripherals \IOs}
+\label{subsec:usecase:periphio}
+
 Cores are not the only active hardware components present inside a typical x86
 hardware architecture.
 %
@@ -764,6 +827,51 @@ address, it raises a so-called Page Fault.
   \label{tab:usecase:idt}
 \end{table}
 
+\paragraph{Access Control for Hardware Components.}
+%
+Hardware components come from various places and can be of various qualities.
+%
+Once integrated together, an attacker can potentially leverage any of them to
+threaten the security of the system.
+%
+In this context, the principle of least
+privilege\,\cite{saltzer1975leastprivilege} applies: a given component should
+only be able to leverage capabilities it needs to work according to its purpose,
+where a ``capability'' refers to the right to perform a given \IO.
+%
+To impose an access control policy to hardware components, a system software
+component uses the so-called VT-d feature, which implements an \IO-\ac{mmu} for
+x86 computing platform\,\cite{abramson2006vtd}.
+
+In practice, the correct enforcement of an access control policy for hardware
+components remain challenging, for various reasons.
+
+Firstly, security checks can have an important impact on performance.
+%
+Partly for this reason, the hardware components have long been assumed
+trustworthy.
+%
+A good demonstration of this fact is the Address Translation Services mechanism
+introduced by the PCI standard, whose purpose is to allow PCI devices to bypass
+security mechanisms designed to reduce their
+privileges\,\cite{daubignard2017protip}.
+%
+Other examples showed blind trust in foreign hardware components (\emph{e.g.}
+USB devices) is not without consequences from a security
+perspective\,\cite{nohl2014badusb,hudson2015thunderstrike,chifflier2013uefi}.
+%
+Secondly, the ``least privilege'' may vary from one execution to another,
+\emph{e.g.} depending on the software stack executed.
+%
+To handle the numerous use cases of the x86 architecture, its default
+configuration is very permissive, until software components such as the
+\ac{bios} or an operating system modifies it to fit their needs, by implementing
+\ac{hse} mechanisms.
+
+\thomasrk[inline]{J'en viens à me demander si on ne peut juste pas virer la
+  section sur le ME. Ou alors, la réduire et la fusionner avec la précédente,
+  pour montrer les limites de l’IOMMU. Des avis~?}
+%
 \paragraph{Autonomous Subsystem.}
 %
 Intel has implemented several out-of-band management technologies for its
@@ -794,254 +902,15 @@ typical x86 computing platform \TODO{ref!}.
 The Management Engine will notably provoke the reboot of the platform if it
 cannot initialize correctly.
 
-\subsection{Tour of x86 Security Features}
-\label{subsec:usecase:targetedsec}
-%
-\TODO{Le titre est difficile à comprendre. En outre, je ne vois pas bien où tu
-  veux en venir avec cette sous-section. Quelle est son utilité? On ne sais pas
-  si tu veux parler des politique ou des mécanismes permettant d'assurer ces
-  politiques, c'est un peu mélangé. La thèse est essentiellement focalisée sur
-  le BIOS. Or la plupart des exemples cités ici concernent plutot l'OS. Le
-  lecteur est un peu perdu...}
+\subsection*{Conclusion}
 
-As previously stated, x86 computing platforms are formed of interconnected
-components.
+This introduction to the x86 hardware architecture provides the necessary
+background to understand the challenges related to the implementation of a
+\ac{hse} mechanism in general.
 %
-Such components share common resources, like the \ac{dram} which can be both
-modified by the cores and \ac{dma}-capable hardware components.
-%
-This allows for cooperation, \emph{e.g.} when a network card receives an
-Ethernet frame, it copies its content to a pre-defined address in \ac{dram} and
-then notifies the operating system by sending an interrupt to the core.
-%
-This also raises a significant challenge from a security perspective.
-
-\paragraph{Principle of Least Privilege.}
-%
-Hardware and software components come from various places and can be of various
-qualities.
-%
-Once integrated together, an attacker can potentially leverage any of them to
-threaten the security of the system.
-%
-In this context, the principle of least
-privilege\,\cite{saltzer1975leastprivilege} applies: a given component should
-only be able to leverage capabilities it needs to work according to its purpose,
-where a ``capability'' refers to the right to perform a given \IO.
-%
-In practice, the implementation of this principle is challenging, for various
-reasons.
-
-Firstly, security checks can have an important impact on performance.
-%
-Partly for this reason, the hardware components have long been assumed
-trustworthy.
-%
-A good demonstration of this fact is the Address Translation Services mechanism
-introduced by the PCI standard, whose purpose is to allow PCI devices to bypass
-security mechanisms designed to reduce their
-privileges\,\cite{daubignard2017protip}.
-%
-Other examples showed blind trust in foreign hardware components (\emph{e.g.}
-USB devices) is not without consequences from a security
-perspective\,\cite{nohl2014badusb,hudson2015thunderstrike,chifflier2013uefi}.
-%
-Secondly, the ``least privilege'' may vary from one execution to another,
-\emph{e.g.} depending on the software stack executed.
-%
-To handle the numerous use cases of the x86 architecture, its default
-configuration is very permissive, until software components such as the
-\ac{bios} or an operating system modifies it to fit their needs, by implementing
-\ac{hse} mechanisms.
-
-% OLD VERSION: For instance, it has also been repeatedly shown that the various
-% physical interface exposed by the computer (\emph{e.g.}
-% USB\,\cite{nohl2014badusb}, Thunderbolt\,\cite{hudson2015thunderstrike},
-% PCI\,\cite{chifflier2013uefi}) could be leveraged to take the control of a
-% given computing platform, because peripherals connected \emph{via} these
-% interfaces could perform \ac{dma}.
-
-\paragraph{Access Control.}
-%
-The x86 hardware architecture provides many hardware features to be used to
-implement \ac{hse} mechanisms
-%
-\TODO{Il faudrait mettre ici une liste importante d'exemples avec des ref}
-%
-to determine which \IO each component of the system can or cannot perform.
-%
-In other words, these \ac{hse} mechanisms enforce access control
-policies\,\cite{sandhu1994access}.
-%
-Subjects of these policies include the software and hardware components of the
-system.
-%
-Objects ultimately come down to the memory locations of various natures
-scattered within the hardware architecture.
-%
-Actions comprise reading from and writing to a memory location. From a core
-perspective, it is also common to distinguish between reading data and reading
-instructions.
-
-The \ac{mmu} is a good example of a hardware feature involved in a \ac{hse}
-mechanism.
-%
-Thanks to the \ac{mmu}, an operating system can attribute ranges of \ac{dram} to
-user applications it manages and isolates its code and data from these
-applications.
-%
-The \ac{mmu} alone is not sufficient, because its scope does not cover its own
-configuration.
-%
-That is, it is not possible to configure the \ac{mmu} in order to prevent a
-software component to modify the \ac{mmu} configuration.
-%
-As a consequence, an additional hardware feature has to be used: the protection
-rings\,\cite[Volume 3, Section 5.5]{intel2014manual}.
-%
-The x86 cores can operate in 4 different so-called rings, from 0 to 3, where
-ring~0 is the most privileged and ring~3 the least.
-%
-Ring~3 imposes several restrictions on software components, including the
-capability to modify the \texttt{CR3} register which identifies the base of the
-page table hierarchy used byt the \ac{mmu}.
-%
-This is why ring~3 is commonly dedicated to the execution of applications.
-%
-Finally, the scope of the \ac{mmu} is limited to the software component executed
-by a core at a given time.
-%
-To impose an access control policy to hardware components as well, an operating
-system can use the so-called VT-d feature, which implements an \IO-\ac{mmu} for
-x86 computing platform\,\cite{abramson2006vtd}.
-
-%
-% GUILLAUME: Ce qu'il faudrait dire, c'est que le CPU et la RAM sont des
-% ressources partagées par les différents composants logiciels et matériels. Du
-% coup, d'un point de vue de la sécurité, comme ces composants ne se font pas
-% nécessairement confiance (parsqu'ils viennent de fournisseur différent,
-% parqsu'il peuvent être malveillant ou vulnérables, etc.) il est nécessaire de
-% les isoler les un les autres. La plupart des mécanismes de sécurité de la
-% plateforme fournisse don c un mécanisme d'isolation}
-%
-
-The complexity of the x86 \IO resolution mechanism obliges to take into account
-the numerous redirection features exposed by the architecture.
-%
-Memory locations can have an arbitrary number of aliases, in several layered
-address spaces: the \ac{dram} controller assigns an address to each memory cell
-the \ac{dram} contains; the processor maps physical addresses to \ac{dram}
-addresses; the \ac{mmu} maps virtual addresses to physical addresses.
-%
-As a consequence, modifying the content of a memory cell may not be the only way
-at the disposal of attackers to defeat a given access control policy.
-%
-For instance, if the access control policy refers to virtual addresses \( v \),
-modifying the \ac{mmu} configuration results in modifying the content associated
-with \( v \).
-
-\paragraph{Availability.}
-%
-Another class of security policies targeted by \ac{hse} mechanism is
-availability security policies.
-%
-They focus on ensuring given software components are executed over time, without
-the need for cooperation from mistrusted software components.
-%
-For instance, a user application which contains an infinite loop should not be
-able to prevent the execution of the operating system, and by extension other
-user applications.
-%
-To that end, the x86 hardware architecture relies on hardware interrupts and
-exceptions.
-%
-Going back to the example of user applications, an operating system can leverage
-one of the numerous hardware timers (\emph{e.g.} APIC timer\,\cite[Volume 3,
-Subsection 10.5.4]{intel2014manual}) at its disposal to periodically preempt a
-core, \emph{i.e.} implement preemptive multitasking.
-
-% \TODO{Beaucoup de confusion dans ce paragraphe. 1) si tu parles de information
-% flow et que tu dis que tu ne peux pas traiter la noninterference, tu vas te
-% faire allumer... 2) la non-interference ne traite généralement pas des canaux
-% auxilliaires mais seulement des flux directe et indirecte qui résulte d'une
-% écriture explicite dans un conteneur d'informatin ou canal public et 3) je ne
-% comprends pas ce que tu veux dire avec la citation du manuel Intel}:
-%
-%\begin{quote}
-%  The Intel architecture aims to provide protection against software
-%  side-channel attacks at the cache line granularity.
-%
-%  \hfill\small \emph{Intel Software Guard Extensions, Developer Guide}
-%\end{quote}
-%
-%Because computer programs rarely fit inside a cache line, preventing
-% side-channel attacks requires additional software-based security enforcement
-% mechanisms.
-
-% \subsection{Security Challenges and Attack Paths}
-%
-% \paragraph{Privilege Escalation.}
-%%
-%
-% \paragraph{Malicious Hardware Components.}
-%%
-% Historically, peripherals have been part of the \ac{tcb} of every x86 \ac{hse}
-% mechanisms, with important consequences on the computing platform security.
-%%
-% \TODO{Tu n'as pas défini avant la TCB, il me semble.}
-%%
-% For instance, it has also been repeatedly shown that the various physical
-% interface exposed by the computer (\emph{e.g.} USB\,\cite{nohl2014badusb},
-% Thunderbolt\,\cite{hudson2015thunderstrike}, PCI\,\cite{chifflier2013uefi})
-% could be leveraged to take the control of a given computing platform, because
-% peripherals connected \emph{via} these interfaces could perform \ac{dma}.
-%%
-% In 2010, Loic Duflot \emph{et al.} have shown it was possible to take control
-% of certain network card.
-%%
-% They exploit some vulnerability in the network card firmware, which process
-% network packets, to that end\,\cite{duflot2010network}.
-%%
-% This attack path did not require a physical access to the target.
-%
-% In that respect, the current situation of x86 systems has improved.
-%%
-% Modern \acp{cpu} provide a feature called \IO MMU\thomasrk{ref!}, which allows
-% for configuring the memory ranges each peripheral can access to.
-%%
-% A well-configured \IO MMU drastically limits the impact of a rogue
-% peripherals.
-%%
-% However, it is worth mentioning that, since 2008, Intel embeds the Management
-% Engine, a processor \emph{inside} the \ac{pch}\thomasrk{ref}.
-%%
-% The Management Engine executes a complete software stack, and is capable of
-% interacting with the \ac{dram} as well as other hardware components.
-%%
-% Intel leverages the Management Engine to provide out-of-band management
-% solution, which means it can interact with the rest of the world without the
-% cooperation of the main \ac{cpu}.
-%%
-% Although the Management Engine supposedly operates in a transparent manner
-% from the \ac{cpu} perspective, we emphasize that a Management Engine
-% vulnerability, a scenario which is not without precedent, potentially defeats
-% any security measures implemented at the \ac{cpu} level.
-%
-% \paragraph{Microarchitecture}
-%%
-% Intel microarchitectural design is increasingly considered from a security
-% perspective.
-%%
-% A deep knowledge of a core internals can be leveraged to perform side channel
-% attacks\,\thomasrk{ref}.
-%%
-% For instance, time variations in memory accesses induced by the x86 cache have
-% been leveraged to \emph{e.g.} retrieve secrets\thomasrk{ref} or defeat
-% software components isolation\thomasrk{ref}.
-%%
-% Since the disclosure of Spectre\thomasrk{ref} and Meltdown in January
-% 2018\thomasrk{ref}, many other microarchitectural features have been subverted
-% in side-channels attacks\thomasrk{ref spectre variants}.
+In the next section, we explain why the \ac{bios} requires such an isolated
+environment to operate, and we detailed the hardware features it leveraged to
+that end.
 
 \section{BIOS Overview}
 \label{sec:usecase:firmware}
