@@ -1,3 +1,4 @@
+%!TEX root = ../main.tex
 \chapter{Modular Verification of Component-based Systems}
 \label{chapter:freespec}
 
@@ -8,7 +9,7 @@
 
 \vspace{1cm}\noindent
 %
-For many years, industrial vendors\,\cite{reid2017arm,leslie2015sgx} and
+For many years, industrial vendors\,\cite{reid2017arm,leslie2015sgx} \GH{la deuxième référence est cassée} and
 researchers\,\cite{chong2016report,choi2017kami} have aimed to formally specify
 and verify hardware architectures.
 %
@@ -24,7 +25,7 @@ The scale of the task dictates several requirements regarding the formalism to
 adopt in this particular case.
 %
 It must allow for considering independently each component of our system, before
-composing them to conclude about the properties of the system as a whole.
+composing them to conclude about the properties of the system as a whole. \GH{Tu parles de plusieurs requirements mais tu n'en n'évoque qu'un seul. En outre, cette intro est longue et parfois un peu maladroite. Je la réduirais en une ou deux phrase plus sobre et directe du style 'Modéliser de manière préciser un système complexe que représente une architecture x86, constitué de plusieurs composants interagissant entre eux, nécessite une approche modulaire.'}
 
 This objective is reminiscent of the programming language problematic to model
 and verify large programs with side effects.
@@ -35,14 +36,13 @@ imply to somehow take into account an outer \emph{stateful} environment and
 secondly, because the composition of stateful computations is not well-handled
 by traditional (monadic) approaches.
 %
-Algebraic effects and handlers\,\cite{bauer2015effects} are a generic approach
-to overcome this double challenge.
+Algebraic effects and handlers\,\cite{bauer2015effects} overcome this double challenge.
 %
 They allow to model large classes of effects (e.g., exception, state,
 non-determinism) and to compose effects within purely functional programs, while
 deferring the realizations of these effects to dedicated handlers.
 
-In this Chapter, we aim to show how a variant of algebraic effects based on Free
+In this Chapter, we aim to show how a variant of algebraic effects based on Free \GH{pourquoi un F majuscule... }
 monads can be used to reason about large systems, by modelling their components
 as effect handlers.
 %
@@ -65,7 +65,7 @@ Our contribution is threefold:
   platforms.
 \end{itemize}
 
-The rest of the paper proceeds as follows.
+The rest of the paper \GH{Je pense que tu voulais dire "chapitre" ;-)} proceeds as follows. \GH{TOn plan n'évoque pas la section 6.1}
 %
 We describe how we model components in terms of programs with effects and effect
 handlers (Section~\ref{sec:freespec:specifying}) and we introduce so-called
@@ -81,6 +81,7 @@ leveraged to scale the modelling and verification work for larger systems
 
 \section{A Compositional Reasoning Framework}
 % ==============================================================================
+\GH{Il faudrait une ou deux phrase d'introduction à cette section avec annonce du plan interne. Après lecture de la suite, il me semble que le premier paragraphe de la sous-section suivante correspond à ce que je souhaiterais mais il est mal placé.}
 
 \subsection{{\scshape Minx86} Limitations}
 
@@ -93,7 +94,7 @@ makes its use at a larger scale unlikely.
 %
 Then, we formulate requirements on a potential successor for {\scshape Minx86},
 that would allow for taking better advantage of our \ac{hse} mechanism
-definition.
+definition. \GH{En fait, ce premier paragraphe est un plan de la section. Il devrai donc être placé en dehors de cette première sous-section. Ici, il faudrait une petite phrase d'introduction de la sous section, en présentant succintement les deux limites que tu vas développer. }
 
 \paragraph{Monolithic Model.}
 %
@@ -115,7 +116,7 @@ We have no doubt that such situations will arise again if we try to increase the
 scope of {\scshape Minx86}.
 
 Some transitions of {\scshape Minx86} imply several state updates may happen in
-sequence.
+sequence. \GH{A mon avis il manque des mots dans cette phrase pour qu'elle soit compréhensible}
 %
 This is particularly true for \( \mathrm{Read} \) and \( \mathrm{Write} \)
 transitions, as both the cache and memories are updated in case of cache misses
@@ -427,7 +428,7 @@ location contents (that are, bytes of bits), similarly to what a type inference
 algorithm can do.
 %
 It worked, because we did not modeled hardware features whose behavior depends
-for instance on configuration stored in memory for instance (\emph{e.g.} a
+for instance on configuration stored in memory (\emph{e.g.} a
 \ac{mmu} and its page tables).
 %
 We have tried to address this issue by modifying the model, so that both the
