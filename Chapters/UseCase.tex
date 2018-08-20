@@ -31,7 +31,8 @@ These attacks have motivated our effort to provide a formal framework for
 reasoning about \ac{hse} mechanisms.
 %
 However, it is important to emphasize that other mainstream architectures
-(\emph{e.g.}  ARM) work on a similar basis and potentially suffer similar issues. 
+(\emph{e.g.}  ARM) work on a similar basis and potentially suffer similar issues.
+%
 Our contributions are thus intended to be applicable to other hardware
 architectures.
 
@@ -39,7 +40,7 @@ The rest of this Chapter proceeds as follows.
 %
 We provide the necessary details on how a typical x86 hardware architecture
 works (Section~\ref{sec:usecase:architecture}) and we explain why and how the
-\ac{bios} remains isolated from the rest of the software stack at runtime
+\ac{bios} remain isolated from the rest of the software stack at runtime
 (Section~\ref{sec:usecase:firmware}).
 %
 This background allows us to describe the critical compositional attacks we
@@ -75,14 +76,14 @@ peripherals (\emph{e.g.} USB devices, hard drives).
 The x86 architecture has seen many iterations over the years, and it is quite
 common to find in the same computer park different versions of this architecture.
 %
-For instance the processor was previously connected to a \emph{northbrige}
+For instance, the processor was previously connected to a \emph{northbrige}
 (low-latency), which was itself connected to a \emph{southbridge} (slower \IOs).
 
-This section proceeds as follow.
+This section proceeds as follows.
 %
 First, we describe the internals of a x86 processor (\ref{subsec:usecase:proc}).
 %
-We detail the mechanisms which play a part in the the interactions between the
+We detail the mechanisms which play a part in interactions between the
 processor and the memories scattered inside the hardware architecture
 (\ref{subsec:usecase:mem}), then focus on the caches embedded inside the
 processor to reduce the latency induced by these interactions
@@ -292,7 +293,7 @@ and the same binary sequence can be first decoded as an instruction, then
 interpreted as an operand of an arithmetical operation. \GH{and then? En outre, c'est un exemple parmi d'autre, non?}
 %
 In addition, other hardware components also provide additional memory regions
-cores can read from or write to.
+that cores can read from or write to.
 %
 Contrary to \ac{dram}, \IOs targeting these memories often carry a semantics
 specific to each peripheral.
@@ -309,10 +310,10 @@ Cores interact with memories \emph{via} two distinct memory address spaces,
 characterized by a set of addresses and a set of instructions.
 %
 The most important address space is the \emph{system memory}, and most of the
-x86 instructions (\emph{e.g.} \texttt{mov} variants, arithmetic operations such
+x86 instructions (\emph{e.g.} \texttt{mov} variants, arithmetical operations such
 as \texttt{sub} and \texttt{add}) are designed to manipulate it.
 %
-Addresses of the system memory are often refer to \GH{refer to?} as physical addresses, and the
+Addresses of the system memory are often referred to as physical addresses, and the
 majority of the system memory is made of \ac{dram}. \GH{pas très claire.}
 %
 Besides, cores use another address space characterized by two dedicated
@@ -365,9 +366,9 @@ The PCI specification states that the offset \texttt{0x10} of the PCI
 configuration spaces is dedicated to so-called \texttt{BAR}s (Base Address
 Registers).
 %
-The purposte of the \texttt{BAR}s is to configure a memory-mapped mechanism, so
+The purpose of the \texttt{BAR}s is to configure a memory-mapped mechanism, so
 that it becomes possible to interact with the PCI configuration space of a given
-peripherals \emph{via} the system memory.
+peripheral \emph{via} the system memory.
 %
 As a consequence, a core which reads from or write to the system memory in a
 range specified by a BAR sees its \IO dispatched to the configuration space of
@@ -838,7 +839,7 @@ component uses the so-called VT-d feature, which implements an \IO-\ac{mmu} for
 x86 computing platform\,\cite{abramson2006vtd}.
 
 In practice, the correct enforcement of an access control policy for hardware
-components remain challenging, for various reasons.
+components remains challenging, for various reasons.
 
 Firstly, security checks can have an important impact on performance.
 %
@@ -1071,7 +1072,7 @@ component.
 %
 For instance, the \ac{bios} takes care of its own software updates, in order to
 verify submitted versions prior to applying them, \emph{e.g.} by verifying
-cryptographic signature or preventing the installation of older, out-dated
+cryptographic signature or preventing the installation of older, outdated
 versions.
 
 \paragraph{Proactive Features.}
@@ -1101,7 +1102,7 @@ In most cases, it is a proprietary software, and the computer owner has little
 control over it.
 %
 The rest of the software stack is considered untrusted, and one goal of the
-\ac{bios} is to keep the computer in a working state, even in presence of an
+\ac{bios} is to keep the computer in a working state, even in the presence of an
 erroneous or malicious software stack.
 %
 To that end, the \ac{bios} relies on several \ac{hse} mechanisms to enforce its
@@ -1289,11 +1290,11 @@ This way, the execution of the software component previously halted by the
 From the system point of view, it is almost like if nothing has happened.
 
 Finally, the \ac{pch} exposes a register called \texttt{APM\_CNT} that a system
-software component can write to in order to make the \ac{pch} triggers a
+software component can write to in order to make the \ac{pch} trigger a
 \ac{smi}\,\cite{intel2012pch}.
 %
 In practice, this mechanism is used by a system software component in order to
-request the execution of the \ac{bios}, for purpose of carry out a given
+request the execution of the \ac{bios}, for the purpose of carrying out a given
 service, \emph{e.g.} modifying the content of a given \ac{uefi} variable.
 %
 \footnote{\ac{uefi} variables are stored in the flash memory, alongside the
@@ -1353,7 +1354,7 @@ explains why the \ac{smm} is often referred to as the x86 ``most privileged
 execution mode.''
 %
 In a nutshell, the \ac{smm} code can leverage the same hardware capabilities
-than the system software, including manipulating memories used by the system
+as the system software, including manipulating memories used by the system
 software.
 %
 On the contrary, the system software cannot modify either the SMRAM content or
@@ -1431,7 +1432,7 @@ The attack proceeds as follows:
   copy of the \ac{smm} code inside its cache.
 \end{enumerate}
 %
-This attack is a perfect illustration of an compositional attack:
+This attack is a perfect illustration of a compositional attack:
 %
 both the memory controller and the cache work as expected.
 %
