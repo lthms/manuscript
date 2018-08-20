@@ -1,11 +1,6 @@
 \chapter{Notations}
 \label{frontmatter:notations}
 
-\paragraph{Predicates}
-%
-\( \top \) (\emph{top}) is the logical statement which is always true, while \(
-\bot \) (\emph{bottom}) is the logical statement which is always false.
-
 \paragraph{Constructors}
 %
 We often define sets of values in terms of functions to construct these values.
@@ -62,9 +57,14 @@ that
   \end{cases}
 \]
 %
-Finally, we ease the definition of nested updates by gathering the nested fields
-on the right side of \( \leftarrow \).
+Finally, we ease the definition of nested updates by gathering nested fields on
+the left side of~\( \leftarrow \).
 %
-For instance, we write \( r \{ s(t) \leftarrow u \} \) for
+Let \( R \triangleq \langle s : T \rightarrow U,\quad v : W \rangle \) be a set
+of named tuples whose field \( s \) is a function which maps elements of \( T \)
+to element of \( U \).
+%
+To replace the value associated to \( t \in T \) by \( u \in U \) in the
+function associated with the field \( s \) of \( r \in R \), we write
+\( r \{ s(t) \leftarrow u \} \) instead of
 \( r \{ s \leftarrow r.s \{ t \leftarrow u \} \} \).
-\TODO{Je ne comprends pas cette dernière remarque}

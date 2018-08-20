@@ -23,9 +23,9 @@ interface can be seamlessly interchanged.
 From a security perspective, each layer is often more privileged than its
 successors.
 %
-For instance, system software components (\emph{e.g.} an Operating System (OS) \GH{utiliser un  acronyme pour OS} or a
-hypervisor) manage the life cycle of upper layers (\emph{e.g.} applications or
-guest OSes).
+For instance, system software components (\emph{e.g.} an Operating System (OS)
+or a hypervisor) manage the life cycle of upper layers (\emph{e.g.} applications
+or guest OSes).
 %
 In such a context, one layer implicitly trusts its predecessors.
 %
@@ -38,7 +38,7 @@ security\,\cite{yang2016a2}, and the platform firmware has been used as a
 persistent attack vector across machine restarts\,\cite{embleton2013smm}.
 %
 On the other hand, one layer may constrain the execution of its successors, with
-respect to a targeted security policy, \emph{e.g.}  an operating system enforces
+respect to a targeted security policy, \emph{e.g.}  an OS enforces
 availability ---fair share of \ac{cpu} time---, confidentiality and integrity
 ---exclusive partition of physical memories--- properties for the applications
 it manages.
@@ -47,11 +47,12 @@ it manages.
 
 Constraining an execution can be achieved in various ways.
 %
-Concerning the lowest layers of a software stack \GH{du coup maintenant le terme n'a pas été défini}, the common approach is to rely
-on features provided by the hardware architecture to reduce the hardware
-capabilities that can be used by upper layers.
+Concerning the lowest layers of software stack, \emph{e.g.} the \ac{bios} and
+system software components, the common approach is to rely on features provided
+by the hardware architecture to reduce the hardware capabilities that can be
+used by upper layers.
 %
-For instance, system software components \GH{system software n'a pas été défini} often leverage among other mechanisms a
+For instance, system software components often leverage among other mechanisms a
 \ac{mmu} to partition the system memory.
 %
 Thus, when an application is executed, it can only access a subset of the system
@@ -122,7 +123,8 @@ implementation bugs\,\cite{wojtczuk2011txtbug,sang2010iommu}.
 This is not surprising, as novel hardware features tend to be more and more
 complex.
 %
-In extreme scenarios, novel hardware features have been turned into attack vectors\,\cite{wojtczuk2011txtbug}.
+In extreme scenarios, novel hardware features have been turned into attack
+vectors\,\cite{wojtczuk2011txtbug}.
 %
 In addition to these implementation errors, the fact that hardware architectures
 often comprise hundreds of features implemented by dozens of interconnected
@@ -170,7 +172,7 @@ whole.
 
 The significant impact of previously disclosed compositional
 attacks\,\cite{duflot2009smram,wojtczuk2009smram,domas2015sinkhole,kallenberg2015racecondition,kovah2015senter}
-have motivated our will to formally specify \GH{and verify?} HSE mechanisms.
+have motivated our will to formally specify and verify HSE mechanisms.
 %
 We believe this would benefit both hardware designers and software developers.
 %
@@ -238,20 +240,24 @@ impact on the proofs already written.
 
 During the first stage of this thesis, we propose a formal definition of
 \ac{hse} mechanisms in the form of requirements trusted software components have
-to satisfy to see a targeted security policy enforced at all time by the
-hardware architecture. \GH{couper la phrase en deux. j'aime pas "to see"}
+to satisfy.
+%
+A \ac{hse} mechanism is correct if its requirements are sufficient to make the
+hardware architecture enforce a targeted security policy.
 %
 To evaluate our approach, we formally specify and verify a \ac{hse} mechanism
 implemented by the \ac{bios} of x86-based computing platform at runtime to
 remain isolated from the rest of the software stack.
 %
 Our choice has been motivated by the prominent position of the Intel hardware
-architecture on the personal computer market. Moreover compositional attacks targeting this architecture have been
- disclosed \GH{refs}.
+architecture on the personal computer market.
+%
+Moreover compositional attacks targeting this architecture have been
+disclosed\,\cite{duflot2009smram,wojtczuk2009smram,domas2015sinkhole,kallenberg2015racecondition,kovah2015senter}.
 %
 The resulting formal definition assumes as little as possible about the actual
 implementation of the \ac{bios}, and constitutes, to the extent of our
-knowledge, the first formalization \GH{formalisation? anglais US ou GB?} of the \ac{bios} security model at runtime.
+knowledge, the first formalization of the \ac{bios} security model at runtime.
 %
 Our model and its related proofs of correctness have been implemented in the Coq
 theorem prover, to increase our confidence in our result.

@@ -77,7 +77,8 @@ The x86 architecture has seen many iterations over the years, and it is quite
 common to find in the same computer park different versions of this architecture.
 %
 For instance, the processor was previously connected to a \emph{northbrige}
-(low-latency), which was itself connected to a \emph{southbridge} (slower \IOs).
+(low-latency), which was itself connected to a \emph{southbridge} (slower
+peripherals).
 
 This section proceeds as follows.
 %
@@ -152,7 +153,7 @@ responsible for executing assembly instructions of software component programs.
 %
 It also integrates several additional hardware modules to connect the cores to
 the rest of the hardware architecture, \emph{e.g.} a memory controller to manage
-\IOs targeting the DRAM.
+interactions with the DRAM.
 %
 The concrete hardware implementation of the processor is often referred as the
 Intel microarchitecture, in opposition to the Intel architecture which describes
@@ -277,7 +278,7 @@ an attack vector.
 Besides cores, \emph{memories} are the most important components of a computing
 platform.
 %
-Cores interact with these memories during so-called \IOs, for Input/Output \GH{tu as utilisé le terme I/O avant}: a
+Cores interact with these memories during so-called \IOs, for Input/Output: a
 core receives data during an input and it sends data during an output.
 %
 The x86 architecture integrates several sources of memories, along with several
@@ -288,9 +289,9 @@ The main target of cores \IOs is the \ac{dram}.
 \ac{dram} contains the instructions executed by the cores, \emph{and} the data
 they manipulate.
 %
-A core decides the semantics of a given memory cell depending on the context,
-and the same binary sequence can be first decoded as an instruction, then
-interpreted as an operand of an arithmetical operation. \GH{and then? En outre, c'est un exemple parmi d'autre, non?}
+A core decides the semantics of a given memory cell depending on the context, \emph{e.g.}
+the same binary sequence can be decoded as an instruction or interpreted as an
+operand of an arithmetical operation.
 %
 In addition, other hardware components also provide additional memory regions
 that cores can read from or write to.
@@ -313,8 +314,8 @@ The most important address space is the \emph{system memory}, and most of the
 x86 instructions (\emph{e.g.} \texttt{mov} variants, arithmetical operations such
 as \texttt{sub} and \texttt{add}) are designed to manipulate it.
 %
-Addresses of the system memory are often referred to as physical addresses, and the
-majority of the system memory is made of \ac{dram}. \GH{pas très claire.}
+Addresses of the system memory are referred to as physical addresses and the
+majority of system memory \IOs are dispatched to the \ac{dram}.
 %
 Besides, cores use another address space characterized by two dedicated
 instructions ---\texttt{in} and \texttt{out}--- to target the memories exposed
@@ -640,10 +641,11 @@ The purpose of this strategy is to reduce the number of \IO forwarded to the
 To that end, each cache line has a ``dirty bit'' which is set by the cache when
 its value is updated by a write access.
 %
-In case of cache eviction, that is when the cache frees a given cache line
-previously used for a given address in order to use it for another one, it
-verifies the value of the ``dirty bit'', so it can update the underlying memory
-cell if necessary. \GH{fait 2 phrases. une pour décrire cache eviction, une pour décrire ce que l'on fait dans ce cas.}
+A \emph{cache eviction} occurs  when the cache frees a given cache line
+previously used for a given address in order to use it for another one.
+%
+When it happens, the cache verifies the value of the ``dirty bit'', so it can
+update the underlying memory cell if necessary.
 %
 Therefore, as long as the cache line is not evicted, the processor does not
 issue write access to the underlying memory.
@@ -766,8 +768,8 @@ Not all x86 interrupts come from a hardware component.
 %
 Cores use several of them, for instance to recover from errors.
 %
-For example, if a core is not able to translate a virtual address into a proper
-address, it raises a so-called Page Fault \GH{Pourquoi des majuscules?}.
+For example, if a core is not able to translate a virtual address into a
+physical address, it raises a so-called page fault.
 
 \begin{table}
   \centering
@@ -839,8 +841,8 @@ component uses the so-called VT-d feature, which implements an \IO-\ac{mmu} for
 x86 computing platform\,\cite{abramson2006vtd}.
 
 In practice, the correct enforcement of an access control policy for hardware
-components remains challenging, for various reasons.
-Firstly, security checks can have an important impact on performance.
+components remains challenging, for various reasons.  Firstly, security checks
+can have an important impact on performance.
 %
 Partly for this reason, the hardware components have long been assumed
 trustworthy.
@@ -862,34 +864,29 @@ configuration is very permissive, until software components such as the
 \ac{bios} or an operating system modifies it to fit their needs, by implementing
 \ac{hse} mechanisms.
 
-\thomasrk[inline]{J'en viens à me demander si on ne peut juste pas virer la
-  section sur le ME. Ou alors, la réduire et la fusionner avec la précédente,
-  pour montrer les limites de l’IOMMU. Des avis~?}
-  \GH{Je pense que çà serait mieux en effet. Tel quel, çà vient un peu comme une cheveu sur la soupe} 
-%
-\paragraph{Autonomous Subsystem.}
-%
-Intel has implemented several out-of-band management technologies for its
-products.
-%
-They allow for administering a computer \emph{via} the network, without the need
-for a physical access.
-%
-In practice, the software components responsible for implementing the
-out-of-band management features are not executed by the main processor: some
-network cards implement the ASF technology\,\cite{duflot2010network}, and since
-2008, the x86 hardware architecture comprises a so-called Management
-Engine to that end\,\cite{ruan2014me,skochinsky2014intel}.
-%
-In 2018, the Management Engine is located inside the \ac{pch}.
-%
-ASF-capable network cards and the Management Engine require important
-capabilities to implement their features.
-%
-For instance, the Management Engine can download from the Internet an executable
-image, provoke the reboot of the computing platform and force the processor
-to execute the software components within the image it has
-downloaded\,\cite{kumar2009active}.
+% \paragraph{Autonomous Subsystem.}
+% %
+% Intel has implemented several out-of-band management technologies for its
+% products.
+% %
+% They allow for administering a computer \emph{via} the network, without the
+% need for a physical access.
+% %
+% In practice, the software components responsible for implementing the
+% out-of-band management features are not executed by the main processor: some
+% network cards implement the ASF technology\,\cite{duflot2010network}, and
+% since 2008, the x86 hardware architecture comprises a so-called Management
+% Engine to that end\,\cite{ruan2014me,skochinsky2014intel}.
+% %
+% In 2018, the Management Engine is located inside the \ac{pch}.
+% %
+% ASF-capable network cards and the Management Engine require important
+% capabilities to implement their features.
+% %
+% For instance, the Management Engine can download from the Internet an
+% executable image, provoke the reboot of the computing platform and force the
+% processor to execute the software components within the image it has
+% downloaded\,\cite{kumar2009active}.
 
 \subsection{Conclusion}
 
@@ -1080,10 +1077,9 @@ through its interfaces, the \ac{bios} carries out several hardware-specific
 tasks which are not publicly documented.
 %
 This includes and is not limited to handling hardware errors, checking thermal
-zones, adjusting cores speed, and configuring hardware workarounds.
-%
-Some \acp{bios} also emulate complete hardware devices to the system software
-component. \GH{ref?}
+zones, adjusting cores speed, configuring hardware workarounds, and emulate
+complete hardware devices to the system software
+component\,\cite{yao2009system}.
 
 The execution of the \ac{bios} in this context should be transparent to the rest
 of the software stack.
@@ -1132,7 +1128,7 @@ isolation from the rest of the software stack.
 % security
 % vulnerability\,\cite{duflot2009smram,wojtczuk2009smram,bulygin2014summary}.
 %
-From the information we gathered in the Intel manual\,\cite{intel2014manual}, 
+From the information we gathered in the Intel manual\,\cite{intel2014manual},
 datasheets\,\cite{intel2009mch,intel2012pch}, and in the academic
 literature\,\cite{bulygin2014summary}, the isolation required by the \ac{bios}
 can be divided into three complementary security policies.
@@ -1326,8 +1322,8 @@ then the \ac{pch} triggers a \ac{smi}.
 As a consequence, the cores stop their current
 executions and enter in \ac{smm}.
 %
-This prevents the system software from modifying with \GH{modifying with?} the content of the Flash
-Memory, even if the \ac{pch} now authorizes write accesses.
+This prevents a system software component from modifying the content of the
+flash memory, even if the \ac{pch} now authorizes write accesses.
 %
 It is the \ac{smm} code responsibility to clear the \texttt{BIOSWE} bit before
 using the \texttt{rsm} instruction.
@@ -1347,7 +1343,7 @@ code that a \ac{bios} update is available.
 
 \paragraph{}
 %
-The combination of the SMRAM, the \ac{smi} and the Flash Memory Lockdown
+The combination of the SMRAM, the \ac{smi} and the flash memory lockdown
 explains why the \ac{smm} is often referred to as the x86 ``most privileged
 execution mode.''
 %
@@ -1359,14 +1355,12 @@ On the contrary, the system software cannot modify either the SMRAM content or
 the \ac{smm} code stored in the flash memory, and cannot prevent the \ac{smm}
 code execution, \emph{i.e} intercept or mask \acp{smi}.
 
-
-
 \section{BIOS HSE Mechanism and Compositional Attacks}
 \label{sec:usecase:hse}
 
 To stay isolated from the rest of the software stack at runtime, the \ac{bios}
 implements a \ac{hse} mechanism whose key hardware feature is the \ac{smm}, a
-dedicated execution mode of x86 processor (\ref{subsec:usecase:hse:smm}) \GH{cette référence est cassée}.
+dedicated execution mode of x86 processor.
 %
 The \ac{smm} provides the necessary features to enforce its isolation from the
 rest of the software stack.
@@ -1401,8 +1395,8 @@ misplaced when they disclosed the SMRAM Cache Poisoning Attack.
 \paragraph{Attack Path.}
 %
 The SMRAM Cache Poisoning leverages the write-back strategy
-(\ref{subsec:usecase:cachemem}) of the cache to circumvent the
-\texttt{D\_LCK} bit protection.
+(\ref{subsec:usecase:cachemem}) of the cache to circumvent the \texttt{D\_LCK}
+bit protection.
 %
 The attack proceeds as follows:
 
@@ -1482,16 +1476,16 @@ On the contrary, the \texttt{BIOSWE} flag is set as soon as the
 \texttt{BIOS\_CNTL} register is modified.
 %
 If two cores cooperate, they can benefit from a sufficient window for action and
-successfully tamper with the Flash Memory \GH{parfois tu utilises des majuscules pour Flash Memory et des fois, non. Fais une passe d'homogénéisation. Sans majuscule, si tu veux mon avis...} content.
+successfully tamper with the flash memory content.
 %
 The attack proceeds as follows:
 
 \begin{enumerate}
-\item One core tries \emph{ad infinitum} to overwrite the content of the Flash
-  Memory.
+\item One core tries \emph{ad infinitum} to overwrite the content of the flash
+  memory.
   %
   Because the \texttt{BIOSWE} bit is initially clear, the \ac{pch} discards its
-  attempts, and the Flash Memory content is correctly protected.
+  attempts, and the flash memory content is correctly protected.
 %
 \item At the same time, another core set the \texttt{BIOSWE} bit.
 %
@@ -1507,7 +1501,7 @@ the \texttt{BIOS\_CNTL} register: the \texttt{SMM\_BWP} (\ac{smm} \ac{bios}
 Write Protection).
 %
 If the \texttt{SMM\_BWP} is set, the \ac{pch} discards any write access which
-targets the Flash Memory \emph{unless all processors are in \ac{smm}}.
+targets the flash memory \emph{unless all processors are in \ac{smm}}.
 
 \subsection{SENTER Sandman}
 \label{subsec:usecase:hse:sandman}
@@ -1525,9 +1519,16 @@ some x86 processor, whose purpose is twofold: it attests the integrity of the
 system software component program without the need to trust the \ac{bios}, and
 it provides a trusted execution environment to the system software component.
 %
-Its purpose is to address the limitations of both the Secure Boot and Trusted
-Boot approaches, which both rely on a software root of trust stored on the flash
-memory, by making the processor the new root of trust. \GH{Je ne comprends pas "making the processor the new root of trust". Il faudrait donner un peu plus de contexte pour qu'on puisse comprendre cette affirmation}
+% Its purpose is to address the limitations of both the Secure Boot and Trusted
+% Boot approaches, which both rely on a software root of trust stored on the
+% flash memory.
+%%
+% TXT provides a set of dedicated instructions to load a system software
+% component, independently from previously executed software components.
+%%
+% \GH{Je ne comprends pas "making the processor the new root of trust". Il
+% faudrait donner un peu plus de contexte pour qu'on puisse comprendre cette
+% affirmation}
 %
 % Similarly to the Trusted Boot approach, TXT entrusts measurement of the system
 % software component program to the \ac{tpm}.
@@ -1607,8 +1608,8 @@ by the \ac{pch}.
 %
 The \texttt{SMM\_BWP} configuration bit makes this attack ineffective.
 %
-Besides, recent x86 processors do not disable \ac{smi} during the initialization of a
-system software component with TXT anymore.
+Besides, recent x86 processors do not disable \ac{smi} during the initialization
+of a system software component with TXT anymore.
 
 \section{Conclusion}
 \label{sec:usecase:conclusion}
