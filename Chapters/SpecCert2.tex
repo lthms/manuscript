@@ -1889,18 +1889,32 @@ separately.
 \section{Conclusion}
 \label{sec:speccert:discuss}
 
-\thomasrk[inline]{On doit remettre (séparément) l'argumentation du « ça bénéficie aux deux
-  mondes » de manière plus concrète.}
+\thomasrk[inline]{On doit remettre (séparément) l'argumentation du « ça
+  bénéficie aux deux mondes » de manière plus concrète.}
+%
+\TODO{Je suis en phase avec l'argumentaire développé dans l'abstract
+  (firstly... et secondly...). Tu devrais le reprendre (en le développant) ici
+  où l'arguentaire est moins claire et ne semble pas "calqué" sur sa première
+  énonciation (il devrait).}
 
 Throughout this Chapter, we have applied our three-steps methodology for
 formally specifying and verifying \ac{hse} mechanisms against a hardware
-architecture model to a real world example. \TODO{Phrase trop longue et difficile à suivre. Couper en deux. Première phrase "on a proposé une approche pour spécifier et vérifier un HSE au regard d'un model hardware (virer architecture). On a ensuite appliqué cette méthodo sur un exemple concret : le mécanisme d'isolation du BIOS utilisant la SMM.}
+architecture model to a real world example.
 %
-Such approach can benefit both hardware designers
-and software developers.
+\TODO{Phrase trop longue et difficile à suivre. Couper en deux. Première phrase
+  "on a proposé une approche pour spécifier et vérifier un HSE au regard d'un
+  model hardware (virer architecture). On a ensuite appliqué cette méthodo sur
+  un exemple concret : le mécanisme d'isolation du BIOS utilisant la SMM.}
+%
+Such approach can benefit both hardware designers and software developers.
 
-First, the hardware model \TODO{A quoi renvoie précisément "hardware model" dans ton approche? harware\_req? software\_req? les deux? Il faut être explicite } can be used as a formal specification by
-software developers. \TODO{tu es sur que c'est bien "software dev" que tu as voulu mettre ici? Dans ce cas je ne comprends pas trop ton développement. Tu dis que ton approche peut à la fois bénéficier au hard designer et soft dev mais ton "first" et ton 'secondly" s'adresse tous deux au "soft dev"...}
+First, the hardware model \TODO{A quoi renvoie précisément "hardware model" dans
+  ton approche? harware\_req? software\_req? les deux? Il faut être explicite }
+can be used as a formal specification by software developers. \TODO{tu es sur
+  que c'est bien "software dev" que tu as voulu mettre ici? Dans ce cas je ne
+  comprends pas trop ton développement. Tu dis que ton approche peut à la fois
+  bénéficier au hard designer et soft dev mais ton "first" et ton 'secondly"
+  s'adresse tous deux au "soft dev"...}
 %
 The main benefit of a formal specification is to avoid any ambiguity such as the
 one we have found in \cite{intel2009mch} (as published in 2009).
@@ -1914,8 +1928,11 @@ At the same page, in the description of the LOCK bit, one can also read that
 We modelled the second statement since the behavior of the memory controller is
 not specified if the first statement is true\,\footnote{If we had to actually
   implement the \ac{hse} mechanism, we would have to assume the first was the
-  correct one.}. \TODO{Cette phrase et la footnote correspondante ne sont pas claires.} \formatLTS{Minx86} as a formal specification does not suffer
-from the same flaw. \TODO{Mouais, disons que par définition, une specification formelle ne peut être ambigu. Dans ton cas, tu as du faire un choix si j'ai bien compris. Mais est-ce le bon....?}
+  correct one.}. \TODO{Cette phrase et la footnote correspondante ne sont pas
+  claires.} \formatLTS{Minx86} as a formal specification does not suffer from
+the same flaw. \TODO{Mouais, disons que par définition, une specification
+  formelle ne peut être ambigu. Dans ton cas, tu as du faire un choix si j'ai
+  bien compris. Mais est-ce le bon....?}
 %
 
 Secondly, a formal specification of a \ac{hse} mechanism will help software
@@ -1942,12 +1959,14 @@ introduction of the \ac{smrr}.
 
 From our point of view, the clear separation between the hardware model, the
 security properties and the \ac{hse} mechanisms to enforce those properties are
-the main advantage of our approach. Thanks to this separation, different \ac{hse} mechanisms can be studied against the same hardware model.
+the main advantage of our approach. Thanks to this separation, different
+\ac{hse} mechanisms can be studied against the same hardware model.
 %
 However, the scalability of SpecCert remains to be proven.
 %
 In particular, the complexity of the hardware architecture makes monolithic
-model impracticable in practice. \TODO{Que veux dire "monolithic model"? Il faudrait détailler un peu plus la problématique}
+model impracticable in practice. \TODO{Que veux dire "monolithic model"? Il
+  faudrait détailler un peu plus la problématique}
 %
 The next Part of this thesis focuses on this problematic.
 
@@ -1960,13 +1979,15 @@ The next Part of this thesis focuses on this problematic.
 %   \begin{array}{l}
 %     \text{if }\func{cache\_hit}(h.\func{cache}, pa) \\
 %     \text{then }h' = h \{ \func{cache}(\func{index}(\var{pa})) \leftarrow
-%           %       h.\func{cache}(\func{index}(\var{pa}))\{ \func{content} \leftarrow
-%           %       v,
-%           %       \func{dirty} \leftarrow \val{true} \}\}\} \\
-%           %       \text{else if }h.\func{cache}(\func{index}(\var{pa})).\func{dirty}
-%           %       =
-%           %       \val{true} \\
-%           %       \text{then }h' = h\left\{
+%           %     h.\func{cache}(\func{index}(\var{pa}))\{ \func{content}
+%           %     \leftarrow
+%           %     v,
+%           %     \func{dirty} \leftarrow \val{true} \}\}\} \\
+%           %     \text{else if
+%           %   }h.\func{cache}(\func{index}(\var{pa})).\func{dirty}
+%           %     =
+%           %     \val{true} \\
+%           %     \text{then }h' = h\left\{
 %         \begin{array}{c}
 %           \func{mem}(h.\func{cache}(\func{index}(\var{pa})).\func{tag})
 %           \leftarrow
