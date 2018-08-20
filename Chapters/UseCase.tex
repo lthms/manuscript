@@ -1482,7 +1482,7 @@ On the contrary, the \texttt{BIOSWE} flag is set as soon as the
 \texttt{BIOS\_CNTL} register is modified.
 %
 If two cores cooperate, they can benefit from a sufficient window for action and
-successfully tamper with the Flash Memory content.
+successfully tamper with the Flash Memory \GH{parfois tu utilises des majuscules pour Flash Memory et des fois, non. Fais une passe d'homogénéisation. Sans majuscule, si tu veux mon avis...} content.
 %
 The attack proceeds as follows:
 
@@ -1527,7 +1527,7 @@ it provides a trusted execution environment to the system software component.
 %
 Its purpose is to address the limitations of both the Secure Boot and Trusted
 Boot approaches, which both rely on a software root of trust stored on the flash
-memory, by making the processor the new root of trust.
+memory, by making the processor the new root of trust. \GH{Je ne comprends pas "making the processor the new root of trust". Il faudrait donner un peu plus de contexte pour qu'on puisse comprendre cette affirmation}
 %
 % Similarly to the Trusted Boot approach, TXT entrusts measurement of the system
 % software component program to the \ac{tpm}.
@@ -1616,8 +1616,8 @@ system software component with TXT anymore.
 In this Chapter, we gave an overview of the x86 hardware architecture and of the
 role played by the \ac{bios} within the software stack.
 %
-We then have detailed how the \ac{bios} rely on several hardware features to
-remain isolated from the rest of the software stack to illustrate real life
+We then have detailed how the \ac{bios} relies on several hardware features to
+remain isolated from the rest of the software stack. This illustrates real life
 \ac{hse} mechanisms.
 %
 Finally, we have presented three compositional attacks, to better illustrate
