@@ -721,21 +721,19 @@ specification\,\cite{leslie2015linsgx}.
 Each project focused on one aspect of the x86 architecture and led to uncover
 logic errors and inconsistencies in processor designs.
 %
-However, the models and tools used by Intel are rarely publicly available,
-making it difficult to formally specify and verify \ac{hse}
-mechanisms. \GH{Phrase à reformuler de manière simple. Si les modèles et les
-  outils ne sont pas disponibles, on ne peut pas les réutiliser pour ton
-  approche. point}
+However, the models and tools used by Intel are rarely publicly available, hence
+we could not leverage them to experiment with our approach.
 %
 Besides, to the extend of our knowledge, Intel has not advertised about a
 ``global'' model of its architecture, even though Nachiketh Potlapally, who was
 working at Intel at the time, discussed the benefits of such a model in
-2011\,\cite{potlapally2011hardwaresecurity}. \GH{J'enfoncerait un peu plus le
-  clou en précisant que chaque modèle a été réalisé indépendamment des autres et
-  ne couvre qu'un aspect très réduit de l'architecture (voir seulement du
-  processeur). A l'inverse, nous avons besoins d'un modèle dont le périmètre est
-  large (même si tous les composants ne sont pas nécessairement décrit avec un
-  niveau de détail important)}
+2011\,\cite{potlapally2011hardwaresecurity}.
+%
+\GH{J'enfoncerait un peu plus le clou en précisant que chaque modèle a été
+  réalisé indépendamment des autres et ne couvre qu'un aspect très réduit de
+  l'architecture (voir seulement du processeur). A l'inverse, nous avons besoins
+  d'un modèle dont le périmètre est large (même si tous les composants ne sont
+  pas nécessairement décrit avec un niveau de détail important)}
 
 \paragraph{x86 ISA Models.}
 %
@@ -1128,48 +1126,48 @@ Figure~\ref{fig:sota:minicomp}. \GH{Je ne comprends pas la figure et surtout je
   sont les limitations?}
 
 
-\begin{figure}
-  \begin{minipage}{0.48\linewidth}
-    \begin{center}
-      \begin{tikzpicture}
-        \node [draw, inner sep=10pt, minimum height=40pt] (p) {\( P \)};%
-        \node [draw, inner sep=10pt, right=of p, minimum height=40pt] (q)
-        {\( Q \)};%
+% \begin{figure}
+%   \begin{minipage}{0.48\linewidth}
+%     \begin{center}
+%       \begin{tikzpicture}
+%         \node [draw, inner sep=10pt, minimum height=40pt] (p) {\( P \)};%
+%         \node [draw, inner sep=10pt, right=of p, minimum height=40pt] (q)
+%         {\( Q \)};%
 
-        \draw ([yshift=5pt]p.east) -- ([yshift=5pt]q.west);%
-        \draw ([yshift=-5pt]p.east) -- ([yshift=-5pt]q.west);%
+%         \draw ([yshift=5pt]p.east) -- ([yshift=5pt]q.west);%
+%         \draw ([yshift=-5pt]p.east) -- ([yshift=-5pt]q.west);%
 
-        \draw ([yshift=10pt, xshift=-25pt]p.west) -- ([yshift=10pt]p.west);%
-        \draw ([xshift=-25pt]p.west) -- (p.west);%
-        \draw ([yshift=-10pt, xshift=-25pt]p.west) -- ([yshift=-10pt]p.west);%
+%         \draw ([yshift=10pt, xshift=-25pt]p.west) -- ([yshift=10pt]p.west);%
+%         \draw ([xshift=-25pt]p.west) -- (p.west);%
+%         \draw ([yshift=-10pt, xshift=-25pt]p.west) -- ([yshift=-10pt]p.west);%
 
-        \draw ([yshift=15pt, xshift=25pt]q.east) -- ([yshift=15pt]q.east);%
-        \draw ([yshift=5pt, xshift=25pt]q.east) -- ([yshift=5pt]q.east);%
-        \draw ([yshift=-5pt, xshift=25pt]q.east) -- ([yshift=-5pt]q.east);%
-        \draw ([yshift=-15pt, xshift=25pt]q.east) -- ([yshift=-15pt]q.east);%
-      \end{tikzpicture}
-    \end{center}
-  \end{minipage}
-  %
-  \begin{minipage}{0.48\linewidth}
-    \begin{center}
-      \begin{tikzpicture}
-        \node [draw, inner sep=10pt, minimum height=40pt] (p) {\( P \)};%
-        \node [draw, inner sep=10pt, right=of p] (q) {\( Q' \)};%
+%         \draw ([yshift=15pt, xshift=25pt]q.east) -- ([yshift=15pt]q.east);%
+%         \draw ([yshift=5pt, xshift=25pt]q.east) -- ([yshift=5pt]q.east);%
+%         \draw ([yshift=-5pt, xshift=25pt]q.east) -- ([yshift=-5pt]q.east);%
+%         \draw ([yshift=-15pt, xshift=25pt]q.east) -- ([yshift=-15pt]q.east);%
+%       \end{tikzpicture}
+%     \end{center}
+%   \end{minipage}
+%   %
+%   \begin{minipage}{0.48\linewidth}
+%     \begin{center}
+%       \begin{tikzpicture}
+%         \node [draw, inner sep=10pt, minimum height=40pt] (p) {\( P \)};%
+%         \node [draw, inner sep=10pt, right=of p] (q) {\( Q' \)};%
 
-        \draw ([yshift=5pt]p.east) -- ([yshift=5pt]q.west);%
-        \draw ([yshift=-5pt]p.east) -- ([yshift=-5pt]q.west);%
+%         \draw ([yshift=5pt]p.east) -- ([yshift=5pt]q.west);%
+%         \draw ([yshift=-5pt]p.east) -- ([yshift=-5pt]q.west);%
 
-        \draw ([yshift=10pt, xshift=-25pt]p.west) -- ([yshift=10pt]p.west);%
-        \draw ([xshift=-25pt]p.west) -- (p.west);%
-        \draw ([yshift=-10pt, xshift=-25pt]p.west) -- ([yshift=-10pt]p.west);%
-      \end{tikzpicture}
-    \end{center}
-  \end{minipage}
+%         \draw ([yshift=10pt, xshift=-25pt]p.west) -- ([yshift=10pt]p.west);%
+%         \draw ([xshift=-25pt]p.west) -- (p.west);%
+%         \draw ([yshift=-10pt, xshift=-25pt]p.west) -- ([yshift=-10pt]p.west);%
+%       \end{tikzpicture}
+%     \end{center}
+%   \end{minipage}
 
-  \caption{Illustration of the compositional minimization paradigm}
-  \label{fig:sota:minicomp}
-\end{figure}
+%   \caption{Illustration of the compositional minimization paradigm}
+%   \label{fig:sota:minicomp}
+% \end{figure}
 
 \GH{Il manque une transition avec "compositional Reasoning". Il faudriait
   notamment bien faire ressortir les différences entre les deux concepts
@@ -1235,8 +1233,8 @@ isolation for the purpose of compositional verification, an in particular
 compositional reasoning.
 %
 Because our long-term objective is to apply a component-based modeling approach
-to a complex hardware architecture, we focus on their applicability \GH{to such
-  context?}.
+to a complex hardware architecture, we focus on their applicability to such a
+context.
 %
 A component model should be easy to write, read and exploit in the context of a
 verification problem.
@@ -1547,13 +1545,21 @@ languages and their minimalistic semantic. \GH{Cette conclusion est un peu
 The relation between one component and the rest of the system it is connected to
 is reminiscent of the programming language to model and verify large programs
 with side effects realized by an outer environment (\emph{e.g.} an operating
-system). \GH{phrase trop longue et difficile à comprendre}
-\GH{Ce paragraph est plus difficile à suivre que les autres. Tu enchaînes beaucoup de notions assez nouvelles (Monad, Effect, Effect Handler...) par rapport au reste et trop rapidement. En outre, tu nous parles brusquement de langage pure et fonctionnel et on ne voit pas le rapport avec ce qui a été présenté jusqu'à maintenant. Il faut à mon avis mieux introduire cette partie et mieux faire comprendre pourquoi tu t'y intéresse, d'autant plus que c'est l'approche que tu vas utiliser!}
+system). \GH{phrase trop longue et difficile à comprendre} \GH{Ce paragraph est
+  plus difficile à suivre que les autres. Tu enchaînes beaucoup de notions assez
+  nouvelles (Monad, Effect, Effect Handler...) par rapport au reste et trop
+  rapidement. En outre, tu nous parles brusquement de langage pure et
+  fonctionnel et on ne voit pas le rapport avec ce qui a été présenté jusqu'à
+  maintenant. Il faut à mon avis mieux introduire cette partie et mieux faire
+  comprendre pourquoi tu t'y intéresse, d'autant plus que c'est l'approche que
+  tu vas utiliser!}
 %
 Modeling side effects in pure programming language, such as Haskell or {\scshape
   Gallina}, is usually achieved thanks to
-Monads\,\cite{wadler1990comprehending,jones2005io}, \emph{e.g.} the State Monad \GH{n'utilise pas de majuscule pour des noms communs! D'ailleurs, plus loin, tu n'utilises plus de majuscule pour "monad"} to seamlessly write computations which manipulate a global state, or the List
-Monad to abstract non-determinism,
+Monads\,\cite{wadler1990comprehending,jones2005io}, \emph{e.g.} the State Monad
+\GH{n'utilise pas de majuscule pour des noms communs! D'ailleurs, plus loin, tu
+  n'utilises plus de majuscule pour "monad"} to seamlessly write computations
+which manipulate a global state, or the List Monad to abstract non-determinism,
 %
 However, Monads have a reputation not to compose very
 well\,\cite{hyland2006combining}, despite construction such as Monad
@@ -1811,7 +1817,8 @@ while {\scshape Kami} focuses on refinement proofs.
 %
 To the best of our knowledge, the closest related research is the work of Garg
 \emph{et al.}\,\cite{garg2010compositional}, with the difference than we
-leverage the Coq proof assistant to verify our models. \GH{Il faudrait insister sur le fait que Garg ne fait pas de vérification, ce qui est implicite dans ta phrase. On pourrait penser qu'il ont simplement utilisé un autre outil que Coq}
+leverage the Coq proof assistant to verify our models, whereas they rely on
+paper proofs.
 
 \section{Conclusion}
 \label{sec:sota:conclusion}
