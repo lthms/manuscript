@@ -1019,6 +1019,552 @@ theorem prover.
 \section{Compositional Verification}
 \label{section:sota:compsec}
 
+\thomasrk[inline]{Dans notre première contribution, on trace une frontière entre
+  hw et sw.
+
+  On cherche à reproduire ce schéma à l’intérieur de l'archi hw.
+
+  Par exemple, un core en smm ne doit pas essayer de fetch du code hors de smm.
+
+  Cela change la nature de la question, de « est-ce que le hw se comporte bien
+  si le sw se comporte bien », et ça généralise en « avec trois composants A, B
+  et C, tel que A utilise B, et que B utilise C pour répondre à A, puis-je
+  prouver que, par construction, B va bien se comporter si A se comporte bien ET
+  si C respecte ses engagements, alors B aussi.
+
+  C’est du compositional reasoning
+
+  On a pas trouvé de lib cool pour faire ça de manière bien en Coq. Nos
+  objectifs : facile à écrire, facile à lire, bonus si on peut extraire une spec
+  exécutable.
+
+  Annonce du plan}
+
+\subsection{Concurrent Automata}
+
+Interface automata\,\cite{de2001interfaceautomata} are labeled transition
+systems which distinguish between three classes of transitions, modeled with
+three disjoints sets of labels:
+%
+\begin{inparaenum}[(1)]
+\item input actions (denoted by \( \mathrm{in}(S) \) for an automaton \( S \)),
+  %
+\item output actions (denoted by \( \mathrm{out}(S) \)), and
+  %
+\item internal actions (denoted by \( \mathrm{int}(S) \)).
+  %
+\end{inparaenum}
+%
+They form the signature of a given automaton (denoted by \( \mathrm{act}(S) \)).
+%
+Its transition relation \( R(S) \) is a subset of
+\( \mathrm{state}(S) \times \mathrm{act}(S) \times \mathrm{state}(S) \), where
+\( \mathrm{state}(S) \) is the set of states of \( S \).
+%
+Composition of interface automata is achieved \emph{via} input and output actions.
+%
+More precisely, when one automaton performs an output action \( \pi \) during a
+transition, all automata having \( \pi \) as input action perform \( \pi \)
+simultaneously.
+
+\begin{example}[Airlock System as Interface Automata]
+  \label{example:sota:airlockinterface}
+
+  In order to illustrate how a system can be broken down into small components,
+  we take once again the example of the airlock system.
+  %
+  In this context, the most obvious component is the door.
+  %
+  A door has two states: it can be either open or close.
+  %
+  It takes two input actions: \( \mathtt{Open} \) (the action to open the door)
+  and \( \mathtt{Close} \) (the action to close the door).
+  %
+  It does not have any output action, which means a door does not interact
+  actively with the rest of the system.
+  %
+  One possible specification for a door can be the following interface
+  automaton:
+
+  \begin{center}
+    \begin{tikzpicture}
+      \node [draw, circle] (o) {1};%
+      \node [draw, circle, right=of o] (c) {2};%
+
+      \draw [-latex] (o) edge [bend left] node [above] {\( \mathtt{Open}? \)}
+      (c);%
+      \draw [-latex] (c) edge [bend left] node [below] {\( \mathtt{Close}? \)}
+      (o);%
+      \draw [-latex] (c) edge [loop right] node {\( \mathtt{Open}? \)} (c);%
+      \draw [-latex] (o) edge [loop left] node {\( \mathtt{Close}? \)} (o);%
+
+      \node [draw, fit=(o) (c), inner sep=20pt, text width=130pt, text badly
+      centered] (d1) {};%
+
+      \node [yshift=10pt, left=35pt of d1.west] (open) {};%
+      \draw [-latex] (open) to node [above] {\( \mathtt{Open} \)}
+      ([yshift=10pt]d1.west);%
+      \node [yshift=-10pt, left=35pt of d1] (close) {};%
+      \draw [-latex] (close) to node [above] {\( \mathtt{Close} \)}
+      ([yshift=-10pt]d1.west);%
+    \end{tikzpicture}
+  \end{center}
+
+  In addition to two doors, an airlock system needs a controller, whose purpose
+  is to handle users' requests and open and close doors in consequence.
+  %
+  We consider a slightly different situation than the specification given in
+  Example~\ref{example:sota:airlocklts}.
+  %
+  Here, there are only two commands, modeled with two input actions:
+  \( \mathtt{Req}_1 \) (one user wants the first door to be opened) and
+  \( \mathtt{Req}_2 \) (one user wants the second door to be opened).
+  %
+  The controller does not embed the states of the doors, but has four output
+  actions, two per doors (\( \mathtt{Open}_i \) and \( \mathtt{Close}_i\), for
+  \( i \in \{1, 2\}\)).
+  %
+  We propose the following interface automaton:
+
+  \begin{center}
+    \begin{tikzpicture}
+      \node [draw, circle] (s1) {2};%
+      \node [draw, circle, right=50pt of s1] (s2) {3};%
+      \node [draw, circle, right=50pt of s2] (s3) {4};%
+
+      \draw [-latex] (s1) to node [above] {\( \mathtt{Close2}! \)} (s2);%
+      \draw [-latex] (s2) to node [above] {\( \mathtt{Open1}! \)} (s3);%
+
+      \node [draw, circle, below=60pt of s3] (s4) {5};%
+      \node [draw, circle, left=50pt of s4] (s5) {6};%
+      \node [draw, circle, left=50pt of s5] (s6) {7};%
+
+      \draw [-latex] (s4) to node [below] {\( \mathtt{Close1}! \)} (s5);%
+      \draw [-latex] (s5) to node [below] {\( \mathtt{Open2}! \)} (s6);%
+
+      \node [draw, circle, below=21pt of s2] (s7) {1};%
+
+      \draw [-latex] (s7) to node [left,yshift=-5pt] {\( \mathtt{Req1}? \)}
+      (s1);%
+      \draw [-latex] (s7) to node [right,yshift=5pt] {\( \mathtt{Req2}? \)}
+      (s4);%
+
+      \draw [-latex] (s3) edge [bend left] node [right] {\( \mathtt{Req2}? \)}
+      (s4);%
+      \draw [-latex] (s6) edge [bend left] node [left] {\( \mathtt{Req1}? \)}
+      (s1);%
+
+      \node [draw, fit=(s1) (s4), inner sep=20pt, text width=220pt] (ctrl) {};%
+
+      \node [yshift=20pt, left=35pt of ctrl] (in_open1) {};%
+      \draw [-latex] (in_open1) to node [above] {\( \mathtt{Req}_1 \)}
+      ([yshift=20pt]ctrl.west);%
+      \node [yshift=-20pt, left=35pt of ctrl] (in_open2) {};%
+      \draw [-latex] (in_open2) to node [above] {\( \mathtt{Req}_2 \)}
+      ([yshift=-20pt]ctrl.west);%
+
+      \node [yshift=45pt, right=35pt of ctrl] (out_open1) {};%
+      \draw [latex-] (out_open1) to node [above] {\( \mathtt{Open}_1 \)}
+      ([yshift=45pt]ctrl.east);%
+      \node [yshift=15pt, right=35pt of ctrl] (out_close1) {};%
+      \draw [latex-] (out_close1) to node [above] {\( \mathtt{Close}_1 \)}
+      ([yshift=15pt]ctrl.east);%
+
+      \node [yshift=-15pt, right=35pt of ctrl] (out_open2) {};%
+      \draw [latex-] (out_open2) to node [above] {\( \mathtt{Open}_2 \)}
+      ([yshift=-15pt]ctrl.east);%
+      \node [yshift=-45pt, right=35pt of ctrl] (out_close2) {};%
+      \draw [latex-] (out_close2) to node [above] {\( \mathtt{Close}_2 \)}
+      ([yshift=-45pt]ctrl.east);%
+
+      \draw (s3) edge [loop right] node {\( \mathtt{Req1}? \)} (s3);%
+      \draw (s6) edge [loop left] node {\( \mathtt{Req2}? \)} (s6);%
+    \end{tikzpicture}
+  \end{center}
+\end{example}
+
+Labels of interface automata allows for composing together several transition
+systems by synchronizing their shared transitions.
+%
+However, the manual definition of these components to specify sequences of input
+and output transitions can quickly become cumbersome, as we our experiences
+\GH{"as we our experiences" à revoir} with the definition of the airlock system
+controller in Example~\ref{example:sota:airlockinterface} \GH{peut-être que
+  définir cet example n'a pas été facile pour toi mais tel qu'il est présenté,
+  il ne semble pas difficile. Du coup, pas sur qu'il illustre bien ce que tu
+  veux dire ici.}.
+%
+Besides, interactions between components are often motivated by the need to
+exchange data, \emph{e.g.} the processor interacts with the \ac{pch} to read
+from or write to peripherals memories. \GH{et? que veux tu dire? Que les I/O
+  automata ne permettent pas de modéliser ces échanges de données? Il faut que
+  tu développes et que tu dises explicitement l'idée que tu veux exprimer.}
+
+\subsection{Process Algebra}
+
+Another popular family of approaches which enable compositional modeling of
+complex systems is process algebra.
+%
+Process algebra has been developed to reason about programs executed in
+parallel, and it comes with a proof system to verifying the resulting system.
+%
+In process algebra such as Calculus of Communication
+Systems\,\cite{milner1980ccs} or the Communicating Sequential
+Processes\,\cite{hoare1978csp}, concurrent threads run in parallel, and
+synchronization is achieved by sending and waiting for messages, as specified by
+a dedicated language.
+
+\begin{example}[Airlock System in \( \pi \)-calculus]
+  \label{example:sota:airlockprocess}
+
+  We now try to give a specification of our airlock system using a process
+  algebra called \( \pi \)-calculus.
+  %
+  Once again, we consider three components: two doors and a controller.
+  %
+  Our objective is to write a specification equivalent to our interface automata
+  (although we do not provide a proof of that equivalence).
+
+  We have used the following \( \pi \)-calculus construction to specify the
+  airlock system:
+  %
+  \begin{itemize}
+  \item \( c(x). P\) means receiving a value from the channel \( c \), bounding
+    this value to the name \( x \), then executing the process \( P \).
+  \item \( \bar{c} \langle x \rangle . P \) means sending the value bounded to
+    name \( x \) through the channel \( c \), then executing the process
+    \( P \).
+  \item \( [x = \mathrm{OPEN}] . P \) is a guard, that is \( P \) is executed if
+    \( x \) is equal to the value \( \mathrm{OPEN} \).
+  \item \( P + Q \) is the nondeterministic choice operator, we use it here in
+    conjunction with guards to implement a \texttt{if-then-else} construct. That
+    is, considering the process
+    %
+    \[
+      c(x) . ([x = 1] . P + [x = 2] . Q + R)
+    \]
+    %
+    If the value received from \( c \) is \( 1 \), \( P \) is executed.
+    %
+    If it is \( 2 \), then \( Q \) is executed. Otherwise \( R \) is executed.
+  \item \( \nu c. P \) means a new channel \( c \) is created, and available for
+    \( P \) to use it.
+  \item \( P || Q \) is the parallel execution of \( P \) and \( Q \).
+  \end{itemize}
+
+  \[
+    \begin{array}{rcl}
+      \mathrm{CloseDoor}(c)
+      & \triangleq
+      & c(x) . \ ([x = \mathrm{OPEN}] . \mathrm{OpenDoor}(c) \\
+      &
+      & \qquad + \mathrm{CloseDoor}(c)) \\
+      & & \\
+      \mathrm{OpenDoor}(c)
+      & \triangleq
+      & c(x) . \ ([x = \mathrm{CLOSE}] . \mathrm{CloseDoor}(c) \\
+      &
+      & \qquad + \mathrm{OpenDoor}(c)) \\
+      & & \\
+      \mathrm{Controller}(c, d_1, d_2)
+      & \triangleq
+      & c(x). \ \ [x = \mathrm{OPEN}_1] . \bar{d_2} \langle
+        \mathrm{CLOSE} \rangle . \bar{d_1} \langle \mathrm{OPEN} \rangle . \mathrm{Controller}(c, d_1, d_2) \\
+      &
+      & \qquad + [x = \mathrm{OPEN}_2] . \bar{d_1} \langle
+        \mathrm{CLOSE} \rangle . \bar{d_2} \langle \mathrm{OPEN} \rangle. \mathrm{Controller}(c, d_1, d_2) \\
+      & & \\
+      \mathrm{System}
+      & \triangleq
+      & \nu c. \nu d_1. \nu d_2. (\mathrm{Controller}(c, d_1, d_2) \\
+      &
+      & \quad\qquad\qquad ||\ \mathrm{CloseDoor}(d_1) \\
+      &
+      & \quad\qquad\qquad ||\ \mathrm{CloseDoor}(d_2))
+    \end{array}
+  \]
+
+  The system, modeled with the process \( \mathrm{System} \) creates the
+  channels used by its components to communicate, then starts their concurrent
+  executions.
+  %
+  A door is either open or close, and we model this with two mutually recursive
+  processes \( \mathrm{CloseDoor} \) and \( \mathrm{OpenDoor} \).
+  %
+  They take one channel \( c \) as an argument, then wait for new inputs coming
+  from \( c \).
+  %
+  A controller is a recursive process which takes three channels \( c \),
+  \( d_1 \) and \( d_2 \) as arguments.
+  %
+  It waits for new requests coming from \( c \).
+  %
+  When it receives a new request to open the first (resp. second) door, it first
+  close the second (resp. first) door, using the channel \( d_2 \) (resp.
+  \( d_1 \)).
+  %
+  Then, it opens the first (resp. second) door, using the channel \( d_1 \)
+  (resp. \( d_2 \)).
+\end{example}
+
+Process algebras such as \( \pi \)-calculus are well suited formalisms for
+describing component interactions.
+%
+However, their applicability is limited by the low-level description of the used
+languages and their minimalistic semantic. \GH{Cette conclusion est un peu
+  rapide et minimaliste. Difficile à comprendre en outre. Que veux dire
+  "low-level description" et "minimalist semantic"? Si on remet dans le context
+  de ton approche, en quoi sont-ils peu adaptés?}
+
+\paragraph{{\scshape Kami}.}
+%
+In 2017, Joonwon Choi \emph{et al.} have released {\scshape
+  Kami}\,\cite{choi2017kami}, a framework for Coq to design, verify and extract
+(in the form of BlueSpec\,\cite{nikhil2004bluespec} programs) hardware
+components implementations.
+%
+In {\scshape Kami}, components are defined as modules \( M \). Each module is a
+particular labeled transition system, whose transitions are of the form
+%
+\[
+  p \xrightarrow[a]{i} (v, q)
+\]
+%
+where \( i \) is an operation called by another component, \( p \) is the state
+of the component before the operation \( i \), \( a \) is a program of actions
+performed by the component in order to compute the result of \( i \), \( v \) is
+the result of \( i \) that is returned to the caller, and \( q \) is the
+modified state of the component.
+%
+Actions, in this context, are either local manipulation of the component's state
+or calls of operations handled by other components.
+
+To reason about \( M \) with respect to a specification \( M_S \), {\scshape
+  Kami} introduces a refinement relation \( \sqsubseteq \).
+%
+A module \( M \) refines a module \( M_S \) (\emph{i.e.} \( M \) is an
+implementation of \( M_S \)) if any traces of \( M \) can also be produced by
+\( M_S \).
+%
+A component \( M \) can be composed with another component \( M' \) to form a
+larger component \( M + M' \), for instance when the operations exposed by
+\( M' \) are used by \( M \).
+%
+The authors introduced another ``modular'' refinement property, whose simplest
+expression could be
+%
+\[
+  M \sqsubseteq N \wedge R \sqsubseteq S \Rightarrow M + R \sqsubseteq N + S
+\]
+%
+This approach is related to compositional minimization, where one component is
+reduced to a simpler, more abstract model, to reduce the complexity of the
+proofs.
+%
+They proved the correctness of a realistic multiprocessor system with respect to
+a simple ISA semantics and Lamport's sequential consistency (SC) \thomasrk{ref
+  lamport} \GH{oui, il faut une ref! :-)} as the memory model.
+%
+Their proofs consist in a succession of refinement proofs from their
+implementation to high-level modules which model their semantics and the SC
+memory model.
+
+{\scshape Kami} provides a general-purpose framework for hardware verification.
+%
+\thomasrk[inline]{RPC plutôt que échange de messages, donc on a plus facilement
+ce côté : pour gérer un message entrant, j'emets cette séquence de message
+sortant.}
+%
+\thomasrk[inline]{Par contre, on est sur une approche par rafinement (il faut se
+comporter comme cette référence), alors qu'on cherche plus une approche
+assume-guarantee. Ce n'est pas surprenant, car Kami suit une logique proche de
+celle de la vérification de HW tradi, avec des propriétés transparent to
+software vs. nécessité de configuration}
+
+\thomasrk[inline]{Idée centrale de Kami très intéressante, mais on veut quelque
+  chose de moins opinonated, plus idiomatique Coq/FP. Notamment, input/output
+  dans le type, etc.}
+
+\subsection{Programs with Effects and Effect Handlers}
+
+\thomasrk[inline]{Ici, il faut parler de Oleg, et des extensibles effects, avec
+  le côté coroutine. On retrouve de RPC, mais dans un style beaucoup plus
+  idiomatique en FP.
+
+  On utilise une implémentation similaire à celle proposée dans le papier de
+  Oleg. Coq.io est le projet qui en Coq se rapproche le plus de ce que l'on veut
+  faire, mais ils se sont un peu arrêtés trop vite.}
+
+\paragraph{\texttt{Coq.io}.}
+%
+The \texttt{Coq.io} framework, developed and released by Guillaume Claret
+\emph{et al.}\,\cite{claret2015coqiowww}, have been originally proposed in order
+to allow the definition and verification of interactive programs in Coq by the
+means of use cases\,\cite{claret2015coqio}.
+%
+Such programs are defined in a dedicated monad, with side effects (\emph{e.g.}
+system calls to read from or write to a file) axiomatized as monadic operations
+of this monad.
+%
+The proofs rely on scenarios which determine how an environment (\emph{e.g.} an
+operating system) would react to the program requests.
+%
+The verification goal is to verify that, under the hypothesis that the
+environment is correct with respect to a scenario, then a program with effects
+is also correct with respect to an expected trace of side effects operations it
+produces.
+
+The approach used by \texttt{Coq.io} paves the road towards a compositional
+approach reasoning.
+%
+A program with effects can be verified, but the verification of the composition
+of this program with its environment is out of the scope of the project.
+%
+Our framework does not suffer the same limitation.
+
+\thomasrk[inline]{On s'est inspiré pour cela de ce qui se fait en B.}
+
+\paragraph{B-Method.}
+%
+The B-method\,\cite{abrial2005b} is a well-established method of software
+development based on the B formal system.
+%
+B allows for the definition of functional specifications, called abstract
+machines, and the refinement of these specifications up to executable code.
+%
+An abstract machine is characterized by a set of variables, and several
+operations which update these variables. Preconditions in form of predicates on
+the machine variables can be attached to a given operation to specify when the
+operation can be used.
+
+B has already been used in order to reason about systems made of components
+which interact \emph{via}
+interfaces\,\cite{souquieres2005verifying,chouali2006proving,lanoix:hal-00105041}.
+%
+In particular, Lanoix \emph{et al.}\,\cite{lanoix:hal-00105041} proposed the
+following reasoning:
+%
+\begin{itemize}
+\item Interfaces and requirements over components which expose these interfaces
+  are defined in the form of an abstract machine, where the operations
+  preconditions models the assumption a user needs to satisfy.
+  %
+\item A component which exposes this interface is expected to be a refinement (a
+  more concrete implementation) of this abstract machine.
+  %
+\item A model of a component which uses an interface can \emph{include} the
+  abstract machine which models this interface and uses its
+  operations. \GH{cette dernière phrase n'est pas très claire}
+\end{itemize}
+%
+Our approach apply a similar process within the Coq proof assistant, but with a
+clearer separation between the operations exposed by an interface and the
+requirements over the component which exposes it.
+%
+This offer use more flexibility \GH{que veux "use more flexibility"? Est-ce que
+  "Our approach offers more flexibility" n'est pas plus approprié?} to prove
+that a given component correctly uses (satisfy its assumption) or exposes
+(enforce its guarantee) interface.
+%
+We believe this is a valuable property considering that we want to prove the
+same hardware architecture is correct with respect to several \ac{hse}
+mechanisms.
+
+\paragraph{Compositional Security.}
+%
+\thomasrk[inline]{Le résultat de tout ce travail, c'est globalement ce
+papier. Simplement, on a le pouvoir de Coq, alors que leur approche est
+essentiellement théorique avec un langage et même une logique plus ou moins
+ad-hoc.}
+%
+The projects detailed above focus on verifying functional specifications, but
+the use of component-based modeling has also been used to verify security
+properties of a given system.
+
+Heyman \emph{et al.} have proposed a component-based modelling technique for the
+model finder Alloy\,\cite{jackson2012alloy} \GH{c'est quoi Alloy?}. In their
+approach, components are primarily defined as semantics for a set of
+operations\,\cite{heyman2012securemodel}; a component is connected to another
+when it leverages its operations. \GH{Ce n'est pas très claire. Difficile de
+  comprendre sans connaitre le papier}
+%
+Alloy leverages a model finder to verify a composition of these components
+against known security patterns, and to assume or verify facts about operations
+semantics.
+%
+However, it lacks an extraction mechanism, which makes it harder to validate the
+model.
+%
+On the contrary, our formalism and framework is compatible with the extraction
+mechanism of Coq, meaning a component model can be extracted in an {\scshape
+  OCaml} program. \GH{Mouais, en même temps, tu n'utilises pas cette
+  fonctionnalité dans ton approche, donc je ne trouve pas que c'est un argument
+  "fort", bien qu'on puisse le noter également. Tu n'as pas d'autres critères de
+  comparaison plus en phase avec ce que tu as fait?}
+
+Finally, Garg \emph{et al.} have presented in 2010 a formal framework for
+compositional reasoning where components are defined in terms of programs
+written in a dedicated functional language with algebraic
+effects\,\cite{garg2010compositional}.
+%
+Probably the main difference between our two approaches is that they rely on a
+dedicated programming language, while our programs with effects and effect
+handlers are regular {\scshape Gallina} terms.
+%
+As a consequence, we can use the full interactive proof development environment
+of Coq in order to write and validate our proofs.
+
+\subsection{Conclusion}
+\label{subsec:sota:compconclu}
+
+Our formal definition of \ac{hse} mechanism assumes there exists a formal model
+of the hardware architecture.
+%
+The development of our proof of concept, implemented in
+Coq\,\cite{letan2016speccertcode}, convinced us that such a model cannot be
+monolithic.
+%
+Otherwise, it would make the proof burden hard to bear.
+%
+Compositional verification is thus a very important domain of research for the
+verification of large, realistic models.
+
+With FreeSpec\,\cite{letan2018freespeccode}, we aim to provide a generic
+compositional reasoning framework for Coq.
+%
+As detailed in Chapter~\ref{chapter:freespec}, FreeSpec leverages programs with
+effects and effect handlers to model component-based system, and introduces
+so-called abstract specification in order to enable a verification methodology
+inspired by the assume-guarantee paradigm.
+%
+In doing so, FreeSpec is at the intersection of several research domains.
+%
+Our work is in the continuity of \texttt{Coq.io}\,\cite{claret2015coqio}, but
+our abstract specifications are more generic and expressive than their
+scenarios.
+%
+We have shown how programs with effects and effects handlers can be used to
+modularly verify a complex system made of interconnected components, \emph{via}
+the notion of interface as the rendezvous point.
+%
+The principle of our approach is similar to what {\scshape Kami}
+achieves\,\cite{choi2017kami}, but is not hardware specific.
+%
+In addition, our abstract specifications allow for compositional verification,
+while {\scshape Kami} focuses on refinement proofs.
+%
+To the best of our knowledge, the closest related research is the work of Garg
+\emph{et al.}\,\cite{garg2010compositional}, with the difference than we
+leverage the Coq proof assistant to verify our models, whereas they rely on
+paper proofs.
+
+\section{Conclusion}
+\label{sec:sota:conclusion}
+
+\GH{Il faudrait faire ici une conclusion rapide qui résume les deux problèmes auxquels tu t'es attelé et fasse la transition avec tes deux parties suivantes. Rapide, concis, claire ;-)}
+
+\newpage
+
 Traditional transition systems, such as the ones presented in the previous
 section, impose to model the complete system all at once.
 %
@@ -1239,307 +1785,6 @@ context.
 A component model should be easy to write, read and exploit in the context of a
 verification problem.
 
-\paragraph{Concurrent Automata.}
-%
-I/O automata\,\cite{lynch1988ioautomata} are labeled transition systems which
-distinguish between three classes of transitions, modeled with three disjoints
-sets of labels:
-%
-\begin{inparaenum}[(1)]
-\item input actions (denoted by \( \mathrm{in}(S) \) for an automaton \( S \)),
-  %
-\item output actions (denoted by \( \mathrm{out}(S) \)), and
-  %
-\item internal actions (denoted by \( \mathrm{int}(S) \)).
-  %
-\end{inparaenum}
-%
-They form the signature of a given automaton (denoted by \( \mathrm{act}(S) \)).
-%
-Its transition relation \( R(S) \) is a subset of
-\( \mathrm{state}(S) \times \mathrm{act}(S) \times \mathrm{state}(S) \), where
-\( \mathrm{state}(S) \) is the set of states of \( S \).
-%
-I/O automata are expected to be \emph{input enabled}, that is it cannot delay
-the treatment of its inputs.
-%
-This translates as follows: for every state \( p \) and input actions \( \pi \),
-it exists a state \( q \) such that \( (p, \pi, q) \in R(S) \).
-%
-Composition of I/O automaton is achieved \emph{via} input and output actions.
-%
-More precisely, when one automaton performs an output action \( \pi \) during a
-transition, all automata having \( \pi \) as input action perform \( \pi \)
-simultaneously.
-
-Although by definition, I/O automata are required to be input enabled, in
-practice the component they model will correctly behave (for a certain
-definition of ``correct'') only if certain requirements are met regarding the
-inputs they have to handle.
-%
-Interface automata\,\cite{de2001interfaceautomata} are similar to I/O automata,
-except they do not require to be input enabled.
-%
-As a consequence, the definition of an interface automaton captures its
-requirements over the rest of the system. \GH{Je ne comprends pas cette dernière
-  phrase}
-
-Another popular modeling structure is the Moore Machine, as they play a key role
-in compositional model checking\,\cite{mcmillan1989compositional}, because they
-can be translated into Kripke structures.
-
-\begin{example}[Airlock System as Interface Automata]
-  \label{example:sota:airlockinterface}
-
-  In order to illustrate how a system can be broken down into small components,
-  we take once again the example of the airlock system.
-  %
-  In this context, the most obvious component is the door.
-  %
-  A door has two states: it can be either open or close.
-  %
-  It takes two input actions: \( \mathtt{Open} \) (the action to open the door)
-  and \( \mathtt{Close} \) (the action to close the door).
-  %
-  It does not have any output action, which means a door does not interact
-  actively with the rest of the system.
-  %
-  One possible specification for a door can be the following interface
-  automaton:
-
-  \begin{center}
-    \begin{tikzpicture}
-      \node [draw, circle] (o) {1};%
-      \node [draw, circle, right=of o] (c) {2};%
-
-      \draw [-latex] (o) edge [bend left] node [above] {\( \mathtt{Open}? \)}
-      (c);%
-      \draw [-latex] (c) edge [bend left] node [below] {\( \mathtt{Close}? \)}
-      (o);%
-      \draw [-latex] (c) edge [loop right] node {\( \mathtt{Open}? \)} (c);%
-      \draw [-latex] (o) edge [loop left] node {\( \mathtt{Close}? \)} (o);%
-
-      \node [draw, fit=(o) (c), inner sep=20pt, text width=130pt, text badly
-      centered] (d1) {};%
-
-      \node [yshift=10pt, left=35pt of d1.west] (open) {};%
-      \draw [-latex] (open) to node [above] {\( \mathtt{Open} \)}
-      ([yshift=10pt]d1.west);%
-      \node [yshift=-10pt, left=35pt of d1] (close) {};%
-      \draw [-latex] (close) to node [above] {\( \mathtt{Close} \)}
-      ([yshift=-10pt]d1.west);%
-    \end{tikzpicture}
-  \end{center}
-
-  In addition to two doors, an airlock system needs a controller, whose purpose
-  is to handle users' requests and open and close doors in consequence.
-  %
-  We consider a slightly different situation than the specification given in
-  Example~\ref{example:sota:airlocklts}.
-  %
-  Here, there are only two commands, modeled with two input actions:
-  \( \mathtt{Req}_1 \) (one user wants the first door to be opened) and
-  \( \mathtt{Req}_2 \) (one user wants the second door to be opened).
-  %
-  The controller does not embed the states of the doors, but has four output
-  actions, two per doors (\( \mathtt{Open}_i \) and \( \mathtt{Close}_i\), for
-  \( i \in \{1, 2\}\)).
-  %
-  We propose the following interface automaton:
-
-  \begin{center}
-    \begin{tikzpicture}
-      \node [draw, circle] (s1) {2};%
-      \node [draw, circle, right=50pt of s1] (s2) {3};%
-      \node [draw, circle, right=50pt of s2] (s3) {4};%
-
-      \draw [-latex] (s1) to node [above] {\( \mathtt{Close2}! \)} (s2);%
-      \draw [-latex] (s2) to node [above] {\( \mathtt{Open1}! \)} (s3);%
-
-      \node [draw, circle, below=60pt of s3] (s4) {5};%
-      \node [draw, circle, left=50pt of s4] (s5) {6};%
-      \node [draw, circle, left=50pt of s5] (s6) {7};%
-
-      \draw [-latex] (s4) to node [below] {\( \mathtt{Close1}! \)} (s5);%
-      \draw [-latex] (s5) to node [below] {\( \mathtt{Open2}! \)} (s6);%
-
-      \node [draw, circle, below=21pt of s2] (s7) {1};%
-
-      \draw [-latex] (s7) to node [left,yshift=-5pt] {\( \mathtt{Req1}? \)}
-      (s1);%
-      \draw [-latex] (s7) to node [right,yshift=5pt] {\( \mathtt{Req2}? \)}
-      (s4);%
-
-      \draw [-latex] (s3) edge [bend left] node [right] {\( \mathtt{Req2}? \)}
-      (s4);%
-      \draw [-latex] (s6) edge [bend left] node [left] {\( \mathtt{Req1}? \)}
-      (s1);%
-
-      \node [draw, fit=(s1) (s4), inner sep=20pt, text width=220pt] (ctrl) {};%
-
-      \node [yshift=20pt, left=35pt of ctrl] (in_open1) {};%
-      \draw [-latex] (in_open1) to node [above] {\( \mathtt{Req}_1 \)}
-      ([yshift=20pt]ctrl.west);%
-      \node [yshift=-20pt, left=35pt of ctrl] (in_open2) {};%
-      \draw [-latex] (in_open2) to node [above] {\( \mathtt{Req}_2 \)}
-      ([yshift=-20pt]ctrl.west);%
-
-      \node [yshift=45pt, right=35pt of ctrl] (out_open1) {};%
-      \draw [latex-] (out_open1) to node [above] {\( \mathtt{Open}_1 \)}
-      ([yshift=45pt]ctrl.east);%
-      \node [yshift=15pt, right=35pt of ctrl] (out_close1) {};%
-      \draw [latex-] (out_close1) to node [above] {\( \mathtt{Close}_1 \)}
-      ([yshift=15pt]ctrl.east);%
-
-      \node [yshift=-15pt, right=35pt of ctrl] (out_open2) {};%
-      \draw [latex-] (out_open2) to node [above] {\( \mathtt{Open}_2 \)}
-      ([yshift=-15pt]ctrl.east);%
-      \node [yshift=-45pt, right=35pt of ctrl] (out_close2) {};%
-      \draw [latex-] (out_close2) to node [above] {\( \mathtt{Close}_2 \)}
-      ([yshift=-45pt]ctrl.east);%
-
-      \draw (s3) edge [loop right] node {\( \mathtt{Req1}? \)} (s3);%
-      \draw (s6) edge [loop left] node {\( \mathtt{Req2}? \)} (s6);%
-    \end{tikzpicture}
-  \end{center}
-\end{example}
-
-Labels of interface automata allows for composing together several transition
-systems by synchronizing their shared transitions.
-%
-However, the manual definition of these components to specify sequences of input
-and output transitions can quickly become cumbersome, as we our experiences
-\GH{"as we our experiences" à revoir} with the definition of the airlock system
-controller in Example~\ref{example:sota:airlockinterface} \GH{peut-être que
-  définir cet example n'a pas été facile pour toi mais tel qu'il est présenté,
-  il ne semble pas difficile. Du coup, pas sur qu'il illustre bien ce que tu
-  veux dire ici.}.
-%
-Besides, interactions between components are often motivated by the need to
-exchange data, \emph{e.g.} the processor interacts with the \ac{pch} to read
-from or write to peripherals memories. \GH{et? que veux tu dire? Que les I/O
-  automata ne permettent pas de modéliser ces échanges de données? Il faut que
-  tu développes et que tu dises explicitement l'idée que tu veux exprimer.}
-
-\paragraph{Process Algebra.}
-%
-Another popular family of approaches which enable compositional modeling of
-complex systems is process algebra.
-%
-Process algebra has been developed to reason about programs executed in
-parallel.
-%
-It is a formal system to describe interacting systems \GH{répétition sur
-  system}, together with a proof system for verifying them.
-%
-In process algebra such as Calculus of Communication
-Systems\,\cite{milner1980ccs} or the Communicating Sequential
-Processes\,\cite{hoare1978csp}, concurrent threads run in parallel, and
-synchronization is achieved by sending and waiting for messages, as specified by
-a dedicated language.
-
-\begin{example}[Airlock System in \( \pi \)-calculus]
-  \label{example:sota:airlockprocess}
-
-  We now try to give a specification of our airlock system using a process
-  algebra called \( \pi \)-calculus.
-  %
-  Once again, we consider three components: two doors and a controller.
-  %
-  Our objective is to write a specification equivalent to our interface automata
-  (although we do not provide a proof of that equivalence).
-
-  We have used the following \( \pi \)-calculus construction to specify the
-  airlock system:
-  %
-  \begin{itemize}
-  \item \( c(x). P\) means receiving a value from the channel \( c \), bounding
-    this value to the name \( x \), then executing the process \( P \).
-  \item \( \bar{c} \langle x \rangle . P \) means sending the value bounded to
-    name \( x \) through the channel \( c \), then executing the process
-    \( P \).
-  \item \( [x = \mathrm{OPEN}] . P \) is a guard, that is \( P \) is executed if
-    \( x \) is equal to the value \( \mathrm{OPEN} \).
-  \item \( P + Q \) is the nondeterministic choice operator, we use it here in
-    conjunction with guards to implement a \texttt{if-then-else} construct. That
-    is, considering the process
-    %
-    \[
-      c(x) . ([x = 1] . P + [x = 2] . Q + R)
-    \]
-    %
-    If the value received from \( c \) is \( 1 \), \( P \) is executed.
-    %
-    If it is \( 2 \), then \( Q \) is executed. Otherwise \( R \) is executed.
-  \item \( \nu c. P \) means a new channel \( c \) is created, and available for
-    \( P \) to use it.
-  \item \( P || Q \) is the parallel execution of \( P \) and \( Q \).
-  \end{itemize}
-
-  \[
-    \begin{array}{rcl}
-      \mathrm{CloseDoor}(c)
-      & \triangleq
-      & c(x) . \ ([x = \mathrm{OPEN}] . \mathrm{OpenDoor}(c) \\
-      &
-      & \qquad + \mathrm{CloseDoor}(c)) \\
-      & & \\
-      \mathrm{OpenDoor}(c)
-      & \triangleq
-      & c(x) . \ ([x = \mathrm{CLOSE}] . \mathrm{CloseDoor}(c) \\
-      &
-      & \qquad + \mathrm{OpenDoor}(c)) \\
-      & & \\
-      \mathrm{Controller}(c, d_1, d_2)
-      & \triangleq
-      & c(x). \ \ [x = \mathrm{OPEN}_1] . \bar{d_2} \langle
-        \mathrm{CLOSE} \rangle . \bar{d_1} \langle \mathrm{OPEN} \rangle . \mathrm{Controller}(c, d_1, d_2) \\
-      &
-      & \qquad + [x = \mathrm{OPEN}_2] . \bar{d_1} \langle
-        \mathrm{CLOSE} \rangle . \bar{d_2} \langle \mathrm{OPEN} \rangle. \mathrm{Controller}(c, d_1, d_2) \\
-      & & \\
-      \mathrm{System}
-      & \triangleq
-      & \nu c. \nu d_1. \nu d_2. (\mathrm{Controller}(c, d_1, d_2) \\
-      &
-      & \quad\qquad\qquad ||\ \mathrm{CloseDoor}(d_1) \\
-      &
-      & \quad\qquad\qquad ||\ \mathrm{CloseDoor}(d_2))
-    \end{array}
-  \]
-
-  The system, modeled with the process \( \mathrm{System} \) creates the
-  channels used by its components to communicate, then starts their concurrent
-  executions.
-  %
-  A door is either open or close, and we model this with two mutually recursive
-  processes \( \mathrm{CloseDoor} \) and \( \mathrm{OpenDoor} \).
-  %
-  They take one channel \( c \) as an argument, then wait for new inputs coming
-  from \( c \).
-  %
-  A controller is a recursive process which takes three channels \( c \),
-  \( d_1 \) and \( d_2 \) as arguments.
-  %
-  It waits for new requests coming from \( c \).
-  %
-  When it receives a new request to open the first (resp. second) door, it first
-  close the second (resp. first) door, using the channel \( d_2 \) (resp.
-  \( d_1 \)).
-  %
-  Then, it opens the first (resp. second) door, using the channel \( d_1 \)
-  (resp. \( d_2 \)).
-\end{example}
-
-Process algebras such as \( \pi \)-calculus are well suited formalisms for
-describing component interactions.
-%
-However, their applicability is limited by the low-level description of the used
-languages and their minimalistic semantic. \GH{Cette conclusion est un peu
-  rapide et minimaliste. Difficile à comprendre en outre. Que veux dire
-  "low-level description" et "minimalist semantic"? Si on remet dans le context
-  de ton approche, en quoi sont-ils peu adaptés?}
-
 \paragraph{Programs with Effects.}
 %
 The relation between one component and the rest of the system it is connected to
@@ -1597,230 +1842,23 @@ request to the handler, and waits for the result.
 \subsection{Related Work}
 \label{subsec:sota:comprelated}
 
-\GH{Sur quoi porte cet état de l'art? Il faudrait un titre de sous-section plus précis.}
+\GH{Sur quoi porte cet état de l'art? Il faudrait un titre de sous-section plus
+  précis.}
 
 In Chapter~\ref{chapter:freespec}, we show how it is possible to model a
 hierarchy of components which interacts \emph{via} their interfaces by means of
-programs with effects and effect handlers. \GH{Référence en avant. Beurk. En gros tu dis : "j'ai utilisé telle technique, donc je vais vous en parler dans l'état de l'art". Il faudrait plutôt que ta manière de présenter l'état de l'art amène naturellement le lecteur à se persuader que cette technique est la bonne pour le problème que tu adresses. Il sera alors beaucoup plus enclin à lire un état de l'art détaillé sur la technique en question. Il faut revoir la fin de la sous-section précédente et l'introduction de cette sous-section en ce sens.}
+programs with effects and effect handlers. \GH{Référence en avant. Beurk. En
+  gros tu dis : "j'ai utilisé telle technique, donc je vais vous en parler dans
+  l'état de l'art". Il faudrait plutôt que ta manière de présenter l'état de
+  l'art amène naturellement le lecteur à se persuader que cette technique est la
+  bonne pour le problème que tu adresses. Il sera alors beaucoup plus enclin à
+  lire un état de l'art détaillé sur la technique en question. Il faut revoir la
+  fin de la sous-section précédente et l'introduction de cette sous-section en
+  ce sens.}
 %
 The main idea is that a component can be modeled as a handler for the interface
 it exposes, in terms of program with effects of the interface it uses.
 %
 To our surprise, we did not find any generic project to write and verify
-programs with effects and effect handlers for {\scshape Gallina}, but
-several related approaches exist.
-
-\paragraph{{\scshape Kami}.}
-%
-In 2017, Joonwon Choi \emph{et al.} have released {\scshape
-  Kami}\,\cite{choi2017kami}, a framework for Coq to design, verify and extract
-(in the form of BlueSpec\,\cite{nikhil2004bluespec} programs) hardware
-components implementations.
-%
-In {\scshape Kami}, components are defined as modules \( M \). Each module is a
-particular labeled transition system, whose transitions are of the form
-%
-\[
-  p \xrightarrow[a]{i} (v, q)
-\]
-%
-where  \( i \)  is an operation called by another component, \( p \) is the state of the component before the operation \( i \), \( a \) is a program of actions performed by the
-component in order to compute the result of \( i \), \( v \) is the result of
-\( i \) that is returned to the caller, and \( q \) is the modified state of the
-component.
-%
-Actions, in this context, are either local manipulation of the component's state
-or calls of operations handled by other components.
-
-To reason about \( M \) with respect to a specification \( M_S \), {\scshape
-  Kami} introduces a refinement relation \( \sqsubseteq \).
-%
-A module \( M \) refines a module \( M_S \) (\emph{i.e.} \( M \) is an
-implementation of \( M_S \)) if any traces of \( M \) can also be produced by
-\( M_S \).
-%
-A component \( M \) can be composed with another component \( M' \) to form a
-larger component \( M + M' \), for instance when the operations exposed by
-\( M' \) are used by \( M \).
-%
-The authors introduced another ``modular'' refinement property, whose simplest
-expression could be
-%
-\[
-  M \sqsubseteq N \wedge R \sqsubseteq S \Rightarrow M + R \sqsubseteq N + S
-\]
-%
-This approach is related to compositional minimization, where one component
-is reduced to a simpler, more abstract model, to reduce the complexity of the
-proofs.
-%
-They proved the correctness of a realistic multiprocessor system with respect to
-a simple ISA semantics and Lamport's sequential consistency (SC) \thomasrk{ref
-  lamport} \GH{oui, il faut une ref! :-)} as the memory model.
-%
-Their proofs consist in a succession of refinement proofs from their
-implementation to high-level modules which model their semantics and the SC
-memory model.
-
-{\scshape Kami} provides a general-purpose framework for hardware verification.
-\GH{Il manque le début de la phrase} is hardware-specific, thus is not suitable to reason about systems which also
-include software components.
-%
-We believe this is a strong argument in favor of compositional reasoning for
-hardware architectures. \GH{Cet argument n'est pas très claire. Tu as bien présenté Kami, on comprend bien qu'il correspond à la catégorie "minimization reasoning". Tu dis qu'il est centré sur le hardware seulement, ok.  Mais je ne vois pas en quoi çà permet de conclure que "minimization reasoning" et plus adapté que "compositionnal reasoning" pour ton approche. Pourrais-on adapter Kami pour inclure des composants software? Soit, a priori, tu peux établir qu'une famille (compositionnal  ou minimization reasoning) est plus adaptée que l'autre et dans ce cas il faudrait l'expliquer plus tôt, quand tu présentes les deux familles, et t'appuyer sur cet argument déjà présenté pour critique Kami ici. Soit il faut mieux expliquer.}
-%
-In comparison, our framework presented in Chapter~\ref{chapter:freespec} is more
-high-level \GH{çà veut dire quoi "high level"?}, and focus on compositional reasoning ---in the form of
-assume-guarantee contracts--- rather than minimization reasoning.
-
-\paragraph{\texttt{Coq.io}.}
-%
-The \texttt{Coq.io} framework, developed and released by Guillaume Claret
-\emph{et al.}\,\cite{claret2015coqiowww}, have been originally proposed in order
-to allow the definition and verification of interactive programs in Coq by the
-means of use cases\,\cite{claret2015coqio}.
-%
-Such programs are defined in a dedicated monad, with side effects (\emph{e.g.}
-system calls to read from or write to a file) axiomatized as monadic operations
-of this monad.
-%
-The proofs rely on scenarios which determine how an environment (\emph{e.g.} an
-operating system) would react to the program requests.
-%
-The verification goal is to verify that, under the hypothesis that the
-environment is correct with respect to a scenario, then a program with effects
-is also correct with respect to an expected trace of side effects operations it
-produces.
-
-The approach used by \texttt{Coq.io} paves the road towards a compositional
-approach reasoning.
-%
-A program with effects can be verified, but the verification of the composition
-of this program with its environment is out of the scope of the project.
-%
-Our framework does not suffer the same limitation.
-
-\paragraph{B-Method.}
-%
-The B-method\,\cite{abrial2005b} is a well-established method of software
-development based on the B formal system.
-%
-B allows for the definition of functional specifications, called abstract
-machines, and the refinement of these specifications up to executable code.
-%
-An abstract machine is characterized by a set of variables, and several
-operations which update these variables. Preconditions in form of
-predicates on the machine variables can be attached to a given operation to
-specify when the operation can be used.
-
-B has already been used in order to reason about systems made of components
-which interact \emph{via}
-interfaces\,\cite{souquieres2005verifying,chouali2006proving,lanoix:hal-00105041}.
-%
-In particular, Lanoix \emph{et al.}\,\cite{lanoix:hal-00105041} proposed the
-following reasoning:
-%
-\begin{itemize}
-\item Interfaces and requirements over components which expose these interfaces
-  are defined in the form of an abstract machine, where the operations
-  preconditions models the assumption a user needs to satisfy.
-  %
-\item A component which exposes this interface is expected to be a refinement (a
-  more concrete implementation) of this abstract machine.
-  %
-\item A model of a component which uses an interface can \emph{include} the
-  abstract machine which models this interface and uses its operations. \GH{cette dernière phrase n'est pas très claire}
-\end{itemize}
-%
-Our approach apply a similar process within the Coq proof assistant, but with a
-clearer separation between the operations exposed by an interface and the
-requirements over the component which exposes it.
-%
-This offer use more flexibility \GH{que veux "use more flexibility"? Est-ce que "Our approach offers more flexibility" n'est pas plus approprié?} to prove that a given component correctly uses
-(satisfy its assumption) or exposes (enforce its guarantee) interface.
-%
-We believe this is a valuable property considering that we want to prove the
-same hardware architecture correct \GH{correctness} with respect to several \ac{hse} mechanisms.
-
-\paragraph{Compositional Security.}
-
-The projects detailed above focus on verifying functional specifications, but
-the use of component-based modeling has also been used to verify security properties of a given
-system.
-
-Heyman \emph{et al.} have proposed a component-based modelling technique for
-Alloy\,\cite{jackson2012alloy} \GH{c'est quoi Alloy?}. In their approach, components are primarily defined as
-semantics for a set of operations\,\cite{heyman2012securemodel}; a component is
-connected to another when it leverages its operations. \GH{Ce n'est pas très claire. Difficile de comprendre sans connaitre le papier}
-%
-Alloy leverages a model finder to verify a composition of these components
-against known security patterns, and to assume or verify facts about operations
-semantics.
-%
-However, it lacks an extraction mechanism, which makes it harder to validate the
-model.
-%
-On the contrary, our formalism and framework is compatible with the extraction
-mechanism of Coq, meaning a component model can be extracted in an {\scshape
-  OCaml} program. \GH{Mouais, en même temps, tu n'utilises pas cette fonctionnalité dans ton approche, donc je ne trouve pas que c'est un argument "fort", bien qu'on puisse le noter également. Tu n'as pas d'autres critères de comparaison plus en phase avec ce que tu as fait?}
-
-Finally, Garg \emph{et al.} have presented in 2010 a formal framework for
-compositional reasoning where components are defined in terms of programs
-written in a dedicated functional language with algebraic
-effects\,\cite{garg2010compositional}.
-%
-Probably the main difference between our two approaches is that they rely on a
-dedicated programming language, while our programs with effects and effect
-handlers are regular {\scshape Gallina} terms.
-%
-As a consequence, we can use the full interactive proof development environment
-of Coq in order to write and validate our proofs.
-
-\subsection{Conclusion}
-\label{subsec:sota:compconclu}
-
-Our formal definition of \ac{hse} mechanism assumes there exists a formal model
-of the hardware architecture.
-%
-The development of our proof of concept, implemented in
-Coq\,\cite{letan2016speccertcode}, convinced us that such a model cannot be
-monolithic.
-%
-Otherwise, it would make the proof burden hard to bear.
-%
-Compositional verification is thus a very important domain of research for the
-verification of large, realistic models.
-
-With FreeSpec\,\cite{letan2018freespeccode}, we aim to provide a generic
-compositional reasoning framework for Coq.
-%
-As detailed in Chapter~\ref{chapter:freespec}, FreeSpec leverages programs with
-effects and effect handlers to model component-based system, and introduces
-so-called abstract specification in order to enable a verification methodology
-inspired by the assume-guarantee paradigm.
-%
-In doing so, FreeSpec is at the intersection of several research domains.
-%
-Our work is in the continuity of \texttt{Coq.io}\,\cite{claret2015coqio}, but
-our abstract specifications are more generic and expressive than their
-scenarios.
-%
-We have shown how programs with effects and effects handlers can be used to
-modularly verify a complex system made of interconnected components, \emph{via}
-the notion of interface as the rendezvous point.
-%
-The principle of our approach is similar to what {\scshape Kami}
-achieves\,\cite{choi2017kami}, but is not hardware specific.
-%
-In addition, our abstract specifications allow for compositional verification,
-while {\scshape Kami} focuses on refinement proofs.
-%
-To the best of our knowledge, the closest related research is the work of Garg
-\emph{et al.}\,\cite{garg2010compositional}, with the difference than we
-leverage the Coq proof assistant to verify our models, whereas they rely on
-paper proofs.
-
-\section{Conclusion}
-\label{sec:sota:conclusion}
-
-\GH{Il faudrait faire ici une conclusion rapide qui résume les deux problèmes auxquels tu t'es attelé et fasse la transition avec tes deux parties suivantes. Rapide, concis, claire ;-)}
+programs with effects and effect handlers for {\scshape Gallina}, but several
+related approaches exist.
