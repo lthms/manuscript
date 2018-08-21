@@ -721,21 +721,19 @@ specification\,\cite{leslie2015linsgx}.
 Each project focused on one aspect of the x86 architecture and led to uncover
 logic errors and inconsistencies in processor designs.
 %
-However, the models and tools used by Intel are rarely publicly available,
-making it difficult to formally specify and verify \ac{hse}
-mechanisms. \GH{Phrase à reformuler de manière simple. Si les modèles et les
-  outils ne sont pas disponibles, on ne peut pas les réutiliser pour ton
-  approche. point}
+However, the models and tools used by Intel are rarely publicly available, hence
+we could not leverage them to experiment with our approach.
 %
 Besides, to the extend of our knowledge, Intel has not advertised about a
 ``global'' model of its architecture, even though Nachiketh Potlapally, who was
 working at Intel at the time, discussed the benefits of such a model in
-2011\,\cite{potlapally2011hardwaresecurity}. \GH{J'enfoncerait un peu plus le
-  clou en précisant que chaque modèle a été réalisé indépendamment des autres et
-  ne couvre qu'un aspect très réduit de l'architecture (voir seulement du
-  processeur). A l'inverse, nous avons besoins d'un modèle dont le périmètre est
-  large (même si tous les composants ne sont pas nécessairement décrit avec un
-  niveau de détail important)}
+2011\,\cite{potlapally2011hardwaresecurity}.
+%
+\GH{J'enfoncerait un peu plus le clou en précisant que chaque modèle a été
+  réalisé indépendamment des autres et ne couvre qu'un aspect très réduit de
+  l'architecture (voir seulement du processeur). A l'inverse, nous avons besoins
+  d'un modèle dont le périmètre est large (même si tous les composants ne sont
+  pas nécessairement décrit avec un niveau de détail important)}
 
 \paragraph{x86 ISA Models.}
 %
@@ -1021,231 +1019,32 @@ theorem prover.
 \section{Compositional Verification}
 \label{section:sota:compsec}
 
-Traditional transition systems, such as the ones presented in the previous
-section, impose to model the complete system all at once.
-%
-This raises important challenges for complex systems.
-%
-Theorem provers allow for leveraging parameterized models to generalize similar
-components (\emph{e.g.} a memory of arbitrary size, an arbitrary number of
-core), but this approach does not address the challenges posed by the
-composition of many different ---and complex--- components.
-%
-A comprehensive hardware model in terms of hardware components would undoubtedly
-make the construction of the proof unbearable for any non-trivial properties,
-yet is a requirement to uncover compositional attacks by the means of formal
-methods.
-%
-% \PC{il manque aussi l'argument de la difficulté à maintenir / faire évoluer le
-% modèle si un composant change - or c'est le cas en pratique: de nombreuses
-% archis sont similaires, mais avec quelques différences dans les composants}
+\thomasrk[inline]{Dans notre première contribution, on trace une frontière entre
+  hw et sw.
 
-Compositional verification is a promising family of approaches to overcome the
-challenges posed by the scale of complex and large systems, as it enables to
-locally abstract a subpart of the problem \emph{via} a specification.
-%
-Traditional compositional approaches in the programming language communities
----that the Coq community is part of--- include type
-systems %\,\cite{knowles2008compositional}
-(specifications for values manipulated by a program) \GH{ref sur composition
-  dans les types system}, and Hoare logic systems (specifications for the state
-updates provoked by the execution of a program) \GH{composition sur la logic de
-  Hoare (que tu n'a pas évoqué avant..., tu devrais le mentionner dans ta
-  première section)}.
-%
-The model checking communities take a different approach, and rather breakdown a
-complex system in several stateful and interacting components \GH{ref sur
-  composition dans Model Checking }.
-%
-The verification process proceeds as follow: components are verified in
-isolation, then their composition is verified in order to ensure that local
-properties remain true in the complete system.
+  On cherche à reproduire ce schéma à l’intérieur de l'archi hw.
 
-We believe component-based verification is a particularly well-suited solution
-to address the scale of hardware architectures verification, notably because it
-mimic their concrete implementations.
-%
-The rest of the section proceeds as follows.
-%
-We first give an overview of compositional verification approaches which can be
-leveraged to enable ``divide and conquer'' strategies to reason about a
-component-based system (\ref{subsec:sota:compverif}).
-%
-Then, we describe the modeling structures that have been proposed to model
-components and their interactions (\ref{subsec:sota:compverif}).
-%
-We discuss the already existing approaches which have been proposed to enable
-component-based verification in theorem prover (\ref{subsec:sota:comprelated}),
-and summarize our motivations to propose our own framework for the Coq proof
-assistant (\ref{subsec:sota:compconclu}).
+  Par exemple, un core en smm ne doit pas essayer de fetch du code hors de smm.
 
-\subsection{Compositional Verification Approaches}
-\label{subsec:sota:compverif}
+  Cela change la nature de la question, de « est-ce que le hw se comporte bien
+  si le sw se comporte bien », et ça généralise en « avec trois composants A, B
+  et C, tel que A utilise B, et que B utilise C pour répondre à A, puis-je
+  prouver que, par construction, B va bien se comporter si A se comporte bien ET
+  si C respecte ses engagements, alors B aussi.
 
-Historically, compositional verification\,\cite{peng1998survey} is the answer of
-model checking\,\cite{mcmillan1989compositional} and concurrent programs
-verification\,\cite{jones1983tentative} communities to the state explosion
-problem.
-%
-It can be divided into two complementary approaches: compositional minimization
-and compositional reasoning.
+  C’est du compositional reasoning
 
-\paragraph{Compositional Minimization.}
-%
-Components of a larger system are primarily identified by the interface they
-expose to their pairs, that is the set of operations they can carry out for the
-rest of the system.
-%
-They \GH{A quoi renvoie "they"? "Components"? "Interfaces"? "operations"?} also
-``hide'' the components they are connected to, and use in order to handle their
-input.
-%
-In this context, two components which expose the same interface can be freely
-interchange on the condition that they exhibit an equivalent behavior with
-respect to their interface, where the meaning ``equivalent behavior'' is really
-specific to each verification problem.
-%
-For instance, in the context of process algebra, trace equivalence or
-bisimulation are two possible definitions of equivalent
-behavior\,\cite{fokkink2013pa}.
+  On a pas trouvé de lib cool pour faire ça de manière bien en Coq. Nos
+  objectifs : facile à écrire, facile à lire, bonus si on peut extraire une spec
+  exécutable.
 
-Using a behavior equivalence approach, it becomes possible to reason about one
-component by abstracting away the part of the systems it interacts with
-functional specifications \GH{la phrase n'est pas très claire. Je ne suis pas
-  sur que "abstract away ... with" soit correct. La construction habituelle est
-  "the model abstract away something from details"}.
-%
-This is referred to as compositional minimization in model checking.
-%
-The goal is to reduce the complexity of a model, with smaller \GH{que veut dire
-  "smaller" ici? Simpler?} yet provably equivalent components, as pictured in
-Figure~\ref{fig:sota:minicomp}. \GH{Je ne comprends pas la figure et surtout je
-  ne vois pas en quoi elle illustre la réduction de la complexité par des
-  composants plus petit et équivalent. Je propose de la supprimer.}
-%
-\GH{et? que devons nous penser de ces approches? Sont-elles adapté a ton
-  approche? Quelles sont les "bonnes" idées que tu voudrais reprendre? Quelles
-  sont les limitations?}
+  Annonce du plan}
 
+\subsection{Concurrent Automata}
 
-\begin{figure}
-  \begin{minipage}{0.48\linewidth}
-    \begin{center}
-      \begin{tikzpicture}
-        \node [draw, inner sep=10pt, minimum height=40pt] (p) {\( P \)};%
-        \node [draw, inner sep=10pt, right=of p, minimum height=40pt] (q)
-        {\( Q \)};%
-
-        \draw ([yshift=5pt]p.east) -- ([yshift=5pt]q.west);%
-        \draw ([yshift=-5pt]p.east) -- ([yshift=-5pt]q.west);%
-
-        \draw ([yshift=10pt, xshift=-25pt]p.west) -- ([yshift=10pt]p.west);%
-        \draw ([xshift=-25pt]p.west) -- (p.west);%
-        \draw ([yshift=-10pt, xshift=-25pt]p.west) -- ([yshift=-10pt]p.west);%
-
-        \draw ([yshift=15pt, xshift=25pt]q.east) -- ([yshift=15pt]q.east);%
-        \draw ([yshift=5pt, xshift=25pt]q.east) -- ([yshift=5pt]q.east);%
-        \draw ([yshift=-5pt, xshift=25pt]q.east) -- ([yshift=-5pt]q.east);%
-        \draw ([yshift=-15pt, xshift=25pt]q.east) -- ([yshift=-15pt]q.east);%
-      \end{tikzpicture}
-    \end{center}
-  \end{minipage}
-  %
-  \begin{minipage}{0.48\linewidth}
-    \begin{center}
-      \begin{tikzpicture}
-        \node [draw, inner sep=10pt, minimum height=40pt] (p) {\( P \)};%
-        \node [draw, inner sep=10pt, right=of p] (q) {\( Q' \)};%
-
-        \draw ([yshift=5pt]p.east) -- ([yshift=5pt]q.west);%
-        \draw ([yshift=-5pt]p.east) -- ([yshift=-5pt]q.west);%
-
-        \draw ([yshift=10pt, xshift=-25pt]p.west) -- ([yshift=10pt]p.west);%
-        \draw ([xshift=-25pt]p.west) -- (p.west);%
-        \draw ([yshift=-10pt, xshift=-25pt]p.west) -- ([yshift=-10pt]p.west);%
-      \end{tikzpicture}
-    \end{center}
-  \end{minipage}
-
-  \caption{Illustration of the compositional minimization paradigm}
-  \label{fig:sota:minicomp}
-\end{figure}
-
-\GH{Il manque une transition avec "compositional Reasoning". Il faudriait
-  notamment bien faire ressortir les différences entre les deux concepts
-  (actuellement, ce n'est pas très claire).}
-\paragraph{Compositional Reasoning.}
-%
-Assume-guarantee\,\cite{pnueli1985ag} and
-rely-guarantee\,\cite{jones1983tentative} reasoning are about proving a
-component \( C \) guarantees the property \( G \) under the assumptions that a
-property \( A \) is satisfied, and then proving that the rest of the system
-\( S' \) satisfies \( A \).
-%
-This allows for concluding about the correctness of the system as a whole, that
-is the composition of \( C \) with \( S' \) (denoted by \( C || S' \))
-guarantees \( G \).
-%
-Assume-guarantee systems have been developed for model checkers, where
-assumptions and guarantees are defined in temporal logic formulas \GH{ref}.
-
-%%
-% The main obstacle to the adoption of the assume-guarantee paradigm is the
-% necessity for the user to provide additional inputs to the checker, in
-% addition to the model and the properties to verify.
-%%
-% \GH{A quoi correspondent ces "additional inputs"?}
-%%
-% The \( L* \) learning algorithm, originally proposed by
-% Angluin\,\cite{angluin1987lstart}, addresses this issue by automatically
-% generating appropriate assumptions.
-%%
-% \GH{de ce que je connais, L* est un algorithme permettant d'apprendre
-% automatiquement un automate de manière active, en requêtant une implémentation
-% et en observant les réponses. Je ne vois pas le lien avec ce qui est présenté
-% ici. Il faut expliquer un peu plus ce que permet cet algorithme dans ce
-% contexte.}
-%%
-% The \( L* \) algorithm has latterly been adapted to other modeling structure,
-% for instance for interface automata\,\cite{emmi2008assume}.
-
-\paragraph*{}
-%
-We believe assume-guarantee contracts encodes a well-suited reasoning to work
-with \ac{hse} mechanisms, and formally express the definition we gave in the
-Introduction of this manuscript (Definition \ref{def:intro:hse}).
-%
-Conceptually, a trusted software component interacts with some hardware
-components, which provide the hardware features of the \ac{hse}, \emph{via}
-their interfaces, \emph{e.g.} CPU instruction sets.
-%
-As long as the trusted software component correctly implements the \ac{hse}
-mechanism, it satisfies the assumption of the hardware components, and therefore
-is guaranteed that the hardware architecture enforces the targeted security
-policy.
-%
-\GH{J'ai un peu remanié ce paragraphe en le rendant plus générique. Peux-tu
-  vérifier?}
-
-\subsection{Compositional Modeling Structures}
-\label{subsec:sota:compmod}
-
-We now detail the popular formalisms which have been used to model components in
-isolation for the purpose of compositional verification, an in particular
-compositional reasoning.
-%
-Because our long-term objective is to apply a component-based modeling approach
-to a complex hardware architecture, we focus on their applicability \GH{to such
-  context?}.
-%
-A component model should be easy to write, read and exploit in the context of a
-verification problem.
-
-\paragraph{Concurrent Automata.}
-%
-I/O automata\,\cite{lynch1988ioautomata} are labeled transition systems which
-distinguish between three classes of transitions, modeled with three disjoints
-sets of labels:
+Interface automata\,\cite{de2001interfaceautomata} are labeled transition
+systems which distinguish between three classes of transitions, modeled with
+three disjoints sets of labels:
 %
 \begin{inparaenum}[(1)]
 \item input actions (denoted by \( \mathrm{in}(S) \) for an automaton \( S \)),
@@ -1262,33 +1061,11 @@ Its transition relation \( R(S) \) is a subset of
 \( \mathrm{state}(S) \times \mathrm{act}(S) \times \mathrm{state}(S) \), where
 \( \mathrm{state}(S) \) is the set of states of \( S \).
 %
-I/O automata are expected to be \emph{input enabled}, that is it cannot delay
-the treatment of its inputs.
-%
-This translates as follows: for every state \( p \) and input actions \( \pi \),
-it exists a state \( q \) such that \( (p, \pi, q) \in R(S) \).
-%
-Composition of I/O automaton is achieved \emph{via} input and output actions.
+Composition of interface automata is achieved \emph{via} input and output actions.
 %
 More precisely, when one automaton performs an output action \( \pi \) during a
 transition, all automata having \( \pi \) as input action perform \( \pi \)
 simultaneously.
-
-Although by definition, I/O automata are required to be input enabled, in
-practice the component they model will correctly behave (for a certain
-definition of ``correct'') only if certain requirements are met regarding the
-inputs they have to handle.
-%
-Interface automata\,\cite{de2001interfaceautomata} are similar to I/O automata,
-except they do not require to be input enabled.
-%
-As a consequence, the definition of an interface automaton captures its
-requirements over the rest of the system. \GH{Je ne comprends pas cette dernière
-  phrase}
-
-Another popular modeling structure is the Moore Machine, as they play a key role
-in compositional model checking\,\cite{mcmillan1989compositional}, because they
-can be translated into Kripke structures.
 
 \begin{example}[Airlock System as Interface Automata]
   \label{example:sota:airlockinterface}
@@ -1423,16 +1200,13 @@ from or write to peripherals memories. \GH{et? que veux tu dire? Que les I/O
   automata ne permettent pas de modéliser ces échanges de données? Il faut que
   tu développes et que tu dises explicitement l'idée que tu veux exprimer.}
 
-\paragraph{Process Algebra.}
-%
+\subsection{Process Algebra}
+
 Another popular family of approaches which enable compositional modeling of
 complex systems is process algebra.
 %
 Process algebra has been developed to reason about programs executed in
-parallel.
-%
-It is a formal system to describe interacting systems \GH{répétition sur
-  system}, together with a proof system for verifying them.
+parallel, and it comes with a proof system to verifying the resulting system.
 %
 In process algebra such as Calculus of Communication
 Systems\,\cite{milner1980ccs} or the Communicating Sequential
@@ -1542,68 +1316,6 @@ languages and their minimalistic semantic. \GH{Cette conclusion est un peu
   "low-level description" et "minimalist semantic"? Si on remet dans le context
   de ton approche, en quoi sont-ils peu adaptés?}
 
-\paragraph{Programs with Effects.}
-%
-The relation between one component and the rest of the system it is connected to
-is reminiscent of the programming language to model and verify large programs
-with side effects realized by an outer environment (\emph{e.g.} an operating
-system). \GH{phrase trop longue et difficile à comprendre}
-\GH{Ce paragraph est plus difficile à suivre que les autres. Tu enchaînes beaucoup de notions assez nouvelles (Monad, Effect, Effect Handler...) par rapport au reste et trop rapidement. En outre, tu nous parles brusquement de langage pure et fonctionnel et on ne voit pas le rapport avec ce qui a été présenté jusqu'à maintenant. Il faut à mon avis mieux introduire cette partie et mieux faire comprendre pourquoi tu t'y intéresse, d'autant plus que c'est l'approche que tu vas utiliser!}
-%
-Modeling side effects in pure programming language, such as Haskell or {\scshape
-  Gallina}, is usually achieved thanks to
-Monads\,\cite{wadler1990comprehending,jones2005io}, \emph{e.g.} the State Monad \GH{n'utilise pas de majuscule pour des noms communs! D'ailleurs, plus loin, tu n'utilises plus de majuscule pour "monad"} to seamlessly write computations which manipulate a global state, or the List
-Monad to abstract non-determinism,
-%
-However, Monads have a reputation not to compose very
-well\,\cite{hyland2006combining}, despite construction such as Monad
-Transformers\,\cite{liang1995mtl}.
-%
-Algebraic effects and effect handlers are a generic approach overcoming this
-challenge, with many different implementations (\emph{e.g.}
-Eff\,\cite{bauer2015effects}, {\scshape Idris}\,\cite{brady2013idris}, or
-Haskell\,\cite{kiselyov2013extensible}).
-%
-In this context, \emph{effects} are characterized by sets of operations,
-\emph{e.g.} \texttt{get} and \texttt{set} for global state manipulation.
-%
-These operations are expected to produce a value whose type is known by
-definition.
-%
-For instance, \texttt{get} produces a value of the same type as the global
-state.
-
-On the one hand, programs with effects are pure computations which compose
-effects results together.
-%
-On the other hand, handlers model the environment which realizes these effects,
-computes their results, and manipulates programs control flows.
-%
-One possible representation of the relation between programs with effects and
-effect handlers is by the means of coroutines\,\cite{kiselyov2013extensible}.
-%
-When a program with effects requires the result of a given effect, it sends a
-request to the handler, and waits for the result.
-
-\GH{et? que doit-on penser de tout çà? Est-ce intéressant pour ton problème?
-  Quelles sont les éventuelles limitations?}
-
-\subsection{Related Work}
-\label{subsec:sota:comprelated}
-
-\GH{Sur quoi porte cet état de l'art? Il faudrait un titre de sous-section plus précis.}
-
-In Chapter~\ref{chapter:freespec}, we show how it is possible to model a
-hierarchy of components which interacts \emph{via} their interfaces by means of
-programs with effects and effect handlers. \GH{Référence en avant. Beurk. En gros tu dis : "j'ai utilisé telle technique, donc je vais vous en parler dans l'état de l'art". Il faudrait plutôt que ta manière de présenter l'état de l'art amène naturellement le lecteur à se persuader que cette technique est la bonne pour le problème que tu adresses. Il sera alors beaucoup plus enclin à lire un état de l'art détaillé sur la technique en question. Il faut revoir la fin de la sous-section précédente et l'introduction de cette sous-section en ce sens.}
-%
-The main idea is that a component can be modeled as a handler for the interface
-it exposes, in terms of program with effects of the interface it uses.
-%
-To our surprise, we did not find any generic project to write and verify
-programs with effects and effect handlers for {\scshape Gallina}, but
-several related approaches exist.
-
 \paragraph{{\scshape Kami}.}
 %
 In 2017, Joonwon Choi \emph{et al.} have released {\scshape
@@ -1618,10 +1330,11 @@ particular labeled transition system, whose transitions are of the form
   p \xrightarrow[a]{i} (v, q)
 \]
 %
-where  \( i \)  is an operation called by another component, \( p \) is the state of the component before the operation \( i \), \( a \) is a program of actions performed by the
-component in order to compute the result of \( i \), \( v \) is the result of
-\( i \) that is returned to the caller, and \( q \) is the modified state of the
-component.
+where \( i \) is an operation called by another component, \( p \) is the state
+of the component before the operation \( i \), \( a \) is a program of actions
+performed by the component in order to compute the result of \( i \), \( v \) is
+the result of \( i \) that is returned to the caller, and \( q \) is the
+modified state of the component.
 %
 Actions, in this context, are either local manipulation of the component's state
 or calls of operations handled by other components.
@@ -1644,8 +1357,8 @@ expression could be
   M \sqsubseteq N \wedge R \sqsubseteq S \Rightarrow M + R \sqsubseteq N + S
 \]
 %
-This approach is related to compositional minimization, where one component
-is reduced to a simpler, more abstract model, to reduce the complexity of the
+This approach is related to compositional minimization, where one component is
+reduced to a simpler, more abstract model, to reduce the complexity of the
 proofs.
 %
 They proved the correctness of a realistic multiprocessor system with respect to
@@ -1657,15 +1370,30 @@ implementation to high-level modules which model their semantics and the SC
 memory model.
 
 {\scshape Kami} provides a general-purpose framework for hardware verification.
-\GH{Il manque le début de la phrase} is hardware-specific, thus is not suitable to reason about systems which also
-include software components.
 %
-We believe this is a strong argument in favor of compositional reasoning for
-hardware architectures. \GH{Cet argument n'est pas très claire. Tu as bien présenté Kami, on comprend bien qu'il correspond à la catégorie "minimization reasoning". Tu dis qu'il est centré sur le hardware seulement, ok.  Mais je ne vois pas en quoi çà permet de conclure que "minimization reasoning" et plus adapté que "compositionnal reasoning" pour ton approche. Pourrais-on adapter Kami pour inclure des composants software? Soit, a priori, tu peux établir qu'une famille (compositionnal  ou minimization reasoning) est plus adaptée que l'autre et dans ce cas il faudrait l'expliquer plus tôt, quand tu présentes les deux familles, et t'appuyer sur cet argument déjà présenté pour critique Kami ici. Soit il faut mieux expliquer.}
+\thomasrk[inline]{RPC plutôt que échange de messages, donc on a plus facilement
+ce côté : pour gérer un message entrant, j'emets cette séquence de message
+sortant.}
 %
-In comparison, our framework presented in Chapter~\ref{chapter:freespec} is more
-high-level \GH{çà veut dire quoi "high level"?}, and focus on compositional reasoning ---in the form of
-assume-guarantee contracts--- rather than minimization reasoning.
+\thomasrk[inline]{Par contre, on est sur une approche par rafinement (il faut se
+comporter comme cette référence), alors qu'on cherche plus une approche
+assume-guarantee. Ce n'est pas surprenant, car Kami suit une logique proche de
+celle de la vérification de HW tradi, avec des propriétés transparent to
+software vs. nécessité de configuration}
+
+\thomasrk[inline]{Idée centrale de Kami très intéressante, mais on veut quelque
+  chose de moins opinonated, plus idiomatique Coq/FP. Notamment, input/output
+  dans le type, etc.}
+
+\subsection{Programs with Effects and Effect Handlers}
+
+\thomasrk[inline]{Ici, il faut parler de Oleg, et des extensibles effects, avec
+  le côté coroutine. On retrouve de RPC, mais dans un style beaucoup plus
+  idiomatique en FP.
+
+  On utilise une implémentation similaire à celle proposée dans le papier de
+  Oleg. Coq.io est le projet qui en Coq se rapproche le plus de ce que l'on veut
+  faire, mais ils se sont un peu arrêtés trop vite.}
 
 \paragraph{\texttt{Coq.io}.}
 %
@@ -1694,6 +1422,8 @@ of this program with its environment is out of the scope of the project.
 %
 Our framework does not suffer the same limitation.
 
+\thomasrk[inline]{On s'est inspiré pour cela de ce qui se fait en B.}
+
 \paragraph{B-Method.}
 %
 The B-method\,\cite{abrial2005b} is a well-established method of software
@@ -1703,9 +1433,9 @@ B allows for the definition of functional specifications, called abstract
 machines, and the refinement of these specifications up to executable code.
 %
 An abstract machine is characterized by a set of variables, and several
-operations which update these variables. Preconditions in form of
-predicates on the machine variables can be attached to a given operation to
-specify when the operation can be used.
+operations which update these variables. Preconditions in form of predicates on
+the machine variables can be attached to a given operation to specify when the
+operation can be used.
 
 B has already been used in order to reason about systems made of components
 which interact \emph{via}
@@ -1723,29 +1453,40 @@ following reasoning:
   more concrete implementation) of this abstract machine.
   %
 \item A model of a component which uses an interface can \emph{include} the
-  abstract machine which models this interface and uses its operations. \GH{cette dernière phrase n'est pas très claire}
+  abstract machine which models this interface and uses its
+  operations. \GH{cette dernière phrase n'est pas très claire}
 \end{itemize}
 %
 Our approach apply a similar process within the Coq proof assistant, but with a
 clearer separation between the operations exposed by an interface and the
 requirements over the component which exposes it.
 %
-This offer use more flexibility \GH{que veux "use more flexibility"? Est-ce que "Our approach offers more flexibility" n'est pas plus approprié?} to prove that a given component correctly uses
-(satisfy its assumption) or exposes (enforce its guarantee) interface.
+This offer use more flexibility \GH{que veux "use more flexibility"? Est-ce que
+  "Our approach offers more flexibility" n'est pas plus approprié?} to prove
+that a given component correctly uses (satisfy its assumption) or exposes
+(enforce its guarantee) interface.
 %
 We believe this is a valuable property considering that we want to prove the
-same hardware architecture correct \GH{correctness} with respect to several \ac{hse} mechanisms.
+same hardware architecture is correct with respect to several \ac{hse}
+mechanisms.
 
 \paragraph{Compositional Security.}
-
+%
+\thomasrk[inline]{Le résultat de tout ce travail, c'est globalement ce
+papier. Simplement, on a le pouvoir de Coq, alors que leur approche est
+essentiellement théorique avec un langage et même une logique plus ou moins
+ad-hoc.}
+%
 The projects detailed above focus on verifying functional specifications, but
-the use of component-based modeling has also been used to verify security properties of a given
-system.
+the use of component-based modeling has also been used to verify security
+properties of a given system.
 
-Heyman \emph{et al.} have proposed a component-based modelling technique for
-Alloy\,\cite{jackson2012alloy} \GH{c'est quoi Alloy?}. In their approach, components are primarily defined as
-semantics for a set of operations\,\cite{heyman2012securemodel}; a component is
-connected to another when it leverages its operations. \GH{Ce n'est pas très claire. Difficile de comprendre sans connaitre le papier}
+Heyman \emph{et al.} have proposed a component-based modelling technique for the
+model finder Alloy\,\cite{jackson2012alloy} \GH{c'est quoi Alloy?}. In their
+approach, components are primarily defined as semantics for a set of
+operations\,\cite{heyman2012securemodel}; a component is connected to another
+when it leverages its operations. \GH{Ce n'est pas très claire. Difficile de
+  comprendre sans connaitre le papier}
 %
 Alloy leverages a model finder to verify a composition of these components
 against known security patterns, and to assume or verify facts about operations
@@ -1756,7 +1497,10 @@ model.
 %
 On the contrary, our formalism and framework is compatible with the extraction
 mechanism of Coq, meaning a component model can be extracted in an {\scshape
-  OCaml} program. \GH{Mouais, en même temps, tu n'utilises pas cette fonctionnalité dans ton approche, donc je ne trouve pas que c'est un argument "fort", bien qu'on puisse le noter également. Tu n'as pas d'autres critères de comparaison plus en phase avec ce que tu as fait?}
+  OCaml} program. \GH{Mouais, en même temps, tu n'utilises pas cette
+  fonctionnalité dans ton approche, donc je ne trouve pas que c'est un argument
+  "fort", bien qu'on puisse le noter également. Tu n'as pas d'autres critères de
+  comparaison plus en phase avec ce que tu as fait?}
 
 Finally, Garg \emph{et al.} have presented in 2010 a formal framework for
 compositional reasoning where components are defined in terms of programs
@@ -1811,9 +1555,310 @@ while {\scshape Kami} focuses on refinement proofs.
 %
 To the best of our knowledge, the closest related research is the work of Garg
 \emph{et al.}\,\cite{garg2010compositional}, with the difference than we
-leverage the Coq proof assistant to verify our models. \GH{Il faudrait insister sur le fait que Garg ne fait pas de vérification, ce qui est implicite dans ta phrase. On pourrait penser qu'il ont simplement utilisé un autre outil que Coq}
+leverage the Coq proof assistant to verify our models, whereas they rely on
+paper proofs.
 
 \section{Conclusion}
 \label{sec:sota:conclusion}
 
 \GH{Il faudrait faire ici une conclusion rapide qui résume les deux problèmes auxquels tu t'es attelé et fasse la transition avec tes deux parties suivantes. Rapide, concis, claire ;-)}
+
+\newpage
+
+Traditional transition systems, such as the ones presented in the previous
+section, impose to model the complete system all at once.
+%
+This raises important challenges for complex systems.
+%
+Theorem provers allow for leveraging parameterized models to generalize similar
+components (\emph{e.g.} a memory of arbitrary size, an arbitrary number of
+core), but this approach does not address the challenges posed by the
+composition of many different ---and complex--- components.
+%
+A comprehensive hardware model in terms of hardware components would undoubtedly
+make the construction of the proof unbearable for any non-trivial properties,
+yet is a requirement to uncover compositional attacks by the means of formal
+methods.
+%
+% \PC{il manque aussi l'argument de la difficulté à maintenir / faire évoluer le
+% modèle si un composant change - or c'est le cas en pratique: de nombreuses
+% archis sont similaires, mais avec quelques différences dans les composants}
+
+Compositional verification is a promising family of approaches to overcome the
+challenges posed by the scale of complex and large systems, as it enables to
+locally abstract a subpart of the problem \emph{via} a specification.
+%
+Traditional compositional approaches in the programming language communities
+---that the Coq community is part of--- include type
+systems %\,\cite{knowles2008compositional}
+(specifications for values manipulated by a program) \GH{ref sur composition
+  dans les types system}, and Hoare logic systems (specifications for the state
+updates provoked by the execution of a program) \GH{composition sur la logic de
+  Hoare (que tu n'a pas évoqué avant..., tu devrais le mentionner dans ta
+  première section)}.
+%
+The model checking communities take a different approach, and rather breakdown a
+complex system in several stateful and interacting components \GH{ref sur
+  composition dans Model Checking }.
+%
+The verification process proceeds as follow: components are verified in
+isolation, then their composition is verified in order to ensure that local
+properties remain true in the complete system.
+
+We believe component-based verification is a particularly well-suited solution
+to address the scale of hardware architectures verification, notably because it
+mimic their concrete implementations.
+%
+The rest of the section proceeds as follows.
+%
+We first give an overview of compositional verification approaches which can be
+leveraged to enable ``divide and conquer'' strategies to reason about a
+component-based system (\ref{subsec:sota:compverif}).
+%
+Then, we describe the modeling structures that have been proposed to model
+components and their interactions (\ref{subsec:sota:compverif}).
+%
+We discuss the already existing approaches which have been proposed to enable
+component-based verification in theorem prover (\ref{subsec:sota:comprelated}),
+and summarize our motivations to propose our own framework for the Coq proof
+assistant (\ref{subsec:sota:compconclu}).
+
+\subsection{Compositional Verification Approaches}
+\label{subsec:sota:compverif}
+
+Historically, compositional verification\,\cite{peng1998survey} is the answer of
+model checking\,\cite{mcmillan1989compositional} and concurrent programs
+verification\,\cite{jones1983tentative} communities to the state explosion
+problem.
+%
+It can be divided into two complementary approaches: compositional minimization
+and compositional reasoning.
+
+\paragraph{Compositional Minimization.}
+%
+Components of a larger system are primarily identified by the interface they
+expose to their pairs, that is the set of operations they can carry out for the
+rest of the system.
+%
+They \GH{A quoi renvoie "they"? "Components"? "Interfaces"? "operations"?} also
+``hide'' the components they are connected to, and use in order to handle their
+input.
+%
+In this context, two components which expose the same interface can be freely
+interchange on the condition that they exhibit an equivalent behavior with
+respect to their interface, where the meaning ``equivalent behavior'' is really
+specific to each verification problem.
+%
+For instance, in the context of process algebra, trace equivalence or
+bisimulation are two possible definitions of equivalent
+behavior\,\cite{fokkink2013pa}.
+
+Using a behavior equivalence approach, it becomes possible to reason about one
+component by abstracting away the part of the systems it interacts with
+functional specifications \GH{la phrase n'est pas très claire. Je ne suis pas
+  sur que "abstract away ... with" soit correct. La construction habituelle est
+  "the model abstract away something from details"}.
+%
+This is referred to as compositional minimization in model checking.
+%
+The goal is to reduce the complexity of a model, with smaller \GH{que veut dire
+  "smaller" ici? Simpler?} yet provably equivalent components, as pictured in
+Figure~\ref{fig:sota:minicomp}. \GH{Je ne comprends pas la figure et surtout je
+  ne vois pas en quoi elle illustre la réduction de la complexité par des
+  composants plus petit et équivalent. Je propose de la supprimer.}
+%
+\GH{et? que devons nous penser de ces approches? Sont-elles adapté a ton
+  approche? Quelles sont les "bonnes" idées que tu voudrais reprendre? Quelles
+  sont les limitations?}
+
+
+% \begin{figure}
+%   \begin{minipage}{0.48\linewidth}
+%     \begin{center}
+%       \begin{tikzpicture}
+%         \node [draw, inner sep=10pt, minimum height=40pt] (p) {\( P \)};%
+%         \node [draw, inner sep=10pt, right=of p, minimum height=40pt] (q)
+%         {\( Q \)};%
+
+%         \draw ([yshift=5pt]p.east) -- ([yshift=5pt]q.west);%
+%         \draw ([yshift=-5pt]p.east) -- ([yshift=-5pt]q.west);%
+
+%         \draw ([yshift=10pt, xshift=-25pt]p.west) -- ([yshift=10pt]p.west);%
+%         \draw ([xshift=-25pt]p.west) -- (p.west);%
+%         \draw ([yshift=-10pt, xshift=-25pt]p.west) -- ([yshift=-10pt]p.west);%
+
+%         \draw ([yshift=15pt, xshift=25pt]q.east) -- ([yshift=15pt]q.east);%
+%         \draw ([yshift=5pt, xshift=25pt]q.east) -- ([yshift=5pt]q.east);%
+%         \draw ([yshift=-5pt, xshift=25pt]q.east) -- ([yshift=-5pt]q.east);%
+%         \draw ([yshift=-15pt, xshift=25pt]q.east) -- ([yshift=-15pt]q.east);%
+%       \end{tikzpicture}
+%     \end{center}
+%   \end{minipage}
+%   %
+%   \begin{minipage}{0.48\linewidth}
+%     \begin{center}
+%       \begin{tikzpicture}
+%         \node [draw, inner sep=10pt, minimum height=40pt] (p) {\( P \)};%
+%         \node [draw, inner sep=10pt, right=of p] (q) {\( Q' \)};%
+
+%         \draw ([yshift=5pt]p.east) -- ([yshift=5pt]q.west);%
+%         \draw ([yshift=-5pt]p.east) -- ([yshift=-5pt]q.west);%
+
+%         \draw ([yshift=10pt, xshift=-25pt]p.west) -- ([yshift=10pt]p.west);%
+%         \draw ([xshift=-25pt]p.west) -- (p.west);%
+%         \draw ([yshift=-10pt, xshift=-25pt]p.west) -- ([yshift=-10pt]p.west);%
+%       \end{tikzpicture}
+%     \end{center}
+%   \end{minipage}
+
+%   \caption{Illustration of the compositional minimization paradigm}
+%   \label{fig:sota:minicomp}
+% \end{figure}
+
+\GH{Il manque une transition avec "compositional Reasoning". Il faudriait
+  notamment bien faire ressortir les différences entre les deux concepts
+  (actuellement, ce n'est pas très claire).}
+\paragraph{Compositional Reasoning.}
+%
+Assume-guarantee\,\cite{pnueli1985ag} and
+rely-guarantee\,\cite{jones1983tentative} reasoning are about proving a
+component \( C \) guarantees the property \( G \) under the assumptions that a
+property \( A \) is satisfied, and then proving that the rest of the system
+\( S' \) satisfies \( A \).
+%
+This allows for concluding about the correctness of the system as a whole, that
+is the composition of \( C \) with \( S' \) (denoted by \( C || S' \))
+guarantees \( G \).
+%
+Assume-guarantee systems have been developed for model checkers, where
+assumptions and guarantees are defined in temporal logic formulas \GH{ref}.
+
+%%
+% The main obstacle to the adoption of the assume-guarantee paradigm is the
+% necessity for the user to provide additional inputs to the checker, in
+% addition to the model and the properties to verify.
+%%
+% \GH{A quoi correspondent ces "additional inputs"?}
+%%
+% The \( L* \) learning algorithm, originally proposed by
+% Angluin\,\cite{angluin1987lstart}, addresses this issue by automatically
+% generating appropriate assumptions.
+%%
+% \GH{de ce que je connais, L* est un algorithme permettant d'apprendre
+% automatiquement un automate de manière active, en requêtant une implémentation
+% et en observant les réponses. Je ne vois pas le lien avec ce qui est présenté
+% ici. Il faut expliquer un peu plus ce que permet cet algorithme dans ce
+% contexte.}
+%%
+% The \( L* \) algorithm has latterly been adapted to other modeling structure,
+% for instance for interface automata\,\cite{emmi2008assume}.
+
+\paragraph*{}
+%
+We believe assume-guarantee contracts encodes a well-suited reasoning to work
+with \ac{hse} mechanisms, and formally express the definition we gave in the
+Introduction of this manuscript (Definition \ref{def:intro:hse}).
+%
+Conceptually, a trusted software component interacts with some hardware
+components, which provide the hardware features of the \ac{hse}, \emph{via}
+their interfaces, \emph{e.g.} CPU instruction sets.
+%
+As long as the trusted software component correctly implements the \ac{hse}
+mechanism, it satisfies the assumption of the hardware components, and therefore
+is guaranteed that the hardware architecture enforces the targeted security
+policy.
+%
+\GH{J'ai un peu remanié ce paragraphe en le rendant plus générique. Peux-tu
+  vérifier?}
+
+\subsection{Compositional Modeling Structures}
+\label{subsec:sota:compmod}
+
+We now detail the popular formalisms which have been used to model components in
+isolation for the purpose of compositional verification, an in particular
+compositional reasoning.
+%
+Because our long-term objective is to apply a component-based modeling approach
+to a complex hardware architecture, we focus on their applicability to such a
+context.
+%
+A component model should be easy to write, read and exploit in the context of a
+verification problem.
+
+\paragraph{Programs with Effects.}
+%
+The relation between one component and the rest of the system it is connected to
+is reminiscent of the programming language to model and verify large programs
+with side effects realized by an outer environment (\emph{e.g.} an operating
+system). \GH{phrase trop longue et difficile à comprendre} \GH{Ce paragraph est
+  plus difficile à suivre que les autres. Tu enchaînes beaucoup de notions assez
+  nouvelles (Monad, Effect, Effect Handler...) par rapport au reste et trop
+  rapidement. En outre, tu nous parles brusquement de langage pure et
+  fonctionnel et on ne voit pas le rapport avec ce qui a été présenté jusqu'à
+  maintenant. Il faut à mon avis mieux introduire cette partie et mieux faire
+  comprendre pourquoi tu t'y intéresse, d'autant plus que c'est l'approche que
+  tu vas utiliser!}
+%
+Modeling side effects in pure programming language, such as Haskell or {\scshape
+  Gallina}, is usually achieved thanks to
+Monads\,\cite{wadler1990comprehending,jones2005io}, \emph{e.g.} the State Monad
+\GH{n'utilise pas de majuscule pour des noms communs! D'ailleurs, plus loin, tu
+  n'utilises plus de majuscule pour "monad"} to seamlessly write computations
+which manipulate a global state, or the List Monad to abstract non-determinism,
+%
+However, Monads have a reputation not to compose very
+well\,\cite{hyland2006combining}, despite construction such as Monad
+Transformers\,\cite{liang1995mtl}.
+%
+Algebraic effects and effect handlers are a generic approach overcoming this
+challenge, with many different implementations (\emph{e.g.}
+Eff\,\cite{bauer2015effects}, {\scshape Idris}\,\cite{brady2013idris}, or
+Haskell\,\cite{kiselyov2013extensible}).
+%
+In this context, \emph{effects} are characterized by sets of operations,
+\emph{e.g.} \texttt{get} and \texttt{set} for global state manipulation.
+%
+These operations are expected to produce a value whose type is known by
+definition.
+%
+For instance, \texttt{get} produces a value of the same type as the global
+state.
+
+On the one hand, programs with effects are pure computations which compose
+effects results together.
+%
+On the other hand, handlers model the environment which realizes these effects,
+computes their results, and manipulates programs control flows.
+%
+One possible representation of the relation between programs with effects and
+effect handlers is by the means of coroutines\,\cite{kiselyov2013extensible}.
+%
+When a program with effects requires the result of a given effect, it sends a
+request to the handler, and waits for the result.
+
+\GH{et? que doit-on penser de tout çà? Est-ce intéressant pour ton problème?
+  Quelles sont les éventuelles limitations?}
+
+\subsection{Related Work}
+\label{subsec:sota:comprelated}
+
+\GH{Sur quoi porte cet état de l'art? Il faudrait un titre de sous-section plus
+  précis.}
+
+In Chapter~\ref{chapter:freespec}, we show how it is possible to model a
+hierarchy of components which interacts \emph{via} their interfaces by means of
+programs with effects and effect handlers. \GH{Référence en avant. Beurk. En
+  gros tu dis : "j'ai utilisé telle technique, donc je vais vous en parler dans
+  l'état de l'art". Il faudrait plutôt que ta manière de présenter l'état de
+  l'art amène naturellement le lecteur à se persuader que cette technique est la
+  bonne pour le problème que tu adresses. Il sera alors beaucoup plus enclin à
+  lire un état de l'art détaillé sur la technique en question. Il faut revoir la
+  fin de la sous-section précédente et l'introduction de cette sous-section en
+  ce sens.}
+%
+The main idea is that a component can be modeled as a handler for the interface
+it exposes, in terms of program with effects of the interface it uses.
+%
+To our surprise, we did not find any generic project to write and verify
+programs with effects and effect handlers for {\scshape Gallina}, but several
+related approaches exist.
