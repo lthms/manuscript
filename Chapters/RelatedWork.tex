@@ -32,7 +32,7 @@ the system behavior by means of formal methods.
 % expected behaviors of their implementations, and \emph{non-functional}
 % specifications, which notably include security policies.
 %
-In this thesis, our objective is to give a formal definition of \ac{hse}
+In this thesis, our objective is to give a formal theory of \ac{hse}
 mechanisms in the form of requirements that trusted software components have to
 satisfy, and to verify that these requirements do effectively provide the
 enforcement of targeted security policies.
@@ -60,7 +60,7 @@ The rest of this Chapter proceeds as follows.
 %
 We detail how transition systems have been widely and successfully used in order
 to model and verify hardware and software systems, and where does our formal
-definition of \ac{hse} mechanisms and experiment on using this formal definition
+theory of \ac{hse} mechanisms and experiment on using this theory
 stand with respect to previous work (Section~\ref{sec:sota:formalisms})
 %
 Then, we introduce and justify our interest in compositional verification
@@ -98,7 +98,7 @@ Many x86 models have been proposed over years, but to the extent of our
 knowledge, none of them aims to describe the x86 architecture as a whole
 (\ref{subsec:sota:ltsrelated}).
 %
-To experiment with our formal definition of \ac{hse} mechanisms, we compromise
+To experiment with our formal theory of \ac{hse} mechanisms, we compromise
 and relied on a ad-hoc model, with the aim of identifying desirable properties
 for a large-scale model that would optimize the applicability of our approach
 (\ref{subsec:sota:ltsconclusion})
@@ -106,8 +106,8 @@ for a large-scale model that would optimize the applicability of our approach
 \subsection{Modeling a Hardware Architecture}
 \label{subsec:sota:ltsdef}
 
-\GH{Ref} A system is characterized by a set of states (\emph{e.g.} the state of
-a processor core typically includes the values of its registers, its execution
+A system is characterized by a set of states (\emph{e.g.} the state of a
+processor core typically includes the values of its registers, its execution
 mode) and a set of state transformations (\emph{e.g.}  the value of a register
 will change when a core execute certain instructions) which occur over times as
 the system operates.
@@ -514,7 +514,7 @@ Because hardware features are unsafe, \emph{i.e.} they need to be configured by
 trusted software components which implements \ac{hse} mechanisms, legitimate
 traces of a general-purpose x86 model will not be part of the ``secure'' traces.
 %
-Our formal definition of \ac{hse} mechanisms allows for identifying the subset
+Our formal theory of \ac{hse} mechanisms allows for identifying the subset
 of traces wherein the mechanism is correctly implemented by the trusted software
 components, and verifying a \ac{hse} mechanism consists of proving this set of
 traces satisfies the predicate which characterizes the targeted security policy.
@@ -549,15 +549,15 @@ On the one hand, the most generic approach is the construction a proof, that is
 a succession of inference rules to derive the statement to be proven from
 formulas known to be true.
 %
-Theorem provers such as Coq\,\cite{coq} or
-Isabelle/HOL\,\cite{nipkow2002isabelle} provide facilities to write proofs, and
-a checker to automatically verify these proofs.
+Theorem provers provide facilities to construct proofs, and a checker to
+automatically verify these proofs.
 %
 On the other hand, it is possible to rely on algorithms whose correctness have
 been formally established to handle a well-defined class of problems.
 %
-Model checking\,\cite{clarke2018modelc}, SAT and SMT solvers\thomasrk{ref} are
-two classical instances of this approach.
+Model checking\,\cite{clarke2018modelc} and satisfiability
+solvers\,\cite{gomes2008satisfiability} are two classical instances of this
+approach.
 
 The choice of one approach over another for a given verification problem is a
 compromise constrained by requirements in terms of expressiveness, automation
@@ -587,10 +587,10 @@ First-order logic\,\cite{smullyan2012fol} extends propositional logic with
 respect to the applied terms, and \emph{quantifier}, such as \( \forall \) (all
 values) or \( \exists \) (there exists a value).
 
-SAT solvers (REF) form a class of tools whose purpose is to determine whether a
+SAT solvers form a class of tools whose purpose is to determine whether a
 given propositional formula with boolean variables is satisfiable, by finding
 appropriate instances for these variables.
-
+%
 SMT solvers have a similar purpose, but they target first-order logic formula
 ---without quantifiers--- and are not limited to boolean variables (SMT stands
 for satisfiability modulo theories).
@@ -601,9 +601,9 @@ the formula \( x - y = 0 \wedge x \neq y \) is not.
 %
 The lack of quantifiers has a significant impact on formulas expressiveness
 which reduces its applicability when it comes to formal verification,
-\emph{e.g.} we cannot express an invariant of the form ``at any point in a
+\emph{e.g.} we cannot express a specification of the form ``at any point in a
 trace, a predicate \( P \) is satisfied'' if we consider a system can operate
-during an infinitely.
+infinitely.
 
 % Finally, automated theorem provers (\emph{e.g.}
 % Vampire\,\cite{riazanov2002vampire}, Z3\,\cite{de2008z3}) construct proofs of
@@ -647,7 +647,7 @@ considers three cache locations).
 % Coq\,\cite{barthe2011virtcert1}--- yet model checkers have the benefit of
 % automation and counter-example generation.
 %
-Bounded model checkers (REF) overcome this limitation by considering only finite
+Bounded model checkers\,\cite{biere2003bounded} overcome this limitation by considering only finite
 traces.
 %
 As a consequence, temporal logic formula can be translated into acceptable
@@ -672,7 +672,7 @@ comes at a cost in terms of automation.
 Interactive theorem provers (\emph{e.g.}  Coq, Isabelle/HOL, or more recently
 Lean\,\cite{de2015lean}) are based on higher-order logic.
 
-We leverage a higher-order logic to propose our formal definition of \ac{hse}
+We leverage a higher-order logic to propose our formal theory of \ac{hse}
 mechanisms, which allows us to reason about high-level properties implying
 \ac{hse} mechanisms, \emph{e.g.} in Section~\ref{subsec:speccert2:coop}, we
 reason about the composition of two \ac{hse} mechanisms whose only the targeted
@@ -942,7 +942,7 @@ However, we believe the necessity to manually maintain a merge of two transition
 systems reduces its applicability in the long run, as new architecture versions
 are released frequently.
 %
-This is why our formal definition of \ac{hse} mechanism is characterized by a
+This is why our formal theory of \ac{hse} mechanism is characterized by a
 subset of traces of a model, rather than an additional, idealized model.
 %
 % Besides, the state explosion problem forces the authors to simplify their
@@ -996,8 +996,8 @@ interdependent features, would make a general-purpose model subject to the state
 explosion problem, which would reduce the applicability of model checkers.
 %
 Hardware verification by means of theorem provers has proven to be a practical
-alternative to model checking\thomasrk{refs}, and a successful solution to
-address the state explosion problem.
+alternative to model checking\,\cite{vijayaraghavan2015modular,choi2017kami},
+and a successful solution to address the state explosion problem.
 %
 For these reasons, we decided to implement our model and proofs using the Coq
 theorem prover.
@@ -1005,7 +1005,7 @@ theorem prover.
 \section{Compositional Verification}
 \label{section:sota:compsec}
 
-Our formal definition of \ac{hse} mechanisms makes a clear distinction between
+Our formal theory of \ac{hse} mechanisms makes a clear distinction between
 software components and the underlying hardware architecture which executes
 them.
 %
@@ -1025,7 +1025,7 @@ If a component \( C' \) is proven to enforce \( A \), then the composition of
 \( C \) and \( C' \) enforces \( G \).
 
 Our second contribution generalizes the key idea of our \ac{hse} mechanisms
-formal definition ---that is specifying requirements and verifying they fulfill
+formal theory ---that is specifying requirements and verifying they fulfill
 their promises--- with compositional reasoning, in order to address the
 challenge posed by the inevitable complexity of a general-purpose hardware
 architecture model.
@@ -1416,8 +1416,8 @@ expression could be
 \]
 %
 They proved the correctness of a realistic multiprocessor system with respect to
-a simple ISA semantics and Lamport's sequential consistency \thomasrk{ref
-  lamport} as the memory model.
+a simple ISA semantics and Lamport's sequential
+consistency\,\cite{lamport1979sc} as the memory model.
 %
 Their proofs consist in a succession of refinement proofs from their
 implementation to high-level modules which model the instructions semantics and
@@ -1545,7 +1545,7 @@ following reasoning:
 \subsection{Conclusion}
 \label{subsec:sota:compconclu}
 
-Our formal definition of \ac{hse} mechanisms is reminiscent of the
+Our formal theory of \ac{hse} mechanisms is reminiscent of the
 assume-guarantee paradigm, where a component is verified in isolation in terms
 of assumptions it has on the rest of the system and guarantees it enforces for
 that system if its assumptions are met.
