@@ -1294,9 +1294,8 @@ demonstrate in the following example.
   \begin{itemize}
   \item \( c(x). P\) means receiving a value from the channel \( c \), bounding
     this value to the fresh name \( x \), then executing the process \( P \).
-  \item \( \bar{c} \langle x \rangle . P \) means sending the
-    name \( x \) through the channel \( c \), then executing the process
-    \( P \).
+  \item \( \bar{c} \langle x \rangle . P \) means sending the name \( x \)
+    through the channel \( c \), then executing the process \( P \).
   \item \( [x = \mathrm{OPEN}] P \) is a guard, that is \( P \) is executed if
     \( x \) is equal to the name \( \mathrm{OPEN} \).
   \item \( P + Q \) is the nondeterministic choice operator, we use it here in
@@ -1546,10 +1545,10 @@ following reasoning:
 \subsection{Conclusion}
 \label{subsec:sota:compconclu}
 
-Our formal theory of \ac{hse} mechanisms is reminiscent of the
-assume-guarantee paradigm, where a component is verified in isolation in terms
-of assumptions it has on the rest of the system and guarantees it enforces for
-that system if its assumptions are met.
+Our formal theory of \ac{hse} mechanisms is reminiscent of the assume-guarantee
+paradigm, where a component is verified in isolation in terms of assumptions it
+has on the rest of the system and guarantees it enforces for that system if its
+assumptions are met.
 %
 To address the inevitable complexity of a general-purpose hardware architecture
 model, we make an additional step in that direction and verify each hardware
