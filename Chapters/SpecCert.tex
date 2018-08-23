@@ -1,5 +1,5 @@
 %!TEX root = ../main.tex
-\chapter{Formal Definition of HSE Mechanisms}
+\chapter{A Theory of HSE Mechanisms}
 \label{chapter:speccert}
 
 \endquote{``\emph{The purpose of abstraction is not to be vague, but to create a
@@ -10,7 +10,7 @@
 \vspace{1cm}%
 \noindent
 %
-Our first contribution is a formal definition of \ac{hse} mechanisms, which
+Our first contribution is a theory of \ac{hse} mechanisms, which
 takes into account that
 %
 \thomasrk[inline]{Faire référence à l'intro de \ref{subsec:sota:ltsrelated}.}
@@ -45,14 +45,14 @@ First, we model the hardware architecture as a labeled transition system whose
 sequences of transitions, also called traces, characterize every possible
 execution of software components (Section~\ref{sec:speccert:hardware}).
 %
-This model acts as a foundation for our \ac{hse} mechanisms definition
+This model acts as a foundation for our \ac{hse} mechanisms theory
 (Section~\ref{sec:speccert:hse}).
 %
 We finally define what correctness means in the context of \ac{hse} mechanisms
 (Section~\ref{sec:speccert:security}).
 %
-Our motivation to separate the model of the hardware architecture and the
-\ac{hse} mechanism definition is to enable the reuse of the same hardware model
+Our motivation to separate the model of the hardware architecture and
+\ac{hse} mechanism definitions is to enable the reuse of the same hardware model
 to verify the correctness of several \ac{hse} mechanisms.
 
 For the reader familiar with Coq, we present an implementation of our formalism
@@ -194,12 +194,12 @@ This is why we ultimately seek to model \ac{hse} mechanisms as traces subsets,
 to discard traces legitimate from a hardware specification perspective, yet
 dangerous from a security perspective.
 
-\section{HSE Mechanisms Definition}
+\section{HSE Mechanisms}
 \label{sec:speccert:hse}
 
-We now propose a formal definition for \ac{hse} mechanisms, where a \ac{hse}
-mechanism is primarily characterized by a set of trusted software components, a
-set of requirements over hardware states and a set of requirements over software
+We now propose a theory of \ac{hse} mechanisms, where a \ac{hse} mechanism is
+primarily characterized by a set of trusted software components, a set of
+requirements over hardware states and a set of requirements over software
 transitions.
 %
 On the one hand, the purpose of the requirements over states is to identify the
@@ -255,8 +255,8 @@ executed when the \ac{cpu} is in ring 3, with a particular page table setup.
 \end{definition}
 
 We say a software transition is trusted (respectively untrusted) when it is
-generated from a state associated to a trusted (respectively untrusted)
-software component.
+generated from a state associated to a trusted (respectively untrusted) software
+component.
 %
 A hardware-software mapping is mandatory to define requirements over software
 transitions that are consistent with respect to our adversary model, \emph{i.e.}
@@ -399,7 +399,7 @@ In both cases, this is really implementation dependent.
 
 \paragraph{HSE Laws.}
 %
-As it is, our definition of \ac{hse} mechanisms is too permissive.
+As it is, our theory of \ac{hse} mechanisms is too permissive.
 %
 For a \ac{hse} mechanism to be consistent, it must also obey two axioms,
 together called the \ac{hse} laws.
@@ -462,8 +462,8 @@ states, despite the correct implementation of the mechanism by the trusted
 software components.
 %
 In such a condition, the hardware architecture may stop to constrain the
-execution of untrusted software components with respect to the targeted
-security policy.
+execution of untrusted software components with respect to the targeted security
+policy.
 %
 This could mean that constrains over trusted software components execution are
 incomplete, or that requirements over hardware states are too restrictive.
@@ -765,7 +765,7 @@ easier to reason about, as shown by the following theorem.
 
 \section{Conclusion}
 
-In this Chapter, we present our formal definition of \ac{hse} mechanisms, in the
+In this Chapter, we have presented our theory of \ac{hse} mechanisms, in the
 form of requirements over a hardware model.
 %
 This approach makes it possible to reuse the same model to define and verify
