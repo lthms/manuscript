@@ -528,9 +528,10 @@ serve its purpose.
   first law that the race condition uncovered by Corey Kallenberg \emph{et
     al.}\,\cite{kallenberg2015racecondition} is possible.
   %
-  On the contrary, the \texttt{SMM\_BWP} register semantics allows for defining
-  a HSE mechanism which satisfies both laws, because the register ties together
-  the state of the \acp{cpu} and the flash memory state.
+  On the contrary, the \texttt{SMM\_BWP} register semantics ---detailed in
+  Subsection~\ref{subsec:usecase:hse:speed}--- allows for defining a HSE
+  mechanism which satisfies both laws, because the register ties together the
+  state of the \acp{cpu} and the flash memory state.
 \end{example}
 
 \paragraph{Trace Compliance.}
@@ -633,9 +634,11 @@ However, between the \ac{cpu} and the memory controller lies the cache, as
 pictured in Figure~\ref{fig:speccert:smram}.
 %
 If the cache does not take into account the SMRAM ---as it was the case in 2009,
-before the introduction of the SMRR--- it can be used to circumvent the
-protection enforced by the memory controller: the integrity of the SMRAM is
-enforced, but the \ac{cpu} does not read its content when it needs it.
+before the SMRAM cache poisoning attack (discussed in
+Subsection~\,\cite{subsec:usecase:hse:smram}) was disclosed--- it can be used to
+circumvent the protection enforced by the memory controller: the integrity of
+the SMRAM is enforced, but the \ac{cpu} does not read its content when it needs
+it.
 
 \begin{figure}
   \centering
@@ -665,9 +668,12 @@ enforced, but the \ac{cpu} does not read its content when it needs it.
   \label{fig:speccert:smram}
 \end{figure}
 
+We detail in Subsection~\ref{subsec:sota:security} how various classes of
+security policies can be modeled against a transition system.
+
 \begin{definition}[Security Policy]
-  A security policy $P$ is either a predicate on sets of traces, a predicate on
-  traces or a predicate on transitions.
+  A security policy \( P \) is either a predicate on sets of traces, a predicate
+  on traces or a predicate on transitions.
 \end{definition}
 
 \begin{definition}[Correct HSE Mechanism]
@@ -690,25 +696,12 @@ enforced, but the \ac{cpu} does not read its content when it needs it.
 \end{definition}
 
 Verifying that a \ac{hse} mechanism is correct with respect to a security policy
-can be difficult, especially when this security policy is a
-hyperproperty\,\cite{clarkson2010hyperproperties}.
+can be difficult.
 %
-On the contrary, safety properties modelled as predicates on transitions are
-easier to reason about, as shown by the following theorem.
+In the particular case of safety properties, the reasoning is facilitate because
+they are characterized by predicates on transitions.
 %
-\TODO{Je trouve que c'est un peu s'avancer de dire que ton modèle peut traiter
-  autre chose que des prédicats sur les transitions. Tout est construit dans ton
-  approche pour traiter efficacement ce cas. Tu ne nous convainc pas que ton
-  approche (prédicat, sur l'état du hard, restriction sur les transition
-  trusté...) est adaptée pour traiter d'autre cas...}
-
-\thomasrk[inline]{Pour le moment, je n'ai décris aucune « approche », mais
-  simplement une définition « méta » qui permet de raisonner a propos des HSE
-  mechanisms. Les deux requirements que je propose ne sont pas totalement sortis
-  de mon chapeau, ils visent à décrire une réalité. Ce ne sont pas que des
-  outils théoriques complètement déconnectés de la réalité.  Du coup, j’ai
-  l’impression que ce que tu dis reviens à sous-entendre que les HSE mechanisms
-  ne permettent pas d’enforce des hyperproperties.}
+The following theorem takes advantage of this fact.
 
 \begin{theorem}[Correct HSE Mechanism for Predicate on Transitions]
   \label{theorem:speccert:correcthse}
@@ -717,9 +710,9 @@ easier to reason about, as shown by the following theorem.
   \[
     \begin{array}{l}
       \forall (h, l, h') \in \mathcal{T}(\Sigma), \\
-      \qquad \func{hardware\_req}(h) \\
-      \qquad \Rightarrow (l \in L_{S} \Rightarrow \func{software\_req}(h, l))\\
-      \qquad \Rightarrow P(h, l, h')
+      \qquad (\func{hardware\_req}(h) \wedge
+      (l \in L_{S} \Rightarrow \func{software\_req}(h, l)))
+      \Rightarrow P(h, l, h')
     \end{array}
   \]
   %
@@ -730,17 +723,9 @@ easier to reason about, as shown by the following theorem.
   \]
 
   \begin{proof}
-    \TODO{Comment faut-il lire la formule logique précédente? 3 implications
-      imbriquées? Du coup, si hardware\_req(h) n'est pas vérifié, la propriété
-      est quand même vérifiée? Ca semble contre-intuitif...}
-    %
-    \thomasrk[inline]{Si hardware\_req n’est pas vérifié, alors la trace
-      considérée n’est pas compliant, du coup effectivement dans le cadre de
-      Delta |= P, on ne la considère pas.}
-    %
-    A HSE mechanisn \( \Delta \) is correct with respect to a security policy
-    characterized by a predicate on transitions \( P \) if transitions of its
-    compliant traces satisfy \( P \).
+    By definition, a HSE mechanisn \( \Delta \) is correct with respect to a
+    security policy characterized by a predicate on transitions \( P \) if the
+    transitions of its compliant traces satisfy \( P \).
     %
     With Lemma~\ref{lemma:speccert:hseinv}, we know that initial states of a
     transition of compliant traces satisfy $\func{hardware\_req}$.
@@ -755,11 +740,6 @@ easier to reason about, as shown by the following theorem.
     \hfill \( \square \)
   \end{proof}
 \end{theorem}
-
-\TODO{Contrairement au lemmes précédents, je trouve que la preuve (schéma de
-  preuve?) est un peu trop rapide. Je n'arrive pas à suivre et à me convaincre
-  que çà marche (mais je suis sans doute trop fatigué).}
-\thomasrk[inline]{Mieux ?}
 
 \section{Conclusion}
 
