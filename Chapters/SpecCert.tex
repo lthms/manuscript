@@ -115,12 +115,11 @@ Between each of these transitions, a hardware transition can occur.
 %
 For instance, one hardware component can initiate a \ac{dma}.
 %
-Also, if the content of \texttt{ecx} is not a valid addres, the \ac{cpu} raises
+Also, if the content of \texttt{ecx} is not a valid address, the \ac{cpu} raises
 an interrupt.
 %
 In this scenario, only one software transition occurs ---when the \ac{cpu} reads
-the content of \texttt{ecx}--- then the following transition models the
-interrupt.
+the content of \texttt{ecx}--- then the next transition models the interrupt.
 
 \begin{definition}[Hardware Model]
   \label{def:speccert:model}
@@ -161,11 +160,11 @@ interrupt.
 A trace is a non-empty sequence of transitions of~$\Sigma$, such that for two
 consecutive transitions, the resulting state of the first one is the initial
 state of the next one.
-%
-\TODO{Tu ne donnes qu'une définition informelle (en anglais) des traces. Tu
-  pourrais donner la formule correspondante. Idem pour init et trans}
-\thomasrk[inline]{Bien que je comprenne l'argument, je ne pense personnellement
-  pas que ça apportenait vraiment quelque chose.}
+
+%\TODO{Tu ne donnes qu'une définition informelle (en anglais) des traces. Tu
+%  pourrais donner la formule correspondante. Idem pour init et trans}
+%\thomasrk[inline]{Bien que je comprenne l'argument, je ne pense personnellement
+%  pas que ça apportenait vraiment quelque chose.}
 
 \begin{definition}[Traces]
   \label{def:speccert:trace}
@@ -177,7 +176,7 @@ state of the next one.
     state
   \item
     $\func{trans} : \pathesLTS{Ez} \rightarrow \powerset(\mathcal{T}(\Sigma))$
-    maps a trace to the set of transitions which occured during the trace
+    maps a trace to the set of transitions which occurred during the trace
   \end{itemize}
 \end{definition}
 
@@ -218,13 +217,13 @@ components, and therefore we do not consider any hypotheses on their behavior.
 
 These two classes of requirements allow us to determine a subset of compliant
 traces, that is traces where trusted software components have correctly
-implemented the \ac{hse} mechanism by obeying software requirements.
+implemented a \ac{hse} mechanism by obeying software requirements.
 %
 % \TODO{Peut être rappeller que "correctly implement the HSE" veut dire
 % respecter les contraintes sur les états et les transititions software. C'est
 % un peu trop implicite.}
 %
-To verify a \ac{hse} mechanism is correct with respect to a targeted security
+To verify this \ac{hse} mechanism is correct with respect to a targeted security
 policy means proving the set of compliant traces of this mechanism satisfies the
 predicate which models the policy.
 
@@ -285,8 +284,8 @@ which only constrain trusted software components.
     hardware configurations and potentially vulnerable ones.
   %
   \item $\func{software\_req}$ is a predicate on $H \times L_S$ to distinguish
-    between software transitions trusted software components can safely use, and
-    potentially harmful ones they need to avoid.
+    between software transitions that trusted software components can safely
+    use, and potentially harmful ones they need to avoid.
   \end{itemize}
 \end{definition}
 
@@ -327,11 +326,10 @@ ad-hoc communication channel between the \ac{bios} and the system software
 component, \emph{e.g.} to initiate a \ac{bios} update.
 %
 The \ac{uefi} standard introduces dedicated protocols to enable communication
-between the \ac{bios} and the system software component, and we believe the
-\ac{bios} action, in response to a \ac{smi} triggered by the unlocking of the
-flash memory, is limited to lock it again and resume.
-%
-In both cases, this is really implementation dependent.
+between the \ac{bios} and the system software component, and our understanding
+is that in most implementations the \ac{bios} action, in response to a \ac{smi}
+triggered by the unlocking of the flash memory, is limited to lock it again and
+resume.
 
 \begin{figure}
   \centering
@@ -362,7 +360,7 @@ In both cases, this is really implementation dependent.
   \label{fig:speccert:flash}
 \end{figure}
 
-\begin{example}[Flash Memory Lockdown Mechanism]
+\begin{example}[Model of Flash Memory Lockdown Mechanism]
   \label{example:speccert:flashdef}
   %
   The set of trusted software components is limited to the \ac{bios}, that is
@@ -414,7 +412,7 @@ The second law says that the requirements over the hardware state specified by
 $\func{hardware\_req}$ are invariant with respect to $\func{software\_req}$.
 %
 As long as the trusted software components which implement the \ac{hse}
-mechanisms only generate software transitions which satisfy the
+mechanism only generate software transitions which satisfy the
 $\func{software\_req}$ predicate, the $\func{hardware\_req}$ predicate holds
 true.
 %
@@ -531,7 +529,7 @@ serve its purpose.
     al.}\,\cite{kallenberg2015racecondition} is possible.
   %
   On the contrary, the \texttt{SMM\_BWP} register semantics allows for defining
-  a HSE mechanisms which satisfies both laws, because the register ties together
+  a HSE mechanism which satisfies both laws, because the register ties together
   the state of the \acp{cpu} and the flash memory state.
 \end{example}
 
@@ -544,10 +542,10 @@ generate a software transition which does not satisfy the requirements of the
 %
 Because the purpose of these requirements over software transitions is to
 prevent untrusted software components to reach a hardware configuration wherein
-the requirements over state are not satisfied, so it is required that the
-initial state of the trace satisfies the requirements over state.
+the requirements over states are not satisfied, so it is required that the
+initial state of the trace satisfies the requirements over states.
 %
-A trace whose initial state satisfies the requirements over state and where
+A trace whose initial state satisfies the requirements over states and where
 trusted software components do correctly implement a \ac{hse} mechanism is said
 to comply with this mechanism.
 %
