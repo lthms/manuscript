@@ -1145,36 +1145,36 @@ simultaneously.
   It does not have any output action, which means a door does not interact
   actively with the rest of the system.
   %
-  One possible specification for a door can be the following interface
-  automaton:
+  One possible specification for the \( i^{th} \) door of a airlock system is
+  the following interface automaton:
 
   \begin{center}
     \begin{tikzpicture}
       \node [draw, circle] (o) {1};%
       \node [draw, circle, right=of o] (c) {2};%
 
-      \draw [-latex] (o) edge [bend left] node [above] {\( \mathtt{Open}? \)}
+      \draw [-latex] (o) edge [bend left] node [above] {\( \mathtt{Open}_{i} \)}
       (c);%
-      \draw [-latex] (c) edge [bend left] node [below] {\( \mathtt{Close}? \)}
-      (o);%
-      \draw [-latex] (c) edge [loop right] node {\( \mathtt{Open}? \)} (c);%
-      \draw [-latex] (o) edge [loop left] node {\( \mathtt{Close}? \)} (o);%
+      \draw [-latex] (c) edge [bend left] node [below]
+      {\( \mathtt{Close}_{i} \)} (o);%
+      \draw [-latex] (c) edge [loop right] node {\( \mathtt{Open}_{i} \)} (c);%
+      \draw [-latex] (o) edge [loop left] node {\( \mathtt{Close}_{i} \)} (o);%
 
       \node [draw, fit=(o) (c), inner sep=20pt, text width=130pt, text badly
       centered] (d1) {};%
 
       \node [yshift=10pt, left=35pt of d1.west] (open) {};%
-      \draw [-latex] (open) to node [above] {\( \mathtt{Open} \)}
+      \draw [-latex] (open) to node [above] {\( \mathtt{Open}_{i} \)}
       ([yshift=10pt]d1.west);%
       \node [yshift=-10pt, left=35pt of d1] (close) {};%
-      \draw [-latex] (close) to node [above] {\( \mathtt{Close} \)}
+      \draw [-latex] (close) to node [above] {\( \mathtt{Close}_{i} \)}
       ([yshift=-10pt]d1.west);%
     \end{tikzpicture}
   \end{center}
 
   In addition to two doors, an airlock system needs a controller, whose purpose
-  is to handle requests coming from users and open and close doors in
-  consequence.
+  is to handle requests coming from users and effectively open and close doors
+  in consequence.
   %
   We consider a slightly different situation than the specification given in
   Example~\ref{example:sota:airlocklts}.
@@ -1195,26 +1195,26 @@ simultaneously.
       \node [draw, circle, right=50pt of s1] (s2) {3};%
       \node [draw, circle, right=50pt of s2] (s3) {4};%
 
-      \draw [-latex] (s1) to node [above] {\( \mathtt{Close2}! \)} (s2);%
-      \draw [-latex] (s2) to node [above] {\( \mathtt{Open1}! \)} (s3);%
+      \draw [-latex] (s1) to node [above] {\( \mathtt{Close}_2 \)} (s2);%
+      \draw [-latex] (s2) to node [above] {\( \mathtt{Open}_1 \)} (s3);%
 
       \node [draw, circle, below=60pt of s3] (s4) {5};%
       \node [draw, circle, left=50pt of s4] (s5) {6};%
       \node [draw, circle, left=50pt of s5] (s6) {7};%
 
-      \draw [-latex] (s4) to node [below] {\( \mathtt{Close1}! \)} (s5);%
-      \draw [-latex] (s5) to node [below] {\( \mathtt{Open2}! \)} (s6);%
+      \draw [-latex] (s4) to node [below] {\( \mathtt{Close}_1 \)} (s5);%
+      \draw [-latex] (s5) to node [below] {\( \mathtt{Open}_2 \)} (s6);%
 
       \node [draw, circle, below=21pt of s2] (s7) {1};%
 
-      \draw [-latex] (s7) to node [left,yshift=-5pt] {\( \mathtt{Req1}? \)}
+      \draw [-latex] (s7) to node [left,yshift=-5pt] {\( \mathtt{Req}_1 \)}
       (s1);%
-      \draw [-latex] (s7) to node [right,yshift=5pt] {\( \mathtt{Req2}? \)}
+      \draw [-latex] (s7) to node [right,yshift=5pt] {\( \mathtt{Req}_2 \)}
       (s4);%
 
-      \draw [-latex] (s3) edge [bend left] node [right] {\( \mathtt{Req2}? \)}
+      \draw [-latex] (s3) edge [bend left] node [right] {\( \mathtt{Req}_2 \)}
       (s4);%
-      \draw [-latex] (s6) edge [bend left] node [left] {\( \mathtt{Req1}? \)}
+      \draw [-latex] (s6) edge [bend left] node [left] {\( \mathtt{Req}_1 \)}
       (s1);%
 
       \node [draw, fit=(s1) (s4), inner sep=20pt, text width=220pt] (ctrl) {};%
@@ -1240,8 +1240,8 @@ simultaneously.
       \draw [latex-] (out_close2) to node [above] {\( \mathtt{Close}_2 \)}
       ([yshift=-45pt]ctrl.east);%
 
-      \draw (s3) edge [loop right] node {\( \mathtt{Req1}? \)} (s3);%
-      \draw (s6) edge [loop left] node {\( \mathtt{Req2}? \)} (s6);%
+      \draw (s3) edge [loop right] node {\( \mathtt{Req}_1 \)} (s3);%
+      \draw (s6) edge [loop left] node {\( \mathtt{Req}_2 \)} (s6);%
     \end{tikzpicture}
   \end{center}
 \end{example}
@@ -1264,7 +1264,7 @@ the second door'' then ``Open the first door''.
 \subsection{Process Algebra}
 \label{subsec:sota:palgebra}
 
-Process algebra has been developed to reason about programs executed in
+Process algebra have been developed to reason about programs executed in
 parallel, and it comes with a proof system to verifying the resulting system.
 %
 In process algebra such as Calculus of Communication
@@ -1292,24 +1292,24 @@ demonstrate in the following example.
   %
   \begin{itemize}
   \item \( c(x). P\) means receiving a value from the channel \( c \), bounding
-    this value to the name \( x \), then executing the process \( P \).
-  \item \( \bar{c} \langle x \rangle . P \) means sending the value bounded to
+    this value to the fresh name \( x \), then executing the process \( P \).
+  \item \( \bar{c} \langle x \rangle . P \) means sending the
     name \( x \) through the channel \( c \), then executing the process
     \( P \).
-  \item \( [x = \mathrm{OPEN}] . P \) is a guard, that is \( P \) is executed if
-    \( x \) is equal to the value \( \mathrm{OPEN} \).
+  \item \( [x = \mathrm{OPEN}] P \) is a guard, that is \( P \) is executed if
+    \( x \) is equal to the name \( \mathrm{OPEN} \).
   \item \( P + Q \) is the nondeterministic choice operator, we use it here in
     conjunction with guards to implement a \texttt{if-then-else} construct. That
     is, considering the process
     %
     \[
-      c(x) . ([x = 1] . P + [x = 2] . Q + R)
+      c(x) . ([x = 1] P + [x = 2] Q)
     \]
     %
     If the value received from \( c \) is \( 1 \), \( P \) is executed.
     %
-    If it is \( 2 \), then \( Q \) is executed. Otherwise \( R \) is executed.
-  \item \( \nu c. P \) means a new channel \( c \) is created, and available for
+    If it is \( 2 \), then \( Q \) is executed.
+  \item \( \nu c. P \) means a new name \( c \) is created, and available for
     \( P \) to use it.
   \item \( P || Q \) is the parallel execution of \( P \) and \( Q \).
   \end{itemize}
@@ -1318,22 +1318,22 @@ demonstrate in the following example.
     \begin{array}{rcl}
       \mathrm{CloseDoor}(c)
       & \triangleq
-      & c(x) . \ ([x = \mathrm{OPEN}] . \mathrm{OpenDoor}(c) \\
+      & c(x) . \ ([x = \mathrm{OPEN}] \mathrm{OpenDoor}(c) \\
       &
-      & \qquad + \mathrm{CloseDoor}(c)) \\
+      & \qquad + [x = \mathrm{CLOSE}] \mathrm{CloseDoor}(c)) \\
       & & \\
       \mathrm{OpenDoor}(c)
       & \triangleq
-      & c(x) . \ ([x = \mathrm{CLOSE}] . \mathrm{CloseDoor}(c) \\
+      & c(x) . \ ([x = \mathrm{CLOSE}] \mathrm{CloseDoor}(c) \\
       &
-      & \qquad + \mathrm{OpenDoor}(c)) \\
+      & \qquad + [x = \mathrm{OPEN}] \mathrm{OpenDoor}(c)) \\
       & & \\
       \mathrm{Controller}(c, d_1, d_2)
       & \triangleq
-      & c(x). \ \ [x = \mathrm{OPEN}_1] . \bar{d_2} \langle
+      & c(x). \ \ [x = \mathrm{OPEN}_1] \bar{d_2} \langle
         \mathrm{CLOSE} \rangle . \bar{d_1} \langle \mathrm{OPEN} \rangle . \mathrm{Controller}(c, d_1, d_2) \\
       &
-      & \qquad + [x = \mathrm{OPEN}_2] . \bar{d_1} \langle
+      & \qquad + [x = \mathrm{OPEN}_2] \bar{d_1} \langle
         \mathrm{CLOSE} \rangle . \bar{d_2} \langle \mathrm{OPEN} \rangle. \mathrm{Controller}(c, d_1, d_2) \\
       & & \\
       \mathrm{System}
