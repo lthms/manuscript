@@ -237,9 +237,9 @@ impact on the proofs already written.
 
 \section{Contributions}
 
-During the first stage of this thesis, we propose a formal definition of
-\ac{hse} mechanisms in the form of requirements trusted software components have
-to satisfy.
+During the first stage of this thesis, we propose a theory of \ac{hse}
+mechanisms in the form of requirements trusted software components have to
+satisfy.
 %
 A \ac{hse} mechanism is correct if its requirements are sufficient to make the
 hardware architecture enforce a targeted security policy.
@@ -254,7 +254,7 @@ architecture on the personal computer market.
 Moreover compositional attacks targeting this architecture have been
 disclosed\,\cite{duflot2009smram,wojtczuk2009smram,domas2015sinkhole,kallenberg2015racecondition,kovah2015senter}.
 %
-The resulting formal definition assumes as little as possible about the actual
+The resulting model assumes as little as possible about the actual
 implementation of the \ac{bios}, and constitutes, to the extent of our
 knowledge, the first formalization of the \ac{bios} security model at runtime.
 %
@@ -274,9 +274,9 @@ In this thesis, we advocate for the use of a general-purpose model of a hardware
 architecture to support the specification of \ac{hse} mechanisms which can be
 implemented on this architecture.
 %
-Our experiment with our formal definition of \ac{hse} mechanisms convinced us
-that such a general-purpose model should obey certain requirements, notably in
-terms of readability and modularity, so it could remain applicable to real life
+Our experiment with our theory of \ac{hse} mechanisms convinced us that such a
+general-purpose model should obey certain requirements, notably in terms of
+readability and modularity, so it could remain applicable to real life
 verification problem.
 %
 Our second contribution is a novel approach, inspired by algebraic effects, to
@@ -314,10 +314,10 @@ We justify, in this context, our choices in terms of formalism and tools.
 
 Part~\ref{part:speccert} focuses on our first contribution.
 %
-In Chapter~\ref{chapter:speccert}, we present our general-purpose definition to
+In Chapter~\ref{chapter:speccert}, we present our general-purpose theory to
 support the specification and verification of \ac{hse} mechanisms.
 %
-In Chapter~\ref{chapter:speccert2}, we leverage this definition to reason about
+In Chapter~\ref{chapter:speccert2}, we leverage this theory to reason about
 the \ac{hse} mechanism implemented by the \ac{bios} to remain isolated from the
 rest of the software stack at runtime.
 
