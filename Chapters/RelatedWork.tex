@@ -48,7 +48,7 @@ isolation\,\cite{lie2003xom}), and system software verification relies on
 hardware models which abstract as much as possible of the architecture
 complexity.
 %
-To the extent of our knowledge, the closest related project research is the work
+To the extent of our knowledge, the closest related research project  is the work
 of Jomaa \emph{et al.}\,\cite{jomaa2016mmu}, who specified what are the
 requirement a microkernel must satisfy in order for a \ac{mmu} to enforce memory
 isolation at all times.
@@ -59,9 +59,9 @@ numerous configurable hardware features is less subject to formal verification.
 The rest of this Chapter proceeds as follows.
 %
 We detail how transition systems have been widely and successfully used in order
-to model and verify hardware and software systems, and where does our formal
-theory of \ac{hse} mechanisms and experiment on using this theory
-stand with respect to previous work (Section~\ref{sec:sota:formalisms})
+to model and verify hardware and software systems, and where does our 
+approach 
+stand with respect to previous work (Section~\ref{sec:sota:formalisms}).
 %
 Then, we introduce and justify our interest in compositional verification
 approaches, which enable the ``divide and conquer'' strategy to reduce the
@@ -84,9 +84,9 @@ As a consequence, by reasoning about the set of traces of the model, we reason
 about the set of all possible behaviors of the system, \emph{e.g.} to verify
 that security policies are enforced at all time (\ref{subsec:sota:security}).
 %
-To support this reasoning, many approaches and tools which implement them have
-been proposed, and to choose between one of these tools means making a necessary
-compromise between expressiveness, automation and applicability
+To support this reasoning, many approaches and tools have
+been proposed. Choosing between one of these tools means making a necessary
+compromise between expressiveness, automation, and applicability
 (\ref{subsec:sota:tools}).
 %
 In this thesis, we advocate for defining \ac{hse} mechanisms of a given hardware
@@ -107,14 +107,14 @@ for a large-scale model that would optimize the applicability of our approach
 \label{subsec:sota:ltsdef}
 
 A system is characterized by a set of states (\emph{e.g.} the state of a
-processor core typically includes the values of its registers, its execution
+processor core typically includes the values of its registers and its execution
 mode) and a set of state transformations (\emph{e.g.}  the value of a register
-will change when a core execute certain instructions) which occur over times as
+will change when a core executes certain instructions) which occur over times as
 the system operates.
 %
-To formally define these two sets means constructing a model of the system.
+To formally define these two sets means constructing a model of the system. \GH{"To ... means" me semble bizarre comme formulation. Es-tu sur que ce soit idiomatique? }
 %
-The literature has a rich collection of formalisms which can be leveraged to
+The literature has a rich collection of formalisms \GH{lequels? Tu pourrais en citer quelques uns à titre d'example, avec des ref pour appuyer "a riche collection of". Ou donner une ref qui parle de la profusion des modèles} which can be leveraged to
 that end, each of them being well-suited for dedicated classes of problem.
 % \emph{e.g.}  the Kripke structure\,\cite{kripke1971semantical} is a prominent
 % definition of transition systems used in model
@@ -131,27 +131,27 @@ between transitions.
   \( (s, l, s') \in R \) is a transition of the LTS.
 \end{definition}
 
-There is a myriad of names which have been used to designate labels and labeled
+Different names have been used to designate labels and labeled
 transitions, \emph{e.g.} input variables\,\cite{cimatti2002nusmv},
-operations\,\cite{jackson2012alloy}, rules\,\cite{murphi},
+operations\,\cite{jackson2012alloy}, rules\,\cite{murphi}, or 
 actions\,\cite{barthe2011virtcert1}.
 %
 Although the name changes, the motivation remains to characterize the nature of
 the transition.
 %
-They are also well-suited to reason about the interactions of a system with its
+LTS are well-suited to reason about the interactions of a system with its
 environment, \emph{e.g.} hypercalls handled by a
-hypervisor\,\cite{barthe2011virtcert1}, \IOs provoked by the execution of
+hypervisor\,\cite{barthe2011virtcert1} or \IOs provoked by the execution of
 machine instructions\,\cite{lie2003xom}.
 %
-Similarly to that last example\,\cite{lie2003xom}, we use labels to reason about
+Similarly to the work of Lie \textit{et al.}\,\cite{lie2003xom}, we use labels to reason about
 the interactions between the hardware architecture and the software components
-which are executed by this architecture.
+that are executed by this architecture.
 %
 It allows us to define requirements trusted software components have to satisfy
 to implement a given \ac{hse} mechanism.
 
-Throughout this Chapter, we will use the airlock system in order to act as a
+Throughout this Chapter, we will use the airlock system  as a
 running example, since it is both simple ---our examples remain of manageable
 size--- and rich ---we can use it to illustrate the definitions we introduce.
 %
@@ -277,7 +277,7 @@ by compositional attacks.
 %
 However, (\ref{needreduce}) means such a general-purpose model of hardware
 architectures necessarily embeds behavior which are legitimate with respect to
-the hardware architecture functional specification, but violate targeted
+the hardware architecture functional specification, but violate some targeted
 security policies.
 %
 This is the case, for instance, if the \ac{bios} leaves the SMRAM unlocked at
@@ -361,7 +361,7 @@ where \( \rho_{[..n]} \) is the subtrace made with the \( n \) first elements of
 
 \begin{example}[Airlock Safety and Liveness Properties]
   A typical \emph{safety} property for an airlock system is that at least one
-  door shall be close at any time.
+  door shall be closed at any time.
   %
   We formalize this property with the invariant \( \iota \), defined as follows:
   %
@@ -516,7 +516,7 @@ traces of a general-purpose x86 model will not be part of the ``secure'' traces.
 %
 Our formal theory of \ac{hse} mechanisms allows for identifying the subset
 of traces wherein the mechanism is correctly implemented by the trusted software
-components, and verifying a \ac{hse} mechanism consists of proving this set of
+components. Verifying a \ac{hse} mechanism consists of proving this set of
 traces satisfies the predicate which characterizes the targeted security policy.
 %
 Because of the complexity of a typical x86 architecture, this work cannot be
@@ -579,7 +579,7 @@ First-order logic\,\cite{smullyan2012fol} extends propositional logic with
 respect to the applied terms, and \emph{quantifier}, such as \( \forall \) (all
 values) or \( \exists \) (there exists a value).
 
-SAT solvers form a class of tools whose purpose is to determine whether a
+SAT solvers \GH{ref, exemples de solver... Comme tu le fais plus loin pour les model checker} form a class of tools whose purpose is to determine whether a
 given propositional formula with boolean variables is satisfiable, by finding
 appropriate instances for these variables.
 %
@@ -629,7 +629,7 @@ Temporal logic formulas are commonly verified thanks to model checkers,
 TLA+\,\cite{lamport2002tla}.
 
 Despite improvements in algorithms, model checkers remains subject to the
-\emph{state explosion problem}, which imposes modeling compromises, \emph{e.g.}
+\emph{state explosion problem} \GH{ref sur ce problème?}, which imposes modeling compromises, \emph{e.g.}
 verification of cache coherency protocols with a fixed number of cores and
 address spaces limited in size (\emph{e.g.} in \cite{lie2003xom}, the model only
 considers three cache locations).
