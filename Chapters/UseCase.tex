@@ -53,10 +53,10 @@ Describing hardware architectures in depth is challenging, because they tend to
 comprise an increasing number of interconnected components of various natures.
 %
 The x86 hardware architecture is a perfect illustration of this, which is
-probably best illustrated by the scale of its documentation.
+probably best demonstrated by the scale of its documentation.
 %
 At the time of writing this thesis\,\footnote{Spring 2018.}, the \emph{Intel 64
-  and IA-32 Architectures Software Developer’s Manual} is 4842 pages long.
+  and IA-32 Architectures Software Developer’s Manual} is 4,842 pages long.
 %
 A typical computing platform is made of dozens of hardware components, including
 \emph{e.g.} hard drives, a keyboard, a trackpad, an audio controller, and a
@@ -69,12 +69,14 @@ components are interconnected in a modern x86 computing platform (generation
 \emph{Nehalem}\,\cite{thomadakis2011nehalem} and newer).
 %
 The two main components are the processor ---responsible for executing the
-software stack--- directly connected to high-speed peripherals  (\emph{e.g.}  DRAM, a display controller), and a companion chipset
-called the Platform Controller which handles interactions with the rest of the
-peripherals (\emph{e.g.} USB devices, hard drives).
+software stack--- directly connected to high-speed peripherals (\emph{e.g.}
+DRAM, a display controller), and a companion chipset called the Platform
+Controller which handles interactions with the rest of the peripherals
+(\emph{e.g.} USB devices, hard drives).
 %
 The x86 architecture has seen many iterations over the years, and it is quite
-common to find in the same computer park different versions of this architecture.
+common to find in the same computer park different versions of this
+architecture.
 %
 For instance, the processor was previously connected to a \emph{northbrige}
 (low-latency), which was itself connected to a \emph{southbridge} (slower
@@ -84,8 +86,8 @@ This section proceeds as follows.
 %
 First, we describe the internals of a x86 processor (\ref{subsec:usecase:proc}).
 %
-We detail the mechanisms which play a part in interactions between the
-processor and the memories scattered inside the hardware architecture
+We detail the mechanisms which play a part in interactions between the processor
+and the memories scattered inside the hardware architecture
 (\ref{subsec:usecase:mem}), then focus on the caches embedded inside the
 processor to reduce the latency induced by these interactions
 (\ref{subsec:usecase:cachemem}).
@@ -148,8 +150,8 @@ communicate with the processor (\ref{subsec:usecase:periphio}).
 
 The main component of the architecture is the \emph{processor}.
 %
-It embeds several execution units called \emph{cores}, which are
-responsible for executing assembly instructions of software component programs.
+It embeds several execution units called \emph{cores}, which are responsible for
+executing assembly instructions of software component programs.
 %
 It also integrates several additional hardware modules to connect the cores to
 the rest of the hardware architecture, \emph{e.g.} a memory controller to manage
@@ -289,9 +291,9 @@ The main target of cores \IOs is the \ac{dram}.
 \ac{dram} contains the instructions executed by the cores, \emph{and} the data
 they manipulate.
 %
-A core decides the semantics of a given memory cell depending on the context, \emph{e.g.}
-the same binary sequence can be decoded as an instruction or interpreted as an
-operand of an arithmetical operation.
+A core decides the semantics of a given memory cell depending on the context,
+\emph{e.g.}  the same binary sequence can be decoded as an instruction or
+interpreted as an operand of an arithmetical operation.
 %
 In addition, other hardware components also provide additional memory regions
 that cores can read from or write to.
@@ -311,8 +313,8 @@ Cores interact with memories \emph{via} two distinct memory address spaces,
 characterized by a set of addresses and a set of instructions.
 %
 The most important address space is the \emph{system memory}, and most of the
-x86 instructions (\emph{e.g.} \texttt{mov} variants, arithmetical operations such
-as \texttt{sub} and \texttt{add}) are designed to manipulate it.
+x86 instructions (\emph{e.g.} \texttt{mov} variants, arithmetical operations
+such as \texttt{sub} and \texttt{add}) are designed to manipulate it.
 %
 Addresses of the system memory are referred to as physical addresses and the
 majority of system memory \IOs are dispatched to the \ac{dram}.
@@ -342,8 +344,8 @@ That is, \emph{it is possible to read from or write to the same memory location
 The mapping between addresses of the system memory and their concrete memory
 locations within the hardware architecture is called the \emph{memory map}.
 %
-This memory map is configurable, that is it can be changed dynamically \emph{via}
-configuration registers exposed by the processor and the \ac{pch}.
+This memory map is configurable, that is it can be changed dynamically
+\emph{via} configuration registers exposed by the processor and the \ac{pch}.
 
 For instance, the Peripheral Component Interconnect (PCI) standard ---whose aim
 is to propose a standard local bus and communication protocol to connect
@@ -418,7 +420,7 @@ For instance, the \ac{mmu} is probably the most well-know hardware feature to
 implement an access control policy.
 %
 Thanks to the \ac{mmu}, an operating system can attribute ranges of \ac{dram} to
-user applications it manages and isolates its code and data from these
+user applications it manages and isolate its code and data from these
 applications.
 %
 The \ac{mmu} alone is not sufficient, because its scope does not cover its own
@@ -449,7 +451,7 @@ This is why ring~3 is commonly dedicated to the execution of applications.
 % plateforme fournisse don c un mécanisme d'isolation}
 %
 
-The complexity of the x86 \IO resolution mechanism obliges to take into account
+The complexity of the x86 \IO resolution mechanism requires to take into account
 the numerous redirection features exposed by the architecture.
 %
 Memory locations can have an arbitrary number of aliases, in several layered
@@ -608,8 +610,8 @@ end\,\cite{thomadakis2011nehalem}.
   \label{fig:usecase:l1-l3caches}
 \end{figure}
 
-When a core successfully reads the memory at a given address, it keeps a
-copy of the result in its caches.
+When a core successfully reads the memory at a given address, it keeps a copy of
+the result in its caches.
 %
 Therefore, the next time it needs to read some data at this address, these data
 are retrieved from the cache.
@@ -641,7 +643,7 @@ The purpose of this strategy is to reduce the number of \IO forwarded to the
 To that end, each cache line has a ``dirty bit'' which is set by the cache when
 its value is updated by a write access.
 %
-A \emph{cache eviction} occurs  when the cache frees a given cache line
+A \emph{cache eviction} occurs when the cache frees a given cache line
 previously used for a given address in order to use it for another one.
 %
 When it happens, the cache verifies the value of the ``dirty bit'', so it can
@@ -861,7 +863,7 @@ Secondly, the ``least privilege'' may vary from one execution to another,
 %
 To handle the numerous use cases of the x86 architecture, its default
 configuration is very permissive, until software components such as the
-\ac{bios} or an operating system modifies it to fit their needs, by implementing
+\ac{bios} or an operating system modify it to fit their needs, by implementing
 \ac{hse} mechanisms.
 
 % \paragraph{Autonomous Subsystem.}
@@ -1084,7 +1086,7 @@ component\,\cite{yao2009system}.
 The execution of the \ac{bios} in this context should be transparent to the rest
 of the software stack.
 %
-As such, the \ac{bios} remains the most privilege software component of the
+As such, the \ac{bios} remains the most privileged software component of the
 software stack, even after the end of the boot sequence.
 
 \subsection{HSE Mechanisms Implemented by the BIOS}
@@ -1409,8 +1411,8 @@ The attack proceeds as follows:
   operating system exposes a software interface to manage the cache from the
   userland).
 %
-\item They write to the \texttt{APM\_CNT} register in order to provoke the
-  triggering of a \ac{smi}.
+\item They write to the \texttt{APM\_CNT} register in order to
+  trigger of a \ac{smi}.
 %
 \item The \ac{bios} code stored in SMRAM is executed in SMM, leading the cache
   to be filled with copies of that code, and the processor leaves \ac{smm} when
