@@ -10,50 +10,31 @@
 \vspace{1cm}%
 \noindent
 %
-Our first contribution is a theory of \ac{hse} mechanisms, which
-takes into account that
-%
-\thomasrk[inline]{Faire référence à l'intro de \ref{subsec:sota:ltsrelated}.}
+Our first contribution is a theory of \ac{hse} mechanisms, which takes into
+account that
 %
 \begin{inparaenum}[(1)]
-\item interfaces exposed by commodity hardware architectures to software
-  components are not safe,
-\item trusted and untrusted software components use the same interface and
-  manipulate the same stateful environment, and
-\item several \ac{hse} mechanisms are often implemented simultaneously, to
-  enforce different security policies.
+\item hardware architectures often allow for implementing several \ac{hse}
+  mechanisms, and
+\item hardware features involved in \ac{hse} mechanisms are not safe by default,
+  hence the role played by trusted software components to configure them.
 \end{inparaenum}
 
-% \TODO{Dire dans l'intro du 4, et plusieurs endroits, que l'on a surtout
-% utilisé l'approche dans le cas d'une propriété de safety}
+The rest of this Chapter proceeds as follows.
 %
-In this Chapter and the following, we assume only one software component is
-executed at a given time by the hardware architecture, in order to simplify our
-definitions.
-%
-We believe dealing with multi-core architectures is possible with the cost of
-additional efforts, although it remains to be proven as we have not tackled this
-challenge during this thesis.
-%
-% \TODO{C'est du bottage en touche peu élégant. Je dirais que c'est une limite
-% du modèle tel qu'il est présenté dans cette thèse. Mais on pourrait étendre le
-% modèle pour traiter le multi-coeur. Il faut le dire clairement. C'est pas un
-% truc hors sujet du chapitre (sauf erreur de ma part, le problème n'est pas
-% traité ailleurs dans le manuscrit). }
-%
-First, we model the hardware architecture as a labeled transition system whose
+We model the hardware architecture as a labeled transition system whose
 sequences of transitions, also called traces, characterize every possible
 execution of software components (Section~\ref{sec:speccert:hardware}).
 %
 This model acts as a foundation for our \ac{hse} mechanisms theory
 (Section~\ref{sec:speccert:hse}).
 %
-We finally define what correctness means in the context of \ac{hse} mechanisms
+We then define what correctness means in the context of \ac{hse} mechanisms
 (Section~\ref{sec:speccert:security}).
 %
-Our motivation to separate the model of the hardware architecture and
-\ac{hse} mechanism definitions is to enable the reuse of the same hardware model
-to verify the correctness of several \ac{hse} mechanisms.
+Our motivation to separate the model of the hardware architecture and \ac{hse}
+mechanism definitions is to enable the reuse of the same hardware model to
+verify the correctness of several \ac{hse} mechanisms.
 
 For the reader familiar with Coq, we present an implementation of our formalism
 in Appendix~\ref{appendix:speccert}.
@@ -152,19 +133,19 @@ the content of \texttt{ecx}--- then the next transition models the interrupt.
   \[
     \mathcal{T}(\Sigma) \triangleq \{\ (h, l, h')\ |\ \transition{h}{l}{h'}\ \}
   \]
-\end{definition}
 
-\TODO{c'est quoi le sigle "union" avec un plus à l'intérieur?}
+  \TODO{c'est quoi le sigle "union" avec un plus à l'intérieur?}
+\end{definition}
 
 \paragraph{Traces.}
 A trace is a non-empty sequence of transitions of~$\Sigma$, such that for two
 consecutive transitions, the resulting state of the first one is the initial
 state of the next one.
 
-%\TODO{Tu ne donnes qu'une définition informelle (en anglais) des traces. Tu
-%  pourrais donner la formule correspondante. Idem pour init et trans}
-%\thomasrk[inline]{Bien que je comprenne l'argument, je ne pense personnellement
-%  pas que ça apportenait vraiment quelque chose.}
+% \TODO{Tu ne donnes qu'une définition informelle (en anglais) des traces. Tu
+% pourrais donner la formule correspondante. Idem pour init et trans}
+% \thomasrk[inline]{Bien que je comprenne l'argument, je ne pense
+% personnellement pas que ça apportenait vraiment quelque chose.}
 
 \begin{definition}[Traces]
   \label{def:speccert:trace}
@@ -239,19 +220,40 @@ software component is executed at a given time.
 In practice, a subset of states of the hardware architecture is dedicated to
 each software component.
 %
-For instance, the x86 \ac{cpu} has a feature called protection rings where each
-ring can be seen as an execution mode dedicated to a class of software
-components.
+For instance, x86 processors protection rings are commonly used to execute
+several software components.
 %
-The ring 0 is dedicated to the operating system whereas the applications are
+Ring 0 is dedicated to the operating system, whereas the applications are
 executed when the \ac{cpu} is in ring 3, with a particular page table setup.
 
 \begin{definition}[Hardware-Software Mapping]
   \label{def:speccert:hardsoft}
-  Given $S$ a set of software components, a hardware-software mapping
+  Given \( S \) a set of software components, a hardware-software mapping
   $\func{con\-text} : H \rightarrow S$ is a function which takes a hardware
   state and returns the software component currently executed.
 \end{definition}
+
+This definition is of key importance, because it implies strong hypotheses on
+how a software stack is executed.
+%
+First, we assume only one software component is executed at a given time by the
+hardware architecture, in order to simplify our definitions.
+%
+We believe dealing with multi-core architectures is possible with the cost of
+additional efforts, \emph{e.g.} by defining a set of identifiers to select a
+particular core.
+%
+It remains to be proven as we have not tackled this challenge during this
+thesis.
+%
+Besides, there are approaches which allow for executing two software components
+using the same ``hardware context'', \emph{e.g.} JavaScript programs of two tabs
+inside a browser are arguably two distinct software components.
+%
+However, from the hardware architecture perspective, these three components are
+indistinguishable, and enforcing a security policy in such a context is achieved
+by means of software measures, \emph{e.g.} program interpretation or software
+fault isolation\,\cite{morrisett2012rocksalt}.
 
 We say a software transition is trusted (respectively untrusted) when it is
 generated from a state associated to a trusted (respectively untrusted) software
@@ -399,7 +401,7 @@ resume.
 %
 As it is, our theory of \ac{hse} mechanisms is too permissive.
 %
-For a \ac{hse} mechanism to be consistent, it must also obey two axioms,
+For a \ac{hse} mechanism to be consistent, it must also obey two requirements,
 together called the \ac{hse} laws.
 %
 The first law says that the $\func{software\_req}$ predicate always holds true
@@ -454,10 +456,9 @@ implicit assumptions.
 On the other hand, a \ac{hse} mechanism which does not satisfy the second law
 has to be carefully reviewed.
 %
-As it stands, it does not prevent the hardware architecture to reach a state
-wherein the hardware configuration does not satisfy the requirements over
-states, despite the correct implementation of the mechanism by the trusted
-software components.
+As it stands, it lets the hardware architecture reach a state wherein the
+hardware configuration does not satisfy the requirements over states, despite
+the correct implementation of the mechanism by the trusted software components.
 %
 In such a condition, the hardware architecture may stop to constrain the
 execution of untrusted software components with respect to the targeted security
@@ -669,7 +670,8 @@ it.
 \end{figure}
 
 We detail in Subsection~\ref{subsec:sota:security} how various classes of
-security policies can be modeled against a transition system.
+security policies ---safety and liveness properties, and hyperproperties--- can
+be modeled against a transition system.
 
 \begin{definition}[Security Policy]
   A security policy \( P \) is either a predicate on sets of traces, a predicate
@@ -753,24 +755,6 @@ terms of hardware features.
 We believe this is an essential property, especially because in practice, these
 multiple mechanisms will be implemented concurrently, and may interfere with
 each other.
-
-\TODO{Sauf erreur de ma part, ton chapitre 4 ne développe pas du tout cet aspect
-  "modulaire" et "réutilisabilié". Donc c'est un peu exagéré de le mettre en
-  avant dans la conclusion. Soit il faut nuancer cette conclusion, soit il faut
-  développer ces aspects (via un exemple notamment) dans le chapitre.}
-%
-\thomasrk[inline]{Encore un fois, on est très méta dans ce chapitre. Je pense
-  sincèrement que le choix de « conception » de bien faire la séparation entre
-  HW et HSE \textbf{permet} la réutilisation d'un modèle HW.
-
-  Ça ne veut pas dire que dans la pratique, ça va se passer aussi bien.  Par
-  exemple, Minx86 est réutilisable pour vérifier des classes de propriétés de
-  sécurité similaires à celle traitée dans le chapitre 5 seulement. C’est
-  d’ailleurs évoqué dans le début du chapitre 6, pour justifier les
-  spécifications abstraites.
-
-  J’ai édité à plusieurs endroits pour \emph{nuancer} le propos et dire que ça
-  demande de faire attention quand on applique concrètement l'approche.}
 
 Throughout this Chapter, we have tried to illustrate our definitions with
 real-world examples, as our effort has been originally motivated by the
