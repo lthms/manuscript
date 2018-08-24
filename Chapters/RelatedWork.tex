@@ -528,14 +528,6 @@ achieved manually and we need the support of an appropriate tooling.
 \GH{Je trouve que ce tour d'horizon des méthodes formelles est un peu rapide. Il
   gagnerait à être plus complet et mieux structuré.}
 %
-\GH{Il me semble que tu rentres assez vite dans des détails, certes (trop)
-  facilement compréhensibles, mais qui sont spécifiques à la preuve de
-  théorème. Je préfererais que tu abordes l'ensemble des méthodes formelles
-  disponibles puis que tu sélectionnes assez rapidement, en le justifiant, (par
-  une approche "entonoire", le type de méthode formelle que tu va utiliser dans
-  ton approche. Ensuite, tu pourras faire un état de l'art plus détaillé sur ce
-  type de méthode.}
-%
 \thomasrk[inline]{Suite à notre conversation téléphonique, j’ai changé mon fusil
   d’épaule. J’ai enlevé la partie sur la construction de la preuve (sans doute
   intéressante, mais pas forcément utile), et j'ai changé la mentalité de la
@@ -709,7 +701,8 @@ with respect to security properties, rather than functional
 specification\,\cite{leslie2015linsgx}.
 %
 Each project focused on one aspect of the x86 architecture and led to uncover
-logic errors and inconsistencies in processor designs.
+logic errors and inconsistencies in processor designs, while we aim for a more
+general-purpose model with a large scope with respect to hardware components.
 %
 However, the models and tools used by Intel are rarely publicly available, hence
 we could not leverage them to experiment with our approach.
@@ -718,12 +711,6 @@ Besides, to the extend of our knowledge, Intel has not advertised about a
 ``global'' model of its architecture, even though Nachiketh Potlapally, who was
 working at Intel at the time, discussed the benefits of such a model in
 2011\,\cite{potlapally2011hardwaresecurity}.
-%
-\GH{J'enfoncerait un peu plus le clou en précisant que chaque modèle a été
-  réalisé indépendamment des autres et ne couvre qu'un aspect très réduit de
-  l'architecture (voir seulement du processeur). A l'inverse, nous avons besoins
-  d'un modèle dont le périmètre est large (même si tous les composants ne sont
-  pas nécessairement décrit avec un niveau de détail important)}
 
 \paragraph{x86 ISA Models.}
 %
@@ -790,7 +777,7 @@ Besides, we already mentioned the work of Jomaa \emph{et
   al.}\,\cite{jomaa2016mmu}.
 %
 In 2016, they have proposed a formal machine-checked proof (in Coq) of guests
-isolation by an idealized protokernel based on a \ac{mmu}\,\cite{jomaa2016mmu}.
+isolation by an idealized protokernel based on a \ac{mmu}.
 %
 Similarly to seL4, their hardware model focus on \ac{mmu} and interrupt
 handling.
@@ -839,8 +826,10 @@ would have to make significant changes prior to using it.
 %
 The x86 architecture is not the only hardware architecture which has been the
 object of formal verification projects.
-
-\thomasrk{Sparkv8 FM2018?}
+%
+We detail two projects targeting two architectures ---ARM and XOM--- because
+they follow alternative approaches that are of interest with respect to our
+goal.
 
 The two latest versions of the ARM processors have been formally
 specified\,\cite{fox2010armv7,reid2016armv8}.
@@ -868,17 +857,16 @@ addition to regular informal specifications\,\cite{arm2018aspec}.
 %
 This represent an exciting opportunity for research targeting ARM architectures,
 and we can only hope that it eventually becomes a standard in the industry.
+
+ASL is used to \emph{describe} the architecture in an unambiguous fashion, but
+it cannot be used as-is to reason about the correctness of this architecture.
 %
-However, it would not make sense to use the ASL language ourselves to specify
-the x86 architecture. \GH{Pourquoi? Il est trop spécifique à l'architecture ARM?
-  Il faudrait le dire explicitement. En outre, même si on ne peut pas le
-  réutiliser tel quel, peut-on s'en inspirer? Ou pas?}
+This means the ASL model has to be compiled to another representation,
+\emph{e.g.} Verilog or a model checker modeling language.
 %
-Indeed, ASL is used to \emph{describe} the architecture in an unambiguous
-fashion, but it cannot be used as it to reason about the correctness of this
-architecture. \GH{Cette phrase n'est pas très claire. Et surtout, on ne comprend
-  pas en quoi ASL (ou quelque chose s'en inspirant) n'est pas adapté à ton
-  approche.}
+On the contrary, we decided to implement our model directly in the language used
+by the tool supporting our verification process because we were targeting a
+proof of concept.
 
 The \ac{xom} microprocessor architecture maintains separate so-called
 \emph{compartments} for applications\,\cite{lie2000architectural}.
@@ -942,8 +930,8 @@ However, we believe the necessity to manually maintain a merge of two transition
 systems reduces its applicability in the long run, as new architecture versions
 are released frequently.
 %
-This is why our formal theory of \ac{hse} mechanism is characterized by a
-subset of traces of a model, rather than an additional, idealized model.
+This is why our formal theory of \ac{hse} mechanism is characterized by a subset
+of traces of a model, rather than an additional, idealized model.
 %
 % Besides, the state explosion problem forces the authors to simplify their
 % model, in order to reduce the state combinatory.
@@ -1451,15 +1439,15 @@ with the rest of the system.
 We believe it is reminiscent of the functional programming language problematic
 to model and verify large programs with side-effects.
 %
-These side-effects are often carry out by an outer environment, \emph{e.g.} a
-program which read the content of a file rely on an operating system to access
-the file stored in a hard drive and makes it content available in its address
-space.
+These side-effects are often carried out by an outer environment, \emph{e.g.} a
+program which reads the content of a file relies on an operating system to
+access the file stored in a hard drive and makes this content available in its
+address space.
 %
 Modeling side effects in pure programming language, such as Haskell or {\scshape
   Gallina}, is usually achieved thanks to
 monads\,\cite{wadler1990comprehending,jones2005io}, but they have a reputation
-not to compose very well\,\cite{hyland2006combining}, despite construction such
+not to compose very well\,\cite{hyland2006combining}, despite constructions such
 as monad transformers\,\cite{liang1995mtl}.
 
 Recently, algebraic effects and effect handlers\,\cite{bauer2015effects} have
@@ -1527,8 +1515,9 @@ following reasoning:
   more concrete implementation) of this abstract machine.
   %
 \item A model of a component which uses an interface can \emph{include} the
-  abstract machine which models this interface and uses its
-  operations. \GH{cette dernière phrase n'est pas très claire}
+  abstract machine which models this interface and uses its operations,
+  similarly to what aggregation enables in object orienting programming
+  language.
 \end{itemize}
 
 % The formal framework proposed by Garg \emph{et
@@ -1567,6 +1556,23 @@ what Lanoix \emph{et al.} for the B-method\,\cite{lanoix:hal-00105041}.
 \section{Conclusion}
 \label{sec:sota:conclusion}
 
-\GH{Il faudrait faire ici une conclusion rapide qui résume les deux problèmes
-  auxquels tu t'es attelé et fasse la transition avec tes deux parties
-  suivantes. Rapide, concis, claire ;-)}
+In this Chapter, we have discussed our two contributions with respect to related
+work.
+%
+Our theory of \ac{hse} mechanisms, presented in Part~\ref{part:speccert}, aims
+to specify requirements that trusted software components have to satisfy in
+order for the underlying hardware architecture to enforce a targeted security
+policy at all time.
+%
+Our initial goal is to leverage formal \ac{hse} definition to support
+verification of hardware architectures, a research direction which was little
+investigated in the past, with the notable exception of the work of Jomaa
+\emph{et al.} about \ac{mmu}-based memory isolation\,\cite{jomaa2016mmu}.
+%
+Our approach presupposes the existence of a general-purpose model of the
+hardware architecture.
+%
+To manage the scale of such a model, we propose in Part~\ref{part:freespec} a
+compositional reasoning framework for Coq, in the continuity of similar research
+efforts, notably Garg \emph{et al.}\,\cite{garg2010compositional} and Heyman
+\emph{et al.}\,\cite{heyman2012securemodel}.
