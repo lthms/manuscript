@@ -22,19 +22,7 @@ account that
 
 The rest of this Chapter proceeds as follows.
 %
-We model the hardware architecture as a labeled transition system whose
-sequences of transitions, also called traces, characterize every possible
-execution of software components (Section~\ref{sec:speccert:hardware}).
-%
-This model acts as a foundation for our \ac{hse} mechanisms theory
-(Section~\ref{sec:speccert:hse}).
-%
-We then define what correctness means in the context of \ac{hse} mechanisms
-(Section~\ref{sec:speccert:security}).
-%
-Our motivation to separate the model of the hardware architecture and \ac{hse}
-mechanism definitions is to enable the reuse of the same hardware model to
-verify the correctness of several \ac{hse} mechanisms.
+\thomasrk[inline]{TODO annonce plan}
 
 For the reader familiar with Coq, we present an implementation of our formalism
 in Appendix~\ref{appendix:speccert}.
@@ -42,8 +30,26 @@ in Appendix~\ref{appendix:speccert}.
 This development comprises machine-checked proofs of the theoretical results
 that we present throughout this Chapter.
 
-\section{Hardware Model}
-\label{sec:speccert:hardware}
+\section{Theory Definition}
+
+We model the hardware architecture as a labeled transition system whose
+sequences of transitions, also called traces, characterize every possible
+execution of software components (Section~\ref{subsec:speccert:hardware}).
+%
+This model acts as a foundation for our \ac{hse} mechanisms theory
+(Section~\ref{subsec:speccert:hse}).
+%
+We then define what correctness means in the context of \ac{hse} mechanisms
+(Section~\ref{subsec:speccert:security}).
+%
+Our motivation to separate the model of the hardware architecture and \ac{hse}
+mechanism definitions is to enable the reuse of the same hardware model to
+verify the correctness of several \ac{hse} mechanisms.
+%
+\thomasrk[inline]{TODO annonce plan composition}
+
+\subsection{Hardware Model}
+\label{subsec:speccert:hardware}
 
 We model a hardware architecture, which can execute different software
 components, as a \ac{lts}.
@@ -171,8 +177,8 @@ This is why we ultimately seek to model \ac{hse} mechanisms as traces subsets,
 to discard traces legitimate from a hardware specification perspective, yet
 dangerous from a security perspective.
 
-\section{HSE Mechanisms}
-\label{sec:speccert:hse}
+\subsection{HSE Mechanisms}
+\label{subsec:speccert:hse}
 
 We now propose a theory of \ac{hse} mechanisms, where a \ac{hse} mechanism is
 primarily characterized by a set of trusted software components, a set of
@@ -259,9 +265,6 @@ component.
 A hardware-software mapping is mandatory to define requirements over software
 transitions that are consistent with respect to our adversary model, \emph{i.e.}
 which only constrain trusted software components.
-% GH: Cela devrait être expliqué un peu plus en détail et plus tôt. Il suffirait
-% alors ici de le rappeler (comme expliqué en section xx, ces contraintes ne
-% concernent que les transition trustés.}
 
 \begin{definition}[HSE Mechanism]
   \label{def:speccert:hse}
@@ -547,7 +550,7 @@ initial state of the trace satisfies the requirements over states.
 A trace whose initial state satisfies the requirements over states and where
 trusted software components do correctly implement a \ac{hse} mechanism is said
 to comply with this mechanism.
-%
+
 \begin{definition}[Compliant Traces]
   We write $\mathcal{C}(\Delta)$ for the set of the traces which comply with
   $\Delta$.
@@ -599,8 +602,8 @@ requirements over hardware configurations throughout the execution of a software
 stack, as long as a set of trusted software components correctly implement the
 mechanism.
 
-\section{HSE Mechanism Correctness.}
-\label{sec:speccert:security}
+\subsection{HSE Mechanism Correctness.}
+\label{subsec:speccert:security}
 
 It is important to keep in mind that preserving a set of requirements over
 hardware configurations is only a mean to an end.
@@ -608,35 +611,33 @@ hardware configurations is only a mean to an end.
 The true purpose of a \ac{hse} mechanism is to constrain the execution of
 untrusted software components with respect to a targeted security policy.
 
-It is possible to define a \ac{hse} mechanism which satisfies the \ac{hse} Laws,
+It is possible to define a \ac{hse} mechanism which satisfies the \ac{hse} laws,
 yet failed to constrain the execution of untrusted software components with
 respect to a targeted security policy.
 %
-The SMRAM cache poisoning attack described in
-Subsection~\ref{subsec:usecase:hse:smram} is a good illustration of that
-eventuality\,\cite{duflot2009smram,wojtczuk2009smram}.
+The SMRAM cache poisoning attack disclosed in 2009 is a good illustration of
+that eventuality\,\cite{duflot2009smram,wojtczuk2009smram}.
 %
-The isolation of the \ac{bios} at runtime is enforced by only two hardware
-mechanisms: the \ac{smm} of the \ac{cpu} and the \texttt{SMRAMC} register of the
-memory controller.
+Back then, the isolation of the \ac{bios} at runtime is enforced by only two
+hardware mechanisms: the \ac{smm} of the \ac{cpu} and the \texttt{SMRAMC}
+register of the memory controller.
 %
 By correctly configuring the memory controller \emph{via} the \texttt{SMRAMC}
 register, the \ac{bios} can activate the protection of a dedicated memory region
 called the SMRAM.
 %
-In such a case, only a \ac{cpu} in \ac{smm} can read or write to the SMRAM.
+In such a case, only a core in \ac{smm} can read or write to the SMRAM.
 %
 As it stands, the \ac{hse} mechanism described here satisfies both laws.
 %
-However, between the \ac{cpu} and the memory controller lies the cache, as
-pictured in Figure~\ref{fig:speccert:smram}.
+However, between the core and the memory controller lies the cache, as pictured
+in Figure~\ref{fig:speccert:smram}.
 %
-If the cache does not take into account the SMRAM ---as it was the case in 2009,
-before the SMRAM cache poisoning attack (discussed in
-Subsection~\,\cite{subsec:usecase:hse:smram}) was disclosed--- it can be used to
-circumvent the protection enforced by the memory controller: the integrity of
-the SMRAM is enforced, but the \ac{cpu} does not read its content when it needs
-it.
+If the cache does not take into account the SMRAM ---as it was the case in
+2009--- it can be used to somehow circumvent the protection enforced by the
+memory controller: as we have already explained in
+Subsection~\ref{subsec:usecase:hse:smram}, the integrity of the SMRAM is
+enforced, but the core does not read its content when it needs it.
 
 \begin{figure}
   \centering
@@ -669,6 +670,9 @@ it.
 We detail in Subsection~\ref{subsec:sota:security} how various classes of
 security policies ---safety and liveness properties, and hyperproperties--- can
 be modeled against a transition system.
+%
+Because our hardware model is a labeled transition system, we can easily
+transpose these definitions to our theory.
 
 \begin{definition}[Security Policy]
   A security policy \( P \) is either a predicate on sets of traces, a predicate
@@ -737,6 +741,492 @@ The following theorem takes advantage of this fact.
     can conclude that transitions of compliant traces satisfy \( P \).
     %
     \hfill \( \square \)
+  \end{proof}
+\end{theorem}
+
+\subsection{HSE Mechanisms Composition}
+\label{subsec:speccert:compo}
+
+We model the concurrent implementation of two \ac{hse} mechanisms \( \Delta_1 \)
+and \( \Delta_2 \) as a third \ac{hse} mechanism \( \Delta_1 \sqcap \Delta_2 \).
+%
+For convenience, the \( \sqcap \) operator imposes two restrictions over
+\ac{hse} mechanisms: they shall share the same set of software components and
+the same hardware-software mapping.
+
+\begin{definition}[Concurrent HSE Mechanisms]
+  Given two HSE mechanism \( \Delta_1 \) and \( \Delta_2 \), such that
+%
+  \[
+    \begin{array}{rcl}
+      \Delta_1
+      & =
+      & \langle S, T_1, \func{context}, \func{hardware\_req}_1, \func{software\_req}_1
+        \rangle \\
+      \Delta_2
+      & =
+      & \langle S, T_2, \func{context}, \func{hardware\_req}_2, \func{software\_req}_2
+        \rangle
+    \end{array}
+  \]
+%
+  We write $\Delta_1 \sqcap \Delta_2$ for the \ac{hse} mechanism which combines
+  the requirements of both $\Delta_1$ and $\Delta_2$, that is
+%
+  \[
+    \Delta_1 \sqcap \Delta_2 \triangleq \langle S, T_1 \cup T_2, \func{context},
+    \func{hardware\_req}_{1\wedge2}, \func{software\_req}_{1\wedge2} \rangle
+  \]
+%
+  where
+  \[
+    \begin{array}{rcl}
+      \func{hardware\_req}_{1\wedge2}(h)
+      & \triangleq
+      & \func{hardware\_req}_1(h) \wedge \func{hardware\_req}_2(h) \\
+      \func{software\_req}_{1\wedge2}(h,l)
+      & \triangleq
+      & \func{software\_req}_1(h,l) \wedge \func{software\_req}_2(h,l)
+    \end{array}
+  \]
+\end{definition}
+
+We now discuss two properties of \( \sqcap \) which emphasize that its
+definition matches legitimate expectations.
+%
+Firstly, \( \sqcap \) forms a commutative monoid, and as a consequence is both
+associative and commutative.
+%
+This means the order in which we define a ``composite'' \ac{hse} mechanism from
+a list of sub-mechanisms is not important.
+%
+Secondly, the set of compliant traces of the composition of two mechanisms is
+the intersection of the sets of compliant traces of these mechanisms.
+%
+In other word, to comply with the composition of two \ac{hse} mechanisms, a
+trace has to comply with each mechanism individually.
+
+\begin{lemma}[Commutative Monoid]
+  We write $\Delta_\top$ for the \ac{hse} mechanism whose requirements over
+  states and software transitions are always satisfied.
+  %
+  \( \sqcap \) forms a commutative monoid with the set of \ac{hse} mechanisms
+  which share both the same set of software components and the same
+  hardware-software mapping, whose identity element is \( \Delta_\top \).
+
+  Indeed, \( \sqcap \) satisfies the following properties:
+
+  \begin{description}
+  \item [Associativity:]
+    \( (\Delta_1 \sqcap \Delta_2) \sqcap \Delta_3 = \Delta_1 \sqcap (\Delta_2
+    \sqcap \Delta_3) \)
+    %
+  \item [Identity Element:] \( \Delta \sqcap \Delta_\top = \Delta \)
+    %
+  \item [Commutativity:]
+    \( \Delta_1 \sqcap \Delta_2 = \Delta_2 \sqcap \Delta_1 \)
+  \end{description}
+
+  \begin{proof}
+    \( \sqcap \) is defined with operators which themselves form monoids.
+    %
+    For each properties, the proof consists in unfolding the definition of
+    \( \sqcap \) and relying on the properties of \( \cup \) and \( \wedge \).
+    %
+    \hfill \( \square \)
+  \end{proof}
+\end{lemma}
+
+\begin{lemma}[Compliant Traces, Composition and Intersection]
+  \label{lemma:speccert:compinter}
+  The set of compliant traces of the intersection of $\Delta_1$ and $\Delta_2$
+  is the intersection of the sets of compliant traces of $\Delta_1$ and
+  $\Delta_2$, that is
+  \[
+    \mathcal{C}(\Delta_1 \sqcap \Delta_2) = \mathcal{C}(\Delta_1) \cap
+    \mathcal{C}(\Delta_2)
+  \]
+
+  \begin{proof}
+    The main idea of the proof is to leverage the definition of $\wedge$ and
+    $\Rightarrow$ to turn a statement of the form
+    %
+    \[
+      (P \wedge P') \wedge (R \Rightarrow Q \wedge Q')
+    \]
+    %
+    into
+    %
+    \[
+      (P \wedge (R \Rightarrow Q)) \wedge (P' \wedge (R \Rightarrow Q'))
+    \]
+    %
+    and vice versa.
+    %
+    In our case, $P$ and $P'$ are statements about the initial states of traces
+    and \func{hardware\_req}, $R$ is the premise filtering software transitions,
+    and $Q$ and $Q'$ are statements about \func{software\_req}.
+    %
+    \hfill \( \square \)
+  \end{proof}
+\end{lemma}
+
+The definition of a composition operator poses the question of \ac{hse}
+mechanisms compatibility.
+%
+There are obvious scenarios where two \ac{hse} mechanisms \( \Delta_1 \) and
+\( \Delta_2 \) can be doubtlessly considered incompatible.
+%
+For instance, \( \mathcal{C}(\Delta_1 \sqcap \Delta_2) = \emptyset \) would
+means it is not possible to implement both at the same time.
+%
+We anticipate there are other scenarios more unclear, for instance if the set of
+compliant traces \( \mathcal{C}(\Delta_1 \sqcap \Delta_2) \) contains only
+traces where a given software component prevents a given software component to
+correctly implement its functional specification.
+%
+We advocate that a similar situation can occur for a single \ac{hse} mechanism.
+%
+Because we aimed to focused on hardware architecture verification in the context
+of this thesis, we therefore did not investigated further a characterization of
+compatible and incompatible \ac{hse} mechanisms.
+
+\section{Case Study: Code Injection Policy}
+
+A proof of correctness of a given \ac{hse} mechanism in our theory asserts the
+hardware architecture enforces a targeted security policy \emph{if trusted
+  software components correctly implement this \ac{hse} mechanism}, that is
+their executions only imply software transitions which satisfy the appropriate
+software requirements.
+%
+If an untrusted software component proves to be capable of exploiting a security
+vulnerability of a trusted software component program, this condition would
+instantaneously become false and the security policy enforcement would no longer
+be guaranteed, even though the hardware architecture is capable of enforcing it.
+
+A straightforward attack path attackers can leverage is modifying trusted
+software components programs thanks to illegitimate code injection
+(\ref{subsec:speccert:tampering}).
+%
+In this Section, we aim to illustrate further how our theory can be leveraged in
+order to reason about security enforcement.
+%
+To that end, we take as an example a security policy which explicitly forbids
+software components of a typical software stack ---that is, the \ac{bios}, an
+operating system and several applications--- to perform illegitimate code
+injection (\ref{subsec:speccert:globalsec}).
+%
+Finally, we detail how this security policy can be enforced through the correct
+implementation of two \ac{hse} mechanisms
+(\ref{subsec:speccert:isolationenforcement}).
+
+\subsection{Defining Code Injection}
+\label{subsec:speccert:tampering}
+
+A memory location within a hardware architecture is a container which is able to
+store data used by software components \emph{e.g.}~a general-purpose register of
+a processor, a \ac{dram} memory cell, etc.
+%
+To formally define a code injection, it is necessary to be able to map an
+instruction executed by the processor to the software component which has
+written this instruction into its memory location.
+%
+To that end, we assign to each memory location a so-called \emph{owner}, such
+that a software component becomes the new owner of a memory location when it
+overwrites its content during a transition.
+%
+A hardware model tracks the memory location ownership when the hardware
+architecture state maps each memory location with a software component called
+its \emph{owner}, and transition relation updates this mapping throughout
+traces.
+%
+By extension, we say a software component owns some data when it owns the memory
+location in which these data are stored.
+
+\begin{definition}[Transition-Software Mapping]
+  \label{def:speccert:transsoft}
+  A transition-software mapping
+  $\func{fetched}_{\Sigma}: H \times L \rightarrow \powerset(S)$ is a function
+  which takes an initial hardware state, a transition label and returns the set
+  of owners of the fetched instructions during this transition.
+\end{definition}
+
+With this mapping, specific to a given hardware model, it becomes possible to
+determine the owner of an instruction fetched by the processor in order to be
+decoded and executed.
+%
+\( s \in \func{fetched}_{\Sigma}(h, l) \) means that an instruction owned by
+$s$ was fetched in order to be executed by the processor during a transition
+labelled with \( l \) from a state \( h \).
+
+With a hardware-software mapping and an transition-software mapping, we give a
+formal definition of a \textit{code injection}.
+
+% GH: "Event-software mapping" c'est la même chose que "transition-software
+% mapping"? Ne pas utiliser deux termes différents pour la même notion...
+%
+% Thomas: C'était un artefact de la version article. Bien vu :)
+
+\begin{definition}[Code Injection]
+  \label{def:speccert:tempering}
+  A software component $x \in S$ achieves a code injection against another
+  software component $y \in S$ during a transition labelled with $l \in L$ from
+  a state $h \in H$ to a state $h' \in H$, denoted by
+  %
+  \[
+    h \xrightarrow[x \leadsto y]{l} h'
+  \]
+  %
+  when the processor fetches an instruction owned by $x$ while executing $y$,
+  that is
+  %
+  \[
+    h \xrightarrow[x \leadsto y]{l} h' \triangleq x \in
+    \func{fetched}_{\Sigma}(h, l) \wedge \func{context}(h) = y
+  \]
+
+  We write $h \xrightarrow[x \not\leadsto y]{l} h'$ when $x$ does not achieve a
+  code injection against~$y$.
+\end{definition}
+
+It is important to emphasize that a code injection is not inherently a ``bad
+things.''
+%
+On the contrary, a software component initialization is most of the time the
+result of a code injection.
+
+\begin{example}[Application Code Injection]
+  When the user of a computer starts a new application, the operating system
+  loads the code of this application into the \ac{dram}.
+  %
+  Therefore, when the processor starts the execution of the application in
+  ring~3, it executes instructions which are owned by the OS.
+\end{example}
+
+On the contrary, an illegitimate code injection poses a significant threats
+against the security of the software stack, because it constitutes a
+straightforward attack vector for a privilege escalation.
+%
+Low-level software components, such as the \ac{bios}, partly rely on the
+hardware architecture to protect them against illegitimate code injection.
+%
+They store their code in a memory region of their choice and implement a
+\ac{hse} mechanism to prevent upper layers of the stack from modifying its
+content.
+%
+As a consequence, unsound \ac{hse} mechanisms pave the road to illegitimate code
+injection.
+
+\begin{example}[SMRAM Cache Poisoning]
+  The SMRAM cache poisoning attack\,\cite{duflot2009smram,wojtczuk2009smram}
+  that we detailed in Subsection~\ref{subsec:usecase:hse:smram} can be used to
+  perform a code injection attack against the \ac{bios}.
+  %
+  For instance, Loic Duflot \emph{et al.} have been able to inject the necessary
+  instructions inside the cache for the processor so that the \ac{bios} updates
+  the \texttt{SMBASE} register, whose purpose is to determine the first
+  instruction executed by a core when it enters \ac{smm}.
+\end{example}
+
+\subsection{Code Injection Policy}
+\label{subsec:speccert:globalsec}
+
+We leverage the code injection definition to propose a generic formalization of
+code injection policy, to determine if a given software component is authorized
+to make a code injection against another software component in the context of a
+software stack.
+
+\begin{definition}[Code Injection Policy]
+  \label{def:speccert:global}
+  A isolation policy \( I \) is a safety property characterized by a tuple
+  \( \langle S, \rightarrowtail, \func{context} \rangle \), such that
+  %
+  \begin{itemize}
+  \item \( S \) is a set of software components executed by the hardware
+    architecture
+  \item \( \rightarrowtail \) is a binary relation on \( S \), such that given
+    \( (x, y) \in S \times S \), \( x \rightarrowtail y \) means \( x \) is
+    authorized to make a code injection against \( y \).
+    %
+    \( \rightarrowtail \) has to be
+    %
+    \begin{inparaenum}[(1)]
+    \item anti-symmetric, and
+    %
+    \item transitive.
+    %
+    \end{inparaenum}
+    %
+    \[
+      \begin{array}{lr}
+        \forall (x, y) \in S \times S,
+        & \\
+        \qquad x \rightarrowtail y \wedge y
+        \rightarrowtail x \Rightarrow x = y
+        & \text{\small (1)} \\
+        %
+        \forall (x, y, z) \in S \times S \times S,
+        & \\
+        \qquad x \rightarrowtail y \wedge y
+        \rightarrowtail z \Rightarrow x \rightarrowtail z
+        & \text{\small (2)}
+      \end{array}
+    \]
+    %
+  \item \func{context} is a hardware-software mapping.
+  \end{itemize}
+
+  A transition labelled with \( l \in L \) from \( h \in H \) to \( h' \in H \)
+  satisfies \( I \) when code injections which occur during this transition are
+  authorized by \( \rightarrowtail \), that is
+  %
+  \[
+    I(h, l, h') \triangleq \forall (x, y) \in S \times S \text{, } h
+    \xrightarrow[x \leadsto y]{l} h' \Rightarrow x \rightarrowtail y
+  \]
+\end{definition}
+
+% \begin{corollary}
+%   If a transition satisfies $I$, then no code injection which is not
+%   authorized by $\rightarrowtail$ occurs during that transition, that is
+%  %
+%   \[
+%     I(h, l, h') \iff \forall (x, y) \in S \times S \text{, } y \not\ge x
+%     \Rightarrow h \xrightarrow[y \not\leadsto x]{l} h'
+%   \]
+%
+%   \TODO{Dans ce corolaire, tu utilises la notation $ y \not\ge x$ alors
+%   qu'avant tu sembles utiliser la notation $x \rightarrowtail y$ pour la même
+%   chose. Soit j'ai loupé quelque chose soit il faut homogénéiser tes
+%   notations. En outre, ce corollaire est-il vraiment utile ici. Il semble
+%   trivial et on n'en voit pas trop l'intéret.}
+%
+%  \begin{proof}
+%    This is the contrapositive of Definition~\ref{def:speccert:global}.
+%  \end{proof}
+%\end{corollary}
+
+\begin{example}[Software Stack Isolation]
+  \label{example:speccert:isolation}
+  Using our definition, we can define a isolation policy for a whole software
+  stack which comprises the \ac{bios}, an operating system and several
+  applications, that is
+  %
+  \[
+    S \triangleq \{ \mathtt{bios}, \mathtt{os}, \mathtt{app}_1, \dots
+    \mathtt{app}_n \}
+  \]
+
+  We define the authorization relation $\rightarrowtail$ using three rules:
+  %
+  \begin{description}
+  \item [\(\rightarrowtail\)-refl:] A software component is authorized to tamper
+    with its own execution, that is
+    %
+    \[ \forall x \in S, x \rightarrowtail x \]
+    %
+  \item [\(\rightarrowtail\)-bios:] The \ac{bios} is authorized to tamper with
+    the execution of the rest of the software stack, that is
+    %
+    \[ \forall x \in S, \mathtt{bios} \rightarrowtail x \]
+  \item [\(\rightarrowtail\)-os:] The OS is authorized to tamper with the
+    execution of the application it manages, that is
+    %
+    \[ \forall k \in [0, n], \mathtt{os} \rightarrowtail \mathtt{app}_k \]
+  \end{description}
+
+  We prove by case enumeration that $\rightarrowtail$ is anti-symmetric and
+  transitive.
+
+  The definition of the corresponding $\func{context}$ shall obey the following
+  logic: when the processor is in \ac{smm}, the \ac{bios} is executed; when the
+  processor is not in \ac{smm} and is in ring 0, the system software component
+  is executed; when the processor is not in \ac{smm} and is in ring 3, one of
+  the applications ---identified by the page tables used by the processor--- is
+  executed.
+\end{example}
+
+\subsection{Code Injection Policy Enforcement}
+\label{subsec:speccert:isolationenforcement}
+
+A security policy such as the one detailed in
+Example~\ref{example:speccert:isolation} is not enforced by one but several HSE
+mechanisms.
+%
+Therefore, we break it down to more specific security sub-policies, with each
+one being enforced thanks to a dedicated \ac{hse} mechanism.
+
+\begin{definition}[BIOS Code Injection Sub-policy]
+  \label{def:speccert:biospol}
+
+  We write $I_{\mathtt{bios}}$ for the code injection sub-policy, whose purpose
+  is to enforce that the only software component authorized to perform a code
+  injection against the \ac{bios} is the \ac{bios} itself, that is
+  %
+  \[
+    I_{\mathtt{bios}}(h, l, h') \triangleq \forall x \in S, h \xrightarrow[x
+    \leadsto \mathtt{bios}]{l} h' \Rightarrow x = \mathtt{bios}
+  \]
+\end{definition}
+
+\begin{definition}[OS Code Injection Sub-policy]
+  \label{def:speccert:biospol}
+
+  We write $I_{\mathtt{os}}$ for the code injection sub-policy, whose purpose is
+  to enforce that applications are only authorized to perform code injection
+  against themselves, that is
+  %
+  \[
+    I_\mathtt{os}(h, l, h') \triangleq \forall x \in S, h
+    \xrightarrow[\mathtt{app}_k \leadsto x]{l} h' \Rightarrow x = \mathtt{app}_k
+  \]
+\end{definition}
+
+Without any knowledge about how \( I_{\mathtt{bios}} \) and
+\( I_{\mathtt{os}} \) are enforced, we can prove they together imply the
+enforcement of \( I \).
+
+\begin{theorem}[Code Injection Policy Enforcement]
+  Given two \ac{hse} mechanisms \( \Delta_{\mathtt{os}} \) and
+  \( \Delta_{\mathtt{os}} \), if \( \Delta_{\mathtt{bios}} \) is correct with
+  respect to \( I_{\mathtt{bios}} \) and \( \Delta_{\mathtt{os}} \) is correct
+  with respect to \( I_{\mathtt{os}} \), then
+  \( \Delta_{\mathtt{bios}} \sqcap \Delta_{\mathtt{os}} \) is correct with
+  respect to \( I \), that is
+  %
+  \[
+    (\Delta_{\mathtt{bios}} \models I_{\mathtt{bios}} \wedge
+    \Delta_{\mathtt{os}} \models I_{\mathtt{os}}) \Rightarrow
+    \Delta_{\mathtt{bios}} \sqcap \Delta_{\mathtt{os}} \models I
+  \]
+
+  \begin{proof}
+    By definition of correct \ac{hse} mechanism, we need to prove that the set
+    of traces which comply with
+    \( \Delta_{\mathtt{bios}} \sqcap \Delta_{\mathtt{os}} \) satisfies the
+    security policy characterized by \( I \).
+    %
+    With Lemma~\ref{lemma:speccert:compinter}, we know that the set of compliant
+    traces of \( \Delta_{\mathtt{bios}} \sqcap \Delta_{\mathtt{os}} \) is the
+    intersection of the sets of compliant traces of \( \Delta_{\mathtt{bios}} \)
+    and \( \Delta_{\mathtt{os}} \).
+    %
+    As a consequence, we know any transition \( h \xrightarrow{l} h' \) of these
+    traces satisfy both \( I_{\mathtt{os}} \) and \( I_{\mathtt{bios}} \).
+    %
+    We can conclude by case enumeration:
+    %
+    \begin{itemize}
+    \item \( I \) does not impose any restriction if the \( \mathtt{bios} \)
+      performs a code injection during such a transition.
+    \item Because of \( I_{\mathtt{bios}} \), an \( \mathtt{os} \) can only
+      perform a case injection against itself are against an application, which
+      satisfies \( I \)
+      %
+    \item Because of \( I_{\mathtt{os}} \), an application can only perform a
+      case injection against iteslf, which also satisfies \( I \). \hfill
+      \( \square \)
+    \end{itemize}
   \end{proof}
 \end{theorem}
 
