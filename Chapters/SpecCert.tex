@@ -117,12 +117,11 @@ the content of \texttt{ecx}--- then the next transition models the interrupt.
   \item $\rightarrow$ is the transition relation of the system
   \end{itemize}
 
-  The transition relation $\rightarrow$ is a predicate on
-  $H \times (L_S~\uplus~L_H) \times H$.
+  The transition relation \( \rightarrow \) is a predicate on
+  $H \times L \times H$, where \( L = L_S\,\uplus\,L_H \) and \( \uplus \) is
+  the disjoint union which requires that \( L_S\,\cap\,L_H = \emptyset \).
   %
-  Afterwards, we simply write $L$ for $L_S \uplus L_H$.
-  %
-  A transition labelled with $l$ from $h$ to $h'$ is denoted by
+  A transition labeled with $l$ from $h$ to $h'$ is denoted by
   %
   \[
     \transition{h}{l}{h'}
@@ -133,8 +132,6 @@ the content of \texttt{ecx}--- then the next transition models the interrupt.
   \[
     \mathcal{T}(\Sigma) \triangleq \{\ (h, l, h')\ |\ \transition{h}{l}{h'}\ \}
   \]
-
-  \TODO{c'est quoi le sigle "union" avec un plus à l'intérieur?}
 \end{definition}
 
 \paragraph{Traces.}
@@ -748,13 +745,17 @@ The following theorem takes advantage of this fact.
 In this Chapter, we have presented our theory of \ac{hse} mechanisms, in the
 form of requirements over a hardware model.
 %
-This approach makes it possible to reuse the same model to define and verify
-several \ac{hse} mechanisms, provided that the model is comprehensive enough in
-terms of hardware features.
+We emphasize that our approach requires a general-purpose hardware model to
+define and verify \ac{hse} mechanisms to enable the verification of several
+mechanisms against the same reference.
 %
-We believe this is an essential property, especially because in practice, these
-multiple mechanisms will be implemented concurrently, and may interfere with
-each other.
+We believe this is an essential property; in practice, these multiple mechanisms
+are implemented at the same time by different software components, and they may
+interfere with each other.
+%
+We already detailed in Subsection~\ref{subsec:usecase:hse:sandman} an example of
+this threat, such that TXT allowed for circumventing the flash memory lockdown
+mechanism.
 
 Throughout this Chapter, we have tried to illustrate our definitions with
 real-world examples, as our effort has been originally motivated by the
@@ -778,9 +779,10 @@ models, that is
 \end{inparaenum}
 %
 We believe this methodology would benefit both hardware designers and software
-developers.
+developers, but we are interested in challenging the applicability of our
+approach.
 %
-In the next Chapter, we apply our proposal to a real world example: the \ac{hse}
-mechanism implemented by the \ac{bios} to remain isolated from the rest of the
-software stack after the end of the boot sequence
+To that end, we apply in the next Chapter our theory to a real world example:
+the \ac{hse} mechanism implemented by the \ac{bios} to remain isolated from the
+rest of the software stack after the end of the boot sequence
 (Section~\ref{sec:usecase:hse}).
