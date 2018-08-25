@@ -9,17 +9,19 @@
 \vspace{1cm}%
 \noindent
 %
-In the previous chapter, we have introduced a formal definition for \ac{hse}
-mechanisms, whose purpose is to be the foundation of a three-step methodology to
-formally specify and verify \ac{hse} mechanisms.
+In the previous chapter, we have introduced a theory of \ac{hse} mechanisms,
+whose purpose is to be the foundation of a three-step methodology to formally
+specify and verify \ac{hse} mechanisms.
 %
 We now apply this methodology to specify and verify the \ac{hse} mechanism
 implemented by the \ac{bios} on x86 hardware architecture at runtime and
 described in Section~\ref{sec:usecase:hse}.
 %
 The purpose of this \ac{hse} mechanisms is to provide an isolated execution
-environment to the \ac{bios}. It relies on the System Management Mode (SMM) and
-the System Management Interrupt (SMI).
+environment to the \ac{bios}.
+%
+It relies on the System Management Mode (SMM) and the System Management
+Interrupt (SMI).
 
 First, we formally specify the targeted security policy for this \ac{hse}
 mechanism.
@@ -38,12 +40,13 @@ previously introduced (Section~\ref{sec:speccert2:verif}).
 
 The model and proofs described in this Chapter have been implemented using Coq.
 %
-We have released this development as free software in a project called SpecCert\,\footnote{SpecCert can be found at the following
-  URL: \url{https://github.com/lthms/speccert}}.
+We have released this development as free software in a project called
+SpecCert\,\footnote{SpecCert can be found at the following URL:
+  \url{https://github.com/lthms/speccert}}.
 %
 As we introduce new definitions and theoretical results, we point to the related
-statements in SpecCert, so the interesting reader familiar with Coq can
-refer to our machine-checked proofs.
+statements in SpecCert, so the interesting reader familiar with Coq can refer to
+our machine-checked proofs.
 
 \section{Specifying BIOS Isolation Policy}
 \label{sec:speccert2:usecase}
@@ -113,11 +116,11 @@ isolation sub-policy (\ref{subsec:speccert:biossec}).
 
 A memory location within a hardware architecture is a container which is able to
 store data used by a software component \emph{e.g.}~a general-purpose register
-of a \ac{cpu}, a \ac{dram} memory cell, etc.
+of a processor, a \ac{dram} memory cell, etc.
 %
 To formally define a code injection, it is necessary to be able to map an
-instruction executed by the \ac{cpu} to the software component which has written
-this instruction into its memory location.
+instruction executed by the processor to the software component which has
+written this instruction into its memory location.
 %
 A hardware model tracks the memory location ownership when the hardware
 architecture state maps each memory location with a software component called
@@ -132,7 +135,7 @@ By extension, we say a software component owns some data when it owns the memory
 location in which these data are stored.
 
 With this mapping, it becomes possible to determine the owner of an instruction
-fetched by the \ac{cpu} in order to be decoded and executed.
+fetched by the processor in order to be decoded and executed.
 
 \begin{definition}[Transition-Software Mapping]
   \label{def:speccert2:transsoft}
@@ -152,7 +155,7 @@ fetched by the \ac{cpu} in order to be decoded and executed.
   aiderait...)}
 
 Hence, $s \in \func{fetched}_{\Sigma}(h, l)$ means that an instruction owned by
-$s$ was fetched in order to be executed by the \ac{cpu} during a transition
+$s$ was fetched in order to be executed by the processor during a transition
 labelled with $l$ from a state $h$.
 
 With a hardware-software mapping and an transition-software mapping, we give a
@@ -173,7 +176,7 @@ formal definition of a \textit{code injection}.
     h \xrightarrow[x \leadsto y]{l} h'
   \]
   %
-  when the \ac{cpu} fetches an instruction owned by $x$ while executing $y$,
+  when the processor fetches an instruction owned by $x$ while executing $y$,
   that is
   %
   \[
@@ -188,7 +191,7 @@ formal definition of a \textit{code injection}.
 \begin{example}[Application Code Injection]
   When the user of a computer starts a new application, the operating system
   loads the code of this application into the \ac{dram}. Therefore, when the
-  \ac{cpu} starts the execution of the application in ring 3, it executes
+  processor starts the execution of the application in ring 3, it executes
   instructions which are owned by the OS. \TODO{Tu devrais noter avant (en
     dehors de l'exemple) que l'injection de code peut être légitime. cet example
     le montre.}
@@ -211,16 +214,14 @@ formal definition of a \textit{code injection}.
 \end{example}
 
 \begin{example}[SMRAM Cache Poisoning]
-  The SMRAM cache poisoning attack\,\cite{duflot2009smram,wojtczuk2009smram} can
-  be used to perform a code injection attack against the \ac{bios}. For
-  instance, Loic Duflot \emph{et al.} have been able to inject the necessary
-  instructions inside the cache for the \ac{cpu} so that the \ac{bios} updates
-  the \texttt{SMBASE} register. \TODO{la description de cet exemple n'est pas
-    très claire. Il faudrait mieux détailler l'injection et renvoyer
-    éventuellement à une section décrivant l'attaque pkus en détail si c'est le
-    cas. En outre, le but final n'est pas très claire et très spécifique
-    (contrairement à "escalade de privilèges" de l'exemple précédent, que tout
-    le monde comprend.}
+  The SMRAM cache poisoning attack\,\cite{duflot2009smram,wojtczuk2009smram}
+  that we detailed in Subsection~\ref{subsec:usecase:hse:smram} can be used to
+  perform a code injection attack against the \ac{bios}.
+  %
+  For instance, Loic Duflot \emph{et al.} have been able to inject the necessary
+  instructions inside the cache for the processor so that the \ac{bios} updates
+  the \texttt{SMBASE} register, whose purpose is to determine the first
+  instruction executed by a core when it enters \ac{smm}.
 \end{example}
 
 \subsection{Isolation Policies}
@@ -333,10 +334,10 @@ context of a software stack.
   transitive.
 
   The definition of the corresponding $\func{context}$ shall obey the following
-  logic: when the \ac{cpu} is in \ac{smm}, the \ac{bios} is executed; when the
-  \ac{cpu} is not in \ac{smm} and is in ring 0, the system software component is
-  executed; when the \ac{cpu} is not in \ac{smm} and is in ring 3, one of the
-  applications ---identified by the page tables used by the \ac{cpu}--- is
+  logic: when the processor is in \ac{smm}, the \ac{bios} is executed; when the
+  processor is not in \ac{smm} and is in ring 0, the system software component
+  is executed; when the processor is not in \ac{smm} and is in ring 3, one of
+  the applications ---identified by the page tables used by the processor--- is
   executed.
 \end{example}
 
@@ -396,10 +397,10 @@ machines and we have used publicly available Intel
 documents\,\cite{intel2013celeron,intel2009mch,intel2014manual} to define it.
 %
 The hardware architecture we are modeling with $\formatLTS{Minx86}$ contains a
-\ac{cpu}, a cache, a memory controller, a \ac{dram} controller and a VGA
+core, a cache, a memory controller, a \ac{dram} controller and a VGA
 controller\,\footnote{A VGA controller is a hardware device which on we can
-  connect a screen. It exposes some memory to the \ac{cpu} for communication
-  purposes.} which both expose some memory to the \ac{cpu}.
+  connect a screen. It exposes some memory to the core for communication
+  purposes.} which both expose some memory to the core.
 
 $\formatLTS{Minx86}$ is meant to illustrate how our formalism can be leveraged
 to formally specify and verify a HSE mechanism, and thus is not exhaustive.
@@ -416,8 +417,8 @@ In its current state of implementation, its scope focuses on the \ac{smm}.
 
 \paragraph{Hardware Features}
 %
-We consider the \ac{cpu} can be either in System Management Mode (\ac{smm}) or
-in an unprivileged mode.
+We consider the core can be either in System Management Mode (\ac{smm}) or in an
+unprivileged mode.
 %
 As explained in Section~\ref{subsec:usecase:firm:sec}, when a processor receives
 a System Management Interrupt (SMI), it halts its current execution and
@@ -432,8 +433,8 @@ the SMRAM.
 Leaving the \ac{smm} is done by executing a special purpose instruction called
 \texttt{rsm} (for \emph{resume}).
 
-The \ac{cpu} relies on a cache to reduce the Input/Output (\IO, that is a read
-or write access to the memory) latency.
+The core relies on a cache to reduce the Input/Output (\IO, that is a read or
+write access to the memory) latency.
 %
 We model one level of cache which stores both data and instructions and we
 consider two cache strategies: uncacheable (UC) and writeback (WB).
@@ -444,36 +445,35 @@ as possible\,\footnote{These cache strategies are explained in
   \cite{intel2014manual}, Volume 3A, Chapter 11, Section 11.3 (page 2316 --
   2317)}.
 %
-To determine which cache strategy to use, the \ac{cpu} relies on several
+To determine which cache strategy to use, the core relies on several
 configuration registers.
 %
-Among them, the \ac{smrr} are used to tell the \ac{cpu} where the SMRAM is and
-which cache strategy to use for \IO targeting the SMRAM when the \ac{cpu} is in
-\ac{smm}.
+Among them, the \ac{smrr} are used to tell the core where the SMRAM is and which
+cache strategy to use for \IO targeting the SMRAM when the core is in \ac{smm}.
 %
-When it is not in \ac{smm}, the \ac{cpu} always uses the UC strategy for \IO
+When it is not in \ac{smm}, the core always uses the UC strategy for \IO
 targeting the SMRAM.
 %
-Such registers can only be configured when the \ac{cpu} is in \ac{smm}.
+Such registers can only be configured when the core is in \ac{smm}.
 %
 \ac{smrr} have been introduced as a countermeasure to the SMRAM cache poisoning
 attack\,\cite{wojtczuk2009smram,duflot2009smram} which allowed some untrusted
 code to tamper with the copy of the SMRAM stored in the cache.
 %
 
-The memory controller\,\cite{intel2009mch} receives all the \ac{cpu} \IOs which
-are not handled by the cache and dispatches them to the DRAM controller or to
-the VGA controller.
+The memory controller\,\cite{intel2009mch} receives all the core \IOs which are
+not handled by the cache and dispatches them to the DRAM controller or to the
+VGA controller.
 %
-It exposes a unified view (the memory map) of the system memory to the \ac{cpu}.
+It exposes a unified view (the memory map) of the system memory to the core
 %
-The \ac{cpu} manipulates this memory map with a set of physical addresses.
+The core manipulates this memory map with a set of physical addresses.
 %
 The memory controller uses a special range of physical addresses to host the
 SMRAM.
 %
 This memory area is dedicated to store the code intended to be executed when the
-\ac{cpu} is in \ac{smm}.
+core is in \ac{smm}.
 
 \paragraph{Tracking Memory Ownership}
 %
@@ -524,9 +524,9 @@ The memory ownership is updated through transitions according to three rules:
 
 \subsection{Hardware States}
 
-$H(S)$ is defined as the Cartesian product of the set of states of the
-\ac{cpu}'s core, the \ac{cpu}'s cache, the memory controller and the memories
-exposed by both the \ac{dram} controller and the VGA controller.
+$H(S)$ is defined as the Cartesian product of the set of states of the core, the
+cache, the memory controller and the memories exposed by both the \ac{dram}
+controller and the VGA controller.
 %
 Each of these sets is defined in order to model the hardware features we have
 previously described.
@@ -547,7 +547,7 @@ Thus, $H(S)$ is defined as follows:
 
 \paragraph{Address Spaces}
 %
-We define $\texttt{PhysAddr}$ the set of physical addresses the \ac{cpu} uses to
+We define $\texttt{PhysAddr}$ the set of physical addresses the core uses to
 perform \IO and $\texttt{HardAddr}$ the set of hardware addresses exposed by the
 \ac{dram} and VGA controllers.
 %
@@ -581,8 +581,7 @@ The maximal address offset (denoted by $\val{max\_addr}$ here) is specific to
 the \ac{cpu} and may vary in time according to its addressing mode (real mode,
 long mode, etc.), therefore we left its value as a parameter of our model.
 %
-By convenience, we give the same maximum address to each of \TODO{"of" n'est-il
-  pas de trop?} address space.
+By convenience, we give the same maximum address to each address space.
 
 Finally, we write $\texttt{Val}$ for the set of values that the memory cells
 scattered within the memory locations of the hardware architecture can take.
@@ -670,8 +669,9 @@ The cache is modelled as a mapping between address indexes and cache lines.
   \texttt{Cache}(S) \triangleq \texttt{Index} \rightarrow \texttt{CacheLine}(S)
 \]
 %
-A cache \( c \in \texttt{Cache}(S) \) is well-formed if every cache line is tagged with a physical address
-whose index corresponds to the cache line index, that is
+A cache \( c \in \texttt{Cache}(S) \) is well-formed if every cache line is
+tagged with a physical address whose index corresponds to the cache line index,
+that is
 %
 \[
   \forall \var{i} \in \texttt{Index}, \func{index}(c(i).\func{tag}) = i
@@ -1256,21 +1256,20 @@ same as $\func{Read}(\var{pa})$ with $\var{pa}$ being the program register
 value, that is
 %
 \[
-  h \xrightarrow[\func{context}]{\func{Read}(h.\func{pc})} h' \Rightarrow h
-  \xrightarrow[\func{context}]{\func{Fetch}} h'
+  h \xrightarrow[\func{context}]{\func{Fetch}} h' \triangleq h
+  \xrightarrow[\func{context}]{\func{Read}(h.\func{pc})} h'
 \]
 %
-\TODO{Il y a simplement implication ou équivalence?}
-%
-We distinguish between \func{Read} and \func{Fetch} because a software component
-does not always decide the value of the program counter register of the Core.
-%
-\TODO{Je comprends la fin de la phrase mais je ne vois pas le lien avec "We
-  distinguish between \func{Read} and \func{Fetch}". Difficile de comprendre ce
-  que tu voulais dire.}
-%
-For instance, the value of the program counter is updated during a
-\func{ReceiveSMI} transition.
+% We distinguish between \func{Read} and \func{Fetch} because a software
+% component does not always decide the value of the program counter register of
+% the Core.
+%%
+% \TODO{Je comprends la fin de la phrase mais je ne vois pas le lien avec "We
+% distinguish between \func{Read} and \func{Fetch}". Difficile de comprendre ce
+% que tu voulais dire.}
+%%
+% For instance, the value of the program counter is updated during a
+% \func{ReceiveSMI} transition.
 
 \paragraph{Transition-Software Mapping}
 %
@@ -1544,8 +1543,8 @@ antecedent of the requirements over \func{NextInstruction} and
 %
 Therefore, the first \ac{hse} law is satisfied for \( \Delta_{\mathtt{bios}} \).
 
-The second law requires the state requirements to be invariant with respect to the
-software requirements.
+The second law requires the state requirements to be invariant with respect to
+the software requirements.
 %
 We prove this by case enumeration of \( l \in L_S \uplus L_H \) and
 \( h \in H(S) \), we check that each requirement described previously is
@@ -1665,7 +1664,9 @@ mechanism, but does not satisfies the security policy.
 
 \section{Perspectives on Concurrent HSE Mechanisms}
 \label{subsec:speccert2:coop}
-\TODO{Je n'aime pas trop le "perspective". On aurait tendance à penser que c'est du future work. A la lecture de ce qui suit, c'est un peu plus qu'une simple perspective.}
+\TODO{Je n'aime pas trop le "perspective". On aurait tendance à penser que c'est
+  du future work. A la lecture de ce qui suit, c'est un peu plus qu'une simple
+  perspective.}
 
 We have proven that \( \Delta_{\mathtt{bios}} \models I_{\mathtt{bios}} \), that
 is \( \Delta_{\mathtt{bios}} \) is correct with respect to
@@ -1673,21 +1674,27 @@ is \( \Delta_{\mathtt{bios}} \) is correct with respect to
 %
 As we discussed in Subsection~\ref{subsec:speccert2:globalsec}, the \ac{bios}
 isolation policy fall within a more general isolation policy \( I \) whose scope
-is the complete software stack. \TODO{Je pense qu'il faudrait rappeler ici brièvement le concept : un ensemble de composants logiciels qui sont ordonnés par une relation d'ordre partiel (forme un treillis?) et I est la politique d'isolation globale.}
+is the complete software stack. \TODO{Je pense qu'il faudrait rappeler ici
+  brièvement le concept : un ensemble de composants logiciels qui sont ordonnés
+  par une relation d'ordre partiel (forme un treillis?) et I est la politique
+  d'isolation globale.}
 %
 In practice, \( I \) is enforced \emph{via} several \ac{hse} mechanisms,
 including \( \Delta_{\mathtt{bios}} \).
 %
 As a consequence, these mechanisms have to be implemented concurrently.
 
-\TODO{Il faudrait développer un peu la transition entre le paragraphe précédent et ce paragraphe. On doit implémenter plusieurs HSE "concurrently", OK. Et du coup, quels sont les problèmes que cela pose et qui justifient la suite?}We first introduce a \ac{hse} mechanism composition operator \( \sqcap \)
+\TODO{Il faudrait développer un peu la transition entre le paragraphe précédent
+  et ce paragraphe. On doit implémenter plusieurs HSE "concurrently", OK. Et du
+  coup, quels sont les problèmes que cela pose et qui justifient la suite?}We
+first introduce a \ac{hse} mechanism composition operator \( \sqcap \)
 (\ref{subsec:speccert2:compo}).
 %
 We then illustrate how we can leverage this operator to reason about \( I \)
 (\ref{subsec:speccert2:isolationenforcement}).
 %
-%Finally, we discuss the notion of \ac{hse} mechanisms compatibility
-%(\ref{subsec:speccert2:compat}).
+% Finally, we discuss the notion of \ac{hse} mechanisms compatibility
+% (\ref{subsec:speccert2:compat}).
 
 \subsection{HSE Mechanisms Composition}
 \label{subsec:speccert2:compo}
@@ -1816,13 +1823,17 @@ trace has to comply with each mechanism individually.
   \end{proof}
 \end{lemma}
 
-\TODO{Même remarques que précédemment, sans le code Coq, difficile de suivre et surtout d'évaluer ce qui a vraiment été fait. Il faudrait au moins mentionner que cette preuve a été réalisée en Coq (dans quel fichier, ligne, etc.}
+\TODO{Même remarques que précédemment, sans le code Coq, difficile de suivre et
+  surtout d'évaluer ce qui a vraiment été fait. Il faudrait au moins mentionner
+  que cette preuve a été réalisée en Coq (dans quel fichier, ligne, etc.}
 
 \subsection{Software Stack Isolation Policy Enforcement}
 \label{subsec:speccert2:isolationenforcement}
 
 Our objective is to prove that by implementing the \ac{hse} mechanism previously
-defined and verified \TODO{A quoi renvoie "previously defined and verified"? Stop aux qualificatif relatif, nomme explicitement les choses!}, the \ac{bios} participates in enforcing \( I \).
+defined and verified \TODO{A quoi renvoie "previously defined and verified"?
+  Stop aux qualificatif relatif, nomme explicitement les choses!}, the \ac{bios}
+participates in enforcing \( I \).
 %
 We can do that by finding a complementary \ac{hse} mechanism \( \Delta' \) such
 that their composition is correct with respect to \( I \), that is
@@ -1832,9 +1843,15 @@ that their composition is correct with respect to \( I \), that is
 \]
 
 We now show that any \ac{hse} mechanism whose purpose is to constrain the
-execution of applications \TODO{attention, je comprends en lisant la suite que "applications" à un sens bien précis ici. Tu supposes que ta software stack est de la forme BIOS>OS>Appk. Il faudrait le rappeler (ou l'énoncer) juste avant.} with respect to \( I \) \TODO{que veut dire précisément "constrain the execution of app with respect to I'?} verifies this property.
+execution of applications \TODO{attention, je comprends en lisant la suite que
+  "applications" à un sens bien précis ici. Tu supposes que ta software stack
+  est de la forme BIOS>OS>Appk. Il faudrait le rappeler (ou l'énoncer) juste
+  avant.} with respect to \( I \) \TODO{que veut dire précisément "constrain the
+  execution of app with respect to I'?} verifies this property.
 %
-We formally specify this additional security policy \TODO{plutôt que additionnal secutiy property, il faudrait dire explicitement que c'est la propriété mise en oeuvre par ce HSE complémentaire.}
+We formally specify this additional security policy \TODO{plutôt que additionnal
+  secutiy property, il faudrait dire explicitement que c'est la propriété mise
+  en oeuvre par ce HSE complémentaire.}
 %
 \[
   I_\mathtt{os}(h, l, h') \triangleq \forall x \in S, h
@@ -1871,7 +1888,8 @@ to \( I \).
   $I_{\mathtt{os}}$ and $I_{\mathtt{bios}}$.
   %
   This is enough to conclude, based on the definitions of global and partial
-  execution isolation policies. \TODO{Que sont les "global et partial execution isolation policies"?}
+  execution isolation policies. \TODO{Que sont les "global et partial execution
+    isolation policies"?}
   %
   \hfill \( \square \)
 \end{proof}
@@ -1879,12 +1897,16 @@ to \( I \).
 The definition of a correct \( \Delta_{\mathtt{os}} \) remains out of the scope
 of this manuscript, but we wanted to emphasize that the verification work does
 not necessarily ends once \ac{hse} mechanisms are defined and verified
-separately.
-\TODO{Cette dernière phrase est un peu maladroite. Globalement, cette section est mal située, je trouve. Finalement, nous n'avons pas besoin de la définition préciser de  $\Delta_{\mathtt{bios}}$ pour comprendre ces problématiques de composition. En revanche, tu fais souvent référence à des concepts définis en section 5.1 ou avant... Les idées sont intéressantes mais il faudrait mieux les vendre.}
+separately.  \TODO{Cette dernière phrase est un peu maladroite. Globalement,
+  cette section est mal située, je trouve. Finalement, nous n'avons pas besoin
+  de la définition préciser de $\Delta_{\mathtt{bios}}$ pour comprendre ces
+  problématiques de composition. En revanche, tu fais souvent référence à des
+  concepts définis en section 5.1 ou avant... Les idées sont intéressantes mais
+  il faudrait mieux les vendre.}
 
 % TODO: ? Should we?
-%\subsection{On HSE Mechanisms Compatibility}
-%\label{subsec:speccert2:compat}
+% \subsection{On HSE Mechanisms Compatibility}
+% \label{subsec:speccert2:compat}
 
 \section{Conclusion}
 \label{sec:speccert:discuss}
