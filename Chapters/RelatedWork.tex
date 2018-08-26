@@ -700,21 +700,23 @@ create and manage enclaves\,\cite{costan2016sgxexplained}--- have been verified
 with respect to security properties, rather than functional
 specification\,\cite{leslie2015linsgx}.
 %
+
 Each project focused on one aspect of the x86 architecture and led to uncover
 logic errors and inconsistencies in processor designs, while we aim for a more
 general-purpose model with a large scope with respect to hardware components.
 %
-However, the models and tools used by Intel are rarely publicly available, hence
-we could not leverage them to experiment with our approach.
-%
-Besides, to the extend of our knowledge, Intel has not advertised about a
+To the extend of our knowledge, Intel has not advertised about a
 ``global'' model of its architecture, even though Nachiketh Potlapally, who was
 working at Intel at the time, discussed the benefits of such a model in
 2011\,\cite{potlapally2011hardwaresecurity}.
 
+Besides, the models and tools used by Intel are rarely publicly available, hence
+we could not leverage them to experiment with our approach.
+%
+
 \paragraph{x86 ISA Models.}
 %
-Additionally, several x86 model have been proposed by academic researchers over
+Several x86 model have been proposed by academic researchers over
 the years for purposes of formally reasoning about machine-code programs.
 %
 To that end, they have modeled the x86 instructions set semantics, often
@@ -726,15 +728,16 @@ framework\,\cite{goel2014x86}, and CompCert x86 assembly
 model\,\cite{leroy2012compcert}.
 %
 These models allow for reasoning about the execution of one software component
-in isolation, and focus on the semantics of the x86 instructions set and
+in isolation. They focus on the semantics of the x86 instruction set and
 abstract away as many hardware details as possible to increase the applicability
 of the model.
 %
 For instance, memories are commonly limited to the \ac{dram}.
 %
+
 This approach works well when software components use a limited amount of
 hardware features, as applications typically do, and to reason about correction
-with respect to functional specifications.
+with respect to functional specifications. \GH{Il faudrait ici une phrase contre-point qui disent qu'en revanche c'est moins adapté pour notre cas de figure ou les HSE peuvent être en interaction avec de multiples composants hardware et que nous nous intéressons à prouver des politique de sécurité}
 %
 It has been shown in the past that it is possible to extend them, when their
 abstraction is too strong.
@@ -742,10 +745,7 @@ abstraction is too strong.
 For instance, Chen \emph{et al.} have extended the hardware model of CompCertX,
 a variant of CompCert used in the development of formally verified
 kernels\,\cite{gu2016certikos}, with a notion of input devices and
-interrupts\,\cite{chen2018interrupt}.
-
-However the primarily focus of these projects is to reason about software
-components, not the underlying hardware architecture.
+interrupts\,\cite{chen2018interrupt}. However the primarily focus of these projects is to reason about software components, not the underlying hardware architecture.
 
 \paragraph{Ad-hoc x86 Models}
 %
@@ -763,13 +763,13 @@ use these requirements as assumptions to verify the underlying architecture.
 The seL4 microkernel\,\cite{sel4website} is, to date, the most advanced and
 mature verified implementation of a microkernel.
 %
-A C implementation of the kernel is proven correct with respect to a functional
+A implementation in C of the kernel is proven correct with respect to a functional
 implementation modeled in the Isabelle/HOL theorem prover, and the authors have
 proven this model correctly enforces security policies including information
-flow control, integrity and confidentiality\,\cite{klein2009sel4}.
+flow control \GH{information flow control n'est pas une politique, c'est un mécanisme permettant de garantir une politique (intégrité et ou confidentialité), par exemple exprimée sous forme de propriété de non interference}, integrity and confidentiality\,\cite{klein2009sel4}.
 %
-In practice, the hardware model focus on \ac{mmu}, cache and interrupt handling,
-and in large parts the exact behavior of hardware devices is left
+In practice, the hardware model focus on \ac{mmu}, cache and interrupt handling.
+In large parts the exact behavior of hardware devices is left
 non-deterministic, in order to reduce the assumptions made by the model about
 the hardware.
 %
@@ -808,8 +808,7 @@ the model states.
 For instance, it includes various tasks that the hypervisor must carry out, such
 as scheduling the guests OS, hypercalls handling, or memory management.
 %
-Certain actions also witness the execution of guests, for instance when the
-currently running OS reads from or writes to memory.
+Certain actions also witness the execution of guests, for instance when the executing guest OS reads from or writes to memory.
 %
 The resulting project, called VirtCert and implemented in the Coq theorem
 prover, is fairly large, with over 50,000 lines of code.
@@ -820,14 +819,14 @@ from a page it does not own) up to non-interference variants including
 protection against cache-timing attacks, notoriously harder to reason with.
 %
 However, the model combines hardware and software components behavior and we
-would have to make significant changes prior to using it.
+would have to make significant changes prior to using it. \GH{pas d'autres limitation? Ca fait un peu léger. Peut-être que le modèle est trop spécifique aux hyperviseurs?}
 
-\paragraph{Other Hardware Architecture Models.}
+\paragraph{Models for Other Hardware Architectures.}
 %
 The x86 architecture is not the only hardware architecture which has been the
 object of formal verification projects.
 %
-We detail two projects targeting two architectures ---ARM and XOM--- because
+We detail two projects targeting ARM and XOM architectures because
 they follow alternative approaches that are of interest with respect to our
 goal.
 
@@ -941,6 +940,8 @@ of traces of a model, rather than an additional, idealized model.
 
 \subsection{Conclusion}
 \label{subsec:sota:ltsconclusion}
+\GH{je trouve cette conclusion assez difficile à suivre et un peu capilo tracté. Une conclusion doit être limpide et simplement synthétiser ce qui a été présenté avant. 
+. Je pense qu'il faut faire plus simple avec des phrases courtes. Tu as décidé de t'intéresser à un mécanisme HSE qui illustre bien la problématique des HSE : la SMM. Les modèles existants étant peu adapté a ce mécanisme, tu as décidé d'écrire ton propre modèle, ce qui t'a également permis d'identifier des propriétés intéressantes pour établir un modèle plus général qui puisse être utilisé pour vérifier différents HSE. Concernant l'approche, il te parait intéressant d'utiliser un theorem proover pour plusieurs raisons (xx et yy) même si l'exemple présenté par la suite aurait pu être prouvé à l'aide d'autres approche. }
 
 We face a 'chicken-and-egg' problem:
 %
@@ -993,6 +994,8 @@ theorem prover.
 \section{Compositional Verification}
 \label{section:sota:compsec}
 
+\GH{Tout comme la conclusion précédente, cette introduction est à revoir. Elle manque de clareté. Elle doit être concise}
+
 Our formal theory of \ac{hse} mechanisms makes a clear distinction between
 software components and the underlying hardware architecture which executes
 them.
@@ -1004,21 +1007,21 @@ targeted security policy at all time.
 Our approach is reminiscent of assume-guarantee\,\cite{pnueli1985ag} and
 rely-guarantee\,\cite{jones1983tentative} paradigms, where a component \( C \)
 is proven to enforce a guarantee \( G \) as long as an assumption \( A \) is
-met.
+met. \GH{On ne comprend pas pourquoi tu nous parles subitement de ces deux approches (et pourquoi tu n'en n'a pas parlé dans la section précédente)}
 %
-Compositional reasoning is not limited to reasoning about components in
+Compositional reasoning \GH{c'est quoi? Tu ne l'as pas défini avant} is not limited to reasoning about components in
 isolation, it also allows for verifying their composition.
 %
 If a component \( C' \) is proven to enforce \( A \), then the composition of
 \( C \) and \( C' \) enforces \( G \).
 
-Our second contribution generalizes the key idea of our \ac{hse} mechanisms
-formal theory ---that is specifying requirements and verifying they fulfill
+Our second contribution generalizes the key idea of our formal theory of \ac{hse} mechanisms
+---that is specifying requirements and verifying they fulfill
 their promises--- with compositional reasoning, in order to address the
 challenge posed by the inevitable complexity of a general-purpose hardware
 architecture model.
 %
-Given three components, such that a component \( R \) uses a component \( S \)
+\GH{On est dans l'état de l'art. Pourquoi tu nous parles déjà de ta contribution? Il faut évoquer les problèmes, puis parler des approches de l'état de l'art qui pourrait permettre de résoudre ce problème mais en fait pas tellement. Puis évoquer ta contribution. La tu le fait dans le désordre.}Given three components, such that a component \( R \) uses a component \( S \)
 to operate, and \( S \) uses a third component \( T \), we target a verification
 approach that we summarize as follows.
 
@@ -1046,7 +1049,7 @@ The verification goal is to prove that \( S \) enforce a guarantee for \( R \)
 %
 % note: “cannot but” est l’équivalent anglais de “ne peut que”, que j’aime
 % personnellement beaucoup
-Because \( S \) uses \( T \), such a proof cannot but depend on how \( T \)
+Because \( S \) uses \( T \), such a proof cannot but depend \GH{cannot but depend?} on how \( T \)
 operates.
 %
 We propose to define another pair of assumption and guarantee for \( T \), and
@@ -1072,7 +1075,7 @@ support this approach, with two objectives in particular:
 %
 \begin{inparaenum}[(1)]
 \item we want to use well-established constructions in functional programming
-  communities in order to favor adoption, and
+  communities \GH{pourquoi? Il faut rappeler ici que Galina est un langage fonctionnel. Donc l'aspect fonctionnel t'es imposé par le choix de ton outil. Ca ne transparait pas assez!} in order to favor adoption, and
 \item we want to enable component models to be executable if needed, \emph{e.g.}
   to validate them against concrete implementation or to act as a reference
   implementation.
@@ -1085,9 +1088,10 @@ interacting components (\ref{subsec:sota:ioauto}), and how process algebra
 systems have been used to facilitate the definition of these interactions
 (\ref{subsec:sota:palgebra}).
 %
-We then explain how we take advantage of a functional programming language
+\GH{Il manque une transition avec la suite. On comprend pourquoi tu va nous parler de la composition dans les LTS et de l'algebre de processsus. Mais alors, pourquoi va tu nous parler d'une troisième chose après?}
+We then explain how we take advantage of a functional programming language \GH{encore une fois, tu mélanges la description de ton approche avec l'état de l'art. "how we take advantage" laisse penser que tu décrit ton approche. Il faudrait plutôt dire que ces approches semble intéressantes pour ton problème.}
 paradigm called programs with effects and effect handlers as a foundation for a
-compositional reasoning framework for Coq, drawn from these two approaches and which
+compositional reasoning framework for Coq, drawn from these two approaches \GH{quelles approches?} and which
 addresses our objectives (\ref{subsec:sota:peff}).
 
 \subsection{Labeled Transition Systems and Components Composition}
@@ -1134,7 +1138,7 @@ simultaneously.
   It does not have any output action, which means a door does not interact
   actively with the rest of the system.
   %
-  One possible specification for the \( i^{th} \) door of a airlock system is
+  One possible specification for a door $i$ of an airlock system is
   the following interface automaton:
 
   \begin{center}
@@ -1162,7 +1166,7 @@ simultaneously.
   \end{center}
 
   In addition to two doors, an airlock system needs a controller, whose purpose
-  is to handle requests coming from users and effectively open and close doors
+  is to handle requests coming from users and to effectively open and close doors
   in consequence.
   %
   We consider a slightly different situation than the specification given in
@@ -1248,16 +1252,16 @@ component executes.
 %
 To continue with the airlock system example, the input action ``Request to open
 the first door'' could be associate with the sequence of output actions ``Close
-the second door'' then ``Open the first door''.
+the second door'' then ``Open the first door''. \GH{Cette dernière partie n'est pas très claire. Est-ce une transition vers ce qui suit? Un positionnement de ton approche? Que veux tu dire par "we investigate"?}
 
 \subsection{Process Algebra}
 \label{subsec:sota:palgebra}
 
 Process algebra have been developed to reason about programs executed in
-parallel, and it comes with a proof system to verifying the resulting system.
+parallel. It comes with a proof system to verifying the resulting system. \GH{répétition de "système"}
 %
 In process algebra such as Calculus of Communication
-Systems\,\cite{milner1980ccs} or the Communicating Sequential
+Systems\,\cite{milner1980ccs} or Communicating Sequential
 Processes\,\cite{hoare1978csp}, concurrent threads run in parallel, and
 synchronization is achieved by sending and waiting for messages, as specified by
 a dedicated language.
@@ -1334,7 +1338,7 @@ demonstrate in the following example.
     \end{array}
   \]
 
-  The system, modeled with the process \( \mathrm{System} \) creates the
+  The system, modeled with the process \( \mathrm{System} \), creates the
   channels used by its components to communicate, then starts their concurrent
   executions.
   %
@@ -1421,14 +1425,16 @@ However, and similarly to previous hardware verification researches, the proofs
 focus on properties that are transparent to software components and do not
 require configuration from their part.
 %
-The verification process relies an successive refinement, rather than a
-compositional reasoning based on assume-guarantee paradigm.
+The verification process relies on successive refinements, rather than a
+compositional reasoning based on assume-guarantee paradigm. \GH{et?}
 %
 Besides, {\scshape Kami} targets hardware designers, and the syntax used to
 define modules is heavily inspired by the BlueSpec language.
 %
 On the contrary, we aim to provide a more general-purpose framework, which
 enables compositional reasoning.
+
+\GH{il manque une transition vers la prochaine sous-section.}
 
 \subsection{Programs with Effects and Effect Handlers}
 \label{subsec:sota:peff}
