@@ -629,10 +629,9 @@ Temporal logic formulas are commonly verified thanks to model checkers,
 TLA+\,\cite{lamport2002tla}.
 
 Despite improvements in algorithms, model checkers remains subject to the
-\emph{state explosion problem} \GH{ref sur ce problème?}, which imposes modeling compromises, \emph{e.g.}
-verification of cache coherency protocols with a fixed number of cores and
+\emph{state explosion problem} \GH{ref sur ce problème?}, which imposes modeling compromises. For example, verification of cache coherency protocols with a fixed number of cores and
 address spaces limited in size (\emph{e.g.} in \cite{lie2003xom}, the model only
-considers three cache locations).
+considers three cache locations). \GH{Cette dernière phrase est à revoir, il y a un exemple dans un exemple. Outre que le fait que la phrase n'est pas très élégante, c'est hyper spécifique alors que tu veux illustrer un point asses générique. Tu devrais plutôt donner plusieurs examples assez générique pour donner du poid à ton argument}
 %
 % Other approaches can be used to that end ---for instance Gilles Barthe
 % \emph{et al.} have encoded \( \square \) and \( \Diamond \) in
@@ -644,12 +643,12 @@ traces.
 %
 As a consequence, temporal logic formula can be translated into acceptable
 inputs for SMT solvers, but this can abate the verification results, in
-particular if the chosen maximum length of traces is too low.
+particular if the chosen maximum length of traces is too low. \GH{ref?}
 
 \paragraph{Higher-order Logic.}
 %
 First-order logic quantifiers can only be applied on sets of terms (\emph{e.g.}
-natural numbers, booleans, states of an airlock system).
+natural numbers, booleans, or more complexe structures such as the states of an airlock system).
 %
 Higher-order logic\,\cite{leivant1994hol} does not suffer the same limitation,
 since they allow quantification over sets of sets, functions and predicates.
@@ -661,27 +660,28 @@ Hence, it becomes possible to express statements such as \emph{for all sets with
 Therefore, higher order logic is more expressive than first-order logic, but it
 comes at a cost in terms of automation.
 %
-Interactive theorem provers (\emph{e.g.}  Coq, Isabelle/HOL, or more recently
+Interactive theorem provers (\emph{e.g.}  Coq, Isabelle/HOL, \GH{ref sur Coq, Isabelle et HOL} or more recently
 Lean\,\cite{de2015lean}) are based on higher-order logic.
 
 We leverage a higher-order logic to propose our formal theory of \ac{hse}
 mechanisms, which allows us to reason about high-level properties implying
-\ac{hse} mechanisms, \emph{e.g.} in Section~\ref{subsec:speccert2:coop}, we
+\ac{hse} mechanisms. For example, in Section~\ref{subsec:speccert2:coop} \GH{la référence est cassée}, we
 reason about the composition of two \ac{hse} mechanisms whose only the targeted
 security policies are known ---even the hardware model is left as a parameter of
 the proof.
 %
 To increase our confidence in our results, we systemically wrote our proofs in
 the Coq theorem prover, and we made the resulting projects available under free
-software license\,\cite{letan2016speccertcode,letan2018freespeccode}.
+software license\,\cite{letan2016speccertcode,letan2018freespeccode}. \GH{cette dernière remarque n'a rien à faire dans l'état de l'art}
+
+\GH{je trouve que le choix de Coq mériterait d'être un peu mieux justifié. Pourquoi a-t-on besoin d'une logic d'ordre supérieur. Tu ne le justifie que sur un aspect assez anecdotique de ton travail (la composition des HSE).}
 
 \subsection{Tour of Existing x86 Models}
 \label{subsec:sota:ltsrelated}
 
-To experiment with our approach, we decided to specify the \ac{hse} mechanism
+To experiment with our approach, we decided to focus on the \ac{hse} mechanism
 implemented by the \ac{bios} at runtime to remain isolated from the rest of the
-software stack (Section \ref{sec:usecase:hse}) and verify its correctness with
-the security policy it aims to enforce.
+software stack (Section \ref{sec:usecase:hse}). We specify this mechanism and verify its correctness with the security policy it aims to enforce using Coq.
 %
 We now give an overview of existing x86 models, and justify our choice to
 develop our own model.
