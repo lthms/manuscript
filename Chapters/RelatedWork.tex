@@ -1445,30 +1445,29 @@ with the rest of the system.
 We believe it is reminiscent of the functional programming language problematic
 to model and verify large programs with side-effects.
 %
-These side-effects are often carried out by an outer environment, \emph{e.g.} a
+These side-effects are often carried out by an outer environment. For example, a
 program which reads the content of a file relies on an operating system to
 access the file stored in a hard drive and makes this content available in its
 address space.
 %
 Modeling side effects in pure programming language, such as Haskell or {\scshape
   Gallina}, is usually achieved thanks to
-monads\,\cite{wadler1990comprehending,jones2005io}, but they have a reputation
+monads\,\cite{wadler1990comprehending,jones2005io}. \GH{Dans ce qui suit, tu supposes que tout le monde sait ce que sont les monades. J'en doute. En outre, tu as été super pédagogique avec ce qui précède (et qui est finalement assez éloigné de ton approche) et tu vas très (trop) vite sur la fin, alors que ce sont les travaux les plus proches! Tu pourrais par exemple utiliser ton exemple de air-lock} However, monads have a reputation
 not to compose very well\,\cite{hyland2006combining}, despite constructions such
 as monad transformers\,\cite{liang1995mtl}.
 
-Recently, algebraic effects and effect handlers\,\cite{bauer2015effects} have
+Recently, algebraic effects and effect handlers\,\cite{bauer2015effects} \GH{Idem que pour les monades. Il faudrait expliquer un peu ce que sont les effets algébric et les effect handlers} have
 been proposed to address this limitation, and they have been the object of
 implementations for several significant functional programming languages
-functional languages (\emph{e.g.}  Eff\,\cite{bauer2015effects}, {\scshape
+ (\emph{e.g.}  Eff\,\cite{bauer2015effects}, {\scshape
   Idris}\,\cite{brady2013idris}, or Haskell\,\cite{kiselyov2013extensible}).
 %
 We advocate that an approach based on algebraic effects and effect handlers
-addresses our two objectives: we can leverage the ``do-notation'' ---already
+addresses our two objectives \GH{on a un peu perdu de vue ces deux objectifs. En remontant un peu je m'aperçoit que tu voulais un formalisme bien établis dans la communauté (ok, c'est ce que tu expliques après) et d'une spec exécutable. Tu ne parles pas de ce deuxième point, il me semble}: we can leverage the ``do-notation'' ---already
 used in language such as Haskell\,\cite{haskell13}--- to improve our models
 readability, and the paradigm is now well-established in the functional
 programming language community.
 
-\paragraph{Related Work}
 %
 The \texttt{Coq.io} framework, developed and released by Guillaume Claret
 \emph{et al.}\,\cite{claret2015coqiowww}, is a first step in that direction.
@@ -1526,6 +1525,7 @@ following reasoning:
   language.
 \end{itemize}
 
+\GH{et? Le passage sur la méthode B semble un peu tomber du ciel et tu laisse le lecteur sur sa fin.}
 % The formal framework proposed by Garg \emph{et
 % al.}\,\cite{garg2010compositional} does not suffer this limitation.
 % %
@@ -1547,7 +1547,7 @@ assumptions are met.
 %
 To address the inevitable complexity of a general-purpose hardware architecture
 model, we make an additional step in that direction and verify each hardware
-component in isolation with a similar reasoning.
+component in isolation with a similar reasoning. \GH{on ne comprends pas ce que cet "additional step" apporte par rapport à l'approche initial, tel qu'il est formulé}
 %
 With FreeSpec\,\cite{letan2018freespeccode}, we aim to provide a generic
 compositional reasoning framework for Coq.
@@ -1557,10 +1557,13 @@ effects and effect handlers to model component-based system.
 %
 FreeSpec relies on so-called abstract specification in order to enable a
 verification methodology inspired by the assume-guarantee paradigm similar to
-what Lanoix \emph{et al.} for the B-method\,\cite{lanoix:hal-00105041}.
+what Lanoix \emph{et al.} for the B-method\,\cite{lanoix:hal-00105041} \GH{il manque un verbe à cette proposition}.
 
 \section{Conclusion}
 \label{sec:sota:conclusion}
+\GH{Tu as une sous-section et un section qui se suivent qui portent le même titre (conclusion). Ce n'est pas très élégant, il faudrait modifier un des titres.}
+
+\GH{Je trouve que ta conclusion résume mal l'état de l'art. Tu te focalise trop sur ton approche.}
 
 In this Chapter, we have discussed our two contributions with respect to related
 work.
