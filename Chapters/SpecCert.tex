@@ -10,7 +10,7 @@
 \vspace{1cm}%
 \noindent
 %
-Our first contribution is a theory of \ac{hse} mechanisms, which takes into
+Our first contribution is a theory of \ac{hse} mechanisms which takes into
 account that
 %
 \begin{inparaenum}[(1)]
@@ -56,14 +56,15 @@ mechanism definitions is to enable the reuse of the same hardware model to
 verify the correctness of several \ac{hse} mechanisms.
 %
 Beside, it makes reasoning about \ac{hse} mechanisms composition ---that is, the
-implementation, at the same time, of two \ac{hse} or more mechanisms ---
-possible (\ref{subsec:speccert:compo}).
+implementation, at the same time, of two \ac{hse} mechanisms or more--- possible
+(\ref{subsec:speccert:compo}).
 
 \subsection{Hardware Model}
 \label{subsec:speccert:hardware}
 
 We model a hardware architecture, which can execute different software
-components, as a \ac{lts}.
+components, as a particular \ac{lts} (Definition~\ref{def:sota:lts}) with two
+sets of labels instead of one.
 
 \paragraph{States.}
 %
@@ -79,8 +80,8 @@ These state transformations occur during the system's transitions.
 \paragraph{Transitions.}
 %
 We distinguish between two classes of transitions: the software transitions
-which are direct and foreseeable side effects of the execution of a \ac{cpu}
-instruction and the hardware transitions which are not.
+which are direct and foreseeable side effects of the execution of an instruction
+and the hardware transitions which are not.
 %
 Following the terminology of David Basin \emph{et
   al.}\,\cite{basin2013enforceable}, software transitions are ``controllable'',
@@ -89,7 +90,7 @@ while hardware transitions are only ``observable''.
 We illustrate this definition with the x86 instruction \texttt{mov
   (\%ecx),\%eax}\,\footnote{Written in AT\&T syntax here.}.
 %
-With respect to the semantics of this instruction, a x86 \ac{cpu}:
+With respect to the semantics of this instruction, a x86 core:
 %
 \begin{inparaenum}[(1)]
 \item reads the content of the register \texttt{ecx},
@@ -103,8 +104,8 @@ With respect to the semantics of this instruction, a x86 \ac{cpu}:
   to execute.
 \end{inparaenum}
 %
-The execution of this instruction by a \ac{cpu} may result in several sequences
-of transitions.
+The execution of this instruction by a core may result in several sequences of
+transitions.
 %
 First, the four execution steps described above translate into four software
 transitions.
@@ -113,10 +114,10 @@ Between each of these transitions, a hardware transition can occur.
 %
 For instance, one hardware component can initiate a \ac{dma}.
 %
-Also, if the content of \texttt{ecx} is not a valid address, the \ac{cpu} raises
-an interrupt.
+Also, if the content of \texttt{ecx} is not a valid address, the processor
+raises an interrupt.
 %
-In this scenario, only one software transition occurs ---when the \ac{cpu} reads
+In this scenario, only one software transition occurs ---when the core reads
 the content of \texttt{ecx}--- then the next transition models the interrupt.
 
 \begin{definition}[Hardware Model]
@@ -181,9 +182,9 @@ additional software configuration to enforce security properties.
 For instance, it is legitimate, from a x86 specifications perspective, to enter
 ring 3 mode with a page table which allows for modifying kernel code and data.
 %
-As a consequence, we seek to model \ac{hse} mechanisms as traces subsets, to
-discard traces legitimate from a hardware specification perspective, yet
-dangerous from a security perspective.
+We aim to model \ac{hse} mechanisms as traces subsets, to discard traces
+legitimate from a hardware specification perspective, yet dangerous from a
+security perspective.
 
 \subsection{HSE Mechanisms}
 \label{subsec:speccert:hse}
@@ -240,7 +241,7 @@ For instance, x86 processors protection rings are commonly used to execute
 several software components.
 %
 Ring 0 is dedicated to the operating system, whereas the applications are
-executed when the \ac{cpu} is in ring 3, with a particular page table setup.
+executed by a core is in ring 3, with a particular page table setup.
 
 \begin{definition}[Hardware-Software Mapping]
   \label{def:speccert:hardsoft}
@@ -256,11 +257,9 @@ First, we assume only one software component is executed at a given time by the
 hardware architecture, in order to simplify our definitions.
 %
 We believe dealing with multi-core architectures is possible with the cost of
-additional efforts, \emph{e.g.} by defining a set of identifiers to select a
-particular core.
-%
-It remains to be proven as we have not tackled this challenge during this
-thesis.
+additional efforts ---\emph{e.g.} by defining a set of identifiers to select a
+particular core--- yet it remains to be proven as we have not tackled this
+challenge during this thesis.
 %
 Besides, there are approaches which allow for executing two software components
 using the same ``hardware context'', \emph{e.g.} JavaScript programs of two tabs
@@ -294,7 +293,7 @@ which only constrain trusted software components.
     implement the \ac{hse} mechanism and form its \ac{tcb}.
   %
   \item $\func{context}$ is a hardware-software mapping to determine which
-    software component is currently executed by the \ac{cpu}.
+    software component is currently executed by the core.
   %
   \item $\func{hardware\_req}$ is a predicate on $H$ to distinguish between safe
     hardware configurations and potentially vulnerable ones.
@@ -312,7 +311,7 @@ As a reminder, such mechanism enforces the integrity of the \ac{bios} code
 within the flash memory and is implemented by the \ac{pch}.
 %
 As pictured in Figure~\ref{fig:speccert:flash}, the \ac{pch} acts as a proxy
-between the \ac{cpu} and a collection of peripherals, including the flash
+between the core and a collection of peripherals, including the flash
 memory.
 %
 The \ac{hse} mechanism proceeds as follows:
@@ -327,9 +326,9 @@ The \ac{hse} mechanism proceeds as follows:
 \item When a software component (\emph{e.g.} system software) unlocks the flash
   memory, the \ac{pch} triggers a \ac{smi}.
 %
-\item This forces the \ac{cpu} to enter \ac{smm}.
+\item This forces the core to enter \ac{smm}.
   %
-  By doing so, the \ac{cpu} stops the execution of the software component which
+  By doing so, the core stops the execution of the software component which
   has unlocked the flash memory and starts the execution of the \ac{bios}.
 %
 \item In order to protect the integrity of the flash memory content, the
@@ -337,9 +336,9 @@ The \ac{hse} mechanism proceeds as follows:
   execution of the system software with the \texttt{rsm} assembly instruction.
 \end{enumerate}
 
-Legacy \acp{bios} were probably using this mechanism in order to implement an
-ad-hoc communication channel between the \ac{bios} and the system software
-component, \emph{e.g.} to initiate a \ac{bios} update.
+Legacy \acp{bios} probably used this mechanism in order to implement an ad-hoc
+communication channel between the \ac{bios} and the system software component,
+\emph{e.g.} to initiate a \ac{bios} update.
 %
 The \ac{uefi} standard introduces dedicated protocols to enable communication
 between the \ac{bios} and the system software component, and our understanding
@@ -350,7 +349,7 @@ resume.
 \begin{figure}
   \centering
   \begin{tikzpicture}
-    \node [draw, inner sep=12pt, text badly centered] (CPU) {CPU};%
+    \node [draw, inner sep=12pt, text badly centered] (CPU) {Processor};%
     \node [draw, below=15pt of CPU, inner sep=25pt, text badly centered] (PCH)
     {PCH};%
     \draw (CPU) -- (PCH);%
@@ -372,7 +371,7 @@ resume.
     \draw [dashed] (PCH) -- (PCI);%
   \end{tikzpicture}
 
-  \caption{From the CPU to the flash memory}
+  \caption{From the processor to the flash memory}
   \label{fig:speccert:flash}
 \end{figure}
 
@@ -444,8 +443,8 @@ disposal cannot put the system into an unsafe state.
     $\forall (h, l, h') \in \mathcal{T}(\Sigma)$, $\forall x \not\in T$,
     %
     \[
-      (l \in L_S \wedge \func{context}(h) = x) \Rightarrow \func{software\_req}(h,
-      l)
+      (l \in L_S \wedge \func{context}(h) = x) \Rightarrow
+      \func{software\_req}(h, l)
     \]
   %
   \item $\func{hardware\_req}$ is an invariant with respect to
@@ -601,7 +600,7 @@ to comply with this mechanism.
 
   \begin{proof}
     By definition of $\mathcal{C}(\Delta)$, we know the initial state of the
-    trace satisfies \func{hardware\_req}, and thanks to the second HSE Law, we
+    trace satisfies \func{hardware\_req}, and thanks to the second HSE law, we
     can conclude the state after the first transition also satisfies
     \func{hardware\_req}.
     %
@@ -677,7 +676,7 @@ enforced, but the core does not read its content when it needs it.
     {\small SMRAM} ([yshift=25pt]DRAM.south east);%
   \end{tikzpicture}
 
-  \caption{From the \ac{cpu}'s core to the SMRAM}
+  \caption{From the core to the SMRAM}
   \label{fig:speccert:smram}
 \end{figure}
 
@@ -692,6 +691,17 @@ transpose these definitions to our theory.
   A security policy \( P \) is either a predicate on sets of traces, a predicate
   on traces or a predicate on transitions.
 \end{definition}
+
+In most cases, the security policy is expected to be enforce in all traces of a
+given system, that is \( \mathcal{R}(\Sigma) \).
+%
+However, hardware architectures are unsafe by default, and have to be configured
+by trusted software components in order to enforce a targeted security policy at
+all time.
+%
+As a consequence, the correctness relation of a \ac{hse} mechanism \( \Delta \)
+is expressed with respect to \( \mathcal{C}(\Delta) \) rather than
+\( \mathcal{R}(\Sigma) \).
 
 \begin{definition}[Correct HSE Mechanism]
   A \ac{hse} mechanism $\Delta$ is correct with respect to a security policy $P$
@@ -712,6 +722,10 @@ transpose these definitions to our theory.
   \]
 \end{definition}
 
+A proof that a \ac{hse} mechanism \( \Delta \) is correct with respect to a
+security policy \( P \) rules out the risk of a vulnerability based on the
+hardware features which are part of the scope of the hardware model.
+%
 Verifying that a \ac{hse} mechanism is correct with respect to a security policy
 can be difficult.
 %
@@ -901,7 +915,7 @@ There are obvious scenarios where two \ac{hse} mechanisms \( \Delta_1 \) and
 \( \Delta_2 \) can be doubtlessly considered incompatible.
 %
 For instance, \( \mathcal{C}(\Delta_1 \sqcap \Delta_2) = \emptyset \) would
-means it is not possible to implement both at the same time.
+mean it is not possible to implement both at the same time.
 %
 We anticipate there are other scenarios more unclear, for instance if the set of
 compliant traces \( \mathcal{C}(\Delta_1 \sqcap \Delta_2) \) contains only
@@ -914,13 +928,13 @@ Because we aimed to focused on hardware architecture verification in the context
 of this thesis, we therefore did not investigated further a characterization of
 compatible and incompatible \ac{hse} mechanisms.
 
-%\subsection*{}
+% \subsection*{}
 %
-%In this Section, we introduced our theory, from the definition to one \ac{hse}
-%mechanism, up to how we can reason about compositions of \ac{hse} mechanisms.
+% In this Section, we introduced our theory, from the definition to one \ac{hse}
+% mechanism, up to how we can reason about compositions of \ac{hse} mechanisms.
 %%
-%In the next Section, we give a first example of how we can use our theory with a
-%case study.
+% In the next Section, we give a first example of how we can use our theory with
+% a case study.
 
 \section{Case Study: Code Injection Policy}
 \label{sec:speccert:casestudy}
@@ -936,9 +950,9 @@ vulnerability of a trusted software component program, this condition would
 instantaneously become false and the security policy enforcement would no longer
 be guaranteed, even though the hardware architecture is capable of enforcing it.
 
-A straightforward attack path attackers can leverage is modifying trusted
-software components programs thanks to illegitimate code injection
-(\ref{subsec:speccert:tampering}).
+Therefore, a straightforward attack path attackers can leverage to defeat a
+correct \ac{hse} mechanism is modifying trusted software components programs
+thanks to illegitimate code injection (\ref{subsec:speccert:tampering}).
 %
 In this Section, we aim to illustrate further how our theory can be leveraged in
 order to reason about security enforcement.
@@ -955,7 +969,7 @@ implementation of two \ac{hse} mechanisms
 \subsection{Defining Code Injection}
 \label{subsec:speccert:tampering}
 
-A memory location within a hardware architecture is a container which is able to
+A memory location within a hardware architecture is a container dedicated to
 store data used by software components \emph{e.g.}~a general-purpose register of
 a processor, a \ac{dram} memory cell, etc.
 %
@@ -965,12 +979,16 @@ written this instruction into its memory location.
 %
 To that end, we assign to each memory location a so-called \emph{owner}, such
 that a software component becomes the new owner of a memory location when it
-overwrites its content during a transition.
+overwrites its content during a software transition.
 %
-A hardware model tracks the memory location ownership when the hardware
-architecture state maps each memory location with a software component called
-its \emph{owner}, and transition relation updates this mapping throughout
-traces.
+A hardware model tracks the memory location ownership when
+%
+\begin{inparaenum}[(1)]
+\item the hardware architecture state maps each memory location with a software
+  component called its \emph{owner}, and
+%
+\item its transition relation updates this mapping throughout traces.
+\end{inparaenum}
 %
 By extension, we say a software component owns some data when it owns the memory
 location in which these data are stored.
@@ -988,8 +1006,8 @@ determine the owner of an instruction fetched by the processor in order to be
 decoded and executed.
 %
 \( s \in \func{fetched}_{\Sigma}(h, l) \) means that an instruction owned by $s$
-was fetched in order to be executed by the processor during a transition
-labeled with \( l \) from a state \( h \).
+was fetched in order to be executed by the processor during a transition labeled
+with \( l \) from a state \( h \).
 
 With a hardware-software mapping and an transition-software mapping, we give a
 formal definition of a \textit{code injection}.
@@ -1002,8 +1020,8 @@ formal definition of a \textit{code injection}.
 \begin{definition}[Code Injection]
   \label{def:speccert:tempering}
   A software component $x \in S$ achieves a code injection against another
-  software component $y \in S$ during a transition labeled with $l \in L$ from
-  a state $h \in H$ to a state $h' \in H$, denoted by
+  software component $y \in S$ during a transition labeled with $l \in L$ from a
+  state $h \in H$ to a state $h' \in H$, denoted by
   %
   \[
     h \xrightarrow[x \leadsto y]{l} h'
@@ -1024,8 +1042,8 @@ formal definition of a \textit{code injection}.
 It is important to emphasize that a code injection is not inherently a ``bad
 things.''
 %
-On the contrary, a software component initialization is most of the time the
-result of a code injection.
+A software component initialization is most of the time the result of a code
+injection.
 
 \begin{example}[Application Code Injection]
   When the user of a computer starts a new application, the operating system
@@ -1120,8 +1138,8 @@ particular software stack.
 \end{definition}
 
 Based on Definition~\ref{def:speccert:global}, we can define a code injection
-policy for a typical software stack which comprises the \ac{bios}, an
-operating system and several applications.
+policy for a typical software stack which comprises the \ac{bios}, an operating
+system and \( n \) applications.
 
 \begin{definition}[BIOS-OS-Applications Code Injection Policy]
   \label{definition:speccert:isolation}
@@ -1198,9 +1216,9 @@ one being enforced thanks to a dedicated \ac{hse} mechanism.
   \]
 \end{definition}
 
-Without any knowledge about how \( I_{\mathtt{bios}} \) and
-\( I_{\mathtt{os}} \) are enforced, we can prove they together imply the
-enforcement of \( I \).
+Without any knowledge about the \ac{hse} mechanisms used to enforce
+\( I_{\mathtt{bios}} \) and \( I_{\mathtt{os}} \), we can prove they together
+imply the enforcement of \( I \).
 
 \begin{theorem}[Code Injection Policy Enforcement]
   Given two \ac{hse} mechanisms \( \Delta_{\mathtt{os}} \) and
