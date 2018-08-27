@@ -59,8 +59,8 @@ numerous configurable hardware features is less subject to formal verification.
 The rest of this Chapter proceeds as follows.
 %
 We detail how transition systems have been widely and successfully used in order
-to model and verify hardware and software systems, and where does our 
-approach 
+to model and verify hardware and software systems, and where does our
+approach
 stand with respect to previous work (Section~\ref{sec:sota:formalisms}).
 %
 Then, we introduce and justify our interest in compositional verification
@@ -125,6 +125,7 @@ class of transition systems, characterized by the use of labels to distinguish
 between transitions.
 
 \begin{definition}[Labeled Transition System]
+  \label{def:sota:lts}
   A labeled transition system is a tuple \( \langle S, L, R \rangle \), such
   that \( S \) is a set of states, \( L \) is a set of labels, and
   \( R \subseteq S \times L \times S \) is the transition relation, that is
@@ -133,7 +134,7 @@ between transitions.
 
 Different names have been used to designate labels and labeled
 transitions, \emph{e.g.} input variables\,\cite{cimatti2002nusmv},
-operations\,\cite{jackson2012alloy}, rules\,\cite{murphi}, or 
+operations\,\cite{jackson2012alloy}, rules\,\cite{murphi}, or
 actions\,\cite{barthe2011virtcert1}.
 %
 Although the name changes, the motivation remains to characterize the nature of
@@ -940,7 +941,7 @@ of traces of a model, rather than an additional, idealized model.
 
 \subsection{Conclusion}
 \label{subsec:sota:ltsconclusion}
-\GH{je trouve cette conclusion assez difficile à suivre et un peu capilo tracté. Une conclusion doit être limpide et simplement synthétiser ce qui a été présenté avant. 
+\GH{je trouve cette conclusion assez difficile à suivre et un peu capilo tracté. Une conclusion doit être limpide et simplement synthétiser ce qui a été présenté avant.
 . Je pense qu'il faut faire plus simple avec des phrases courtes. Tu as décidé de t'intéresser à un mécanisme HSE qui illustre bien la problématique des HSE : la SMM. Les modèles existants étant peu adapté a ce mécanisme, tu as décidé d'écrire ton propre modèle, ce qui t'a également permis d'identifier des propriétés intéressantes pour établir un modèle plus général qui puisse être utilisé pour vérifier différents HSE. Concernant l'approche, il te parait intéressant d'utiliser un theorem proover pour plusieurs raisons (xx et yy) même si l'exemple présenté par la suite aurait pu être prouvé à l'aide d'autres approche. }
 
 We face a 'chicken-and-egg' problem:

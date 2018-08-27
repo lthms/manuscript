@@ -54,21 +54,27 @@ $\formatLTS{Minx86}$ is intended to be a minimal model for single core x86-based
 machines and we have used publicly available Intel
 documents\,\cite{intel2013celeron,intel2009mch,intel2014manual} to define it.
 %
-The hardware architecture we are modeling with $\formatLTS{Minx86}$ contains a
-core, a cache, a memory controller, a \ac{dram} controller and a VGA
-controller\,\footnote{A VGA controller is a hardware device which on we can
-  connect a screen. It exposes some memory to the core for communication
-  purposes.} which both expose some memory to the core.
+The hardware architecture we are modeling with $\formatLTS{Minx86}$ matches the
+one depicted in Figure~\ref{fig:speccert:smram} and contains a core, a cache, a
+memory controller, a \ac{dram} controller and a VGA controller\,\footnote{A VGA
+  controller is a hardware device which on we can connect a screen. It exposes
+  some memory to the core for communication purposes.} which both expose some
+memory to the core.
+%
+In its current state of implementation, its scope focuses on the \ac{smm}, but
+{\scshape Minx86} is intended to be incrementally extendable to cover more
+hardware features.
 
-$\formatLTS{Minx86}$ is meant to illustrate how our formalism can be leveraged
-to formally specify and verify a HSE mechanism, and thus is not exhaustive.
+The rest of this Section proceeds as follows.
 %
-\TODO{Le lien de cause à effet entre ces deux phrases n'est pas évident. En
-  outre "a HSE mechanism" est un peu vague. En l'état, ton modèle a été défini
-  pour pouvoir spécifier et vérifier le HSE lié à la SMM. Il vaut mieux être
-  précis dès le début.}
+We give an overview of the {\scshape Minx86} scope (\ref{sec:speccert2:scope}),
+then describe in depth its key components of the LTS, that is its set of states
+(\ref{subsec:speccert2:state}) on the one hand, and its set of labeled
+transitions (\ref{subsec:speccert2:labtrans}) on the other hand.
 %
-In its current state of implementation, its scope focuses on the \ac{smm}.
+Finally, in order to reason about code injection policies
+(Definition~\ref{def:speccert:global}), we define the transition-software
+mapping of {\scshape Minx86} (\ref{subsec:minx86:fetched}).
 
 \subsection{Model Scope}
 \label{sec:speccert2:scope}
@@ -150,14 +156,12 @@ The memory ownership is updated through transitions according to three rules:
 \item When the content of this cache line is written back to a memory cell, the
   new owner of this memory cell is the owner of this cache line.
 %
-\item When the content of a memory location is overwritten during a transition,
-  the software currently executed becomes the new owner of this memory location.
+\item During a software transition whose purpose is to overwrite the content of
+  a memory location, the software component currently executed ---and therefore
+  responsible for the software transition--- becomes the new owner of this
+  memory location.
 %
 \end{enumerate}
-
-\TODO{La nuance entre "written back to the memory" et "content of a memory
-  location is overwritten during a transition " n'est pas très claire. Dans le
-  cas d'un write back, par définition le contenu de la mémoire est modifiés...}
 
 \begin{definition}[\formatLTS{Minx86}]
   \label{def:speccert2:minx86}
@@ -174,13 +178,18 @@ The memory ownership is updated through transitions according to three rules:
   components which form the software stack.
 \end{definition}
 
-\TODO{Suite à notre discussion téléphonique, je comprends que tu n'as pas pu
-  définir avant précisemment context car celui-ci dépend du raffinement de ton
-  approche générique. Mais ici tu devrais pouvoir le définir précisemment (en
-  t'appuyant sur les trois règles citées précédemment. Hors tu ne le fais
-  pas...}
+We emphasize that there is many valid definition of the \func{context} function,
+regarding the verification problem we consider.
+%
+For instance, we need two different definitions of \func{context} whether we
+consider a hypervisor in the software stack or not.
+%
+We do not rely on the concrete definition of \func{context} to implement the
+tracking of memory ownership within {\scshape Minx86}, hence it is left as a
+parameter for the model.
 
 \subsection{Hardware States}
+\label{subsec:speccert2:state}
 
 $H(S)$ is defined as the Cartesian product of the set of states of the core, the
 cache, the memory controller and the memories exposed by both the \ac{dram}
@@ -195,13 +204,20 @@ define them.
 Thus, $H(S)$ is defined as follows:
 %
 \[
-  H(S) \triangleq \left<\ \func{core}: \texttt{Core},\quad\func{cache}:
-    \texttt{Cache}(S),\quad\func{mc}: \texttt{MC},\quad\func{mem}:
-    \texttt{Mem}(S) \ \right>
+  H(S) \triangleq \left<\ \func{core}: \mathtt{Core},\quad\func{cache}:
+    \mathtt{Cache}(S),\quad\func{mc}: \mathtt{MC},\quad\func{mem}:
+    \mathtt{Mem}(S) \ \right>
 \]
-
-\TODO{Pourquoi Cache et Mem sont paramétré par S et pas les autres? Tu devrais
-  l'expliquer brièvement ici}
+%
+\( \mathtt{Cache} \) and \( \mathtt{Mem} \) are parameterized by \( S \) because
+they expose memory locations to the core which can contain instructions to be
+fetched, and to implement the tracking of memory ownership within our model, we
+need to taint the memory locations with their respective owner.
+%
+We do not consider core registers in {\scshape Minx86} yet.
+%
+When we extend our model to that end, we will need to taint them accordingly,
+and \( \mathtt{Core} \) will have to be parameterized by \( S \) too.
 
 \paragraph{Address Spaces}
 %
@@ -236,8 +252,8 @@ constructors\,\footnote{See page \pageref{frontmatter:notations}.}.
 \]
 %
 The maximal address offset (denoted by $\val{max\_addr}$ here) is specific to
-the \ac{cpu} and may vary in time according to its addressing mode (real mode,
-long mode, etc.), therefore we left its value as a parameter of our model.
+the core and may vary in time according to its addressing mode (real mode, long
+mode, etc.), therefore we left its value as a parameter of our model.
 %
 By convenience, we give the same maximum address to each address space.
 
@@ -246,7 +262,7 @@ scattered within the memory locations of the hardware architecture can take.
 
 \paragraph{Core}
 %
-The set of states of the \ac{cpu}'s core is denoted by $\texttt{Core}$.
+The set of states of the core is denoted by $\texttt{Core}$.
 %
 We give a minimal definition of $\texttt{Core}$, with a clear focus on the
 \ac{smm}.
@@ -263,9 +279,8 @@ We give a minimal definition of $\texttt{Core}$, with a clear focus on the
   \right>
 \]
 %
-%
-The boolean $\func{in\_smm}$ is set to $\val{true}$ when the \ac{cpu} is in
-\ac{smm} and to $\val{false}$ otherwise.
+The boolean $\func{in\_smm}$ is set to $\val{true}$ when the core is in \ac{smm}
+and to $\val{false}$ otherwise.
 %
 The physical address $\func{pc}$ models the program counter, a register used to
 store the address of the next instruction to be fetched and executed.
@@ -277,17 +292,21 @@ microprocessors to determine which cache strategy to use for a given \IO, where
 $\texttt{CacheStrat} \triangleq \setshortdef{\val{UC}, \val{WB}}$ is the set of
 the modelled cache strategies.
 %
-The set of states of the \acp{smrr} \TODO{SMRR est noté ici en majuscule mais la
-  variable censé les modélisé est en minuscule.} is denoted $\texttt{Smrr}$.
+The set of states of the \acp{smrr} is denoted $\texttt{Smrr}$.
+% \TODO{SMRR est noté ici en majuscule mais la variable censé les modélisé est
+% en minuscule.}
+%
+% Thomas : Ça ne me pose personnellement pas de problème, l'un est un acronyme
+% et l’autre une variable justement.
 %
 \[
   \texttt{Smrr} \triangleq \langle~\func{range}:
   \powerset(\texttt{PhysAddr}),\quad\func{strat}: \texttt{CacheStrat}~\rangle
 \]
 %
-The set of physical addresses $\func{range}$ tells the \ac{cpu} the location of
-the SMRAM and $\func{strat}$ tells which cache strategy has to be used when the
-\ac{cpu} is in \ac{smm}.
+The set of physical addresses $\func{range}$ tells the core the location of the
+SMRAM and $\func{strat}$ tells which cache strategy has to be used when the core
+is in \ac{smm}.
 
 % which can be available or already used. A cache line already used is tagged
 % with the physical address of its content. For a given physical address, the
@@ -301,7 +320,7 @@ the SMRAM and $\func{strat}$ tells which cache strategy has to be used when the
 %
 Let $\texttt{Index}$ be the set of cache indexes and
 $\func{index} : \texttt{PhysAddr} \rightarrow \texttt{Index}$ the function used
-by the \ac{cpu} to determine which index to use for a given physical address.
+by the core to determine which index to use for a given physical address.
 %
 They are both parameters of our model.
 %
@@ -394,17 +413,22 @@ We model this translation with the function
   %
 \]
 %
-\[
-  \func{dispatch}(\var{mc}, \var{in\_smm}, \var{pa}) \triangleq
-  \begin{cases}
-    \textsc{Vga}(i) & \text{if }\var{in\_smm} = \val{false}\text{, }pa \in
-    \texttt{pSmram}\text{,} \\
-    & \quad\text{ and } \var{mc}.\func{d\_open} = \val{false}  \\
-    \textsc{Dram}(i) & \text{otherwise}
-  \end{cases}
-\]
+\begin{definition}
+  \label{def:speccert2:dispatch}
+
+  The function \func{dispatch} is defined as follows:
+  \[
+    \func{dispatch}(\var{mc}, \var{in\_smm}, \var{pa}) \triangleq
+    \begin{cases}
+      \textsc{Vga}(i) & \text{if }\var{in\_smm} = \val{false}\text{, }pa \in
+      \texttt{pSmram}\text{,} \\
+      & \quad\text{ and } \var{mc}.\func{d\_open} = \val{false}  \\
+      \textsc{Dram}(i) & \text{otherwise}
+    \end{cases}
+  \]
 %
-\qquad\qquad\qquad\qquad\qquad\qquad where $pa = \textsc{Pa}(i)$.
+  \qquad\qquad\qquad\qquad\qquad\qquad where $pa = \textsc{Pa}(i)$.
+\end{definition}
 
 We emphasize that the same physical address can be translated into two different
 hardware addresses for two memory controller states $m$ and $m'$, hence it is
@@ -475,6 +499,7 @@ We write $\texttt{Mem}(S)$ for the set of states of the physical memories.
 % \end{itemize}
 
 \subsection{Transition Labels and Transition Relation}
+\label{subsec:speccert2:labtrans}
 
 We consider two sets of labels to distinguish between software transitions
 (direct, foreseeable consequences of instructions execution, denoted by $L_S$)
@@ -511,12 +536,12 @@ predicate on \( L \times H(S) \times H(S) \), then the transition relation of
       \( \func{Write} \)
       & \( \var{pa} \in \texttt{PhysAddr} \) \newline
         \( v \in \texttt{Val} \)
-      & A \ac{cpu} \IO to write at physical address \( \var{pa} \) the value \(
+      & A core \IO to write at physical address \( \var{pa} \) the value \(
         v \) \\
       \hline
       \( \func{Read} \)
       & $\var{pa} \in \texttt{PhysAddr}$
-      & A \ac{cpu} \IO to read at physical address \( \var{pa} \). \\
+      & A core \IO to read at physical address \( \var{pa} \). \\
       \hline
       \( \func{SetCacheStrat} \)
       & \( \var{pa} \in \texttt{PhysAddr} \) \newline
@@ -529,7 +554,7 @@ predicate on \( L \times H(S) \times H(S) \), then the transition relation of
       \hline
       \( \func{Rsm} \)
       & \centering ---
-      & The \ac{cpu} leaves \ac{smm} \\
+      & The core leaves \ac{smm} \\
       \hline
       \( \func{OpenBitFlip} \)
       & \centering ---
@@ -541,7 +566,7 @@ predicate on \( L \times H(S) \times H(S) \), then the transition relation of
       \hline
       \( \func{NextInstruction} \)
       & \( \var{pa} \in \texttt{PhysAddr} \)
-      & The program counter register of the \ac{cpu} is set to \( \func{pa} \) \\
+      & The program counter register of the core is set to \( \func{pa} \) \\
       \hline
     \end{tabular}
   }
@@ -555,284 +580,366 @@ predicate on \( L \times H(S) \times H(S) \), then the transition relation of
 Table~\ref{tab:speccert2:softlab} lists the labels dedicated to software
 transitions in terms of constructors.
 %
-We model the \ac{cpu} \IOs with \( \func{Read}(\var{pa}) \) and
+We model the core \IOs with \( \func{Read}(\var{pa}) \) and
 \( \func{Write}(\var{pa}) \), the configuration of the memory controller with
 \( \func{OpenBitFlip} \) and \( \func{LockSmramc} \), the configuration of the
 cache strategy with \( \func{SetCacheStrat}(\var{pa}, \var{strat}) \), the
 configuration of the \ac{smrr} with \( \func{UpdateSmrr}(\var{smrr}) \), the
-exit of the \ac{smm} with $\func{Rsm}$, and the update of the \ac{cpu} program
+exit of the \ac{smm} with $\func{Rsm}$, and the update of the core program
 counter register with $\func{NextInstruction}(\var{pa})$.
+
+% As an example, the pre and postconditions of the \func{Write} transitions are
+% formally defined in Figure~\ref{fig:speccert2:softprepost}.
+%%
+% \TODO{Il faut commenter cette figure (et donc, ces définitions formelles)}
+%%
+% They are presented under the following form:
+%%
+% \begin{prooftree}
+%   \AxiomC{\func{pre}(l, h)}%
+%   \AxiomC{\func{post}(l, h, h')}%
+%   \BinaryInfC{\( h \xrightarrow[\func{context}]{l} h' \)}%
+% \end{prooftree}
+
+We now give description of the pre and postconditions for each label.
 %
-As an example, the pre and postconditions of the \func{Write} transitions are
-formally defined in Figure~\ref{fig:speccert2:softprepost}.
+The interested readers can refer to the Coq
+development\,\cite{letan2016speccertcode} in case they want to review their
+definitions.
 %
-\TODO{Il faut commenter cette figure (et donc, ces définitions formelles)}
+% \TODO{Je trouve cette dernière phrase un peu maladroite. En outre, le code Coq
+% ne fait pas parti de la thèse. Peut-être cela serait-il pertinent de mettre
+% toutes les définitions formelles en annexes sous forme textuelle et rappeler
+% que ces définitions sont également disponibles dans le code Coq (dans tel
+% fichier). En tout cas, donner seulement un exemple de définition formelle dans
+% le coeur du manuscrit me semble la bonne stratégie. Par contre, renvoyer le
+% lecteur au code Coq pour les autres me semble un peu limite}
+
+% \begin{figure}[p]
+%   {\small
+%   \begin{prooftree}
+%     \AxiomC{%
+%     \(
+%     \begin{array}{l}
+%          h.\func{core}.\func{strat}(\var{pa}) = \val{WB} \\
+%          \wedge~\func{cache\_hit}(h.\func{cache}, \var{pa}) \\
+%          \wedge~\var{pa} \not\in h.\func{smrr}.\func{range}
+%        \end{array}
+%        \) }%
+%        \AxiomC{%
+%        \( h' = h \left\{ \func{cache}(\func{index}(\var{pa})) \leftarrow
+%          h.\func{cache}(\func{index}(\var{pa}))\left\{
+%            \begin{array}{c}
+%              \func{content} \leftarrow v, \\
+%              \func{dirty} \leftarrow \val{true}, \\
+%              \func{owner} \leftarrow \func{context}(h)
+%            \end{array}
+%          \right\} \right\} \) }%
+%        \BinaryInfC{%
+%        \( h \xrightarrow[\func{context}]{\func{Write}(\var{pa}, v)} h' \) }
+%      \end{prooftree}
 %
-They are presented under the following form:
+%    \begin{prooftree}
+%      \AxiomC{%
+%      \(
+%      \begin{array}{l}
+%          h.\func{core}.\func{strat}(\var{pa}) = \val{WB} \\
+%          \wedge~\neg~\func{cache\_hit}(h.\func{cache}, \var{pa}) \\
+%          \wedge~\var{pa} \not\in h.\func{smrr}.\func{range}
+%        \end{array}
+%        \) }%
+%        \AxiomC{%
+%        \(
+%        \begin{array}{l}
+%          \text{let } \var{ha} = \func{dispatch}(h.\func{mc}, h.\func{in\_smm},
+%          \var{pa}) \\
+%          \text{let } \var{i} = \func{index}(\var{pa}) \\
+%          h' = h \left\{
+%          \begin{array}{c}
+%            \func{mem}(\var{ha})
+%            \leftarrow \left<
+%            \begin{array}{c}
+%              \func{content} = h.\func{cache}(i).\func{content}, \\
+%              \func{owner} = h.\func{cache}(i).\func{owner} \\
+%            \end{array}
+%            \right>, \\
+%            \func{cache}(i) \leftarrow \left<
+%            \begin{array}{c}
+%              \func{content} = v, \func{tag} = \var{pa}, \\
+%              \func{owner} = \func{context}(h), \func{dirty} = \val{true}
+%            \end{array}
+%            \right>
+%          \end{array}
+%          \right\}
+%        \end{array}
+%        \) }%
+%        \BinaryInfC{%
+%        \( h \xrightarrow[\func{context}]{\func{Write}(\var{pa}, v)} h' \) }
+%      \end{prooftree}
 %
-\begin{prooftree}
-  \AxiomC{\func{pre}(l, h)}%
-  \AxiomC{\func{post}(l, h, h')}%
-  \BinaryInfC{\( h \xrightarrow[\func{context}]{l} h' \)}%
-\end{prooftree}
+%    \begin{prooftree}
+%      \AxiomC{%
+%      \(
+%      \begin{array}{l}
+%          h.\func{core}.\func{smrr}.\func{strat} = \val{WB} \\
+%          \wedge~\func{cache\_hit}(h.\func{cache}, \var{pa}) \\
+%          \wedge~\var{pa} \in h.\func{smrr}.\func{range} \\
+%          \wedge~h.\func{core}.\func{in\_smm} = \val{true}
+%        \end{array}
+%        \) }%
+%        \AxiomC{%
+%        \( h' = h \left\{ \func{cache}(\func{index}(\var{pa})) \leftarrow
+%          h.\func{cache}(\func{index}(\var{pa}))\left\{
+%            \begin{array}{c}
+%              \func{content} \leftarrow v, \\
+%              \func{dirty} \leftarrow \val{true}, \\
+%              \func{owner} \leftarrow \func{context}(h)
+%            \end{array}
+%          \right\} \right\} \) }%
+%        \BinaryInfC{%
+%        \( h \xrightarrow[\func{context}]{\func{Write}(\var{pa}, v)} h' \) }
+%      \end{prooftree}
 %
-For the remainder, we give a informal description of the pre and postconditions.
+%    \begin{prooftree}
+%      \AxiomC{%
+%      \(
+%      \begin{array}{l}
+%          h.\func{core}.\func{smrr}.\func{strat} = \val{WB} \\
+%          \wedge~\neg~\func{cache\_hit}(h.\func{cache}, \var{pa}) \\
+%          \wedge~\var{pa} \in h.\func{smrr}.\func{range} \\
+%          \wedge~h.\func{core}.\func{in\_smm} = \val{true}
+%        \end{array}
+%        \) }%
+%        \AxiomC{%
+%        \(
+%        \begin{array}{l}
+%          \text{let } \var{ha} = \func{dispatch}(h.\func{mc}, h.\func{in\_smm},
+%          \var{pa}) \\
+%          \text{let } \var{i} = \func{index}(\var{pa}) \\
+%          h' = h \left\{
+%          \begin{array}{c}
+%            \func{mem}(\var{ha})
+%            \leftarrow \left<
+%            \begin{array}{c}
+%              \func{content} = h.\func{cache}(i).\func{content}, \\
+%              \func{owner} = h.\func{cache}(i).\func{owner} \\
+%            \end{array}
+%            \right>, \\
+%            \func{cache}(i) \leftarrow \left<
+%            \begin{array}{c}
+%              \func{content} = v, \func{tag} = \var{pa}, \\
+%              \func{owner} = \func{context}(h), \func{dirty} = \val{true}
+%            \end{array}
+%            \right>
+%          \end{array}
+%          \right\}
+%        \end{array}
+%        \) }%
+%        \BinaryInfC{%
+%        \( h \xrightarrow[\func{context}]{\func{Write}(\var{pa}, v)} h' \) }
+%      \end{prooftree}
 %
-The interested readers can always refer to the Coq development in case they want
-to review their definitions.
+%    \begin{prooftree}
+%      \AxiomC{%
+%      \(
+%      \begin{array}{l}
+%          h.\func{core}.\func{strat}(\var{pa}) = \val{UC} \\
+%          \wedge~\var{pa} \not\in h.\func{smrr}.\func{range}
+%        \end{array}
+%        \) }%
+%        \AxiomC{%
+%        \(
+%        \begin{array}{l}
+%          \text{let } \var{ha} = \func{dispatch}(h.\func{mc}, h.\func{in\_smm},
+%          \var{pa}) \\
+%          h' = h \left\{
+%          \begin{array}{c}
+%            \func{mem}(\var{ha})
+%            \leftarrow \left<
+%            \begin{array}{c}
+%              \func{content} = v, \\
+%              \func{owner} = \func{context}(h) \\
+%            \end{array}
+%            \right>
+%          \end{array}
+%          \right\}
+%        \end{array}
+%        \) }%
+%        \BinaryInfC{%
+%        \( h \xrightarrow[\func{context}]{\func{Write}(\var{pa}, v)} h' \) }
+%      \end{prooftree}
 %
-\TODO{Je trouve cette dernière phrase un peu maladroite. En outre, le code Coq
-  ne fait pas parti de la thèse. Peut-être cela serait-il pertinent de mettre
-  toutes les définitions formelles en annexes sous forme textuelle et rappeler
-  que ces définitions sont également disponibles dans le code Coq (dans tel
-  fichier). En tout cas, donner seulement un exemple de définition formelle dans
-  le coeur du manuscrit me semble la bonne stratégie. Par contre, renvoyer le
-  lecteur au code Coq pour les autres me semble un peu limite}
-
-\begin{figure}[p]
-  {\small
-    \begin{prooftree}
-      \AxiomC{%
-        \(
-        \begin{array}{l}
-          h.\func{core}.\func{strat}(\var{pa}) = \val{WB} \\
-          \wedge~\func{cache\_hit}(h.\func{cache}, \var{pa}) \\
-          \wedge~\var{pa} \not\in h.\func{smrr}.\func{range}
-        \end{array}
-        \) }%
-      \AxiomC{%
-        \( h' = h \left\{ \func{cache}(\func{index}(\var{pa})) \leftarrow
-          h.\func{cache}(\func{index}(\var{pa}))\left\{
-            \begin{array}{c}
-              \func{content} \leftarrow v, \\
-              \func{dirty} \leftarrow \val{true}
-            \end{array}
-          \right\} \right\} \) }%
-      \BinaryInfC{%
-        \( h \xrightarrow[\func{context}]{\func{Write}(\var{pa}, v)} h' \) }
-    \end{prooftree}
-
-    \begin{prooftree}
-      \AxiomC{%
-        \(
-        \begin{array}{l}
-          h.\func{core}.\func{strat}(\var{pa}) = \val{WB} \\
-          \wedge~\neg~\func{cache\_hit}(h.\func{cache}, \var{pa}) \\
-          \wedge~\var{pa} \not\in h.\func{smrr}.\func{range}
-        \end{array}
-        \) }%
-      \AxiomC{%
-        \(
-        \begin{array}{l}
-          \text{let } \var{ha} = \func{dispatch}(h.\func{mc}, h.\func{in\_smm},
-          \var{pa}) \\
-          \text{let } \var{i} = \func{index}(\var{pa}) \\
-          h' = h \left\{
-          \begin{array}{c}
-            \func{mem}(\var{ha})
-            \leftarrow \left<
-            \begin{array}{c}
-              \func{content} = h.\func{cache}(i).\func{content}, \\
-              \func{owner} = h.\func{cache}(i).\func{owner} \\
-            \end{array}
-            \right>, \\
-            \func{cache}(i) \leftarrow \left<
-            \begin{array}{c}
-              \func{content} = v, \func{tag} = \var{pa}, \\
-              \func{owner} = \func{context}(h), \func{dirty} = \val{true}
-            \end{array}
-            \right>
-          \end{array}
-          \right\}
-        \end{array}
-        \) }%
-      \BinaryInfC{%
-        \( h \xrightarrow[\func{context}]{\func{Write}(\var{pa}, v)} h' \) }
-    \end{prooftree}
-
-    \begin{prooftree}
-      \AxiomC{%
-        \(
-        \begin{array}{l}
-          h.\func{core}.\func{smrr}.\func{strat} = \val{WB} \\
-          \wedge~\func{cache\_hit}(h.\func{cache}, \var{pa}) \\
-          \wedge~\var{pa} \in h.\func{smrr}.\func{range} \\
-          \wedge~h.\func{core}.\func{in\_smm} = \val{true}
-        \end{array}
-        \) }%
-      \AxiomC{%
-        \( h' = h \left\{ \func{cache}(\func{index}(\var{pa})) \leftarrow
-          h.\func{cache}(\func{index}(\var{pa}))\left\{
-            \begin{array}{c}
-              \func{content} \leftarrow v, \\
-              \func{dirty} \leftarrow \val{true}
-            \end{array}
-          \right\} \right\} \) }%
-      \BinaryInfC{%
-        \( h \xrightarrow[\func{context}]{\func{Write}(\var{pa}, v)} h' \) }
-    \end{prooftree}
-
-    \begin{prooftree}
-      \AxiomC{%
-        \(
-        \begin{array}{l}
-          h.\func{core}.\func{smrr}.\func{strat} = \val{WB} \\
-          \wedge~\neg~\func{cache\_hit}(h.\func{cache}, \var{pa}) \\
-          \wedge~\var{pa} \in h.\func{smrr}.\func{range} \\
-          \wedge~h.\func{core}.\func{in\_smm} = \val{true}
-        \end{array}
-        \) }%
-      \AxiomC{%
-        \(
-        \begin{array}{l}
-          \text{let } \var{ha} = \func{dispatch}(h.\func{mc}, h.\func{in\_smm},
-          \var{pa}) \\
-          \text{let } \var{i} = \func{index}(\var{pa}) \\
-          h' = h \left\{
-          \begin{array}{c}
-            \func{mem}(\var{ha})
-            \leftarrow \left<
-            \begin{array}{c}
-              \func{content} = h.\func{cache}(i).\func{content}, \\
-              \func{owner} = h.\func{cache}(i).\func{owner} \\
-            \end{array}
-            \right>, \\
-            \func{cache}(i) \leftarrow \left<
-            \begin{array}{c}
-              \func{content} = v, \func{tag} = \var{pa}, \\
-              \func{owner} = \func{context}(h), \func{dirty} = \val{true}
-            \end{array}
-            \right>
-          \end{array}
-          \right\}
-        \end{array}
-        \) }%
-      \BinaryInfC{%
-        \( h \xrightarrow[\func{context}]{\func{Write}(\var{pa}, v)} h' \) }
-    \end{prooftree}
-
-    \begin{prooftree}
-      \AxiomC{%
-        \(
-        \begin{array}{l}
-          h.\func{core}.\func{strat}(\var{pa}) = \val{UC} \\
-          \wedge~\var{pa} \not\in h.\func{smrr}.\func{range}
-        \end{array}
-        \) }%
-      \AxiomC{%
-        \(
-        \begin{array}{l}
-          \text{let } \var{ha} = \func{dispatch}(h.\func{mc}, h.\func{in\_smm},
-          \var{pa}) \\
-          h' = h \left\{
-          \begin{array}{c}
-            \func{mem}(\var{ha})
-            \leftarrow \left<
-            \begin{array}{c}
-              \func{content} = v, \\
-              \func{owner} = \func{context}(h) \\
-            \end{array}
-            \right>
-          \end{array}
-          \right\}
-        \end{array}
-        \) }%
-      \BinaryInfC{%
-        \( h \xrightarrow[\func{context}]{\func{Write}(\var{pa}, v)} h' \) }
-    \end{prooftree}
-
-    \begin{prooftree}
-      \AxiomC{%
-        \(
-        \begin{array}{l}
-          h.\func{core}.\func{smrr}.\func{strat} = \val{UC} \\
-          \wedge~\var{pa} \in h.\func{smrr}.\func{range} \\
-          \wedge~h.\func{core}.\func{in\_smm} = \val{true}
-        \end{array}
-        \) }%
-      \AxiomC{%
-        \(
-        \begin{array}{l}
-          \text{let } \var{ha} = \func{dispatch}(h.\func{mc}, h.\func{in\_smm},
-          \var{pa}) \\
-          h' = h \left\{
-          \begin{array}{c}
-            \func{mem}(\var{ha})
-            \leftarrow \left<
-            \begin{array}{c}
-              \func{content} = v, \\
-              \func{owner} = \func{context}(h) \\
-            \end{array}
-            \right>
-          \end{array}
-          \right\}
-        \end{array}
-        \) }%
-      \BinaryInfC{%
-        \( h \xrightarrow[\func{context}]{\func{Write}(\var{pa}, v)} h' \) }
-    \end{prooftree}
-
-    \begin{prooftree}
-      \AxiomC{%
-        \(
-        \begin{array}{l}
-          \var{pa} \in h.\func{smrr}.\func{range} \\
-          \wedge~h.\func{core}.\func{in\_smm} = \val{false}
-        \end{array}
-        \) }%
-      \AxiomC{%
-        \( h' = h \) }%
-      \BinaryInfC{%
-        \( h \xrightarrow[\func{context}]{\func{Write}(\var{pa}, v)} h' \) }
-    \end{prooftree}
-  }
-
-  \caption{Pre and postconditions for {\scshape Minx86} \( \func{Write} \)
-    transitions}
-  \label{fig:speccert2:softprepost}
-\end{figure}
-
-A software component can always read and write at any physical address.
+%    \begin{prooftree}
+%      \AxiomC{%
+%      \(
+%      \begin{array}{l}
+%          h.\func{core}.\func{smrr}.\func{strat} = \val{UC} \\
+%          \wedge~\var{pa} \in h.\func{smrr}.\func{range} \\
+%          \wedge~h.\func{core}.\func{in\_smm} = \val{true}
+%        \end{array}
+%        \) }%
+%        \AxiomC{%
+%        \(
+%        \begin{array}{l}
+%          \text{let } \var{ha} = \func{dispatch}(h.\func{mc}, h.\func{in\_smm},
+%          \var{pa}) \\
+%          h' = h \left\{
+%          \begin{array}{c}
+%            \func{mem}(\var{ha})
+%            \leftarrow \left<
+%            \begin{array}{c}
+%              \func{content} = v, \\
+%              \func{owner} = \func{context}(h) \\
+%            \end{array}
+%            \right>
+%          \end{array}
+%          \right\}
+%        \end{array}
+%        \) }%
+%        \BinaryInfC{%
+%        \( h \xrightarrow[\func{context}]{\func{Write}(\var{pa}, v)} h' \) }
+%      \end{prooftree}
 %
-\TODO{Cette phrase est un peu ambigu. On pourrait comprendre que n'importe quel
-  softare peut lire n'importe quelle adresse physique. En pratique ce n'est pas
-  le cas car un mécanisme de mémoire virtuelle, utilisant la pagination et ou la
-  segmentation, va s'interposer et empêcher la lecture de certaines adresses
-  physique. Par contre, une fois cette traduction effectuée, rien n'empêche la
-  lecture d'une adresse physique (le MC?). Il faudrait le rappeler ici.}
+%    \begin{prooftree}
+%      \AxiomC{%
+%      \(
+%      \begin{array}{l}
+%          \var{pa} \in h.\func{smrr}.\func{range} \\
+%          \wedge~h.\func{core}.\func{in\_smm} = \val{false}
+%        \end{array}
+%        \) }%
+%        \AxiomC{%
+%        \( h' = h \) }%
+%        \BinaryInfC{%
+%        \( h \xrightarrow[\func{context}]{\func{Write}(\var{pa}, v)} h' \) }
+%      \end{prooftree}
+%    }
+%
+%      \caption{Pre and postconditions for {\scshape Minx86} \( \func{Write} \)
+%      transitions}
+%      \label{fig:speccert2:softprepost}
+%    \end{figure}
+
+Because the pagination and segmentation mechanisms are outside of the current
+scope of {\scshape Minx86}, we consider that a core can always read and write at
+any physical address.
 %
 As a consequence, the precondition for \( \func{Read}(\var{pa}) \) and
 \( \func{Write}(\var{pa}) \) always holds true.
 %
-The postcondition for \( \func{Read}(\var{pa}) \) and
-\( \func{Write}(\var{pa}) \) requires the memory content and ownership to be
-updated according to the update of the memory and cache states.
+The postconditions for \( \func{Read}(\var{pa}) \) and
+\( \func{Write}(\var{pa}, v) \) takes into account
 %
-\TODO{En l'absence de plus de détail (formalisme), difficile de comprendre
-  précisemment cette dernière phrase}
+\begin{inparaenum}[(1)]
+\item the cache strategy configured for the address \( pa \),
+\item the state of the cache line associated to the index
+  \( i = \func{index}(pa) \)
+\item whether \( pa \) belongs to the SMRAM or not,
+\item whether the core is in \ac{smm} or not,
+\item whether the \texttt{D\_OPEN} bit of the \texttt{SMRAMC} register is set or
+  not,
+\end{inparaenum}
 %
-The memory controller enforces a simple access control to protect the
-SMRAM content in the DRAM memory by forwarding the related \IO to the VGA
-controller when the \ac{cpu} is not in \ac{smm}.
+in order to determine which memory locations are updated and modify their
+respective owner accordingly.
 %
-This mecanism is modelled by the \func{dispatch} function.
+We discuss two specific cases of a transition labeled
+\( \func{Write}(v, \func{pa}) \) from a state \( h \) to a state \( h' \) in
+order to illustrate the definition of the postcondition predicate:
 %
-To determine the owner of the memory location which sees its content overridden
-during a state transformation, the postcondition uses the hardware-software
-mapping passed as a parameter of {\scshape Minx86}.
-%
-\TODO{Idem remarque précédente. Difiicile de comprendre ce que tu veux dire sans
-  le modèle explicite sous les yeux.}
+\begin{enumerate}
+\item If the cache strategy for the address \( \var{pa} \) is set to
+  \( \mathtt{WB} \), the content of this address is not currently cached by the
+  processor, the cache line indexed by \( i = \func{index}(pa) \) is marked as
+  ``dirty'', and \( \var{pa} \) does not fall in the range specified by the core
+  SMRR, that is
+  %
+  \[
+    h.\func{core}.\func{strat}(\var{pa}) = \mathtt{WB} \wedge \neg
+    \func{cache\_miss}(h.\func{cache}, \var{pa}) \wedge \var{pa} \not\in
+    h.\func{smrr}.\func{range} \wedge h.\func{cache}(i).\func{dirty} =
+    \mathtt{true}
+  \]
+  %
+  then the content of the cache line is written back to memory, and the cache
+  line is updated with \( v \) as its new content, \( context(h) \) as its new
+  owner, \( pa \) as its new tag and its dirty bit is set.
+  %
+  For this specific case, with
+  \( \var{ha} = \func{dispatch}(h.\func{mc}, h.\func{in\_smm},
+  h.\func{cache}(i).\func{tag}) \), the postcondition is
+  %
+  \[
+    \begin{array}{l}
+      h' = h \left\{
+      \begin{array}{c}
+        \func{mem}(\var{ha})
+        \leftarrow \left<
+        \begin{array}{c}
+          \func{content} = h.\func{cache}(i).\func{content}, \\
+          \func{owner} = h.\func{cache}(i).\func{owner} \\
+        \end{array}
+        \right>, \\
+        \func{cache}(i) \leftarrow \left<
+        \begin{array}{c}
+          \func{content} = v, \func{tag} = \var{pa}, \\
+          \func{owner} = \func{context}(h), \func{dirty} = \val{true}
+        \end{array}
+        \right>
+      \end{array}
+      \right\}
+    \end{array}
+  \]
+  %
+  Note that the same scenario applies if \( \var{pa} \) belongs to the range
+  specified by the core SMRR, and the cache strategy specified by the SMRR is
+  \( \mathtt{WB} \).
+  %
+\item If we consider a similar case, but this time the address \( \var{pa} \) is
+  already present inside the cache, then only the cache is updated.
+  %
+  The new owner of the selected cache line is the software component currently
+  executed by the core, its new content is \( v \) and its dirty bit is set,
+  while the tag of the cache line remains untouched.
+  %
+  In this second scenario, the postcondition is
+  %
+  \[
+    \begin{array}{l}
+      h' = h \left\{
+      \begin{array}{c}
+        \func{cache}(i) \leftarrow h.\func{cache}(i) \left\{
+        \begin{array}{c}
+          \func{content} = v, \\
+          \func{owner} = \func{context}(h),\\
+          \func{dirty} = \val{true}
+        \end{array}
+        \right\}
+      \end{array}
+      \right\}
+    \end{array}
+  \]
+\end{enumerate}
 
 A software component can always update the cache strategy used for an \IO.
 %
-The postcondition for \( \func{SetCacheStrat}(pa,strat) \) requires only the
-cache strategy setting for this physical address $\var{pa}$ to change.
+The postcondition for \( \func{SetCacheStrat}(\var{pa}, \func{strat}) \)
+requires only the cache strategy setting for this physical address $\var{pa}$ to
+change. %, that is
 %
-The precondition for \( \func{UpdateSmrr} \) requires the \ac{cpu} to be in
-\ac{smm}.
+%\[
+%  h' = h \left\{ \func{core}.\func{strat}(\var{pa}) \leftarrow \var{strat}
+%  \right\}
+%\]
 %
-The postcondition requires the \ac{smrr} of the \ac{cpu} to be updated with the
+The precondition for \( \func{UpdateSmrr} \) requires the core to be in
+\ac{smm}. %, that is
+%
+%\[
+%  h.\func{core}.\func{in\_smm} = \val{true}
+%\]
+%
+The postcondition requires the \ac{smrr} of the core to be updated with the
 correct value, the rest of the hardware architecture state being left unchanged.
 
 A software component can jump to any physical address, that is the precondition
@@ -860,10 +967,10 @@ The postcondition requires the $\texttt{d\_open}$ bit to be unset and the
     & \multicolumn{1}{c}{\scshape Description} \\
     \hline
     \(\func{ReceiveSMI}\)
-    & A \ac{smi} is raised and the \ac{cpu} enters \ac{smm} \\
+    & A \ac{smi} is raised and the core enters \ac{smm} \\
     \hline
     \(\func{Fetch}\)
-    & A \ac{cpu} \IO to fetch the instruction stored at the physical address
+    & A core \IO to fetch the instruction stored at the physical address
       contained in the program counter register \\
     \hline
   \end{tabular}
@@ -894,14 +1001,13 @@ transitions in terms of constructors.
   \label{fig:speccert2:receiveSMI}
 \end{figure}
 
-\func{ReceiveSMI} models a System Management Interrupt being raised and handled
-by the \ac{cpu}.
+\func{ReceiveSMI} models a \ac{smi} being raised and handled by the core.
 %
-Its precondition requires the \ac{cpu} not to be in \ac{smm} because \ac{smm} is
+Its precondition requires the core not to be in \ac{smm} because \ac{smm} is
 non-reentrant.
 %
 The postcondition of \func{ReceiveSMI} requires the program counter to be set to
-$\texttt{SMBASE} + \val{0x8000}$ and the \ac{cpu} is in \ac{smm}.
+$\texttt{SMBASE} + \val{0x8000}$ and the core enters in \ac{smm}.
 %
 Both the pre and postcondition of \func{ReceiveSMI} are formally defined in
 Figure~\ref{fig:speccert2:receiveSMI}.
@@ -910,13 +1016,7 @@ $\func{Fetch}$ models the \IO to fetch the instruction pointed by the program
 counter register.
 %
 As a consequence, the definition of its precondition and postcondition are the
-same as $\func{Read}(\var{pa})$ with $\var{pa}$ being the program register
-value, that is
-%
-\[
-  h \xrightarrow[\func{context}]{\func{Fetch}} h' \triangleq h
-  \xrightarrow[\func{context}]{\func{Read}(h.\func{pc})} h'
-\]
+same as \( \func{Read}(h.\func{core}.\func{pc}) \).
 %
 % We distinguish between \func{Read} and \func{Fetch} because a software
 % component does not always decide the value of the program counter register of
@@ -929,116 +1029,114 @@ value, that is
 % For instance, the value of the program counter is updated during a
 % \func{ReceiveSMI} transition.
 
-\paragraph{Transition-Software Mapping}
-%
+\subsection{Transition-Software Mapping}
+\label{subsec:minx86:fetched}
+
 We define \(\textsc{Minx86}\func{\_fetched}\) a transition-software mapping for
-$\formatLTS{Minx86}$ (Definition~\ref{def:speccert2:transsoft}), to map an
+$\formatLTS{Minx86}$ (Definition~\ref{def:speccert:transsoft}), to map an
 initial state of a transition and the label of this transition with the set of
 software components which own an instruction fetched during this transition.
 %
 In the case of \formatLTS{Minx86}, there is only one event which implies
 fetching instructions: \func{Fetch}.
 %
-Either the instruction is fetched from the cache (in case of cache hit, and with
-respect to the \ac{smrr} and \ac{cpu} cache strategy configuration) or from the
-hardware components memories (\ac{dram} and VGA).
+To define the transition-software mapping in this specific case, we rely on a
+helper function
+\( \func{read\_from\_cache} : H(S) \times \texttt{PhysAddr} \rightarrow \{
+\texttt{true}, \texttt{false} \} \) which returns \texttt{true} if a core will
+read the content of a given physical address from the cache, and \texttt{false}
+otherwise.
 %
-The formal definition of \(\textsc{Minx86}\func{\_fetched}\) is given in
-Figure~\ref{fig:speccert2:fetchedformal}.
+This function is defined as follows:
 %
-\TODO{Un peu rapide. Il faudrait commenter un peu cette définition. En outre,
-  figure est-il un environnement adéquat pour ce genre de définition? (on
-  s'attend à une figure, pas des définitions logiques...). Peut-être faudrait-il
-  définir un environnement adéquat.}
+\[
+  \func{read\_from\_cache}(h, \var{pa}) \triangleq \left\{
+    \begin{array}{ll}
+      \texttt{true} & \text{if }\var{pa} \not\in
+                      h.\func{core}.\func{smrr}.\func{range}\text{, }
+                      h.\func{core}.\func{strat} = \texttt{WB} \\
+                    & \quad\text{and } \func{cache\_hit}(h.cache, \var{pa}) \\
+      \texttt{true} & \text{if }\var{pa} \in
+                      h.\func{core}.\func{smrr}.\func{range}\text{, }
+                      h.\func{core}.\func{smrr}.\func{strat} = \texttt{WB}, \\
+                    & \quad \func{cache\_hit}(h.cache, \var{pa}) \text{ and } h.\func{core}.\func{in\_smm} =
+                      \texttt{true} \\
+      \texttt{false} & \text{otherwise}
+    \end{array}
+  \right.
+\]
+%
+Using the function \func{read\_from\_cache}, we can define the
+transition-software mapping of {\scshape Minx86} as follows:
+%
+\[
+  \textsc{Minx86}\func{\_fetched}(h, l) = \left\{
+    \begin{array}{ll}
+      \emptyset & \text{if } l \neq \func{Fetch} \\
+      \emptyset & \text{if } h.\func{core}.\func{pc} \in
+                  h.\func{core}.\func{smrr}.\func{range} \\
+                & \quad \text{ and }
+                  h.\func{core}.\func{in\_smm} = \texttt{false} \\
+      \{ h.\func{cache}(\func{index}(\var{pc})).\func{owner} \} & \text{where }
+                                                                  \var{pc} =
+                                                                  h.\func{core}.\func{pc}
+                                                                  \text{ and} \\
+                & \quad\text{if }\func{read\_from\_cache}(h, \var{pc})
+                  = \texttt{true} \\
+      \{ h.\func{mem}(\var{ha}).\func{owner} \} & \text{where } \\
+                & \quad\var{ha} =
+                  \func{dispatch}(h.\func{mc},
+                  h.\func{in\_smm}, h.\func{core}.\func{pa})
 
-\begin{figure}
-  \centering \small
-  \begin{prooftree}
-    \AxiomC{\( h.\func{core}.\func{pc} \not\in
-      h.\func{core}.\func{smrr}.\func{range} \)}%
-    \AxiomC{\( h.\func{core}.\func{strat}(h.\func{core}.\func{pc}) = \val{WB}
-      \)}%
-    \AxiomC{\( \func{cache\_hit}(h.\func{cache}, h.\func{core}.\func{pc}) \)}%
-    \TrinaryInfC{\( \textsc{Minx86}\func{\_fetched}(h, \func{Fetch}) =
-      \setshortdef{h.\func{cache}(\func{index}(h.\func{core}.\func{pc})).\func{owner}}
-      \)}
-  \end{prooftree}
+    \end{array}
+  \right.
+\]
+%
+We consider four cases.
+%
+Firstly, an instruction is fetched during a \func{Fetch} transition only, so for
+other transitions, the function returns the empty set.
+%
+Secondly, if a core not in \ac{smm} tries to read the content of a physical
+addresses which belongs to the range specified by its SMRR, the specification
+states that the result of this \IO is a predefined value, hence the function
+returns also the empty set in this case.
+%
+For the two last cases, we based our decision on the \func{read\_from\_cache}
+function to determine the content of the singleton returned by
+\( \textsc{Minx86}\func{\_fetched} \).
 
-  \begin{prooftree}
-    \AxiomC{\( h.\func{core}.\func{pc} \not\in
-      h.\func{core}.\func{smrr}.\func{range} \)}%
-    \AxiomC{\( \neg~\func{cache\_hit}(h.\func{cache}, h.\func{core}.\func{pc})
-      \)}%
-    \BinaryInfC{\( \textsc{Minx86}\func{\_fetched}(h, \func{Fetch}) =
-      \setshortdef{h.\func{mem}(\func{dispatch}(h.\func{mem},
-        h.\func{core}.\func{in\_smm}, \var{pa}))} \)}
-  \end{prooftree}
+\subsection*{}
 
-  \begin{prooftree}
-    \AxiomC{\(
-      \begin{array}{l}
-        h.\func{core}.\func{in\_smm} = \val{true} \\
-        \wedge~ h.\func{core}.\func{pc} \in
-        h.\func{core}.\func{smrr}.\func{range}
-      \end{array}
-      \)}%
-    \AxiomC{\( h.\func{core}.\func{smrr}.\func{strat} = \val{WB} \)}%
-    \AxiomC{\( \func{cache\_hit}(h.\func{cache}, h.\func{core}.\func{pc}) \)}%
-    \TrinaryInfC{\( \textsc{Minx86}\func{\_fetched}(h, \func{Fetch}) =
-      \setshortdef{h.\func{cache}(\func{index}(h.\func{core}.\func{pc})).\func{owner}}
-      \)}
-  \end{prooftree}
-
-  \begin{prooftree}
-    \AxiomC{\( h.\func{core}.\func{pc} \in
-      h.\func{core}.\func{smrr}.\func{range} \)}%
-    \AxiomC{\( h.\func{core}.\func{in\_smm} = \val{true} \)}%
-    \AxiomC{\( \neg~\func{cache\_hit}(h.\func{cache}, h.\func{core}.\func{pc})
-      \)}%
-    \TrinaryInfC{\( \textsc{Minx86}\func{\_fetched}(h, \func{Fetch}) =
-      \setshortdef{h.\func{mem}(\func{dispatch}(h.\func{mem},
-        h.\func{core}.\func{in\_smm}, h.\func{core}.\func{pc})).\func{owner}}
-      \)}
-  \end{prooftree}
-
-  \begin{prooftree}
-    \AxiomC{\( h.\func{core}.\func{pc} \in
-      h.\func{core}.\func{smrr}.\func{range} \)}%
-    \AxiomC{\( h.\func{core}.\func{in\_smm} = \val{false} \)}%
-    \BinaryInfC{\( \textsc{Minx86}\func{\_fetched}(h, \func{Fetch}) = \emptyset
-      \)}
-  \end{prooftree}
-
-  \begin{prooftree}
-    \AxiomC{\( l \neq \func{Fetch} \)}%
-    \UnaryInfC{\( \textsc{Minx86}\func{\_fetched}(h, l) = \emptyset \)}
-  \end{prooftree}
-
-  \caption{Formal definition of \( \textsc{Minx86}\func{\_fetched} \)}
-  \label{fig:speccert2:fetchedformal}
-\end{figure}
+In this Section, we have defined a minimal x86 hardware model we called
+{\scshape Minx86}.
+%
+In its current state, the scope of {\scshape Minx86} is limited to hardware
+features involved in the \ac{hse} mechanism implemented by the \ac{bios} to
+remain isolated from the rest of the software stack at runtime.
+%
+However, we defined {\scshape Minx86} with extensibility in mind.
+%
+Notably, the hardware-software mapping used by the model in order to track
+memory location ownership is left as a parameter, and {\scshape Minx86} could be
+extended to reason about other \ac{hse} mechanisms whose purpose is to enforce a
+code injection policy.
 
 \section{Specifying and Verifying a BIOS HSE Mechanism}
 \label{sec:speccert2:verif}
 
-We consider the execution of the software stack described in
-Example~\ref{example:speccert2:isolation} after the end of the boot sequence,
-when the OS manages the execution of several applications.
+We consider the execution of the software stack made of a \ac{bios}, an
+operating system and \( n \) applications, after the end of the boot sequence.
 %
-Our objective is to give a formal definition of the \ac{hse} mechanism
-implemented by the \ac{bios} (denoted by \( \Delta_{\mathtt{bios}} \)) to remain
-isolated from the rest of the software stack.
-%
-We have formally define this security policy with $I_{\mathtt{bios}}$
-(Definition~\ref{def:speccert:biospol}).
-%
-\( \Delta_{\mathtt{bios}} \) relies on the \ac{smm}, the \ac{smrr} of x86
-\ac{cpu}, and the \texttt{SMRAMC} register of the memory controller.
-%
-\TODO{Il manque une transition avec la suite. Une annonce du plan "local",
-  notamment.}
+In this section, our objective is to give a formal definition of the \ac{hse}
+mechanism implemented by the \ac{bios} (denoted by \( \Delta_{\mathtt{bios}} \))
+to remain isolated from the rest of the software stack
+(\ref{subsec:speccert2:bioshsedef}), and to verify its correctness with respect
+to the \ac{bios} code injection sub-policy \( I_{\mathtt{bios}} \) (Definition~\ref{def:speccert:biospol})
+(\ref{subsec:speccert2:bioshsecorrect}).
 
-\subsection{Defining a Hardware-Software Mapping}
+\subsection{BIOS HSE Definition}
+\label{subsec:speccert2:bioshsedef}
 
 {\scshape Minx86} is parameterized with a hardware-software mapping
 \func{context} (Definition~\ref{def:speccert:hardsoft}).
@@ -1060,13 +1158,13 @@ software stack.
 Therefore, we axiomatize the definition of \func{context} with two rules:
 %
 \begin{description}
-\item [\func{context}-bios:] If the \ac{cpu} is in \ac{smm}, it executes the
+\item [\func{context}-bios:] If the core is in \ac{smm}, it executes the
   \ac{bios}
   \[
     h.\func{in\_smm} = \val{true} \Rightarrow \func{context}(h) = \mathtt{bios}
   \]
-\item [\func{context}-untrusted:] If the \ac{cpu} is not in \ac{smm}, it
-  executes another component of the software stack
+\item [\func{context}-untrusted:] If the core is not in \ac{smm}, it executes
+  another component of the software stack
   \[
     h.\func{in\_smm} = \val{false} \Rightarrow \func{context}(h) \in
     \setshortdef{\mathtt{os}, \mathtt{app}_1, \dots, \mathtt{app}_n}
@@ -1074,10 +1172,8 @@ Therefore, we axiomatize the definition of \func{context} with two rules:
 \end{description}
 
 For the sake of readability, we abusively write
-\( \func{context}(h) = \mathtt{untrusted} \) when the \ac{cpu} executes a
-software component which is not the \ac{bios}.
-
-\subsection{BIOS HSE Definition}
+\( \func{context}(h) = \mathtt{untrusted} \) when the core executes a software
+component which is not the \ac{bios}.
 
 We define $\Delta_{\mathtt{bios}}$ to model the \ac{hse} mechanism applied by
 the \ac{bios}, such that
@@ -1099,7 +1195,7 @@ Given \( h \in H(S) \), we have identified six requirements on states for
 \( h \) to satisfy \func{hardware\_req}.
 %
 \begin{enumerate}
-\item When the \ac{cpu} executes the \ac{smm} code, the program counter register
+\item When the core executes the \ac{smm} code, the program counter register
   value needs to be an address in SMRAM.
   \[
     \func{context}(h) = \mathtt{bios} \Rightarrow h.\func{core}.\func{pc} \in
@@ -1130,7 +1226,7 @@ Given \( h \in H(S) \), we have identified six requirements on states for
   boot sequence code has locked the SMRAMC controller.
   %
   This ensures that an OS cannot set the \texttt{d\_open} bit any longer and
-  only a \ac{cpu} in \ac{smm} can modify the content of the SMRAM.
+  only a core in \ac{smm} can modify the content of the SMRAM.
   \[
     h.\func{mc}.\func{d\_lock} = \val{true}
   \]
@@ -1215,7 +1311,7 @@ For \func{Write} and \func{Read} transitions, the following cases have to be
 considered:
 %
 \begin{itemize}
-\item Whether the \ac{cpu}'s core is in \ac{smm} or not;
+\item Whether the core is in \ac{smm} or not;
 \item Whether the targeted physical address falls into the \ac{smrr} range or
   not;
 \item Which cache strategy to use for this transition;
@@ -1235,6 +1331,7 @@ conclude for \func{hardware\_req} as a whole.
   l'avis à des spécialistes (Yann?)}
 
 \subsection{BIOS HSE Mechanism Correctness}
+\label{subsec:speccert2:bioshsecorrect}
 
 Our objective is to prove that \( \Delta_{\mathtt{bios}} \) is correct with
 respect to \( I_{\mathtt{bios}} \).
@@ -1255,41 +1352,66 @@ is a sufficient condition for
 
 From the security policy perspective, only the \func{Fetch} label is relevant.
 %
-\TODO{Je ne comprends pas cette phrase. Il y a trop d'implicite. Il faut que tu
-  développes un peu ton raisonnement.}
+Indeed, a code injection can only occur when an instruction owned by a software
+components is fetched in order to be executed by a core
+(Definition~\ref{subsec:speccert:tampering}).
 %
-Unfolding the definitions previously introduced in this Chapter and its
-predecessor
+For {\scshape Minx86}, this only happens during transitions labeled by
+\func{Fetch} by definition of \( \textsc{Minx86}\func{\_fetched} \) (see
+Subsection~\ref{subsec:minx86:fetched}).
 %
-\TODO{Arrête d'utiliser des qualificatifs relatifs pour désigner les choses
-  comme "previously introduced" ou "its predecessor". Il y a beaucoup de
-  concepts (définition, théorèmes, etc.) dans ton manuscrit donc à la fin on est
-  perdu! Numérote systématiquement les concepts (déf, etc.) et nomme les
-  explicitement "Unfolding definitions xxx".} leaves us to prove that \TODO{Je
-  n'arrive pas à suivre. Je ne comprend pas pourquoi prouver la correctness se
-  réduit à prouver la formule pour fetch seulement. Il faudrait prendre le temps
-  d'expliquer.}
+\( \func{Fetch} \) is a hardware transition, and therefore is not concerned by
+\func{bios\_req}.
+%
+As a consequence, we can simplify our proof goal as follows:
 %
 \[
   \begin{array}{l}
-    \forall (h, h') \in H(S) \times H(S) \text{ such that } (h, \func{Fetch}, h')
-    \in \mathcal{T}(\textsc{Minx86}(\func{context})), \\
-    \qquad \func{hardware\_req}(h) \wedge h.\func{in\_smm} = \val{true}
-    \Rightarrow \func{fetched}_{\textsc{Minx86}}(h, \func{Fetch}) =
+    \forall (h, h') \in H(S) \times H(S) \text{ such that } h
+    \xrightarrow[\func{context}]{\func{Fetch}} h', \\
+    \qquad \func{hardware\_req}(h)\ \Rightarrow I_{\mathtt{bios}}(h, \func{Fetch}, h')
+  \end{array}
+\]
+%
+We now unfold the definition of \( I_{\mathtt{bios}} \)
+(Definition~\ref{def:speccert:biospol}) and of the code injection
+(Definition~\ref{def:speccert:tempering}), which allows us to simplify further
+our proof goal as follows:
+%
+\[
+  \begin{array}{l}
+    \forall (h, h') \in H(S) \times H(S) \text{ such that } h
+    \xrightarrow[\func{context}]{\func{Fetch}} h', \\
+    \qquad (\func{hardware\_req}(h) \wedge \func{context}(h) = \mathtt{bios})
+    \Rightarrow \textsc{Minx86}\func{\_fetched}(h, \func{Fetch}) =
     \setshortdef{\mathtt{bios}}
   \end{array}
 \]
 %
-Once again, the proof relies on cases enumeration.
+The rest of the proof leverages the definition of \func{hardware\_req}.
 %
-In particular, the requirement 1 constrains the value of the program counter
-register.
+Because of requirements 1., we know that
+\( h.\func{core}.\func{pc} belongs to the \texttt{pSmram} \).
 %
-As a consequence, we know we can rely on the requirements 3 and 4 which
-constrains the ownership of memory location related to the SMRAM.
+By definition of \( \textsc{Minx86}\func{\_fetched} \), we know that we have two
+cases to consider:
 %
-\TODO{Une fois de plus, la présentation de la preuve est un peu rapide et
-  difficile à comprendre sans plus d'élément.}
+\begin{itemize}
+\item The instruction is read from the cache, and therefore
+  %
+  \[
+    \textsc{Minx86}\func{\_fetched}(h, \func{Fetch}) =
+    \setshortdef{h.\func{cache}(\func{index}(h.\func{core}.\func{pc})).\func{owner}}
+  \]
+  %
+  In this context, we can conclude thanks to the requirements 4.
+\item Otherwise, the instruction is read from the underlying memories.
+  %
+  More precisely, by definition \func{dispatch}
+  (Definition~\ref{def:speccert2:dispatch}), we know the instruction is read
+  from the \ac{dram}, and as a consequence the requirements 3. allows us to
+  conclude.
+\end{itemize}
 
 As a side note, we emphasize that these proofs validate the SMRAM cache
 poisoning countermeasure.
