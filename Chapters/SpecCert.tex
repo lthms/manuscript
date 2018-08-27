@@ -19,18 +19,27 @@ account that
 \item hardware features involved in \ac{hse} mechanisms are not safe by default,
   hence the role played by trusted software components to configure them.
 \end{inparaenum}
-
+%
 The rest of this Chapter proceeds as follows.
 %
-\thomasrk[inline]{TODO annonce plan}
+First, we detail how our theory allows for specifying \ac{hse} mechanisms
+against general-purpose hardware models and for verifying that the correct
+implementation of a given \ac{hse} mechanism enables a targeted security policy
+enforcement at all time by the underlying hardware architecture
+(Section~\ref{sec:speccert:theory}).
+%
+Then, we demonstrate how we can take advantage of our theory to reason about the
+enforcement of a so-called code injection policy by means of several \ac{hse}
+mechanisms (Section~\ref{sec:speccert:casestudy}).
 
-For the reader familiar with Coq, we present an implementation of our formalism
+For the reader familiar with Coq, we present an implementation of our theory
 in Appendix~\ref{appendix:speccert}.
 %
-This development comprises machine-checked proofs of the theoretical results
+This development comprises machine-checked proofs of the theorems and lemmas
 that we present throughout this Chapter.
 
 \section{Theory Definition}
+\label{sec:speccert:theory}
 
 We model the hardware architecture as a labeled transition system whose
 sequences of transitions, also called traces, characterize every possible
@@ -46,7 +55,9 @@ Our motivation to separate the model of the hardware architecture and \ac{hse}
 mechanism definitions is to enable the reuse of the same hardware model to
 verify the correctness of several \ac{hse} mechanisms.
 %
-\thomasrk[inline]{TODO annonce plan composition}
+Beside, it makes reasoning about \ac{hse} mechanisms composition ---that is, the
+implementation, at the same time, of two \ac{hse} or more mechanisms ---
+possible (\ref{subsec:speccert:compo}).
 
 \subsection{Hardware Model}
 \label{subsec:speccert:hardware}
@@ -892,6 +903,7 @@ of this thesis, we therefore did not investigated further a characterization of
 compatible and incompatible \ac{hse} mechanisms.
 
 \section{Case Study: Code Injection Policy}
+\label{sec:speccert:casestudy}
 
 A proof of correctness of a given \ac{hse} mechanism in our theory asserts the
 hardware architecture enforces a targeted security policy \emph{if trusted
@@ -955,8 +967,8 @@ With this mapping, specific to a given hardware model, it becomes possible to
 determine the owner of an instruction fetched by the processor in order to be
 decoded and executed.
 %
-\( s \in \func{fetched}_{\Sigma}(h, l) \) means that an instruction owned by
-$s$ was fetched in order to be executed by the processor during a transition
+\( s \in \func{fetched}_{\Sigma}(h, l) \) means that an instruction owned by $s$
+was fetched in order to be executed by the processor during a transition
 labelled with \( l \) from a state \( h \).
 
 With a hardware-software mapping and an transition-software mapping, we give a
