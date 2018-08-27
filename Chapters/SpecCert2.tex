@@ -9,35 +9,34 @@
 \vspace{1cm}%
 \noindent
 %
-In the previous chapter, we have introduced a theory of \ac{hse} mechanisms,
-whose purpose is to be the foundation of a three-step methodology to formally
-specify and verify \ac{hse} mechanisms.
+In Chapter~\ref{chapter:speccert}, we have introduced a theory of \ac{hse}
+mechanisms, whose purpose is to be the foundation of a three-step methodology to
+formally specify and verify \ac{hse} mechanisms.
 %
-We now apply this methodology to specify and verify the \ac{hse} mechanism
-implemented by the \ac{bios} on x86 hardware architecture at runtime and
-described in Section~\ref{sec:usecase:hse}.
+We have also introduced a code injection policy for a software stack made of a
+\ac{bios}, an operating system and \( n \) applications
+(Definition~\ref{definition:speccert:isolation}), and we defined a sub-policy
+which focuses on the \ac{bios} protection (\ref{def:speccert:biospol}).
+%
+In this Chapter, we apply our approach to specify and verify the \ac{hse}
+mechanism implemented by the \ac{bios} on x86 hardware architecture at runtime
+and described in Section~\ref{sec:usecase:hse}.
 %
 The purpose of this \ac{hse} mechanisms is to provide an isolated execution
-environment to the \ac{bios}.
-%
-It relies on the System Management Mode (SMM) and the System Management
-Interrupt (SMI).
+environment to the \ac{bios}, and therefore should enforce the so-called
+\ac{bios} code injection sub-policy.
 
-First, we formally specify the targeted security policy for this \ac{hse}
-mechanism.
+The rest of this Chapter proceeds as follows.
 %
-We take the approach of proposing a generic class of security policies we later
-specialize for our use case (Section~\ref{sec:speccert2:usecase}).
-%
-Then, we define a minimal x86 hardware model we call {\scshape Minx86}, whose
-scope is limited to the hardware features required to express our use case
+First, we define a minimal x86 hardware model we call {\scshape Minx86}, whose
+scope comprises the hardware features required to express our case study
 (Section~\ref{sec:speccert2:minx86}).
 %
-Finally, we give a formal definition of the \ac{hse} mechanism implemented by
-the \ac{bios} at runtime, and show that this definition satisfies the two
-\ac{hse} laws and is correct with respect to the targeted security policy
-previously introduced (Section~\ref{sec:speccert2:verif}).
-
+Then, we give a formal definition of the \ac{hse} mechanism implemented by the
+\ac{bios} at runtime, and show that this definition satisfies the two \ac{hse}
+laws and is correct with respect to the targeted security policy previously
+introduced (Section~\ref{sec:speccert2:verif}).
+%
 The model and proofs described in this Chapter have been implemented using Coq.
 %
 We have released this development as free software in a project called
