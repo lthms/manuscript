@@ -22,18 +22,21 @@ account that
 %
 The rest of this Chapter proceeds as follows.
 %
-First, we detail how our theory allows for specifying \ac{hse} mechanisms
-against general-purpose hardware models and for verifying that the correct
-implementation of a given \ac{hse} mechanism enables a targeted security policy
-enforcement at all time by the underlying hardware architecture
-(Section~\ref{sec:speccert:theory}).
+First, we detail how our theory allows for specifying and verifying \ac{hse}
+mechanisms against general-purpose hardware models, in isolation and in
+composition (Section~\ref{sec:speccert:theory}).
 %
-Then, we demonstrate how we can take advantage of our theory to reason about the
-enforcement of a so-called code injection policy by means of several \ac{hse}
-mechanisms (Section~\ref{sec:speccert:casestudy}).
+To demonstrate how we can reason about composition of \ac{hse} mechanisms, we
+proceed through a case study focused on a so-called code injection policy.
+%
+More precisely, we prove how we can enforce this policy by means of two \ac{hse}
+mechanisms implemented at the same time (Section~\ref{sec:speccert:casestudy}).
+%
+This case study is used as the basis of a more in-depth experiment in the next
+Chapter.
 
-For the reader familiar with Coq, we present an implementation of our theory
-in Appendix~\ref{appendix:speccert}.
+For the reader familiar with Coq, we present an implementation of our theory in
+Appendix~\ref{appendix:speccert}.
 %
 This development comprises machine-checked proofs of the theorems and lemmas
 that we present throughout this Chapter.
@@ -117,8 +120,8 @@ For instance, one hardware component can initiate a \ac{dma}.
 Also, if the content of \texttt{ecx} is not a valid address, the processor
 raises an interrupt.
 %
-In this scenario, only one software transition occurs ---when the core reads
-the content of \texttt{ecx}--- then the next transition models the interrupt.
+In this scenario, only one software transition occurs ---when the core reads the
+content of \texttt{ecx}--- then the next transition models the interrupt.
 
 \begin{definition}[Hardware Model]
   \label{def:speccert:model}
@@ -311,8 +314,7 @@ As a reminder, such mechanism enforces the integrity of the \ac{bios} code
 within the flash memory and is implemented by the \ac{pch}.
 %
 As pictured in Figure~\ref{fig:speccert:flash}, the \ac{pch} acts as a proxy
-between the core and a collection of peripherals, including the flash
-memory.
+between the core and a collection of peripherals, including the flash memory.
 %
 The \ac{hse} mechanism proceeds as follows:
 %
@@ -328,8 +330,8 @@ The \ac{hse} mechanism proceeds as follows:
 %
 \item This forces the core to enter \ac{smm}.
   %
-  By doing so, the core stops the execution of the software component which
-  has unlocked the flash memory and starts the execution of the \ac{bios}.
+  By doing so, the core stops the execution of the software component which has
+  unlocked the flash memory and starts the execution of the \ac{bios}.
 %
 \item In order to protect the integrity of the flash memory content, the
   \ac{bios} is expected to lock the flash memory again, before resuming the
@@ -774,6 +776,37 @@ The following theorem takes advantage of this fact.
   \end{proof}
 \end{theorem}
 
+A proof of correctness of a given \ac{hse} mechanism in our theory asserts the
+hardware architecture enforces a targeted security policy \emph{if trusted
+  software components correctly implement this \ac{hse} mechanism}, that is
+their executions only imply software transitions which satisfy the appropriate
+software requirements.
+%
+If an untrusted software component proves to be capable of exploiting a security
+vulnerability of a trusted software component program, this condition would
+instantaneously become false and the security policy enforcement would no longer
+be guaranteed, even though the hardware architecture is capable of enforcing it.
+
+Besides, an hypothesis of our model remains implicit: our reasoning is based on
+the fact that we can determine the behavior of a software component based on the
+current hardware configuration.
+%
+In practice, this is not true: the behavior of a software component is based on
+its programs, as fetched by the core which executes it.
+%
+If attackers is able to modify the instructions which form the trusted software
+components programs, then they can trivially defeat the security enforcement by
+modifying the instruction responsible to implement it.
+
+This is why trusted software components are expected to protect themselves
+against untrusted software components attempt to modify their program.
+%
+They satisfy this expectation thanks to dedicated \ac{hse} mechanisms that we
+can also verify.
+%
+This raises the question of the implementation of several \ac{hse} mechanisms at
+the same time.
+
 \subsection{HSE Mechanisms Composition}
 \label{subsec:speccert:compo}
 
@@ -914,8 +947,8 @@ mechanisms compatibility.
 There are obvious scenarios where two \ac{hse} mechanisms \( \Delta_1 \) and
 \( \Delta_2 \) can be doubtlessly considered incompatible.
 %
-For instance, \( \mathcal{C}(\Delta_1 \sqcap \Delta_2) = \emptyset \) would
-mean it is not possible to implement both at the same time.
+For instance, \( \mathcal{C}(\Delta_1 \sqcap \Delta_2) = \emptyset \) would mean
+it is not possible to implement both at the same time.
 %
 We anticipate there are other scenarios more unclear, for instance if the set of
 compliant traces \( \mathcal{C}(\Delta_1 \sqcap \Delta_2) \) contains only
@@ -928,41 +961,35 @@ Because we aimed to focused on hardware architecture verification in the context
 of this thesis, we therefore did not investigated further a characterization of
 compatible and incompatible \ac{hse} mechanisms.
 
-% \subsection*{}
+\subsection*{}
+
+In this Section, we introduced our theory to formally specify and verify
+\ac{hse} mechanisms.
 %
-% In this Section, we introduced our theory, from the definition to one \ac{hse}
-% mechanism, up to how we can reason about compositions of \ac{hse} mechanisms.
-%%
-% In the next Section, we give a first example of how we can use our theory with
-% a case study.
+It allows us to verify each \ac{hse} mechanism in isolation, but we also
+introduced a composition operator as a first step toward reasoning about the
+implementation of two \ac{hse} mechanisms or more at the same time.
+%
+In the next Section, we proceed with a case study focused on so-called code
+injection policies, to act as a detailed example on \ac{hse} compositions.
 
 \section{Case Study: Code Injection Policy}
 \label{sec:speccert:casestudy}
 
-A proof of correctness of a given \ac{hse} mechanism in our theory asserts the
-hardware architecture enforces a targeted security policy \emph{if trusted
-  software components correctly implement this \ac{hse} mechanism}, that is
-their executions only imply software transitions which satisfy the appropriate
-software requirements.
-%
-If an untrusted software component proves to be capable of exploiting a security
-vulnerability of a trusted software component program, this condition would
-instantaneously become false and the security policy enforcement would no longer
-be guaranteed, even though the hardware architecture is capable of enforcing it.
-
-Therefore, a straightforward attack path attackers can leverage to defeat a
-correct \ac{hse} mechanism is modifying trusted software components programs
-thanks to illegitimate code injection (\ref{subsec:speccert:tampering}).
-%
-In this Section, we aim to illustrate further how our theory can be leveraged in
-order to reason about security enforcement.
+We now aim to illustrate further how our theory can be leveraged in order to
+reason about security enforcement.
 %
 To that end, we take as an example a security policy which explicitly forbids
 software components of a typical software stack ---that is, the \ac{bios}, an
 operating system and several applications--- to perform illegitimate code
 injection (\ref{subsec:speccert:globalsec}).
 %
-Finally, we detail how this security policy can be enforced through the correct
+As we discussed in Subsection~\ref{subsec:speccert:security}, the integrity of
+the trusted software components programs is an implicit hypothesis of our
+approach, which makes our code injection policy a prerequisite for reasoning
+about other \ac{hse} mechanisms.
+%
+We detail how this security policy can be enforced through the correct
 implementation of two \ac{hse} mechanisms
 (\ref{subsec:speccert:isolationenforcement}).
 
@@ -1280,8 +1307,8 @@ mechanisms against the same reference, both in isolation and in composition.
 %
 We believe this is an essential property; in practice, these multiple mechanisms
 are implemented at the same time by different software components, and they may
-interfere with each other, as illustrated by the SENTER Sandman attacked
-discussed in Subsection~\ref{subsec:usecase:hse:sandman}.
+interfere with each other, as illustrated by the SENTER Sandman attack discussed
+in Subsection~\ref{subsec:usecase:hse:sandman}.
 
 Throughout this Chapter, we have tried to illustrate our definitions with
 real-world examples, as our effort has been originally motivated by the
@@ -1308,7 +1335,10 @@ We believe this methodology would benefit both hardware designers and software
 developers, but we are interested in challenging the applicability of our
 approach.
 %
-To that end, we proceed with the case study introduced in this section and
-verify the \ac{hse} mechanism implemented by the \ac{bios} to remain isolated
-from the rest of the software stack after the end of the boot sequence
-(Section~\ref{sec:usecase:hse}).
+To that end, we proceed with the case study introduced in
+Section~\ref{sec:speccert:casestudy}, by specifying the \ac{hse} mechanism
+implemented by the \ac{bios} to remain isolated from the rest of the software
+stack after the end of the boot sequence (detailed
+Section~\ref{sec:usecase:hse}), and verifying this \ac{hse} mechanism is correct
+with respect to the \ac{bios} code injection
+(Definition~\ref{def:speccert:biospol}).

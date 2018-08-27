@@ -1141,9 +1141,8 @@ to the \ac{bios} code injection sub-policy \( I_{\mathtt{bios}} \) (Definition~\
 {\scshape Minx86} is parameterized with a hardware-software mapping
 \func{context} (Definition~\ref{def:speccert:hardsoft}).
 %
-This mapping is necessary for the model to track memory ownership, as
-exemplified by the postconditions of \func{Write} transitions in
-Figure~\ref{fig:speccert2:softprepost}.
+This mapping is necessary for the model to track memory ownership during
+\func{Write}, \func{Read} and \func{Fetch} transitions.
 %
 The specification of \func{context} in our use case has already been discussed
 in Example~\ref{example:speccert2:isolation}, but the {\scshape Minx86} is not
