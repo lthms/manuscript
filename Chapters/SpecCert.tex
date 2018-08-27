@@ -914,6 +914,14 @@ Because we aimed to focused on hardware architecture verification in the context
 of this thesis, we therefore did not investigated further a characterization of
 compatible and incompatible \ac{hse} mechanisms.
 
+%\subsection*{}
+%
+%In this Section, we introduced our theory, from the definition to one \ac{hse}
+%mechanism, up to how we can reason about compositions of \ac{hse} mechanisms.
+%%
+%In the next Section, we give a first example of how we can use our theory with a
+%case study.
+
 \section{Case Study: Code Injection Policy}
 \label{sec:speccert:casestudy}
 
@@ -981,7 +989,7 @@ decoded and executed.
 %
 \( s \in \func{fetched}_{\Sigma}(h, l) \) means that an instruction owned by $s$
 was fetched in order to be executed by the processor during a transition
-labelled with \( l \) from a state \( h \).
+labeled with \( l \) from a state \( h \).
 
 With a hardware-software mapping and an transition-software mapping, we give a
 formal definition of a \textit{code injection}.
@@ -994,7 +1002,7 @@ formal definition of a \textit{code injection}.
 \begin{definition}[Code Injection]
   \label{def:speccert:tempering}
   A software component $x \in S$ achieves a code injection against another
-  software component $y \in S$ during a transition labelled with $l \in L$ from
+  software component $y \in S$ during a transition labeled with $l \in L$ from
   a state $h \in H$ to a state $h' \in H$, denoted by
   %
   \[
@@ -1058,10 +1066,11 @@ injection.
 We leverage the code injection definition to propose a generic formalization of
 code injection policy, to determine if a given software component is authorized
 to make a code injection against another software component in the context of a
-software stack.
+particular software stack.
 
 \begin{definition}[Code Injection Policy]
   \label{def:speccert:global}
+
   A isolation policy \( I \) is a safety property characterized by a tuple
   \( \langle S, \rightarrowtail, \func{context} \rangle \), such that
   %
@@ -1100,7 +1109,7 @@ software stack.
   \item \func{context} is a hardware-software mapping.
   \end{itemize}
 
-  A transition labelled with \( l \in L \) from \( h \in H \) to \( h' \in H \)
+  A transition labeled with \( l \in L \) from \( h \in H \) to \( h' \in H \)
   satisfies \( I \) when code injections which occur during this transition are
   authorized by \( \rightarrowtail \), that is
   %
@@ -1110,38 +1119,21 @@ software stack.
   \]
 \end{definition}
 
-% \begin{corollary}
-%   If a transition satisfies $I$, then no code injection which is not
-%   authorized by $\rightarrowtail$ occurs during that transition, that is
-%  %
-%   \[
-%     I(h, l, h') \iff \forall (x, y) \in S \times S \text{, } y \not\ge x
-%     \Rightarrow h \xrightarrow[y \not\leadsto x]{l} h'
-%   \]
-%
-%   \TODO{Dans ce corolaire, tu utilises la notation $ y \not\ge x$ alors
-%   qu'avant tu sembles utiliser la notation $x \rightarrowtail y$ pour la même
-%   chose. Soit j'ai loupé quelque chose soit il faut homogénéiser tes
-%   notations. En outre, ce corollaire est-il vraiment utile ici. Il semble
-%   trivial et on n'en voit pas trop l'intéret.}
-%
-%  \begin{proof}
-%    This is the contrapositive of Definition~\ref{def:speccert:global}.
-%  \end{proof}
-%\end{corollary}
+Based on Definition~\ref{def:speccert:global}, we can define a code injection
+policy for a typical software stack which comprises the \ac{bios}, an
+operating system and several applications.
 
-\begin{example}[Software Stack Isolation]
-  \label{example:speccert:isolation}
-  Using our definition, we can define a isolation policy for a whole software
-  stack which comprises the \ac{bios}, an operating system and several
+\begin{definition}[BIOS-OS-Applications Code Injection Policy]
+  \label{definition:speccert:isolation}
+
+  For a software stack made of a \ac{bios}, an operating system an \( n \)
   applications, that is
-  %
   \[
     S \triangleq \{ \mathtt{bios}, \mathtt{os}, \mathtt{app}_1, \dots
     \mathtt{app}_n \}
   \]
-
-  We define the authorization relation $\rightarrowtail$ using three rules:
+  %
+  we define the authorization relation $\rightarrowtail$ using three rules:
   %
   \begin{description}
   \item [\(\rightarrowtail\)-refl:] A software component is authorized to tamper
@@ -1168,14 +1160,14 @@ software stack.
   is executed; when the processor is not in \ac{smm} and is in ring 3, one of
   the applications ---identified by the page tables used by the processor--- is
   executed.
-\end{example}
+\end{definition}
 
 \subsection{Code Injection Policy Enforcement}
 \label{subsec:speccert:isolationenforcement}
 
 A security policy such as the one detailed in
-Example~\ref{example:speccert:isolation} is not enforced by one but several HSE
-mechanisms.
+Definition~\ref{definition:speccert:isolation} is not enforced by one but
+several HSE mechanisms.
 %
 Therefore, we break it down to more specific security sub-policies, with each
 one being enforced thanks to a dedicated \ac{hse} mechanism.
@@ -1254,6 +1246,11 @@ enforcement of \( I \).
   \end{proof}
 \end{theorem}
 
+On a typical x86 hardware architecture, \( \Delta_{\mathtt{bios}} \) relies on
+the \ac{smm} and the SMRAMC memory region within \ac{dram} (as we detailed in
+Subsection~\ref{subsec:usecase:firm:sec}), and \( \Delta_{\mathtt{os}} \) relies
+on the \ac{mmu} and the protection rings.
+
 \section{Conclusion}
 
 In this Chapter, we have presented our theory of \ac{hse} mechanisms, in the
@@ -1261,15 +1258,12 @@ form of requirements over a hardware model.
 %
 We emphasize that our approach requires a general-purpose hardware model to
 define and verify \ac{hse} mechanisms to enable the verification of several
-mechanisms against the same reference.
+mechanisms against the same reference, both in isolation and in composition.
 %
 We believe this is an essential property; in practice, these multiple mechanisms
 are implemented at the same time by different software components, and they may
-interfere with each other.
-%
-We already detailed in Subsection~\ref{subsec:usecase:hse:sandman} an example of
-this threat, such that TXT allowed for circumventing the flash memory lockdown
-mechanism.
+interfere with each other, as illustrated by the SENTER Sandman attacked
+discussed in Subsection~\ref{subsec:usecase:hse:sandman}.
 
 Throughout this Chapter, we have tried to illustrate our definitions with
 real-world examples, as our effort has been originally motivated by the
@@ -1296,7 +1290,7 @@ We believe this methodology would benefit both hardware designers and software
 developers, but we are interested in challenging the applicability of our
 approach.
 %
-To that end, we apply in the next Chapter our theory to a real world example:
-the \ac{hse} mechanism implemented by the \ac{bios} to remain isolated from the
-rest of the software stack after the end of the boot sequence
+To that end, we proceed with the case study introduced in this section and
+verify the \ac{hse} mechanism implemented by the \ac{bios} to remain isolated
+from the rest of the software stack after the end of the boot sequence
 (Section~\ref{sec:usecase:hse}).
