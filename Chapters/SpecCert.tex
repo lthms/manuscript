@@ -175,58 +175,60 @@ state of the next one.
   \end{itemize}
 \end{definition}
 
-As we detailed in Subsection~\ref{subsec:sota:security}, security policies are
-modelled as predicates on sets of traces, that is $\powerset (\pathesLTS{Ez})$.
-%
 Mainstream hardware architectures are not ``safe'' by default, and required
 additional software configuration to enforce security properties.
 %
 For instance, it is legitimate, from a x86 specifications perspective, to enter
 ring 3 mode with a page table which allows for modifying kernel code and data.
 %
-This is why we ultimately seek to model \ac{hse} mechanisms as traces subsets,
-to discard traces legitimate from a hardware specification perspective, yet
+As a consequence, we seek to model \ac{hse} mechanisms as traces subsets, to
+discard traces legitimate from a hardware specification perspective, yet
 dangerous from a security perspective.
 
 \subsection{HSE Mechanisms}
 \label{subsec:speccert:hse}
 
-We now propose a theory of \ac{hse} mechanisms, where a \ac{hse} mechanism is
-primarily characterized by a set of trusted software components, a set of
-requirements over hardware states and a set of requirements over software
-transitions.
+In our theory of \ac{hse} mechanism, a \ac{hse} mechanism is primarily
+characterized by a set of trusted software components, a set of requirements
+over states and a set of requirements over software transitions.
 %
+Trusted software components are responsible for implementing the \ac{hse}
+mechanism.
+%
+To that end, they correctly configure the underlying hardware mechanism in
+accordance with the two requirements over states and over software transitions.
+
 On the one hand, the purpose of the requirements over states is to identify the
 hardware configurations which constrain the execution of untrusted software
 components with respect to a targeted security policy.
-%
+
 On the other hand, the purpose of the requirements over software transitions is
-to prevent untrusted software components to reach a hardware configuration
-wherein the requirements over state are not satisfied.
+to guarantee requirements over state hold true at all time.
 %
-Requirements over software transitions should only constrain the execution of
-trusted software components, which implement the \ac{hse} mechanism.
+Because we consider an adversary model where attackers control untrusted
+software components, we do not consider any hypotheses on their behavior.
 %
-We consider an adversary model where attackers control untrusted software
-components, and therefore we do not consider any hypotheses on their behavior.
+Therefore, requirements over software transitions should only constrain the
+execution of trusted software components, which implement the \ac{hse}
+mechanism.
 
 These two classes of requirements allow us to determine a subset of compliant
 traces, that is traces where trusted software components have correctly
-implemented a \ac{hse} mechanism by obeying software requirements.
+implemented a \ac{hse} mechanism by satisfying the requirements at all time.
 %
 % \TODO{Peut être rappeller que "correctly implement the HSE" veut dire
 % respecter les contraintes sur les états et les transititions software. C'est
 % un peu trop implicite.}
 %
-To verify this \ac{hse} mechanism is correct with respect to a targeted security
-policy means proving the set of compliant traces of this mechanism satisfies the
-predicate which models the policy.
+From this perspective, to verify this \ac{hse} mechanism is correct with respect
+to a targeted security policy means proving the set of compliant traces of this
+mechanism satisfies the predicate which models the policy.
 
 \paragraph{HSE Mechanisms.}
 %
 In the context of \ac{hse} mechanisms, trusted and untrusted software components
 alike use the same interface to interact with the underlying hardware
-components: the \ac{cpu} instructions set.
+components: the processor instructions set.
 %
 To reason about HSE mechanisms, it is necessary to be able to determine which
 software component is executed at a given time.
@@ -264,13 +266,14 @@ Besides, there are approaches which allow for executing two software components
 using the same ``hardware context'', \emph{e.g.} JavaScript programs of two tabs
 inside a browser are arguably two distinct software components.
 %
-However, from the hardware architecture perspective, these three components are
-indistinguishable, and enforcing a security policy in such a context is achieved
-by means of software measures, \emph{e.g.} program interpretation or software
-fault isolation\,\cite{morrisett2012rocksalt}.
+However, from the hardware architecture perspective, these three components
+---the browser and the two JavaScript programs--- are indistinguishable, and
+enforcing a security policy in such a context is achieved by means of software
+measures, \emph{e.g.} program interpretation or software fault
+isolation\,\cite{morrisett2012rocksalt}.
 
-We say a software transition is trusted (respectively untrusted) when it is
-generated from a state associated to a trusted (respectively untrusted) software
+We say a software transition is trusted (respectively untrusted) when it occurs
+from a state associated to a trusted (respectively untrusted) software
 component.
 %
 A hardware-software mapping is mandatory to define requirements over software
@@ -416,12 +419,12 @@ For a \ac{hse} mechanism to be consistent, it must also obey two requirements,
 together called the \ac{hse} laws.
 %
 The first law says that the $\func{software\_req}$ predicate always holds true
-for transitions generated by untrusted software components.
+for untrusted software transitions.
 %
 That is, the first law enforces that a \ac{hse} mechanism definition does not
 make any assumption regarding untrusted software components.
 %
-The second law says that the requirements over the hardware state specified by
+The second law says that the requirements over states specified by
 $\func{hardware\_req}$ are invariant with respect to $\func{software\_req}$.
 %
 As long as the trusted software components which implement the \ac{hse}
@@ -441,15 +444,15 @@ disposal cannot put the system into an unsafe state.
     $\forall (h, l, h') \in \mathcal{T}(\Sigma)$, $\forall x \not\in T$,
     %
     \[
-      l \in L_S \wedge \func{context}(h) = x \Rightarrow \func{software\_req}(h,
+      (l \in L_S \wedge \func{context}(h) = x) \Rightarrow \func{software\_req}(h,
       l)
     \]
   %
   \item $\func{hardware\_req}$ is an invariant with respect to
     $\func{software\_req}$: $\forall (h, l, h') \in \mathcal{T}(\Sigma)$,
     \[
-      \func{hardware\_req}(h) \wedge (l \in L_S \Rightarrow
-      \func{software\_req}(h,l)) \Rightarrow \func{hardware\_req}(h')
+      (\func{hardware\_req}(h) \wedge (l \in L_S \Rightarrow
+      \func{software\_req}(h,l))) \Rightarrow \func{hardware\_req}(h')
     \]
   \end{enumerate}
 \end{definition}
@@ -613,11 +616,11 @@ requirements over hardware configurations throughout the execution of a software
 stack, as long as a set of trusted software components correctly implement the
 mechanism.
 
-\subsection{HSE Mechanism Correctness.}
+\subsection{HSE Mechanism Correctness}
 \label{subsec:speccert:security}
 
 It is important to keep in mind that preserving a set of requirements over
-hardware configurations is only a mean to an end.
+states is only a mean to an end.
 %
 The true purpose of a \ac{hse} mechanism is to constrain the execution of
 untrusted software components with respect to a targeted security policy.
@@ -678,7 +681,7 @@ enforced, but the core does not read its content when it needs it.
   \label{fig:speccert:smram}
 \end{figure}
 
-We detail in Subsection~\ref{subsec:sota:security} how various classes of
+We detailed in Subsection~\ref{subsec:sota:security} how various classes of
 security policies ---safety and liveness properties, and hyperproperties--- can
 be modeled against a transition system.
 %
@@ -712,8 +715,10 @@ transpose these definitions to our theory.
 Verifying that a \ac{hse} mechanism is correct with respect to a security policy
 can be difficult.
 %
-In the particular case of safety properties, the reasoning is facilitate because
-they are characterized by predicates on transitions.
+In the context of this thesis, we focus on safety properties.
+%
+The reasoning is facilitate because they are characterized by predicates on
+transitions.
 %
 The following theorem takes advantage of this fact.
 
@@ -758,6 +763,13 @@ The following theorem takes advantage of this fact.
 \subsection{HSE Mechanisms Composition}
 \label{subsec:speccert:compo}
 
+In common software stacks, several \ac{hse} mechanisms are implemented at the
+same time by low-level software components.
+%
+The fact that two \ac{hse} mechanisms of the same hardware architecture can be
+specified against the same general-purpose hardware model allows us to reason
+about their \emph{composition}.
+%
 We model the concurrent implementation of two \ac{hse} mechanisms \( \Delta_1 \)
 and \( \Delta_2 \) as a third \ac{hse} mechanism \( \Delta_1 \sqcap \Delta_2 \).
 %
