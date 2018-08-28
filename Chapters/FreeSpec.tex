@@ -85,7 +85,7 @@ abstract specifications to verify their respective properties
 (Section~\ref{sec:freespec:verifying}).
 %
 To illustrate our definitions, we use a running example in the form of the
-specification and verification of a simplified MCH.
+specification and verification of a simplified memory controller.
 %
 Then, we discuss how the different levels of composition of FreeSpec can be
 leveraged to scale the modelling and verification work for larger systems
@@ -136,66 +136,61 @@ important impact on proofs already written at the moment.
 We have no doubt that such situations will arise again if we try to increase the
 scope of {\scshape Minx86}.
 
-Some transitions of {\scshape Minx86} imply that several state updates may
-happen in sequence.
+Besides, some transitions of {\scshape Minx86} imply several intermediary state
+updates.
 %
 This is particularly true for \( \func{Read} \) and \( \func{Write} \)
 transitions, as both the cache and memories are updated in case of cache misses
 or cache evictions.
 %
 The complexity of a transition postcondition has a direct impact on the proofs
-we have to construct in order to verify the correctness of a given system.
+we have to construct in order to verify the correctness of a given system, as
+case scenarios to consider quickly increase.
 %
-For instance, let \( M \) be a transition system, such that the transition
-relation \( R \) of \( M \) is defined as follows:
+We already gave an insight of this in
+Subsection~\ref{subsec:speccert2:bioshsedef} when we explained the structure of
+the proof that \( \Delta_{\mathtt{bios}} \) complies with the second \ac{hse}
+law.
 %
-\[
-  R \triangleq \{ (h, h')\ |\ h' = t(s(r(h))) \}
-\]
-%
-\GH{A quoi correspondent t, s et r? Pourquoi 3 fonctions et pas plus? Ca semble
-  tomber de nulle part...}
+The proof goal depicted in Figure~\ref{fig:freespec:entrypoint} is a good
+illustration of that, even though it is already a subcase of the complete proof.
 
-Let \( \iota \) be a predicate on \( M \) states, such that \( \iota \) is
-expected to be an invariant with respect to \( R \), that is
-%
-\[
-  h' = t(s(r(h))) \vdash \iota(h) \Rightarrow \iota(h')
-\]
-%
-Regarding the definition of \( r \), \( s \) and \( t \), proving this statement
-all at once can quickly become unmanageable. \GH{Pourquoi?}
+\begin{figure}
+  \inputminted{coq}{Listings/StateHell.v}
+
+  \caption{Raw postcondition of a \texttt{Write} transition with a writeback
+    strategy}
+  \label{fig:freespec:entrypoint}
+\end{figure}
 
 \paragraph{Temporary Violation Problem.}
-Besides, it emphasizes another important limitation of {\scshape Minx86}: it is
-potentially subject to the so-called \emph{temporary violation
-  problem}\,\cite{muller2006tempviolation}, where a predicate is satisfied
-\emph{before} and \emph{after} a given transition, yet is temporary violated
-\emph{during} the transition. \GH{cette limitation est importante à noter (et
-  elle est plus facile à comprendre telle que tu la décrit par la suite). En
-  revanche, pour moi il s'agit d'une autre limitation que le côté monolytique,
-  qui devrait donc se trouver dans un paragraphe dédié.}
+%
+The complexity of {\scshape Minx86} transitions emphasizes another important
+limitation of {\scshape Minx86}: it is potentially subject to the so-called
+\emph{temporary violation problem}\,\cite{muller2006tempviolation}, where a
+predicate is satisfied \emph{before} and \emph{after} a given transition, yet is
+temporary violated \emph{during} the transition.
 %
 For instance, if it exists a state \( h \) such that \( \neg r(h) \) or
 \( \neg s(r(h)) \) holds true, then \( M \) is subject to the temporary
-violation problem. \GH{Je ne comprends pas la condition car je ne vois pas à
-  quoi correspond r et s}
+violation problem.
 %
 A well known illustration of this threat is ---once again--- the airlock system.
 
 \begin{example}[Temporary Violation Problem in an Airlock System]
-  %
   In Example~\ref{example:sota:airlocklts}, we have carefully defined the
   labeled transition system of the airlock system so that it is unambiguously
   not subject to the temporary violation problem.
+  %
+  As a reminder, the targeted security policy for a airlock system is that at
+  least one door shall be close at all time.
   %
   We did that by avoiding transitions between states
   \( (\mathtt{open}, \mathtt{close}) \) and
   \( (\mathtt{close}, \mathtt{open}) \).
   %
-  We can define a transition system which is correct with respect to the usual
-  safety property\,\footnote{At least one door should be close at all time.}
-  \emph{and} includes these transitions.
+  We can define a transition system which is correct with respect to the
+  targeted safety property \emph{and} includes these transitions.
 
   \begin{center}
     \begin{tikzpicture}
@@ -284,13 +279,19 @@ concrete value and its abstraction cohabit.
 %
 However, if we ever try to verify a \ac{hse} mechanism with respect to a
 security policy which relies on totally different abstract domains, we will have
-to modify the model another time. \GH{plutôt que 'une autre fois" il faudrait
-  plutôt insister sur la nature et l'importance des changements que cela va
-  nécessiter.}
+to modify the model again.
 %
-This greatly reduces the opportunity to reuse {\scshape Minx86} for other
-security policies, and therefore contradicts our initial goal to verify \ac{hse}
-mechanisms of the same architecture against the same model.
+For instance, using a similar logic that the one we demonstrated in
+Chapter~\ref{chapter:speccert2}, if we want to be able to determine how many
+times memory locations have been updated since the beginning of the trace, we
+would have to modify the definition of \( H(S) \) and of the transition relation
+to add a counter along with the owner of a memory location.
+%
+Modifying the transition relation has a great chance breaking all proofs
+previously written, and therefore this greatly reduces the opportunity to reuse
+{\scshape Minx86} for other security policies and contradicts our initial goal
+to verify \ac{hse} mechanisms of the same architecture against the same
+general-purpose model.
 
 \begin{table}
   \center
@@ -464,14 +465,6 @@ slightly simplified it so it can fit into the page.
 
 \caption{Dividing a transition into a sequences of state updates}
 \label{freespec:figure:seqproof}
-\end{figure}
-
-\begin{figure}
-  \inputminted{coq}{Listings/StateHell.v}
-
-  \caption{Raw postcondition of a \texttt{Write} transition with a writeback
-    strategy}
-  \label{fig:freespec:entrypoint}
 \end{figure}
 
 \begin{figure}
