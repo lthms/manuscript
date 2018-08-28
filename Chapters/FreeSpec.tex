@@ -51,7 +51,7 @@ non-determinism) and to compose effects within purely functional programs, while
 deferring the realizations of these effects to dedicated handlers.
 
 In this Chapter, we aim to show how a variant of algebraic effects based on free
-monads can be used to reason about large systems, by modelling their components
+monads can be used to reason about large systems, by modeling their components
 as effect handlers.
 %
 Our contribution is threefold:
@@ -69,7 +69,7 @@ Our contribution is threefold:
 %
 \item We have modelled and verified a simplified subset of an x86 computing
   system with FreeSpec in order to illustrate how our formalism can be leveraged
-  to tackle our initial objective, that is modelling and verifying computing
+  to tackle our initial objective, that is modeling and verifying computing
   platforms.
 \end{itemize}
 
@@ -88,7 +88,7 @@ To illustrate our definitions, we use a running example in the form of the
 specification and verification of a simplified memory controller.
 %
 Then, we discuss how the different levels of composition of FreeSpec can be
-leveraged to scale the modelling and verification work for larger systems
+leveraged to scale the modeling and verification work for larger systems
 (Section~\ref{sec:freespec:scale}).
 
 \section{A Compositional Reasoning Framework}
@@ -254,7 +254,7 @@ violation of invariant, similarly to the Speed Racer
 attack\,\cite{kallenberg2015racecondition} detailed in
 Subsection~\ref{subsec:usecase:hse:speed}.
 %
-Modelling that threat without changing the modeling structure of {\scshape
+Modeling that threat without changing the modeling structure of {\scshape
   Minx86} requires increasing the granularity of the transitions, with the
 direct consequence to increase the model overall complexity.
 
@@ -318,6 +318,13 @@ general-purpose model.
 
 \subsection{Approach Overview}
 \label{subsec:freespec:approachoverview}
+
+In the verification work presented in Chapter~\ref{chapter:speccert2}, we have
+successfully managed the limitation of {\scshape Minx86} partly thanks to its
+reduced scope, but also because we have taken great care in organizing our
+development as modurarly as we could.
+%
+
 
 One possible approach to face this challenge is to manually divide the
 transition into several change updates ---\emph{i.e.} one per state update---
@@ -659,7 +666,7 @@ seeking to model with our framework.
   \label{fig:freespec:seqdiagr}
 \end{figure}
 
-\section{Modelling Programs with Effects}
+\section{Modeling Programs with Effects}
 % ==============================================================================
 \label{sec:freespec:specifying}
 
@@ -930,7 +937,7 @@ computing platforms are often designed as a hierarchical succession of layers.
 \subsection{The Program Monad}
 % -----------------------------------------------------------------------------
 
-Modelling programs with side effects in purely functional languages such as
+Modeling programs with side effects in purely functional languages such as
 {\textsc Gallina} (the Coq specification language) or Haskell is usually
 achieved thanks to monads\,\cite{hoareetal2001monad}.
 %
@@ -1018,7 +1025,7 @@ operators to compose them and the Program monad to model programs with effects
 which belong to these interfaces, we now have all we need to model a given
 component which exposes an interface $\I$ and uses another interface $\J$.
 %
-We proceed with the following steps: modelling the component in terms of
+We proceed with the following steps: modeling the component in terms of
 programs with effects, then deriving one operational semantics for $\I$ from
 these programs, assuming provided an operational semantics for $\J$.
 
@@ -1625,7 +1632,7 @@ We now discuss how FreeSpec can be leveraged to model and verify larger systems.
 % and limitations we anticipate.
 
 The typical workflow of FreeSpec can be summarized as follows: specifying the
-interfaces of a system; modelling the components of the system in terms of
+interfaces of a system; modeling the components of the system in terms of
 programs with effects of these interfaces; identifying the abstract
 specifications which express the requirements over each interface; verifying
 each component in terms of compliance with these abstract specifications.
@@ -1637,7 +1644,7 @@ If, during the verification process, one group finds out a given interface or
 abstract specification needs to be updated, the required modifications may
 impact its neighbours.
 %
-For instance, modelling a x86-based computing system, as pictured in
+For instance, modeling a x86-based computing system, as pictured in
 Figure~\ref{fig:freespec:computing-platform}, using FreeSpec requires to take
 into account the CPU cache, and to verify it complies with an abstract
 specification similar to the one defined in Example~\ref{ex:mch-abs-specs}.
