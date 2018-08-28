@@ -10,7 +10,8 @@
 \vspace{1cm}%
 \noindent
 %
-For many years, industrial vendors\,\cite{reid2017arm,leslie2015sgx} \GH{la deuxième référence est cassée} and
+For many years, industrial vendors\,\cite{reid2017arm,leslie2015sgx} \GH{la
+  deuxième référence est cassée} and
 researchers\,\cite{chong2016report,choi2017kami} have aimed to formally specify
 and verify hardware architectures.
 %
@@ -26,7 +27,12 @@ The scale of the task dictates several requirements regarding the formalism to
 adopt in this particular case.
 %
 It must allow for considering independently each component of our system, before
-composing them to conclude about the properties of the system as a whole. \GH{Tu parles de plusieurs requirements mais tu n'en n'évoque qu'un seul. En outre, cette intro est longue et parfois un peu maladroite. Je la réduirais en une ou deux phrase plus sobre et directe du style 'Modéliser de manière préciser un système complexe que représente une architecture x86, constitué de plusieurs composants interagissant entre eux, nécessite une approche modulaire.'}
+composing them to conclude about the properties of the system as a whole. \GH{Tu
+  parles de plusieurs requirements mais tu n'en n'évoque qu'un seul. En outre,
+  cette intro est longue et parfois un peu maladroite. Je la réduirais en une ou
+  deux phrase plus sobre et directe du style 'Modéliser de manière préciser un
+  système complexe que représente une architecture x86, constitué de plusieurs
+  composants interagissant entre eux, nécessite une approche modulaire.'}
 
 This objective is reminiscent of the programming language problematic to model
 and verify large programs with side effects.
@@ -37,13 +43,14 @@ imply to somehow take into account an outer \emph{stateful} environment and
 secondly, because the composition of stateful computations is not well-handled
 by traditional (monadic) approaches.
 %
-Algebraic effects and handlers\,\cite{bauer2015effects} overcome this double challenge.
+Algebraic effects and handlers\,\cite{bauer2015effects} overcome this double
+challenge.
 %
 They allow to model large classes of effects (e.g., exception, state,
 non-determinism) and to compose effects within purely functional programs, while
 deferring the realizations of these effects to dedicated handlers.
 
-In this Chapter, we aim to show how a variant of algebraic effects based on Free \GH{pourquoi un F majuscule... }
+In this Chapter, we aim to show how a variant of algebraic effects based on free
 monads can be used to reason about large systems, by modelling their components
 as effect handlers.
 %
@@ -66,9 +73,13 @@ Our contribution is threefold:
   platforms.
 \end{itemize}
 
-The rest of the paper \GH{Je pense que tu voulais dire "chapitre" ;-)} proceeds as follows. \GH{TOn plan n'évoque pas la section 6.1}
+The rest of the Chapter proceeds as follows.
 %
-We describe how we model components in terms of programs with effects and effect
+We first discuss our motivations to propose a compositional reasoning for Coq,
+based on our experience implementing the proofs of
+Chapter~\ref{chapter:speccert2} (Section~\ref{sec:freespec:why}).
+%
+Then, we describe how we model components in terms of programs with effects and effect
 handlers (Section~\ref{sec:freespec:specifying}) and we introduce so-called
 abstract specifications to verify their respective properties
 (Section~\ref{sec:freespec:verifying}).
@@ -81,21 +92,30 @@ leveraged to scale the modelling and verification work for larger systems
 (Section~\ref{sec:freespec:scale}).
 
 \section{A Compositional Reasoning Framework}
+\label{sec:freespec:why}
 % ==============================================================================
-\GH{Il faudrait une ou deux phrase d'introduction à cette section avec annonce du plan interne. Après lecture de la suite, il me semble que le premier paragraphe de la sous-section suivante correspond à ce que je souhaiterais mais il est mal placé.}
-
-\subsection{{\scshape Minx86} Limitations}
 
 Implementing the proofs of correctness of \( \Delta_{\mathtt{bios}} \) has been
 very insightful.
 %
 In this subsection, we emphasize two limitations of {\scshape Minx86} ---the
 hardware model which acts as a foundation of this verification work--- which
-makes its use at a larger scale unlikely.
+makes its use at a larger scale unlikely (\ref{subsec:freespec:minx86lim}).
 %
 Then, we formulate requirements on a potential successor for {\scshape Minx86},
 that would allow for taking better advantage of our \ac{hse} mechanism
-definition. \GH{En fait, ce premier paragraphe est un plan de la section. Il devrai donc être placé en dehors de cette première sous-section. Ici, il faudrait une petite phrase d'introduction de la sous section, en présentant succintement les deux limites que tu vas développer. }
+definition (\ref{subsec:freespec:approachoverview}).
+
+\subsection{{\scshape Minx86} Limitations}
+\label{subsec:freespec:minx86lim}
+
+Having reasoning about the correctness of \( \Delta_{\mathtt{bios}} \) against
+{\scshape Minx86}, we have identified three limitations which reduce, to our
+opinion, its applicability as we would increase its scope: its monolithic
+design, its weakness against the temporary violation
+problem\,\cite{muller2006tempviolation}, and the presence within our supposedly
+general-purpose model of abstract values specific to a particular case study
+(\emph{i.e.}  memory location owners)
 
 \paragraph{Monolithic Model.}
 %
@@ -104,7 +124,7 @@ the sets of states of its hardware components, namely a core, a cache, a memory
 controller and two arrays of memory cells.
 %
 That is, {\scshape Minx86} is a monolithic model, and this is not without
-consequences when the time comes to reason about its correctness.
+consequences.
 
 In our case, it has remained manageable in practice, because we carefully
 organized our Coq development in order to keep components separated from each
@@ -116,10 +136,10 @@ important impact on proofs already written at the moment.
 We have no doubt that such situations will arise again if we try to increase the
 scope of {\scshape Minx86}.
 
-Some transitions of {\scshape Minx86} imply several state updates may happen in
-sequence. \GH{A mon avis il manque des mots dans cette phrase pour qu'elle soit compréhensible}
+Some transitions of {\scshape Minx86} imply that several state updates may
+happen in sequence.
 %
-This is particularly true for \( \mathrm{Read} \) and \( \mathrm{Write} \)
+This is particularly true for \( \func{Read} \) and \( \func{Write} \)
 transitions, as both the cache and memories are updated in case of cache misses
 or cache evictions.
 %
@@ -133,7 +153,8 @@ relation \( R \) of \( M \) is defined as follows:
   R \triangleq \{ (h, h')\ |\ h' = t(s(r(h))) \}
 \]
 %
-\GH{A quoi correspondent t, s et r? Pourquoi 3 fonctions et pas plus? Ca semble tomber de nulle part...}
+\GH{A quoi correspondent t, s et r? Pourquoi 3 fonctions et pas plus? Ca semble
+  tomber de nulle part...}
 
 Let \( \iota \) be a predicate on \( M \) states, such that \( \iota \) is
 expected to be an invariant with respect to \( R \), that is
@@ -144,41 +165,213 @@ expected to be an invariant with respect to \( R \), that is
 %
 Regarding the definition of \( r \), \( s \) and \( t \), proving this statement
 all at once can quickly become unmanageable. \GH{Pourquoi?}
+
+\paragraph{Temporary Violation Problem.}
+Besides, it emphasizes another important limitation of {\scshape Minx86}: it is
+potentially subject to the so-called \emph{temporary violation
+  problem}\,\cite{muller2006tempviolation}, where a predicate is satisfied
+\emph{before} and \emph{after} a given transition, yet is temporary violated
+\emph{during} the transition. \GH{cette limitation est importante à noter (et
+  elle est plus facile à comprendre telle que tu la décrit par la suite). En
+  revanche, pour moi il s'agit d'une autre limitation que le côté monolytique,
+  qui devrait donc se trouver dans un paragraphe dédié.}
 %
+For instance, if it exists a state \( h \) such that \( \neg r(h) \) or
+\( \neg s(r(h)) \) holds true, then \( M \) is subject to the temporary
+violation problem. \GH{Je ne comprends pas la condition car je ne vois pas à
+  quoi correspond r et s}
+%
+A well known illustration of this threat is ---once again--- the airlock system.
+
+\begin{example}[Temporary Violation Problem in an Airlock System]
+  %
+  In Example~\ref{example:sota:airlocklts}, we have carefully defined the
+  labeled transition system of the airlock system so that it is unambiguously
+  not subject to the temporary violation problem.
+  %
+  We did that by avoiding transitions between states
+  \( (\mathtt{open}, \mathtt{close}) \) and
+  \( (\mathtt{close}, \mathtt{open}) \).
+  %
+  We can define a transition system which is correct with respect to the usual
+  safety property\,\footnote{At least one door should be close at all time.}
+  \emph{and} includes these transitions.
+
+  \begin{center}
+    \begin{tikzpicture}
+      \node [draw, circle split, text width=30pt, text badly centered] (cc)
+      {\( \mathtt{close} \) \nodepart{lower} \( \mathtt{close} \)};%
+      \node [right=60pt of cc] (x) {};%
+      \node [draw, circle split, above=of x, text width=30pt, text badly
+      centered] (oc) {\( \mathtt{open} \) \nodepart{lower}
+        \( \mathtt{close} \)};%
+      \node [draw, circle split, below=of x, text width=30pt, text badly
+      centered] (co) {\( \mathtt{close} \) \nodepart{lower}
+        \( \mathtt{open} \)};%
+      \node [draw, circle split, right=60pt of x, text width=30pt, text badly
+      centered] (oo) {\( \mathtt{open} \) \nodepart{lower} \( \mathtt{open}
+        \)};%
+
+      \draw [-latex] (cc) edge [bend left] node [xshift=-5pt, left]
+      {\( \mathtt{Req}_1 \)} (oc);%
+
+      \draw [-latex] (cc) edge [bend right] node [xshift=-5pt, left]
+      {\( \mathtt{Req}_2 \)} (co);%
+
+      \draw [-latex] (oc) edge [bend left] node [right] {\( \mathtt{Req}_2 \)}
+      (co);%
+      \draw [-latex] (co) edge [bend left] node [left] {\( \mathtt{Req}_1 \)}
+      (oc);%
+    \end{tikzpicture}
+  \end{center}
+
+  We can imagine several scenarios:
+  %
+  \begin{inparaenum}[(1)]
+  \item Doors states updates are simultaneous and instantaneous, in other words
+    the transitions \emph{are} atomic.
+    %
+  \item The airlock system first closes one door before opening the
+    other. \label{enum:freespec:goodairlock}
+    %
+  \item The airlock system first opens one door before closing the
+    other. \label{enum:freespec:badairlock}
+    %
+  \end{inparaenum}
+  %
+  The systems modeled in Examples~\ref{example:sota:airlocklts},
+  \ref{example:sota:airlockinterface}, and \ref{example:sota:airlockprocess}
+  corresponds to the scenario (\ref{enum:freespec:goodairlock}).
+  %
+  On the contrary, the transition system pictures in this example is not precise
+  enough to discard the eventuality that both doors are, at a given point in
+  time, both open.
+\end{example}
+
+The temporary violation problem undermines the second \ac{hse} law, which
+stipulates that the requirement on hardware state of a \ac{hse} mechanism is an
+invariant of the model with respect to the requirement on software transitions
+(see Definition~\ref{def:speccert:laws}).
+%
+In practice, transitions in {\scshape Minx86} are not atomic (they are made of
+several state updates), and an attacker may be able to leverage a temporary
+violation of invariant, similarly to the Speed Racer
+attack\,\cite{kallenberg2015racecondition} detailed in
+Subsection~\ref{subsec:usecase:hse:speed}.
+%
+Modelling that threat without changing the modeling structure of {\scshape
+  Minx86} requires increasing the granularity of the transitions, with the
+direct consequence to increase the model overall complexity.
+
+\paragraph{Abstract Model.}
+%
+The definition of {\scshape Minx86} has been governed by the use case we have
+used it for.
+%
+The memory location ownership we have embedded inside the model is the most
+visible demonstration of that fact.
+%
+By construction, {\scshape Minx86} abstracts away the concrete domain of memory
+location contents (that are, bytes of bits), similarly to what a type inference
+algorithm can do.
+%
+It worked, because we did not modeled hardware features whose behavior depends
+for instance on configuration stored in memory (\emph{e.g.} a \ac{mmu} and its
+page tables).
+%
+We have tried to address this issue by modifying the model, so that both the
+concrete value and its abstraction cohabit.
+%
+However, if we ever try to verify a \ac{hse} mechanism with respect to a
+security policy which relies on totally different abstract domains, we will have
+to modify the model another time. \GH{plutôt que 'une autre fois" il faudrait
+  plutôt insister sur la nature et l'importance des changements que cela va
+  nécessiter.}
+%
+This greatly reduces the opportunity to reuse {\scshape Minx86} for other
+security policies, and therefore contradicts our initial goal to verify \ac{hse}
+mechanisms of the same architecture against the same model.
+
+\begin{table}
+  \center
+  \begin{tabular}{ccccc}
+    $I_{\mathrm{C}}$
+    & $\xrightarrow{\mathrm{Core}}$
+    & $I_{\mathrm{MCH}}$ \\
+    \hline
+    \hline
+    $\mathbb{P}$
+    & $\Longrightarrow$
+    & \ $\mathbb{P}'$ \\
+    $\Downarrow$
+    &
+    &
+      $\Downarrow$ \\
+    $\mathbb{Q}$
+    & $\Longleftarrow$
+    & \ $\mathbb{Q}'$ \\
+    \hline
+  \end{tabular}
+  \caption{Scheme of the verification proof for a component}
+\end{table}
+
+\subsection{Approach Overview}
+\label{subsec:freespec:approachoverview}
+
 One possible approach to face this challenge is to manually divide the
-transition into several change updates ---\emph{i.e.} one per state update--- \GH{je ne comprends pas "several change updates ---\emph{i.e.} one per state update". "change updates" me semble une répétition. Et je ne voit pas à quoi correspond un "state update". }
-and prove that \( \iota \) is preserved throughout the transition, as
-illustrated in Figure~\ref{freespec:figure:seqproof}. \GH{Quel est le langage utilisé dans cette figure? Galina? Il faudrait le signaler et commenter un peu cet extrait pour qu'il soit accessible au non-spécialiste. Ce n'est pas une mauvaise idée de mettre un tel code mais il faut que la plupart des relecteur puisse comprendre l'idée générale.}
+transition into several change updates ---\emph{i.e.} one per state update---
+\GH{je ne comprends pas "several change updates ---\emph{i.e.} one per state
+  update". "change updates" me semble une répétition. Et je ne voit pas à quoi
+  correspond un "state update". } and prove that \( \iota \) is preserved
+throughout the transition, as illustrated in
+Figure~\ref{freespec:figure:seqproof}. \GH{Quel est le langage utilisé dans
+  cette figure? Galina? Il faudrait le signaler et commenter un peu cet extrait
+  pour qu'il soit accessible au non-spécialiste. Ce n'est pas une mauvaise idée
+  de mettre un tel code mais il faut que la plupart des relecteur puisse
+  comprendre l'idée générale.}
 %
 Proving \( \Delta_{\mathtt{bios}} \) was correct with respect to
 \( I_{\mathtt{bios}} \) using Coq\,\cite{letan2016speccertcode} led us to
-successfully adopt this approach. \GH{On est un peu perdu. Tu as adopté cette approche dans SpecCert ou FreeSpec?}
+successfully adopt this approach.
+%
+\GH{On est un peu perdu. Tu as adopté cette approche dans SpecCert ou FreeSpec?}
 %
 In practice, we relied on a recurring pattern we call
 ``\texttt{remember};~\texttt{destruct};~\texttt{assert};~\texttt{apply}'', after
-the {\scshape Ltac} tactics. \GH{Normalement l'objet de ce paragraphe est de décrire une limitation de MinX86. Or là j'ai l'impression que tu as glissé vers une description de ton approche, qui normalement est abordée après. Du coup, ce qui suit n'a peut-être pas sa place ici.} \GH{les termes "remember", "destruct", etc; sont-ils des termes à toi ou bien connu de la communauté Coq? A quoi correspondent-ils? Il me semble qu'il s'agisse de "tactique". Il faudrait le préciser ici}
+the {\scshape Ltac} tactics. \GH{Normalement l'objet de ce paragraphe est de
+  décrire une limitation de MinX86. Or là j'ai l'impression que tu as glissé
+  vers une description de ton approche, qui normalement est abordée après. Du
+  coup, ce qui suit n'a peut-être pas sa place ici.} \GH{les termes "remember",
+  "destruct", etc; sont-ils des termes à toi ou bien connu de la communauté Coq?
+  A quoi correspondent-ils? Il me semble qu'il s'agisse de "tactique". Il
+  faudrait le préciser ici}
 %
-We illustrate the use of this pattern with the proof obligation with the proof
-goal \GH{"with the proof obligation withe the proof goal" semble redondant. En tout cas la phrase est étrange.} pictured in Figure~\ref{fig:freespec:postcondition} \GH{la référence de la figure est cassée}.
+We illustrate the use of this pattern with the proof goal pictured in
+Figure~\ref{fig:freespec:entrypoint}.
 %
-We have extracted this goal directly from the SpecCert project; we have
-only slightly simplified it so it can fit into the page.
+We have extracted this goal directly from the SpecCert project; we have only
+slightly simplified it so it can fit into the page.
 %
 \begin{enumerate}
 \item Using \texttt{remember}, we can make the sequence of state updates more
   visible (see Figure~\ref{fig:freespec:remember}, compared to
-  Figure~\ref{fig:freespec:entrypoint}). \GH{Pour moi qui ne suit pas un spécialiste, cette séquence ne me semble pas plus claire, je ne la vois dans aucun des deux figures. Il faudrait peut-être décrire par une phrase ou deux comment on doit interpréter/lire ces figures.}
+  Figure~\ref{fig:freespec:entrypoint}). \GH{Pour moi qui ne suit pas un
+    spécialiste, cette séquence ne me semble pas plus claire, je ne la vois dans
+    aucun des deux figures. Il faudrait peut-être décrire par une phrase ou deux
+    comment on doit interpréter/lire ces figures.}
   %
-  As a result, the Coq goal is more readable, which greatly simplifies the 
+  As a result, the Coq goal is more readable, which greatly simplifies the
   writing of the proof.
-\item Using \texttt{destruct}, we can explore the alternative paths. 
+\item Using \texttt{destruct}, we can explore the alternative paths.
   %
   For instance, regarding the initial state of the system, the content of the
   address \( \mathtt{pa} \) may or may not be present in the cache
   (Figure~\ref{fig:freespec:remember}, line 7).
   %
-  We explore both solution, though two complementary goals \GH{ne faut-il pas un "s" à solution? en outre, je ne comprend pas trop "though two complementary goals". Ne manquerait-il pas un mot?} (see the two
-  simplified goals in Figure~\ref{fig:freespec:destruct})
+  We explore both solution, though two complementary goals \GH{ne faut-il pas un
+    "s" à solution? en outre, je ne comprend pas trop "though two complementary
+    goals". Ne manquerait-il pas un mot?} (see the two simplified goals in
+  Figure~\ref{fig:freespec:destruct})
   %
 \item Using \texttt{assert}, we can introduce now goals to prove intermediary
   results (like the one in Figure~\ref{fig:freespec:assert}, for instance).
@@ -305,171 +498,12 @@ only slightly simplified it so it can fit into the page.
   \label{fig:freespec:assert}
 \end{figure}
 
-The ``\texttt{remember};~\texttt{destruct};~\texttt{assert};~\texttt{apply}'' pattern 
-structures the proof, but it remains cumbersome to use.
+The ``\texttt{remember};~\texttt{destruct};~\texttt{assert};~\texttt{apply}''
+pattern structures the proof, but it remains cumbersome to use.
 %
-Besides, it emphasizes another important limitation of {\scshape Minx86}:
-it is potentially subject to the so-called \emph{temporary violation
-  problem}\,\cite{muller2006tempviolation}, where a predicate is satisfied
-\emph{before} and \emph{after} a given transition, yet is temporary violated
-\emph{during} the transition. \GH{cette limitation est importante à noter (et elle est plus facile à comprendre telle que tu la décrit par la suite). En revanche, pour moi il s'agit d'une autre limitation que le côté monolytique, qui devrait donc se trouver dans un paragraphe dédié.}
-%
-For instance, if it exists a state \( h \) such that \( \neg r(h) \) or
-\( \neg s(r(h)) \) holds true, then \( M \) is subject to the temporary
-violation problem. \GH{Je ne comprends pas la condition car je ne vois pas à quoi correspond r et s}
-%
-A well known illustration of this threat is ---once again--- the airlock system.
-
-\begin{example}[Temporary Violation Problem in an Airlock System]
-  %
-  In Example~\ref{example:sota:airlocklts}, we have carefully defined the
-  labeled transition system of the airlock system so that it is unambiguously
-  not subject to the temporary violation problem.
-  %
-  We did that by avoiding transitions between states
-  \( (\mathtt{open}, \mathtt{close}) \) and
-  \( (\mathtt{close}, \mathtt{open}) \).
-  %
-  In practice, it is possible to define a transition system with these
-  transitions, such that it is correct with respect to the safety property that
-  at least one door should be close at anytime, for instance: \GH{la phrase est longue. à couper en deux }
-
-  \begin{center}
-    \begin{tikzpicture}
-      \node [draw, circle split, text width=30pt, text badly centered] (cc)
-      {\( \mathtt{close} \) \nodepart{lower} \( \mathtt{close} \)};%
-      \node [right=60pt of cc] (x) {};%
-      \node [draw, circle split, above=of x, text width=30pt, text badly
-      centered] (oc) {\( \mathtt{open} \) \nodepart{lower}
-        \( \mathtt{close} \)};%
-      \node [draw, circle split, below=of x, text width=30pt, text badly
-      centered] (co) {\( \mathtt{close} \) \nodepart{lower}
-        \( \mathtt{open} \)};%
-      \node [draw, circle split, right=60pt of x, text width=30pt, text badly
-      centered] (oo) {\( \mathtt{open} \) \nodepart{lower} \( \mathtt{open}
-        \)};%
-
-      \draw [-latex] (cc) edge [bend left] node [xshift=-5pt, left]
-      {\( \mathtt{Req}_1 \)} (oc);%
-
-      \draw [-latex] (cc) edge [bend right] node [xshift=-5pt, left]
-      {\( \mathtt{Req}_2 \)} (co);%
-
-      \draw [-latex] (oc) edge [bend left] node [right] {\( \mathtt{Req}_2 \)}
-      (co);%
-      \draw [-latex] (co) edge [bend left] node [left] {\( \mathtt{Req}_1 \)}
-      (oc);%
-    \end{tikzpicture}
-  \end{center}
-
-  We can imagine several scenarios:
-  %
-  \begin{inparaenum}[(1)]
-  \item Doors states updates are simultaneous and instantaneous, in other words
-    the transitions \emph{are} atomic.
-    %
-  \item The airlock system first closes one door before opening the
-    other. \label{enum:freespec:goodairlock}
-    %
-  \item The airlock system first opens one door before closing the
-    other. \label{enum:freespec:badairlock}
-    %
-  \end{inparaenum}
-  %
-  The systems modeled in Examples~\ref{example:sota:airlocklts},
-  \ref{example:sota:airlockinterface}, and \ref{example:sota:airlockprocess}
-  corresponds to the scenario (\ref{enum:freespec:goodairlock}).
-  %
-  On the contrary, the transition system pictures in this example is not precise
-  enough to discard the eventuality that both doors are, at a given point in
-  time, both open.
-\end{example}
-
 Although the \texttt{remember;~destruct;~assert;~apply} pattern can help to
 uncover temporary violation of an invariant, nothing prevents the verifier from
-forgetting a given state updates \GH{si update est un verbe ici, il manque un complément. Si c'est un nom, il devrai être au singulier} and yet being able to conclude the proof.
-%
-The temporary violation problem undermines the second \ac{hse} law, which
-stipulates that the requirement on hardware state of a \ac{hse} mechanism is an
-invariant of the model with respect to the requirement on software transitions
-(see Definition~\ref{def:speccert:laws}).
-%
-For the \ac{hse} mechanism \( \Delta_{\mathtt{bios}} \) ---defined as
-\( \langle S, T, \mathrm{context}, \mathrm{hardware\_req}, \mathrm{bios\_req}
-\rangle \), see Definition~\ref{def:speccert2:minx86}--- this translates as
-follows:
-%
-\[
-  \begin{array}{l}
-    \forall (h, l, h') \in H(S) \times L \times H(S), \\
-    \qquad\func{hardware\_req}(h) \\
-    \qquad\Rightarrow (l \in L_S \Rightarrow \func{bios\_req}(h, l)) \\
-    \qquad\Rightarrow \func{hardware\_req}(h')
-  \end{array}
-\]
-\GH{Je ne vois pas l'utilité de rappeler l'invariant de delta bios ici.}
-%
-In practice, transitions in {\scshape Minx86} are not atomic (they are made of
-several state updates), and an attacker may be able to leverage a temporary
-violation of invariant, similarly to the Speed Rcare
-attack\,\cite{kallenberg2015racecondition} detailed in
-Subsection~\ref{subsec:usecase:hse:speed}.
-%
-Modelling that threat without changing the modeling structure of {\scshape
-  Minx86} requires increasing the granularity of the transitions, with the
-direct consequence to increase the model overall complexity.
-
-\paragraph{Abstract Model.}
-%
-The definition of {\scshape Minx86} has been governed by the use case we have
-used it for.
-%
-The memory location ownership we have embedded inside the model is the most
-visible demonstration of that fact.
-%
-By construction, {\scshape Minx86} abstracts away the concrete domain of memory
-location contents (that are, bytes of bits), similarly to what a type inference
-algorithm can do.
-%
-It worked, because we did not modeled hardware features whose behavior depends
-for instance on configuration stored in memory (\emph{e.g.} a
-\ac{mmu} and its page tables).
-%
-We have tried to address this issue by modifying the model, so that both the
-concrete value and its abstraction cohabit.
-%
-However, if we ever try to verify a \ac{hse} mechanism with respect to a
-security policy which relies on totally different abstract domains, we will have
-to modify the model another time. \GH{plutôt que 'une autre fois" il faudrait plutôt insister sur la nature et l'importance des changements que cela va nécessiter.}
-%
-This greatly reduces the opportunity to reuse {\scshape Minx86} for other
-security policies, and therefore contradicts our initial goal to verify \ac{hse}
-mechanisms of the same architecture against the same model.
-
-\begin{table}
-  \center
-  \begin{tabular}{ccccc}
-    $I_{\mathrm{C}}$
-    & $\xrightarrow{\mathrm{Core}}$
-    & $I_{\mathrm{MCH}}$ \\
-    \hline
-    \hline
-    $\mathbb{P}$
-    & $\Longrightarrow$
-    & \ $\mathbb{P}'$ \\
-    $\Downarrow$
-    &
-    &
-      $\Downarrow$ \\
-    $\mathbb{Q}$
-    & $\Longleftarrow$
-    & \ $\mathbb{Q}'$ \\
-    \hline
-  \end{tabular}
-  \caption{Scheme of the verification proof for a component}
-\end{table}
-
-\subsection{Approach Overview}
+forgetting a problematic state update and yet being able to conclude the proof.
 
 During the development of SpecCert, we have carefully organized our work to
 model and verify each component of {\scshape Minx86} in isolation prior to
@@ -670,8 +704,7 @@ in the \texttt{operational} package of Haskell\,\cite{operational}.
     \node [right=4pt of MC.north east, yshift=3pt] (Im) {$I_{\mathrm{MC}}$};%
 
     % CPU
-    \node [inner sep=16pt, draw, dashed, above=30pt of MC.center]
-    (CPU) {CPU};%
+    \node [inner sep=16pt, draw, dashed, above=30pt of MC.center] (CPU) {CPU};%
 
     % arrows
     \draw [-latex] (CPU.south) -- ([yshift=5pt]MC.north);%
