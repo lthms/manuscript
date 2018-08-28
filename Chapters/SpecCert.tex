@@ -66,7 +66,7 @@ implementation, at the same time, of two \ac{hse} mechanisms or more--- possible
 \label{subsec:speccert:hardware}
 
 We model a hardware architecture, which can execute different software
-components, as a particular \ac{lts} (Definition~\ref{def:sota:lts}) with two
+components, as a particular \ac{lts} (Definition~\ref{def:sota:lts}) \GH{la défintion 3.1 est loin. Si on lit le pdf en version informatique, on clique sur le lien et çà va. Si le texte est imprimé, il faudrait peut-être rappeler la section est la page ce cette défintion).} with two
 sets of labels instead of one.
 
 \paragraph{States.}
@@ -182,24 +182,24 @@ state of the next one.
 Mainstream hardware architectures are not ``safe'' by default, and require
 additional software configuration to enforce security properties.
 %
-For instance, it is legitimate, from a x86 specifications perspective, to enter
+For instance, it is legitimate, from a x86 specification perspective, to enter
 ring 3 mode with a page table which allows for modifying kernel code and data.
 %
-We aim to model \ac{hse} mechanisms as traces subsets, to discard traces
+We aim to model \ac{hse} mechanisms as traces subsets 	\GH{je pense (mais je peux me tromper) que lorsque tu place un nom devant un autre pour marquer le possessif, ce nom à valeur d'adjectif et qu'il doit être au singulier. Donc "trace subsets" plutôt que "traces subsets". Il faudrait vérifier que tu n'as pas le même souci ailleur}, to discard traces that are
 legitimate from a hardware specification perspective, yet dangerous from a
 security perspective.
 
 \subsection{HSE Mechanisms}
 \label{subsec:speccert:hse}
 
-In our theory of \ac{hse} mechanism, a \ac{hse} mechanism is primarily
+In our theory, a \ac{hse} mechanism is primarily
 characterized by a set of trusted software components, a set of requirements
 over states and a set of requirements over software transitions.
 %
 Trusted software components are responsible for implementing the \ac{hse}
 mechanism.
 %
-To that end, they correctly configure the underlying hardware mechanism in
+To that end, they have to correctly configure the underlying hardware mechanism in
 accordance with the two requirements over states and over software transitions.
 
 On the one hand, the purpose of the requirements over states is to identify the
@@ -237,7 +237,7 @@ components: the processor instructions set.
 To reason about HSE mechanisms, it is necessary to be able to determine which
 software component is executed at a given time.
 %
-In practice, a subset of states of the hardware architecture is dedicated to
+In practice, a subset of the states of the hardware architecture is dedicated to
 each software component.
 %
 For instance, x86 processors protection rings are commonly used to execute
@@ -486,7 +486,7 @@ incomplete, or that requirements over hardware states are too restrictive.
 If the requirements over hardware states cannot be loosen without threatening
 the security policy enforcement or to find additional restrictions over trusted
 software execution, then the \ac{hse} mechanism probably does not serve its
-purpose.
+purpose. \GH{cette phrase est longue et on ne voit plus trop à quoi se rattache "to find aaitionnal...". S'il se rattache à "cannot be losen without", il faudrait utiliser le gérondif "without ... finding additionnal restrictions.}
 % \TODO{Cela veut surrement dire que les contraintes sur l'exécution du code
 % trusté sont incomplètes ou que le la restriction sur l'état du hardware est au
 % contraire trop restrictive. S'il n'est pas possible de trouver une contrainte
