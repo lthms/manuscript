@@ -15,14 +15,15 @@ formally specify and verify \ac{hse} mechanisms.
 %
 We have also introduced a code injection policy for a software stack made of a
 \ac{bios}, an operating system and \( n \) applications
-(Definition~\ref{definition:speccert:isolation}), and we defined a sub-policy
-which focuses on the \ac{bios} protection (\ref{def:speccert:biospol}).
+(Definition~\ref{definition:speccert:isolation}), and we have defined a
+sub-policy which focuses on the \ac{bios} protection
+(\ref{def:speccert:biospol}).
 %
 In this Chapter, we apply our approach to specify and verify the \ac{hse}
-mechanism implemented by the \ac{bios} on x86 hardware architecture at runtime
+mechanism implemented by the \ac{bios} on x86 hardware architectures at runtime
 and described in Section~\ref{sec:usecase:hse}.
 %
-The purpose of this \ac{hse} mechanisms is to provide an isolated execution
+The purpose of this \ac{hse} mechanism is to provide an isolated execution
 environment to the \ac{bios}, and therefore should enforce the so-called
 \ac{bios} code injection sub-policy.
 
@@ -37,15 +38,16 @@ Then, we give a formal definition of the \ac{hse} mechanism implemented by the
 laws and is correct with respect to the targeted security policy previously
 introduced (Section~\ref{sec:speccert2:verif}).
 %
-The model and proofs described in this Chapter have been implemented using Coq.
+The model and the proofs described in this Chapter have been implemented using
+Coq.
 %
 We have released this development as free software in a project called
 SpecCert\,\footnote{SpecCert can be found at the following URL:
   \url{https://github.com/lthms/speccert}}.
 %%
-%As we introduce new definitions and theoretical results, we point to the related
-%statements in SpecCert, so the interesting reader familiar with Coq can refer to
-%our machine-checked proofs.
+% As we introduce new definitions and theoretical results, we point to the
+% related statements in SpecCert, so the interesting reader familiar with Coq
+% can refer to our machine-checked proofs.
 
 \section{A Minimal x86 Hardware Model}
 \label{sec:speccert2:minx86}
@@ -79,7 +81,7 @@ mapping of {\scshape Minx86} (\ref{subsec:minx86:fetched}).
 \subsection{Model Scope}
 \label{sec:speccert2:scope}
 
-\paragraph{Hardware Features}
+\paragraph{Hardware Features.}
 %
 We consider the core can be either in System Management Mode (\ac{smm}) or in an
 unprivileged mode.
@@ -103,7 +105,7 @@ write access to the memory) latency.
 We model one level of cache which stores both data and instructions and we
 consider two cache strategies: uncacheable (UC) and writeback (WB).
 %
-With the UC cache strategy, the cache is not used and all \IOs are forwarded to
+With the UC strategy, the cache is not used and all \IOs are forwarded to
 the memory controller, whereas with the WB strategy, the cache is used as much
 as possible\,\footnote{These cache strategies are explained in
   \cite{intel2014manual}, Volume 3A, Chapter 11, Section 11.3 (page 2316 --
@@ -112,7 +114,7 @@ as possible\,\footnote{These cache strategies are explained in
 To determine which cache strategy to use, the core relies on several
 configuration registers.
 %
-Among them, the \ac{smrr} are used to tell the core where the SMRAM is and which
+Among them, the \ac{smrr} tell the core where the SMRAM is and which
 cache strategy to use for \IO targeting the SMRAM when the core is in \ac{smm}.
 %
 When it is not in \ac{smm}, the core always uses the UC strategy for \IO
@@ -139,13 +141,13 @@ SMRAM.
 This memory area is dedicated to store the code intended to be executed when the
 core is in \ac{smm}.
 
-\paragraph{Tracking Memory Ownership}
+\paragraph{Tracking Memory Ownership.}
 %
 The \formatLTS{Minx86} definition is parameterized by a hardware-software
 mapping \func{context} (Definition~\ref{def:speccert:hardsoft}).
 %
 The memory locations of \formatLTS{Minx86} are either cache lines or memory
-cells exposed by the \ac{dram} controller or the VGA controller.
+cells exposed by the \ac{dram} or the VGA controllers.
 %
 The memory ownership is updated through transitions according to three rules:
 %
@@ -178,7 +180,7 @@ The memory ownership is updated through transitions according to three rules:
   components which form the software stack.
 \end{definition}
 
-We emphasize that there is many valid definition of the \func{context} function,
+We emphasize that there are many valid definitions of the \func{context} function,
 regarding the verification problem we consider.
 %
 For instance, we need two different definitions of \func{context} whether we
@@ -193,12 +195,13 @@ parameter for the model.
 
 $H(S)$ is defined as the Cartesian product of the set of states of the core, the
 cache, the memory controller and the memories exposed by both the \ac{dram}
-controller and the VGA controller.
+and the VGA controllers.
 %
 Each of these sets is defined in order to model the hardware features we have
 previously described.
 %
-We use named tuples\,\footnote{See page \pageref{frontmatter:notations}.} to
+We use named tuples\,\footnote{See page \pageref{frontmatter:notations} for a
+  description of the notations we used to manipulate them.} to
 define them.
 %
 Thus, $H(S)$ is defined as follows:
@@ -219,7 +222,7 @@ We do not consider core registers in {\scshape Minx86} yet.
 When we extend our model to that end, we will need to taint them accordingly,
 and \( \mathtt{Core} \) will have to be parameterized by \( S \) too.
 
-\paragraph{Address Spaces}
+\paragraph{Address Spaces.}
 %
 We define $\texttt{PhysAddr}$ the set of physical addresses the core uses to
 perform \IO and $\texttt{HardAddr}$ the set of hardware addresses exposed by the
@@ -253,14 +256,14 @@ constructors\,\footnote{See page \pageref{frontmatter:notations}.}.
 %
 The maximal address offset (denoted by $\val{max\_addr}$ here) is specific to
 the core and may vary in time according to its addressing mode (real mode, long
-mode, etc.), therefore we left its value as a parameter of our model.
+mode, etc.), therefore we leave its value as a parameter of our model.
 %
 By convenience, we give the same maximum address to each address space.
 
 Finally, we write $\texttt{Val}$ for the set of values that the memory cells
 scattered within the memory locations of the hardware architecture can take.
 
-\paragraph{Core}
+\paragraph{Core.}
 %
 The set of states of the core is denoted by $\texttt{Core}$.
 %
@@ -287,7 +290,7 @@ store the address of the next instruction to be fetched and executed.
 %
 The physical address $\func{smbase}$ models the register of the same name.
 %
-The map $\func{strat}$ abstracts away the numerous mechanisms of the x86
+The map $\func{strat}$ abstracts away the numerous mechanisms of x86
 microprocessors to determine which cache strategy to use for a given \IO, where
 $\texttt{CacheStrat} \triangleq \setshortdef{\val{UC}, \val{WB}}$ is the set of
 the modelled cache strategies.
@@ -305,7 +308,7 @@ The set of states of the \acp{smrr} is denoted $\texttt{Smrr}$.
 \]
 %
 The set of physical addresses $\func{range}$ tells the core the location of the
-SMRAM and $\func{strat}$ tells which cache strategy has to be used when the core
+SMRAM and $\func{strat}$ indicates which cache strategy has to be used when the core
 is in \ac{smm}.
 
 % which can be available or already used. A cache line already used is tagged
@@ -316,7 +319,7 @@ is in \ac{smm}.
 % indicates if the cache line content has been modified without propagating the
 % underlying hardware memories and the .
 
-\paragraph{Cache}
+\paragraph{Cache.}
 %
 Let $\texttt{Index}$ be the set of cache indexes and
 $\func{index} : \texttt{PhysAddr} \rightarrow \texttt{Index}$ the function used
@@ -354,10 +357,9 @@ that is
   \forall \var{i} \in \texttt{Index}, \func{index}(c(i).\func{tag}) = i
 \]
 
-\paragraph{Memory Controller}
+\paragraph{Memory Controller.}
 %
-The set of states of the \formatLTS{Minx86} Computing Platforms memory
-controller is denoted by $\val{MC}$.
+The set of states of the memory controller is denoted by $\val{MC}$.
 %
 \[
   \texttt{MC} \triangleq \langle~\func{d\_open}: \setshortdef{\val{true},
@@ -438,11 +440,11 @@ possible to have
   \func{dispatch}(m, b, pa) \neq \func{dispatch}(m', b, pa)
 \]
 
-\paragraph{Memories}
+\paragraph{Memories.}
 %
-The physical memories (exposed by the DRAM controller and the VGA controller)
-are modelled together with a mapping between the hardware addresses and both the
-content and the software component which owns the related memory location.
+The physical memories (exposed by the DRAM and the VGA controllers)
+are modelled together with a mapping between the hardware addresses and both their
+contents and the software components which own them.
 %
 We write $\texttt{Mem}(S)$ for the set of states of the physical memories.
 \[
@@ -501,9 +503,10 @@ We write $\texttt{Mem}(S)$ for the set of states of the physical memories.
 \subsection{Transition Labels and Transition Relation}
 \label{subsec:speccert2:labtrans}
 
-We consider two sets of labels to distinguish between software transitions
-(direct, foreseeable consequences of instructions execution, denoted by $L_S$)
-and hardware transitions (denoted by $L_H$).
+In accordance with Definition~\ref{def:speccert:model}, we consider two sets of
+labels to distinguish between software transitions (direct, foreseeable
+consequences of instructions execution, denoted by $L_S$) and hardware
+transitions (denoted by $L_H$).
 %
 For each transition label we define
 %
@@ -575,7 +578,7 @@ predicate on \( L \times H(S) \times H(S) \), then the transition relation of
   \label{tab:speccert2:softlab}
 \end{table}
 
-\paragraph{Software Transitions}
+\paragraph{Software Transitions.}
 %
 Table~\ref{tab:speccert2:softlab} lists the labels dedicated to software
 transitions in terms of constructors.
@@ -828,14 +831,14 @@ As a consequence, the precondition for \( \func{Read}(\var{pa}) \) and
 \( \func{Write}(\var{pa}) \) always holds true.
 %
 The postconditions for \( \func{Read}(\var{pa}) \) and
-\( \func{Write}(\var{pa}, v) \) takes into account
+\( \func{Write}(\var{pa}, v) \) take into account
 %
 \begin{inparaenum}[(1)]
 \item the cache strategy configured for the address \( pa \),
 \item the state of the cache line associated to the index
-  \( i = \func{index}(pa) \)
+  \( i = \func{index}(pa) \),
 \item whether \( pa \) belongs to the SMRAM or not,
-\item whether the core is in \ac{smm} or not,
+\item whether the core is in \ac{smm} or not, and
 \item whether the \texttt{D\_OPEN} bit of the \texttt{SMRAMC} register is set or
   not,
 \end{inparaenum}
@@ -942,8 +945,8 @@ The precondition for \( \func{UpdateSmrr} \) requires the core to be in
 The postcondition requires the \ac{smrr} of the core to be updated with the
 correct value, the rest of the hardware architecture state being left unchanged.
 
-A software component can jump to any physical address, that is the precondition
-for the label \( \func{NextInstruction}(\var{pa}) \) always holds true.
+A software component can jump to any physical address, that is the preconditions
+for the label \( \func{NextInstruction}(\var{pa}) \) always hold true.
 %
 The postcondition for \( \func{NextInstruction}(\var{pa}) \) requires the
 program counter register to be updated with \( \var{pa} \).
@@ -979,7 +982,7 @@ The postcondition requires the $\texttt{d\_open}$ bit to be unset and the
   \label{tab:speccert2:hardlab}
 \end{table}
 
-\paragraph{Hardware Transitions}
+\paragraph{Hardware Transitions.}
 Table~\ref{tab:speccert2:hardlab} lists the labels dedicated to hardware
 transitions in terms of constructors.
 
@@ -1034,7 +1037,7 @@ same as \( \func{Read}(h.\func{core}.\func{pc}) \).
 
 We define \(\textsc{Minx86}\func{\_fetched}\) a transition-software mapping for
 $\formatLTS{Minx86}$ (Definition~\ref{def:speccert:transsoft}), to map an
-initial state of a transition and the label of this transition with the set of
+initial state of a transition and the label of this transition to the set of
 software components which own an instruction fetched during this transition.
 %
 In the case of \formatLTS{Minx86}, there is only one event which implies
@@ -1115,7 +1118,7 @@ In its current state, the scope of {\scshape Minx86} is limited to hardware
 features involved in the \ac{hse} mechanism implemented by the \ac{bios} to
 remain isolated from the rest of the software stack at runtime.
 %
-However, we defined {\scshape Minx86} with extensibility in mind.
+However, we have defined {\scshape Minx86} with extensibility in mind.
 %
 Notably, the hardware-software mapping used by the model in order to track
 memory location ownership is left as a parameter, and {\scshape Minx86} could be
@@ -1128,12 +1131,31 @@ code injection policy.
 We consider the execution of the software stack made of a \ac{bios}, an
 operating system and \( n \) applications, after the end of the boot sequence.
 %
-In this section, our objective is to give a formal definition of the \ac{hse}
-mechanism implemented by the \ac{bios} (denoted by \( \Delta_{\mathtt{bios}} \))
-to remain isolated from the rest of the software stack
-(\ref{subsec:speccert2:bioshsedef}), and to verify its correctness with respect
-to the \ac{bios} code injection sub-policy \( I_{\mathtt{bios}} \)
-(Definition~\ref{def:speccert:biospol}) (\ref{subsec:speccert2:bioshsecorrect}).
+In this Section, our objective is to implement the three-step methodology that
+we have introduced in Chapter~\ref{chapter:speccert}, that is
+%
+\begin{inparaenum}[(1)]
+\item specifying the software requirements that must be satisfied by the trusted
+  software components which implement the \ac{hse} mechanism,
+%
+\item specifying the targeted security policy the \ac{hse} mechanism supposedly
+  enforces, and
+%
+\item verifying that the \ac{hse} mechanism is correct with respect to the
+  targeted security policy.
+\end{inparaenum}
+
+Because the targeted security policy has already been defined previously
+(Definition~\ref{def:speccert:biospol}), it leaves steps (1) and (3) to
+complete.
+%
+We first give a formal definition of the \ac{hse} mechanism implemented by the
+\ac{bios} (denoted by \( \Delta_{\mathtt{bios}} \)) to remain isolated from the
+rest of the software stack (\ref{subsec:speccert2:bioshsedef}).
+%
+Then, we verify its correctness with respect to the \ac{bios} code injection
+sub-policy \( I_{\mathtt{bios}} \) (Definition~\ref{def:speccert:biospol})
+(\ref{subsec:speccert2:bioshsecorrect}).
 
 \subsection{BIOS HSE Definition}
 \label{subsec:speccert2:bioshsedef}
@@ -1180,7 +1202,7 @@ Once we have properly introduced both, we verify our definition of
 \( \Delta_{\mathtt{bios}} \) satisfies the \ac{hse} laws
 (Definition~\ref{def:speccert:laws}).
 
-\paragraph{Hardware Requirements}
+\paragraph{Requirements over States.}
 %
 Given \( h \in H(S) \), we have identified six requirements over states for
 \( h \) to satisfy \func{hardware\_req}.
@@ -1246,7 +1268,7 @@ from the correctness of \( \Delta_{\mathtt{bios}} \).
 % pas idéal), même si elles ne correspondent pas à la même phase d'utilisation
 % (initialisation vs. runtime en quelque sorte)}
 
-\paragraph{Software Requirements}
+\paragraph{Requirements over Transitions.}
 %
 We now define $\func{bios\_req}$.
 %
@@ -1282,7 +1304,7 @@ there is no need to further update them.
   \end{array}
 \]
 
-\paragraph{HSE Laws}
+\paragraph{Verifying the HSE Laws.}
 %
 For $\Delta_{\mathtt{bios}}$ to be a \ac{hse} mechanism, we need to prove it
 satisfies the two \ac{hse} laws.
@@ -1482,7 +1504,7 @@ mechanism, but does not satisfies the security policy.
 \section{Conclusion}
 \label{sec:speccert:discuss}
 
-In this Chapter, we proceeded with the case study introduced in
+In this Chapter, we have proceeded with the case study introduced in
 Section~\ref{sec:speccert:casestudy}.
 %
 We introduced {\scshape Minx86}, a minimal x86 hardware model conceived with
@@ -1493,7 +1515,7 @@ remain isolated from the rest of the software stack, then verified that this
 mechanism is correct with respect to the so-called \ac{bios} code injection
 sub-policy.
 %
-In summary, we have applied our three-steps methodology.
+In summary, we have applied our three-step methodology.
 %
 The resulting model assumes as little as possible about the actual
 implementation of the \ac{bios}, and constitutes, to the extent of our
@@ -1501,7 +1523,7 @@ knowledge, the first formalization of the \ac{bios} security model at runtime.
 %
 As we have already mentioned, our proofs have been implemented within the Coq
 theorem prover to increase our confidence in our results, and have been released
-as free software\,\ref{letan2016speccertcode}.
+as free software\,\cite{letan2016speccertcode}.
 %
 The resulting project counts around 4\,500 lines of code, divided into 2\,000
 lines of code of definition and specification and 2\,500 lines of code of
@@ -1518,4 +1540,4 @@ at once ---as it is done in {\scshape Minx86}--- would not scale properly.
 The next Part of this thesis focuses on this problematic.
 %
 We propose another approach to enable modular verification of complex systems
-made of interconnected components, as hardware architectures definitely are.
+composed of interconnected components, as hardware architectures definitely are.
