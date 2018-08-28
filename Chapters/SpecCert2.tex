@@ -1132,8 +1132,8 @@ In this section, our objective is to give a formal definition of the \ac{hse}
 mechanism implemented by the \ac{bios} (denoted by \( \Delta_{\mathtt{bios}} \))
 to remain isolated from the rest of the software stack
 (\ref{subsec:speccert2:bioshsedef}), and to verify its correctness with respect
-to the \ac{bios} code injection sub-policy \( I_{\mathtt{bios}} \) (Definition~\ref{def:speccert:biospol})
-(\ref{subsec:speccert2:bioshsecorrect}).
+to the \ac{bios} code injection sub-policy \( I_{\mathtt{bios}} \)
+(Definition~\ref{def:speccert:biospol}) (\ref{subsec:speccert2:bioshsecorrect}).
 
 \subsection{BIOS HSE Definition}
 \label{subsec:speccert2:bioshsedef}
@@ -1144,17 +1144,9 @@ to the \ac{bios} code injection sub-policy \( I_{\mathtt{bios}} \) (Definition~\
 This mapping is necessary for the model to track memory ownership during
 \func{Write}, \func{Read} and \func{Fetch} transitions.
 %
-The specification of \func{context} in our use case has already been discussed
-in Example~\ref{example:speccert2:isolation}, but the {\scshape Minx86} is not
-precise enough to give a concrete definition which matches this specification.
-%
-That is, we cannot distinguish between OS and applications execution.
-%
-In the context of our use case this is not an issue, because we can distinguish
-between the execution of the \ac{bios} and the execution of the rest of the
-software stack.
-%
-Therefore, we axiomatize the definition of \func{context} with two rules:
+Because {\scshape Minx86} is not precise enough to distinguish between the
+execution of the operating system and the applications, we axiomatize the
+definition of \func{context} with two rules:
 %
 \begin{description}
 \item [\func{context}-bios:] If the core is in \ac{smm}, it executes the
@@ -1170,9 +1162,9 @@ Therefore, we axiomatize the definition of \func{context} with two rules:
   \]
 \end{description}
 
-For the sake of readability, we abusively write
-\( \func{context}(h) = \mathtt{untrusted} \) when the core executes a software
-component which is not the \ac{bios}.
+% For the sake of readability, we abusively write
+% \( \func{context}(h) = \mathtt{untrusted} \) when the core executes a software
+% component which is not the \ac{bios}.
 
 We define $\Delta_{\mathtt{bios}}$ to model the \ac{hse} mechanism applied by
 the \ac{bios}, such that
@@ -1190,7 +1182,7 @@ Once we have properly introduced both, we verify our definition of
 
 \paragraph{Hardware Requirements}
 %
-Given \( h \in H(S) \), we have identified six requirements on states for
+Given \( h \in H(S) \), we have identified six requirements over states for
 \( h \) to satisfy \func{hardware\_req}.
 %
 \begin{enumerate}
@@ -1237,13 +1229,22 @@ Given \( h \in H(S) \), we have identified six requirements on states for
   \]
 \end{enumerate}
 
-\TODO{A la lecture de ces requirements, je m'aperçois que certains d'entre eux
-  s'apppuient sur une configuration réalisée au préalable par le code trusté,
-  durant la phase de boot. On peut donc dire que les exigences sur le code
-  trusté ne sont pas seulement dans les software requirements mais aussi, pour
-  certaines, dans les hardware requirements (et du coup le nom n'est peut être
-  pas idéal), même si elles ne correspondent pas à la même phase d'utilisation
-  (initialisation vs. runtime en quelque sorte)}
+We do not consider the boot sequence in this verification problem and the
+\ac{bios} must correctly configure the hardware architecture prior to start the
+execution of the operating system for the initial state of the considered trace
+to satisfy our 6 requirements over states.
+%
+Otherwise, the trace will not comply with \( \Delta_{\mathtt{bios}} \), and
+there is no guarantee that the security policy will be enforced, independently
+from the correctness of \( \Delta_{\mathtt{bios}} \).
+
+% \TODO{A la lecture de ces requirements, je m'aperçois que certains d'entre eux
+% s'apppuient sur une configuration réalisée au préalable par le code trusté,
+% durant la phase de boot. On peut donc dire que les exigences sur le code
+% trusté ne sont pas seulement dans les software requirements mais aussi, pour
+% certaines, dans les hardware requirements (et du coup le nom n'est peut être
+% pas idéal), même si elles ne correspondent pas à la même phase d'utilisation
+% (initialisation vs. runtime en quelque sorte)}
 
 \paragraph{Software Requirements}
 %
@@ -1304,30 +1305,66 @@ We prove this by case enumeration of \( l \in L_S \uplus L_H \) and
 preserved by \func{bios\_req}.
 %
 In practice, these proofs turned out to be the more demanding, especially for
-requirements 3 and 4.
+requirement 3. ---the content of the SMRAM is owned by the \ac{bios}--- because
+this requires to take the SMRR and the write-back strategy into account for the
+\func{Write} and \func{Read}.
 %
-For \func{Write} and \func{Read} transitions, the following cases have to be
-considered:
+We take the example of \func{Read} transitions; a similar approach applies to
+\func{Write} transitions.
+
+Given a transition labeled \( \func{Read}(\var{pa}) \) from \( h \) to \( h' \),
+there are three case scenarios to consider:
 %
-\begin{itemize}
-\item Whether the core is in \ac{smm} or not;
-\item Whether the targeted physical address falls into the \ac{smrr} range or
+\begin{enumerate}
+\item The core discards the read, as part of the SMRAM cache poisoning
+  countermeasure.
+  %
+  In this context, the hardware architecture is not updated, therefore
+  \( h = h' \) and we can conclude that
+  \( \func{hardware\_req}(h) \Rightarrow \func{hardware\_req}(h') \).
+\item The core is configured to read the content of \( pa \) from the underlying
+  memories (uncacheable strategy).
+  %
+  Thanks to requirements 5., we know that the \texttt{SMRAMC} register has been
+  correctly configured, so by definition of \func{dispatch}
+  (Definition~\ref{def:speccert2:dispatch}), we know that only a core in
+  \ac{smm} can update the content of the SMRAM.
+  %
+  We conclude that the content of the SMRAM remains owned by the \ac{bios} in
+  \( h' \).
+\item The core is configured to read the content of \( pa \) from the cache, and
+  may have to perform a cache eviction if necessary (write-back strategy).
+  %
+  This last case is the more complex to consider, because we have to consider:
+  %
+  whether the core is in \ac{smm} or not;
+  %
+  whether the targeted physical address falls into the \ac{smrr} range or not;
+  %
+  whether the \IO results in a cache hit or not;
+  %
+  in case of cache miss, whether the occupied cache line is tagged ``dirty'' or
   not;
-\item Which cache strategy to use for this transition;
-\item In case of cache hit, whether the occupied cache line is tagged ``dirty''
-  or not, and whether its tag (a physical address) belongs to the SMRAM or not.
-\end{itemize}
+  %
+  in case of a dirty bit, whether its tag (a physical address) belongs to the
+  SMRAM or not.
+  %
+  Taken separately, each case is relatively straightforward to prove.
+  %
+  For instance, in case of cache miss, but the occupied cache line is not tagged
+  as ``dirty'', then the underlying memories are not updated, so we can conclude
+  that the SMRAM remains owned by the \ac{bios}.
+%
+  To manage the number of cases to consider, we carefully organize our proofs in
+  general-purpose lemmas which applies to both \func{Read} and \func{Write}
+  transitions\,\footnote{The interesting reader can have a look at the file
+    \texttt{src/Smm/Delta/Preserve/Architecture.v}
+    in~\ref{letan2016speccertcode}, which gather these proofs, and
+    \texttt{src/Smm/Delta/Preserve/\{Read,Write\}.v} to see them in action.}.
+\end{enumerate}
 %
 Once each requirement has been shown to be preserved during a transition, we can
 conclude for \func{hardware\_req} as a whole.
-
-\TODO{Je comprends ta volonté de résumer une preuve surement un peu rébarbative
-  à décrire et surtout de ne pas réécrire ce que tu as fais en Coq. Toutefois,
-  sans la lecture du code Coq, difficile de comprendre et d'apprécier
-  véritablement ton travail. C'est à mon avis un problème. Ton manuscript
-  devrait expliquer plus précisément ce que tu as fais en Coq pour qu'un lecteur
-  averti puisse juger ton travail sans aller lire ton code. Il faudrait demander
-  l'avis à des spécialistes (Yann?)}
 
 \subsection{BIOS HSE Mechanism Correctness}
 \label{subsec:speccert2:bioshsecorrect}
@@ -1497,9 +1534,9 @@ For instance, the Chapter 34, Volume 3C of \cite{intel2014manual} about \ac{smm}
 is about 30 pages long. It gives many details on how the \ac{smm} actually
 works, yet no section is actually dedicated to security.
 %
-On the contrary, our \ac{hse} mechanism definition gathers six requirements on
-hardware configurations and two requirements on software executions to enforce a
-well-defined security property.
+On the contrary, our \ac{hse} mechanism definition gathers six requirements over
+hardware configurations and two requirements over software executions to enforce
+a well-defined security property.
 %
 Even if the proofs only apply to an abstract model, we believe it is a valuable
 improvement.
