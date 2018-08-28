@@ -977,7 +977,8 @@ injection policies, to act as a detailed example on \ac{hse} compositions.
 \label{sec:speccert:casestudy}
 
 We now aim to illustrate further how our theory can be leveraged in order to
-reason about security enforcement.
+reason about security enforcement by means of several \ac{hse} mechanisms
+implemented at the same time.
 %
 To that end, we take as an example a security policy which explicitly forbids
 software components of a typical software stack ---that is, the \ac{bios}, an
@@ -1291,6 +1292,18 @@ imply the enforcement of \( I \).
   \end{proof}
 \end{theorem}
 
+\subsection*{}
+
+In this Section, we specified a general-purpose called code injection policy,
+and detailed how we could apply it to a typical software stack made of a
+\ac{bios}, an operating system and \( n \) applications.
+%
+More precisely, we proved it is possible to enforce such a policy in this setup
+by enforcing two sub-policies (respectively \( I_{\mathtt{bios}} \) to protect
+the \ac{bios}, and \( I_{\mathtt{os}} \) to constrain the execution of the
+applications) thanks to two \ac{hse} mechanisms (respectively denoted by
+\( \Delta_{\mathtt{bios}} \) and \( \Delta_{\mathtt{os}} \)).
+%
 On a typical x86 hardware architecture, \( \Delta_{\mathtt{bios}} \) relies on
 the \ac{smm} and the SMRAMC memory region within \ac{dram} (as we detailed in
 Subsection~\ref{subsec:usecase:firm:sec}), and \( \Delta_{\mathtt{os}} \) relies
