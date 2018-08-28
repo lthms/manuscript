@@ -51,7 +51,7 @@ execution of software components (Section~\ref{subsec:speccert:hardware}).
 This model acts as a foundation for our \ac{hse} mechanisms theory
 (Section~\ref{subsec:speccert:hse}).
 %
-We then define what correctness means in the context of \ac{hse} mechanisms
+We then define correctness in the context of \ac{hse} mechanisms
 (Section~\ref{subsec:speccert:security}).
 %
 Our motivation to separate the model of the hardware architecture and \ac{hse}
@@ -80,7 +80,7 @@ etc.
 %
 These state transformations occur during the system's transitions.
 
-\paragraph{Transitions.}
+\paragraph{Labeled Transitions.}
 %
 We distinguish between two classes of transitions: the software transitions
 which are direct and foreseeable side effects of the execution of an instruction
@@ -179,7 +179,7 @@ state of the next one.
   \end{itemize}
 \end{definition}
 
-Mainstream hardware architectures are not ``safe'' by default, and required
+Mainstream hardware architectures are not ``safe'' by default, and require
 additional software configuration to enforce security properties.
 %
 For instance, it is legitimate, from a x86 specifications perspective, to enter
@@ -207,10 +207,10 @@ hardware configurations which constrain the execution of untrusted software
 components with respect to a targeted security policy.
 
 On the other hand, the purpose of the requirements over software transitions is
-to guarantee requirements over state hold true at all time.
+to guarantee requirements over states hold true at all time.
 %
 Because we consider an adversary model where attackers control untrusted
-software components, we do not consider any hypotheses on their behavior.
+software components, we do not consider any hypothesis on their behavior.
 %
 Therefore, requirements over software transitions should only constrain the
 execution of trusted software components, which implement the \ac{hse}
@@ -224,9 +224,9 @@ implemented a \ac{hse} mechanism by satisfying the requirements at all time.
 % respecter les contraintes sur les états et les transititions software. C'est
 % un peu trop implicite.}
 %
-From this perspective, to verify this \ac{hse} mechanism is correct with respect
-to a targeted security policy means proving the set of compliant traces of this
-mechanism satisfies the predicate which models the policy.
+From this perspective, to verify whether this \ac{hse} mechanism is correct with
+respect to a targeted security policy means proving its set of compliant traces
+satisfies the predicate which models the policy.
 
 \paragraph{HSE Mechanisms.}
 %
@@ -244,7 +244,7 @@ For instance, x86 processors protection rings are commonly used to execute
 several software components.
 %
 Ring 0 is dedicated to the operating system, whereas the applications are
-executed by a core is in ring 3, with a particular page table setup.
+executed by a core in ring 3, with a particular page table setup.
 
 \begin{definition}[Hardware-Software Mapping]
   \label{def:speccert:hardsoft}
@@ -309,44 +309,6 @@ which only constrain trusted software components.
 
 We illustrate this definition with the flash memory lockdown mechanism described
 in Section~\ref{subsec:usecase:firm:sec}.
-%
-As a reminder, such mechanism enforces the integrity of the \ac{bios} code
-within the flash memory and is implemented by the \ac{pch}.
-%
-As pictured in Figure~\ref{fig:speccert:flash}, the \ac{pch} acts as a proxy
-between the core and a collection of peripherals, including the flash memory.
-%
-The \ac{hse} mechanism proceeds as follows:
-%
-\begin{enumerate}
-\item By default, the flash memory is locked and its content cannot be modified.
-  %
-  By setting the correct bit of a dedicated register of the \ac{pch}
-  (\texttt{BIOS\_CNTL}), a software component requests to unlock the flash
-  memory.
-%
-\item When a software component (\emph{e.g.} system software) unlocks the flash
-  memory, the \ac{pch} triggers a \ac{smi}.
-%
-\item This forces the core to enter \ac{smm}.
-  %
-  By doing so, the core stops the execution of the software component which has
-  unlocked the flash memory and starts the execution of the \ac{bios}.
-%
-\item In order to protect the integrity of the flash memory content, the
-  \ac{bios} is expected to lock the flash memory again, before resuming the
-  execution of the system software with the \texttt{rsm} assembly instruction.
-\end{enumerate}
-
-Legacy \acp{bios} probably used this mechanism in order to implement an ad-hoc
-communication channel between the \ac{bios} and the system software component,
-\emph{e.g.} to initiate a \ac{bios} update.
-%
-The \ac{uefi} standard introduces dedicated protocols to enable communication
-between the \ac{bios} and the system software component, and our understanding
-is that in most implementations the \ac{bios} action, in response to a \ac{smi}
-triggered by the unlocking of the flash memory, is limited to lock it again and
-resume.
 
 \begin{figure}
   \centering
@@ -379,7 +341,46 @@ resume.
 
 \begin{example}[Model of Flash Memory Lockdown Mechanism]
   \label{example:speccert:flashdef}
+
+  As a reminder, such mechanism enforces the integrity of the \ac{bios} code
+  within the flash memory and is implemented by the \ac{pch}.
   %
+  As pictured in Figure~\ref{fig:speccert:flash}, the \ac{pch} acts as a proxy
+  between the core and a collection of peripherals, including the flash memory.
+  %
+  The \ac{hse} mechanism proceeds as follows:
+  %
+  \begin{enumerate}
+  \item By default, the flash memory is locked and its content cannot be
+    modified.
+    %
+    By setting the correct bit of a dedicated register of the \ac{pch}
+    (\texttt{BIOS\_CNTL}), a software component requests to unlock the flash
+    memory.
+  %
+  \item When a software component (\emph{e.g.} system software) unlocks the
+    flash memory, the \ac{pch} triggers a \ac{smi}.
+  %
+  \item This forces the core to enter \ac{smm}.
+    %
+    By doing so, the core stops the execution of the software component which
+    has unlocked the flash memory and starts the execution of the \ac{bios}.
+    %
+  \item In order to protect the integrity of the flash memory content, the
+    \ac{bios} is expected to lock the flash memory again, before resuming the
+    execution of the system software with the \texttt{rsm} assembly instruction.
+  \end{enumerate}
+
+  Legacy \acp{bios} probably used this mechanism in order to implement an ad-hoc
+  communication channel between the \ac{bios} and the system software component,
+  \emph{e.g.} to initiate a \ac{bios} update.
+  %
+  The \ac{uefi} standard introduces dedicated protocols to enable communication
+  between the \ac{bios} and the system software component, and our understanding
+  is that in most implementations the \ac{bios} action, in response to a
+  \ac{smi} triggered by the unlocking of the flash memory, is limited to lock it
+  again and resume.
+
   The set of trusted software components is limited to the \ac{bios}, that is
   \( T = \{ \mathtt{bios} \} \).
   %
@@ -479,13 +480,13 @@ In such a condition, the hardware architecture may stop to constrain the
 execution of untrusted software components with respect to the targeted security
 policy.
 %
-This could mean that constrains over trusted software components execution are
+This could mean that constraints over trusted software components execution are
 incomplete, or that requirements over hardware states are too restrictive.
 %
-If it is not possible to loosen the requirements over hardware states without
-threatening the security policy enforcement or to find additional restrictions
-over trusted software execution, then the \ac{hse} mechanism probably does not
-serve its purpose.
+If the requirements over hardware states cannot be loosen without threatening
+the security policy enforcement or to find additional restrictions over trusted
+software execution, then the \ac{hse} mechanism probably does not serve its
+purpose.
 % \TODO{Cela veut surrement dire que les contraintes sur l'exécution du code
 % trusté sont incomplètes ou que le la restriction sur l'état du hardware est au
 % contraire trop restrictive. S'il n'est pas possible de trouver une contrainte
@@ -559,8 +560,8 @@ generate a software transition which does not satisfy the requirements of the
 %
 Because the purpose of these requirements over software transitions is to
 prevent untrusted software components to reach a hardware configuration wherein
-the requirements over states are not satisfied, so it is required that the
-initial state of the trace satisfies the requirements over states.
+the requirements over states are not satisfied, so the initial state of the
+trace must satisfy the requirements over states.
 %
 A trace whose initial state satisfies the requirements over states and where
 trusted software components do correctly implement a \ac{hse} mechanism is said
@@ -626,9 +627,9 @@ states is only a mean to an end.
 The true purpose of a \ac{hse} mechanism is to constrain the execution of
 untrusted software components with respect to a targeted security policy.
 
-It is possible to define a \ac{hse} mechanism which satisfies the \ac{hse} laws,
-yet failed to constrain the execution of untrusted software components with
-respect to a targeted security policy.
+A \ac{hse} mechanism can satisfy the \ac{hse} laws, but yet fails to constrain
+the execution of untrusted software components with respect to a targeted
+security policy.
 %
 The SMRAM cache poisoning attack disclosed in 2009 is a good illustration of
 that eventuality\,\cite{duflot2009smram,wojtczuk2009smram}.
