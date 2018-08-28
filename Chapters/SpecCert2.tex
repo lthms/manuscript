@@ -42,10 +42,10 @@ The model and proofs described in this Chapter have been implemented using Coq.
 We have released this development as free software in a project called
 SpecCert\,\footnote{SpecCert can be found at the following URL:
   \url{https://github.com/lthms/speccert}}.
-%
-As we introduce new definitions and theoretical results, we point to the related
-statements in SpecCert, so the interesting reader familiar with Coq can refer to
-our machine-checked proofs.
+%%
+%As we introduce new definitions and theoretical results, we point to the related
+%statements in SpecCert, so the interesting reader familiar with Coq can refer to
+%our machine-checked proofs.
 
 \section{A Minimal x86 Hardware Model}
 \label{sec:speccert2:minx86}
@@ -1305,9 +1305,10 @@ We prove this by case enumeration of \( l \in L_S \uplus L_H \) and
 preserved by \func{bios\_req}.
 %
 In practice, these proofs turned out to be the more demanding, especially for
-requirement 3. ---the content of the SMRAM is owned by the \ac{bios}--- because
-this requires to take the SMRR and the write-back strategy into account for the
-\func{Write} and \func{Read}.
+requirement 3. ---the content of the SMRAM is owned by the \ac{bios}--- and
+4. ---the cache line tagged with physical addresses related to the SMRAM are
+owned by the \ac{bios}--- because this requires to take the SMRR and the
+write-back strategy into account for the \func{Write} and \func{Read}.
 %
 We take the example of \func{Read} transitions; a similar approach applies to
 \func{Write} transitions.
@@ -1354,7 +1355,7 @@ there are three case scenarios to consider:
   For instance, in case of cache miss, but the occupied cache line is not tagged
   as ``dirty'', then the underlying memories are not updated, so we can conclude
   that the SMRAM remains owned by the \ac{bios}.
-%
+  %
   To manage the number of cases to consider, we carefully organize our proofs in
   general-purpose lemmas which applies to both \func{Read} and \func{Write}
   transitions\,\footnote{The interesting reader can have a look at the file
@@ -1481,215 +1482,40 @@ mechanism, but does not satisfies the security policy.
 \section{Conclusion}
 \label{sec:speccert:discuss}
 
-\thomasrk[inline]{On doit remettre (séparément) l'argumentation du « ça
-  bénéficie aux deux mondes » de manière plus concrète.}
+In this Chapter, we proceeded with the case study introduced in
+Section~\ref{sec:speccert:casestudy}.
 %
-\TODO{Je suis en phase avec l'argumentaire développé dans l'abstract
-  (firstly... et secondly...). Tu devrais le reprendre (en le développant) ici
-  où l'arguentaire est moins claire et ne semble pas "calqué" sur sa première
-  énonciation (il devrait).}
+We introduced {\scshape Minx86}, a minimal x86 hardware model conceived with
+extensibility in mind.
+%
+We specified the \ac{hse} mechanism implemented by the \ac{bios} in order to
+remain isolated from the rest of the software stack, then verified that this
+mechanism is correct with respect to the so-called \ac{bios} code injection
+sub-policy.
+%
+In summary, we have applied our three-steps methodology.
+%
+The resulting model assumes as little as possible about the actual
+implementation of the \ac{bios}, and constitutes, to the extent of our
+knowledge, the first formalization of the \ac{bios} security model at runtime.
+%
+As we have already mentioned, our proofs have been implemented within the Coq
+theorem prover to increase our confidence in our results, and have been released
+as free software\,\ref{letan2016speccertcode}.
+%
+The resulting project counts around 4\,500 lines of code, divided into 2\,000
+lines of code of definition and specification and 2\,500 lines of code of
+proofs.
+%
+We believe this represents a manageable size regarding the complexity of the
+model, but whether our approach remains applicable for a large-scale models
+remained to be proven when we first released this work in 2016.
+%
+Subsequently, we have experimented increasing the scope of {\scshape Minx86}
+with pagination, and have been convinced that considering the whole architecture
+at once ---as it is done in {\scshape Minx86}--- would not scale properly.
 
-Throughout this Chapter, we have applied our three-steps methodology for
-formally specifying and verifying \ac{hse} mechanisms against a hardware
-architecture model to a real world example.
-%
-\TODO{Phrase trop longue et difficile à suivre. Couper en deux. Première phrase
-  "on a proposé une approche pour spécifier et vérifier un HSE au regard d'un
-  model hardware (virer architecture). On a ensuite appliqué cette méthodo sur
-  un exemple concret : le mécanisme d'isolation du BIOS utilisant la SMM.}
-%
-Such approach can benefit both hardware designers and software developers.
-
-First, the hardware model \TODO{A quoi renvoie précisément "hardware model" dans
-  ton approche? harware\_req? software\_req? les deux? Il faut être explicite }
-can be used as a formal specification by software developers. \TODO{tu es sur
-  que c'est bien "software dev" que tu as voulu mettre ici? Dans ce cas je ne
-  comprends pas trop ton développement. Tu dis que ton approche peut à la fois
-  bénéficier au hard designer et soft dev mais ton "first" et ton 'secondly"
-  s'adresse tous deux au "soft dev"...}
-%
-The main benefit of a formal specification is to avoid any ambiguity such as the
-one we have found in \cite{intel2009mch} (as published in 2009).
-%
-One can read at Section 3.8.3.8, page 102 that ``the OPEN bit must be reset
-before the LOCK bit is set''.
-%
-At the same page, in the description of the LOCK bit, one can also read that
-``when [LOCK] is set to 1 then [OPEN] is reset to 0''.
-%
-We modelled the second statement since the behavior of the memory controller is
-not specified if the first statement is true\,\footnote{If we had to actually
-  implement the \ac{hse} mechanism, we would have to assume the first was the
-  correct one.}. \TODO{Cette phrase et la footnote correspondante ne sont pas
-  claires.} \formatLTS{Minx86} as a formal specification does not suffer from
-the same flaw. \TODO{Mouais, disons que par définition, une specification
-  formelle ne peut être ambigu. Dans ton cas, tu as du faire un choix si j'ai
-  bien compris. Mais est-ce le bon....?}
-%
-
-Secondly, a formal specification of a \ac{hse} mechanism will help software
-developers when the time comes to implement it.
-%
-For instance, the Chapter 34, Volume 3C of \cite{intel2014manual} about \ac{smm}
-is about 30 pages long. It gives many details on how the \ac{smm} actually
-works, yet no section is actually dedicated to security.
-%
-On the contrary, our \ac{hse} mechanism definition gathers six requirements over
-hardware configurations and two requirements over software executions to enforce
-a well-defined security property.
-%
-Even if the proofs only apply to an abstract model, we believe it is a valuable
-improvement.
-%
-Lastly, the verification process of a \ac{hse} mechanism specification against a
-hardware architecture model may help to highlight hidden flaws in the hardware
-specifications assumptions.
-%
-To illustrate that, we have taken the example of the SMRAM cache poisonning
-attack\,\cite{wojtczuk2009smram,duflot2009smram}, which has motivated the
-introduction of the \ac{smrr}.
-
-From our point of view, the clear separation between the hardware model, the
-security properties and the \ac{hse} mechanisms to enforce those properties are
-the main advantage of our approach. Thanks to this separation, different
-\ac{hse} mechanisms can be studied against the same hardware model.
-%
-However, the scalability of SpecCert remains to be proven.
-%
-In particular, the complexity of the hardware architecture makes monolithic
-model impracticable in practice. \TODO{Que veux dire "monolithic model"? Il
-  faudrait détailler un peu plus la problématique}
-%
 The next Part of this thesis focuses on this problematic.
-
-%% In case I need that in the future.
-% {\small
-% \begin{prooftree}
-%   \AxiomC{\( \top \)}%
-%   \AxiomC{%
-%   \(
-%   \begin{array}{l}
-%     \text{if }\func{cache\_hit}(h.\func{cache}, pa) \\
-%     \text{then }h' = h \{ \func{cache}(\func{index}(\var{pa})) \leftarrow
-%           %     h.\func{cache}(\func{index}(\var{pa}))\{ \func{content}
-%           %     \leftarrow
-%           %     v,
-%           %     \func{dirty} \leftarrow \val{true} \}\}\} \\
-%           %     \text{else if
-%           %   }h.\func{cache}(\func{index}(\var{pa})).\func{dirty}
-%           %     =
-%           %     \val{true} \\
-%           %     \text{then }h' = h\left\{
-%         \begin{array}{c}
-%           \func{mem}(h.\func{cache}(\func{index}(\var{pa})).\func{tag})
-%           \leftarrow
-%           \left< \begin{array}{c}
-%                    \func{content} =
-%                    h.\func{cache}(\func{index}(\var{pa})).\func{content}, \\
-%                    \func{owner} = h.\func{cache}(\func{index}(\var{pa})).\func{owner}
-%                  \end{array}
-%           \right>, \\
-%           \func{cache}(\func{index}(\var{pa})) \leftarrow
-%           \left<
-%           \begin{array}{c}
-%             \func{content} = v, \func{tag} = \var{pa}, \func{owner} =
-%             \func{context}(h), \func{dirty} = \val{true}
-%           \end{array}
-%           \right>
-%         \end{array}\right\} \\
-%         \text{else } h' = h \left\{
-%         \func{cache}(\func{index}(\var{pa})) \leftarrow
-%         \left<
-%         \begin{array}{c}
-%           \func{content} = v, \func{tag} = \var{pa}, \func{owner} =
-%           \func{context}(h), \func{dirty} = \val{true}
-%         \end{array}
-%         \right>
-%         \right\}
-%       \end{array}
-%       \)}%
-%       \BinaryInfC{\( h \xrightarrow[\func{context}]{\func{Write}(\var{pa}, v)}
-%       h' \)}
-%     \end{prooftree}
-
-%     \begin{prooftree}
-%       \AxiomC{\( \top \)}%
-%       \AxiomC{%
-%       \(
-%       \begin{array}{l}
-%        \text{if }\func{cache\_hit}(h.\func{cache}, pa) \\
-%        \text{then }h' = h \{ \func{cache}(\func{index}(\var{pa})) \leftarrow
-%        h.\func{cache}(\func{index}(\var{pa}))\{ \func{content} \leftarrow v,
-%        \func{dirty} \leftarrow \val{true} \}\}\} \\
-%        \text{else if
-%        }h.\func{cache}(\func{index}(\var{pa})).\func{dirty} =
-%        \val{true} \\
-%        \text{then }h' =
-%        h\left\{
-%        \begin{array}{c}
-%          \func{mem}(h.\func{cache}(\func{index}(\var{pa})).\func{tag})
-%          \leftarrow
-%          \left< \begin{array}{c}
-%                   \func{content} =
-%                   h.\func{cache}(\func{index}(\var{pa})).\func{content}, \\
-%                   \func{owner} = h.\func{cache}(\func{index}(\var{pa})).\func{owner}
-%                 \end{array}
-%          \right>, \\
-%          \func{cache}(\func{index}(\var{pa})) \leftarrow
-%          \left<
-%          \begin{array}{c}
-%            \func{content} = h.\func{mem}(\var{pa}).\func{content}, \func{tag} =
-%            \var{pa}, \\
-%            \func{owner} =
-%            h.\func{mem}(\var{pa}).\func{owner}, \func{dirty} = \val{false}
-%          \end{array}
-%          \right>
-%        \end{array}\right\} \\
-%        \text{else } h' = h \left\{
-%        \func{cache}(\func{index}(\var{pa})) \leftarrow
-%        \left<
-%        \begin{array}{c}
-%          \func{content} = h.\func{mem}(\var{pa}).\func{content}, \func{tag} =
-%          \var{pa}, \\
-%          \func{owner} =
-%          h.\func{mem}(\var{pa}).\func{owner}, \func{dirty} = \val{false}
-%        \end{array}
-%        \right>
-%        \right\}
-%      \end{array}
-%      \)}%
-%      \BinaryInfC{\( h \xrightarrow[\func{context}]{\func{Read}(\var{pa})} h'
-%      \)}
-%    \end{prooftree}
-%  }
-
-%    \begin{minipage}[c]{0.40\linewidth}
-%      \begin{prooftree}
-%        \AxiomC{\( \top \)}%
-%        \AxiomC{\( h' = h \{ \func{core}.\func{strat}(\var{pa}) \leftarrow
-%        \var{strat} \} \)}%
-%        \BinaryInfC{\( h
-%        \xrightarrow[\func{context}]{\func{SetCacheStrat}(\var{pa},
-%        \var{strat})} h' \)}
-%      \end{prooftree}
-%    \end{minipage}
-%  %
-%    \hfill
-%  %
-%    \begin{minipage}[c]{0.55\linewidth}
-%      \begin{prooftree}
-%        \AxiomC{\( h.\func{in\_smm} = \val{true} \)}%
-%        \AxiomC{\( h' = h \{ \func{core}.\func{smrr} \leftarrow \var{smrr} \}
-%        \)}%
-%        \BinaryInfC{\( h
-%        \xrightarrow[\func{context}]{\func{UpdateSmrr}(\var{smrr})} h' \)}
-%      \end{prooftree}
-%    \end{minipage}
 %
-%    \begin{minipage}[c]{0.55\linewidth}
-%      \begin{prooftree}
-%        \AxiomC{\( h.\func{in\_smm} = \val{true} \)}%
-%        \AxiomC{\( h' = h \{ \func{in\_smm} \leftarrow \val{false} \} \)}%
-%        \BinaryInfC{\( h \xrightarrow[\func{context}]{\func{Rsm}} h' \)}
-%      \end{prooftree}
-%    \end{minipage}
+We propose another approach to enable modular verification of complex systems
+made of interconnected components, as hardware architectures definitely are.
