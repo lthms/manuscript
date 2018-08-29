@@ -65,8 +65,8 @@ work.
 
 Our contribution is twofold.
 %
-As a first step, we propose a theory of HSE mechanisms whose one principle was
-to rely on general-purpose hardware model.
+As a first step, we have proposed a theory of HSE mechanisms whose one principle
+is to rely on general-purpose hardware model.
 %
 Furthermore, we have proposed a compositional reasoning framework for Coq, based
 on our experience in implementing a proof of concept for our theory.
@@ -111,10 +111,37 @@ We have introduced so-called abstract specifications to allow for reasoning
 about component in isolation \emph{and} about the expected properties of their
 composition.
 %
-Besides, the resulting Coq framework, also made available as a free
-software\,\cite{letan2018freespeccode}, is not specific to hardware models, and
-could also be leveraged to reason about composition of software components as
-well.
+Besides, the resulting Coq framework, called FreeSpec and also made available as
+a free software\,\cite{letan2018freespeccode}, is not specific to hardware
+models, and could also be leveraged to reason about composition of software
+components as well.
 
 \section{Perspectives}
 \label{sec:conclusion:perspectives}
+
+As they stand, our theory of \ac{hse} mechanisms and our compositional reasoning
+framework for Coq remain two separated projects.
+%
+The most natural continuation of our work would be to connect these two works,
+\emph{e.g.} by substituting {\scshape Minx86} with a model developed thanks to
+FreeSpec.
+%
+Going further, we are convinced a general-purpose model for the x86 architecture
+would worth every time and effort spent to its construction.
+%
+For the latter to be trustworthy, the validation of this model is of key
+importance.
+%
+We have taken great care for FreeSpec to be compatible with the code extraction
+feature of Coq, which means we can turn components model into executable
+programs.
+%
+This feature opens interesting opportunities, but remains only a first step
+towards a practical model validation framework.
+%
+Validating a model of a \ac{pch}, for instance, promises to be challenging
+because of its tight integration inside Intel chips.
+%
+Focusing our efforts on open source processors, like the
+Leon4\,\cite{gaisler2007leon} for instance, could allow us to investigate
+further this research direction.
