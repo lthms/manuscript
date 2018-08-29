@@ -10,82 +10,34 @@
 \vspace{1cm}%
 \noindent
 %
-For many years, industrial vendors\,\cite{reid2017arm,leslie2015sgx} \GH{la
-  deuxième référence est cassée} and
-researchers\,\cite{chong2016report,choi2017kami} have aimed to formally specify
-and verify hardware architectures.
+In the previous Part of this manuscript, we have introduced a theory of \ac{hse}
+mechanisms and have leveraged this theory to specify and verify the \ac{hse}
+mechanism implemented by the \ac{bios} at runtime in order to remain isolated
+from the rest of the software stack.
 %
-However, verifying properties of existing computing platforms poses significant
-challenges, because they tend to be both complex and under-specified; we are not
-aware of any model of existing and broadly used computing system that is
-comprehensive in terms of its hardware and software components.
+In this context, we have defined a small x86 hardware model called {\scshape
+  Minx86} (Definition~\ref{def:speccert2:minx86}).
 %
-Unfortunately, such a model is a prerequisite to verify a computing platform in
-terms of architectural attacks.
+This experiment has been very insightful.
 %
-The scale of the task dictates several requirements regarding the formalism to
-adopt in this particular case.
+In particular, it has highlighted the key importance of a modular approach to
+tackle the challenge posed by the scale of the x86 hardware architecture.
 %
-It must allow for considering independently each component of our system, before
-composing them to conclude about the properties of the system as a whole. \GH{Tu
-  parles de plusieurs requirements mais tu n'en n'évoque qu'un seul. En outre,
-  cette intro est longue et parfois un peu maladroite. Je la réduirais en une ou
-  deux phrase plus sobre et directe du style 'Modéliser de manière préciser un
-  système complexe que représente une architecture x86, constitué de plusieurs
-  composants interagissant entre eux, nécessite une approche modulaire.'}
-
-This objective is reminiscent of the programming language problematic to model
-and verify large programs with side effects.
-%
-Reasoning about side effects in purely functional languages such as {\textsc
-  Gallina}, the Coq specification language, is difficult, firstly because they
-imply to somehow take into account an outer \emph{stateful} environment and
-secondly, because the composition of stateful computations is not well-handled
-by traditional (monadic) approaches.
-%
-Algebraic effects and handlers\,\cite{bauer2015effects} overcome this double
-challenge.
-%
-They allow to model large classes of effects (e.g., exception, state,
-non-determinism) and to compose effects within purely functional programs, while
-deferring the realizations of these effects to dedicated handlers.
-
-In this Chapter, we aim to show how a variant of algebraic effects based on free
-monads can be used to reason about large systems, by modeling their components
-as effect handlers.
-%
-Our contribution is threefold:
-\begin{itemize}
-\item We propose an approach which leverages the key concepts of algebraic
-  effects and handlers to model and to verify each component of a computing
-  system independently, while providing the necessary abstractions to compose
-  these components in order to verify the properties of the resulting system.
-%
-\item We have implemented FreeSpec\,\footnote{FreeSpec has been released as a
-    free software, under the terms of the GPLv3.
-    \url{https://github.com/ANSSI-FR/FreeSpec}}, a framework for the Coq proof
-  assistant to \emph{modularly} verify programs with effects and effects
-  handlers with our approach.
-%
-\item We have modelled and verified a simplified subset of an x86 computing
-  system with FreeSpec in order to illustrate how our formalism can be leveraged
-  to tackle our initial objective, that is modeling and verifying computing
-  platforms.
-\end{itemize}
+This Chapter focuses on our second contribution: an approach to model and verify
+each component of a component-based system in isolation, while providing the
+necessary abstractions to compose these components\,\cite{letan2018freespec},
+along with a companion framework for Coq to support this
+approach\,\cite{letan2018freespeccode}.
 
 The rest of the Chapter proceeds as follows.
 %
-We first discuss our motivations to propose a compositional reasoning for Coq,
-based on our experience implementing the proofs of
+We justified our contribution with the experience implementing the proofs of
 Chapter~\ref{chapter:speccert2} (Section~\ref{sec:freespec:why}).
 %
-Then, we describe how we model components in terms of programs with effects and effect
-handlers (Section~\ref{sec:freespec:specifying}) and we introduce so-called
-abstract specifications to verify their respective properties
+Then, we describe how we model components in terms of programs with effects and
+effect handlers (Section~\ref{sec:freespec:specifying}) and we introduce
+so-called abstract specifications to verify their respective properties
 (Section~\ref{sec:freespec:verifying}).
-%
-To illustrate our definitions, we use a running example in the form of the
-specification and verification of a simplified memory controller.
 %
 Then, we discuss how the different levels of composition of FreeSpec can be
 leveraged to scale the modeling and verification work for larger systems
@@ -95,16 +47,12 @@ leveraged to scale the modeling and verification work for larger systems
 \label{sec:freespec:why}
 % ==============================================================================
 
-Implementing the proofs of correctness of \( \Delta_{\mathtt{bios}} \) has been
-very insightful.
-%
-In this subsection, we emphasize two limitations of {\scshape Minx86} ---the
-hardware model which acts as a foundation of this verification work--- which
-makes its use at a larger scale unlikely (\ref{subsec:freespec:minx86lim}).
+In this Section, we emphasize three limitations of {\scshape Minx86} which makes
+its use at a larger scale unlikely (\ref{subsec:freespec:minx86lim}).
 %
 Then, we explain how we manage to mitigate these limitations to a large extent
-when experimenting on {\scshape Minx86}, and discuss how we propose to take our
-approach a step further (\ref{subsec:freespec:approachoverview}).
+when experimenting on {\scshape Minx86}, and discuss how we propose to take the
+resulting approach a step further (\ref{subsec:freespec:approachoverview}).
 %
 Finally, we give an overview of our compositional reasoning framework key
 concepts (\ref{freespec:subsec:freespecoverview}).
@@ -112,13 +60,12 @@ concepts (\ref{freespec:subsec:freespecoverview}).
 \subsection{{\scshape Minx86} Limitations}
 \label{subsec:freespec:minx86lim}
 
-Having reasoning about the correctness of \( \Delta_{\mathtt{bios}} \) against
-{\scshape Minx86}, we have identified three limitations which reduce, to our
-opinion, its applicability as we would increase its scope: its monolithic
-design, its weakness against the temporary violation
-problem\,\cite{muller2006tempviolation}, and the presence within our supposedly
-general-purpose model of abstract values specific to a particular case study
-(\emph{i.e.}  memory location owners).
+Having reasoning about the correctness of \( \Delta_{\mathtt{bios}} \), we have
+identified three limitations which reduce the applicability of {\scshape Minx86}
+as we would increase its scope: its monolithic design, its weakness against the
+temporary violation problem\,\cite{muller2006tempviolation}, and the presence
+within our supposedly general-purpose model of abstract values specific to a
+particular case study.
 
 \paragraph{Monolithic Model.}
 %
@@ -129,12 +76,8 @@ controller and two arrays of memory cells.
 That is, {\scshape Minx86} is a monolithic model, and this is not without
 consequences.
 
-In our case, it has remained manageable in practice, because we carefully
-organized our Coq development in order to keep components separated from each
-other as much as possible.
-%
-This does not prevent some changes to the definition of \( H(S) \) to have an
-important impact on proofs already written at the moment.
+During the development of our proof of concept, changes to the definition of
+\( H(S) \) had an important impact on proofs already written at the moment.
 %
 We have no doubt that such situations will arise again if we try to increase the
 scope of {\scshape Minx86}.
@@ -314,9 +257,11 @@ with the owner of a memory location.
 %
 Modifying the transition relation will likely break all proofs previously
 written, and therefore this greatly reduces the opportunity to reuse {\scshape
-  Minx86} for other security policies and contradicts our initial goal to verify
-\ac{hse} mechanisms of the same architecture against the same general-purpose
-model.
+  Minx86} for other security policies.
+%
+This is important to acknowledge, because it contradicts our initial goal to
+verify \ac{hse} mechanisms of the same architecture against the same
+general-purpose model.
 
 % \begin{table}
 %   \center
@@ -345,12 +290,10 @@ model.
 \label{subsec:freespec:approachoverview}
 
 In the verification work presented in Chapter~\ref{chapter:speccert2}, we have
-successfully managed the limitation of {\scshape Minx86} partly thanks to its
-reduced scope, but also because we have taken great care in organizing our
-development as modurarly as we could.
+successfully managed the limitation of {\scshape Minx86} partly because we have
+taken great care in organizing our development as modurarly as we could.
 %
-We now detail the approach we used, and we explain how we aim to take its key
-concepts a step further.
+We now detail the approach we used.
 
 \paragraph{Lessons Learned.}
 %
@@ -368,9 +311,9 @@ similar fashion, \emph{e.g.} there is a \texttt{Architecture\_func.v} file
 accompanied by a \texttt{Architecture\_proofs.v} file.
 
 This approach proved to be valuable to deal with the important number of cases
-to cover, when used in conjunction with a recurring pattern we
-call ``\texttt{remember};~\texttt{destruct};~\texttt{assert};~\texttt{apply}'',
-after the Coq tactics.
+to cover, when used in conjunction with a recurring pattern we call
+``\texttt{remember};~\texttt{destruct};~\texttt{assert};~\texttt{apply}'', after
+the Coq tactics.
 %
 We illustrate the use of this pattern with the proof goal pictured in
 Figure~\ref{fig:freespec:entrypoint}.
@@ -387,11 +330,12 @@ Figure~\ref{fig:freespec:entrypoint}.
   \texttt{if-then-else}.
   %
   For instance, regarding the initial state of the system, the content of the
-  address \( \mathtt{pa} \) may or may not be present in the cache
+  address \( \var{pa} \) may or may not be present in the cache
   (Figure~\ref{fig:freespec:remember}, line 14).
   %
   We explore both alternatives thanks to the \texttt{destruct} tactic (see the
-  two simplified goals in Figure~\ref{fig:freespec:destruct})
+  two simplified goals in Figure~\ref{fig:freespec:destruct}, more particularly
+  on the value of \texttt{a\_3}).
   %
 \item Using \texttt{assert}, we can introduce now goals to prove intermediary
   results (like the one in Figure~\ref{fig:freespec:assert}, for instance).
@@ -405,8 +349,8 @@ Figure~\ref{fig:freespec:entrypoint}.
   %
   For instance, the function \texttt{update\_cache\_content}
   (Figure~\ref{fig:freespec:remember}, line 11) has a companion lemma called
-  \texttt{update\_cache\_content\-\_with\_context\_preserves\_inv} that we can use
-  to conclude about the goal introduced in Figure~\ref{fig:freespec:assert}.
+  \texttt{update\_cache\_content\-\_with\_context\_preserves\_inv} that we can
+  use to conclude about the goal introduced in Figure~\ref{fig:freespec:assert}.
 \end{enumerate}
 
 \begin{figure}
@@ -514,56 +458,66 @@ invariant, \( h_i \) is an intermediary state, and \( h_{i+1} \) its successor.
 Beside, it can help uncover temporary violation problems thanks to the
 intermediary goals introduced with \texttt{assert}.
 
-However, the
-``\texttt{remember};~\texttt{destruct};~\texttt{assert};~\texttt{apply}''
-remains cumbersome to use, and nothing prevents the verifier from forgetting a
-problematic state update and yet being able to conclude the proof.
-
 \paragraph{Perspectives.}
 %
-To prove the correctness of the \ac{hse} mechanism implemented by the \ac{bios}
-at runtime to remain isolated from the rest of the software stack with respect
-to the \ac{bios} code injection policy, we rely on two patterns.
+Decoupling the hardware components as much as possible, and relying on the
+``\texttt{remember};~\texttt{destruct};~\texttt{assert};~\texttt{apply}''
+pattern to reason about their successive state updates has proven to be an
+effective way to mitigate the monolithic design of {\scshape Minx86}, and has
+the potential to address the temporary violation problem.
 %
-Firstly, we model each component and isolation and prove several general-purpose
-lemmas about their behavior prior to combining them together.
+However, it remains cumbersome to use manually.
 %
-Secondly, we systematically organize our proofs to identify sequences of
-intermediary state updates within each transitions, to reduce the proof burden.
-%
-We believe these two patterns have been of key importance to help us conclude
-our proofs.
-%
-Besides, they can help overcoming two important limitations of {\scshape
-  Minx86}, that is monolithic modeling and the temporary invariant problem.
-%
-However, they have proven to be cumbersome to use manually.
+With FreeSpec, our objective is twofold.
 
-The main objective of this second contribution is to automate as much as
-possible the
-\texttt{remember};~\texttt{destruct};~\texttt{assert};~\texttt{apply}, in a way
-that enables formally reasoning about the temporary violation problem.
-%
-Besides, we want to propose a general-purpose formalism that allows for never
+Firstly, we want to propose a general-purpose formalism that allows for never
 considering the hardware architecture as a whole, but rather focus on
 interactions between neighboring components.
 %
-In practice, most of the work related to mitigate impact of modifying the state
-definition was focused on the \texttt{src/x86/Architecture} files.
-%
-Our last objective is to propose a modeling approach which favors the separation
-of the security policy and the hardware model definitions.
-
 To that end, we take the principle of our theory of \ac{hse} mechanism a step
 further.
 %
 Our theory is based onto a clear separation between hardware components from the
-one side, and software components from the other side; software components can
-interact with hardware components through the execution of instructions, modeled
-by the software transitions of the hardware model.
+one side, and software components from the other side.
 %
-In this Chapter, we propose a general-purpose framework that generalizes this
-interface-driven approach for the hardware components.
+Software components can interact with hardware components through the execution
+of instructions, modeled by the software transitions of the hardware model, and
+we specify requirements over how trusted software requirements interact with the
+hardware architecture.
+%
+With FreeSpec, we apply the same reasoning for hardware components alike: we
+specify how they interact together, and specify requirements over these
+interactions.
+
+Secondly, we want to automate as much as possible the
+\texttt{remember};~\texttt{destruct};~\texttt{assert};~\texttt{apply}, in a way
+that enables formally reasoning about the temporary violation problem.
+%
+This objective is reminiscent of the programming language problematic to model
+and verify large programs with side effects.
+%
+Reasoning about side effects in purely functional languages such as {\textsc
+  Gallina}, the Coq specification language, is difficult, firstly because they
+imply to somehow take into account an outer \emph{stateful} environment and
+secondly, because the composition of stateful computations is not well-handled
+by traditional (monadic) approaches.
+%
+Algebraic effects and handlers\,\cite{bauer2015effects} overcome this double
+challenge.
+%
+They allow to model large classes of effects (e.g., exception, state,
+non-determinism) and to compose effects within purely functional programs, while
+deferring the realizations of these effects to dedicated handlers.
+%
+In this Chapter, we aim to show how a variant of algebraic effects based on free
+monads can be used to reason about large systems, by modeling their components
+as effect handlers.
+%
+\thomasrk[inline]{Est-ce que c'est suffisant, est-ce que ça mériterait pas plus
+  de détail ?}
+
+\subsection{FreeSpec Overview}
+\label{freespec:subsec:freespecoverview}
 
 \begin{figure}
   \centering
@@ -631,14 +585,12 @@ interface-driven approach for the hardware components.
   \label{fig:freespec:interfacedriven}
 \end{figure}
 
-\subsection{FreeSpec Overview}
-\label{freespec:subsec:freespecoverview}
-
-The specification and verification work in FreeSpec is centered around the key
-concept of \emph{interfaces}.
+We now give an overview of the formalism that we propose as a solution to
+overcome {\scshape Minx86} flaws, both to model and verify a hardware
+architecture.
 %
-An interface is a set of interdependent operations, which are expected to
-produce a value.
+Its key concept is to focus of components \emph{interfaces}, where an interface
+is a set of interdependent operations which are expected to produce a value.
 
 \paragraph{Interface and Component}
 %
@@ -651,8 +603,8 @@ interface, and sends operations requests to other components it is connected to
 \emph{via} their interfaces and waits for their results.
 
 \begin{example}[{\scshape Minx86} as a component-based system]
-  Figure~\ref{fig:freespec:interfacedriven} pictures how this could materialize
-  as an alternative model to {\scshape Minx86}.
+  Figure~\ref{fig:freespec:interfacedriven} pictures an alternative model to
+  {\scshape Minx86}.
   %
   The software components interact with the core \emph{via} its instructions
   set.
@@ -671,8 +623,8 @@ interface, and sends operations requests to other components it is connected to
 \paragraph{Abstract Specifications}
 %
 To enable compositional reasoning about component-based systems, we introduce
-so-called abstract specifications which allow for defining requirements over how
-the interface should be used and requirements over the interface operations
+so-called abstract specifications which are characterized by requirements over
+how the interface should be used and requirements over the interface operations
 results.
 
 \begin{figure}
@@ -729,14 +681,14 @@ results.
   isolation, by focusing on the memory controller alone.
   %
   This is achieved by abstracting away the rest of the hardware model, thanks to
-  the interfaces exposed and used by the memory controller, as pictured in
-  Figure~\ref{fig:freespec:memc}.
+  the interfaces exposed and used by the hardware component of interest, as
+  pictured in Figure~\ref{fig:freespec:memc}.
   %
   We model the security policy enforced by the mechanism behind the
   \texttt{SMRAMC} register thanks to an abstract specification.
   %
-  An abstract specification is a couple of requirements: over the interface
-  users, and over the interface results.
+  An abstract specification is a couple of requirements ---over the interface
+  users, and over the interface results--- which translates as follows here:
   %
   \begin{itemize}
   \item We forbid unprivileged \IO targeting the SMRAM when the \texttt{SMRAMC}
@@ -763,20 +715,33 @@ results.
   specification if the processor does too.
 
   We focus on modeling the processor, made in our example of two components: a
-  core (which executes the software components) and a cache.
+  core and a cache.
   %
   Similarly to what we achieved with the memory controller, we reason about the
   cache in isolation (as pictured with Figure~\ref{fig:freespec:cachec}).
   %
-  We proceed similarly, by defining a second abstract specification, this time
-  against the interface of the cache.
+  We want to prove that
+  %
+  \begin{inparaenum}
+  \item the cache makes a correct use of the memory controller interface, that
+    is that each uses of the memory controller interface satisfy the appropriate
+    requirements, and
+  %
+  \item it provides similar guarantee to the core.
+  \end{inparaenum}
+
+  We proceed by defining a second abstract specification, this time against the
+  interface of the cache.
+  %
+  This additional abstract specification serves two purposes: it restricts how
+  the core is allowed to use the cache, and by construction how the cache uses
+  the memory controller, but it also formalizes the expectation of the core.
 
   In this second case, the requirements over the interface results are the same
   as what we already introduced for the memory controller.
   %
-  However, contrary to the memory controller, trying to prove the correctness of
-  the cache with respect to this second abstract specification for a cache that
-  lacks the SMRR would uncover the SMRAM cache poisoning.
+  Trying to prove a cache without SMRR can enforce them would uncover the SMRAM
+  cache poisoning attack.
 \end{example}
 
 \begin{figure}
@@ -811,6 +776,16 @@ results.
   \caption{The cache in isolation}
   \label{fig:freespec:cachec}
 \end{figure}
+
+\subsection*{}
+
+In this Section, we have discussed the limitations of {\scshape Minx86}, and the
+strategies that we implemented to mitigate them.
+%
+This necessary assessment allowed us to propose an alternative formalism to both
+model verify the x86 hardware architecture.
+%
+In the rest of this Chapter, we describe in depth this formalism.
 
 \section{Modeling Programs with Effects}
 % ==============================================================================
@@ -1132,9 +1107,9 @@ operators to compose them and the Program monad to model programs with effects
 which belong to these interfaces, we now have all we need to model a given
 component which exposes an interface $\I$ and uses another interface $\J$.
 %
-We proceed with the following steps: modeling the component in terms of
-programs with effects, then deriving one operational semantics for $\I$ from
-these programs, assuming provided an operational semantics for $\J$.
+We proceed with the following steps: modeling the component in terms of programs
+with effects, then deriving one operational semantics for $\I$ from these
+programs, assuming provided an operational semantics for $\J$.
 
 The behaviour of a component is often determined by a local, mutable state.
 %

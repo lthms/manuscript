@@ -1,4 +1,4 @@
-\chapter{Conclusion}
+\chapter{Conclusion and Perspectives}
 \label{chapter:conclusion}
 
 \endquote{``\emph{Now that I have built my very own hammer, nothing looks like a
@@ -9,4 +9,112 @@
 \vspace{1cm}%
 \noindent
 %
-This is a conclusion.
+The starting point of this thesis is the SMRAM cache poisoning
+attack\,\cite{duflot2009smram,wojtczuk2009smram}, and more generally various
+compositional attacks\,\cite{wing2003compositionalattack} against the x86
+hardware
+architecture\,\cite{kovah2015senter,domas2015sinkhole,kallenberg2015racecondition}.
+%
+These attacks have in common to leverage inconsistencies in the hardware
+specifications to defeat security policies supposedly enforced by the hardware
+architecture.
+
+In this thesis, we have identified a class of security mechanism enforcement we
+called Hardwase-based Security Enforcement (HSE) mechanisms, which consist of
+the configuration by a trusted software component of the underlying hardware
+architecture in order to constrain the execution of untrusted software
+components with respect to a targeted security policy.
+%
+We investigated the use of formal methods to formally specify and verify
+\ac{hse} mechanisms as a potential solution to uncover compositional attacks.
+%
+We steer a middle course between two domains: hardware verification and system
+software verification.
+%
+Generally, hardware verification focus on properties which are transparent to
+the executed software (\emph{e.g.} cache
+coherency\,\cite{stern1995cachecoherence}, linearizability of SGX
+instructions\,\cite{leslie2015linsgx}, or hardware-based memory
+isolation\,\cite{lie2003xom}), and system software verification relies on
+hardware models which abstract as much as possible of the architecture
+complexity.
+%
+On the contrary, when it comes to \ac{hse} mechanisms it is important to
+consider that
+%
+\begin{inparaenum}[(1)]
+\item \label{needreuse}%
+  hardware architectures often allow for implementing several \ac{hse}
+  mechanisms, and
+  %
+\item \label{needreduce}%
+  hardware features involved in \ac{hse} mechanisms are not safe by default,
+  hence the role played by trusted software components to configure them.
+\end{inparaenum}
+
+The rest of this final Chapter proceeds as follows.
+%
+We first give a brief summary of our two contributions
+(Section~\ref{sec:conclusion:summary}).
+%
+Then, we conclude this thesis by suggesting some possible directions for future
+work.
+
+\section{Summary of the Contributions}
+\label{sec:conclusion:summary}
+
+Our contribution is twofold.
+%
+As a first step, we propose a theory of HSE mechanisms whose one principle was
+to rely on general-purpose hardware model.
+%
+Furthermore, we have proposed a compositional reasoning framework for Coq, based
+on our experience in implementing a proof of concept for our theory.
+
+\paragraph{A Theory of HSE Mechanisms.}
+%
+We have proposed in Chapter~\ref{chapter:speccert} a theory of \ac{hse}
+mechanisms, such that a mechanism is primarily characterized by a set of trusted
+software components, a set of requirements over states and a set of requirements
+over software transitions.
+%
+We have evaluated our approach in Chapter~\ref{chapter:speccert2}.
+%
+We have introduced {\scshape Minx86}, a minimal model for a single core
+x86-based computing platform, and we have used it to specify and verify the HSE
+mechanism implemented by the \ac{bios} to remain isolated from the rest of the
+software stack at runtime.
+%
+We have written machine-checked proofs in Coq to increase our confidence in our
+result.
+%
+One the one hand, proofs related to the Chapter~\ref{chapter:speccert} have been
+commented in Appendix~\ref{appendix:speccert}.
+%
+On the other hand, proofs related to the Chapter~\ref{chapter:speccert2} have
+been released as a free software\,\cite{letan2016speccertcode}.
+
+\paragraph{Compositional Reasoning for Coq.}
+%
+We have proposed in Chapter~\ref{chapter:freespec} a novel approach which
+enables modular verification of complex systems made of interconnected
+components.
+%
+This approach is the result of various lessons learned during the development of
+our theory proof of concept, and we believe it represents a first step towards
+addressing the challenge posed by the scale of the x86 hardware architecture.
+%
+Components of a system are primarily identified by the interface they expose,
+and secondarily by their current state and the interfaces they uses.
+%
+We have introduced so-called abstract specifications to allow for reasoning
+about component in isolation \emph{and} about the expected properties of their
+composition.
+%
+Besides, the resulting Coq framework, also made available as a free
+software\,\cite{letan2018freespeccode}, is not specific to hardware models, and
+could also be leveraged to reason about composition of software components as
+well.
+
+\section{Perspectives}
+\label{sec:conclusion:perspectives}
