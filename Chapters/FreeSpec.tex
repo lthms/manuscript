@@ -10,82 +10,34 @@
 \vspace{1cm}%
 \noindent
 %
-For many years, industrial vendors\,\cite{reid2017arm,leslie2015sgx} \GH{la
-  deuxième référence est cassée} and
-researchers\,\cite{chong2016report,choi2017kami} have aimed to formally specify
-and verify hardware architectures.
+In the previous Part of this manuscript, we have introduced a theory of \ac{hse}
+mechanisms and have leveraged this theory to specify and verify the \ac{hse}
+mechanism implemented by the \ac{bios} at runtime in order to remain isolated
+from the rest of the software stack.
 %
-However, verifying properties of existing computing platforms poses significant
-challenges, because they tend to be both complex and under-specified; we are not
-aware of any model of existing and broadly used computing system that is
-comprehensive in terms of its hardware and software components.
+In this context, we have defined a small x86 hardware model called {\scshape
+  Minx86} (Definition~\ref{def:speccert2:minx86}).
 %
-Unfortunately, such a model is a prerequisite to verify a computing platform in
-terms of architectural attacks.
+This experiment has been very insightful.
 %
-The scale of the task dictates several requirements regarding the formalism to
-adopt in this particular case.
+In particular, it has highlighted the key importance of a modular approach to
+tackle the challenge posed by the scale of the x86 hardware architecture.
 %
-It must allow for considering independently each component of our system, before
-composing them to conclude about the properties of the system as a whole. \GH{Tu
-  parles de plusieurs requirements mais tu n'en n'évoque qu'un seul. En outre,
-  cette intro est longue et parfois un peu maladroite. Je la réduirais en une ou
-  deux phrase plus sobre et directe du style 'Modéliser de manière préciser un
-  système complexe que représente une architecture x86, constitué de plusieurs
-  composants interagissant entre eux, nécessite une approche modulaire.'}
-
-This objective is reminiscent of the programming language problematic to model
-and verify large programs with side effects.
-%
-Reasoning about side effects in purely functional languages such as {\textsc
-  Gallina}, the Coq specification language, is difficult, firstly because they
-imply to somehow take into account an outer \emph{stateful} environment and
-secondly, because the composition of stateful computations is not well-handled
-by traditional (monadic) approaches.
-%
-Algebraic effects and handlers\,\cite{bauer2015effects} overcome this double
-challenge.
-%
-They allow to model large classes of effects (e.g., exception, state,
-non-determinism) and to compose effects within purely functional programs, while
-deferring the realizations of these effects to dedicated handlers.
-
-In this Chapter, we aim to show how a variant of algebraic effects based on free
-monads can be used to reason about large systems, by modeling their components
-as effect handlers.
-%
-Our contribution is threefold:
-\begin{itemize}
-\item We propose an approach which leverages the key concepts of algebraic
-  effects and handlers to model and to verify each component of a computing
-  system independently, while providing the necessary abstractions to compose
-  these components in order to verify the properties of the resulting system.
-%
-\item We have implemented FreeSpec\,\footnote{FreeSpec has been released as a
-    free software, under the terms of the GPLv3.
-    \url{https://github.com/ANSSI-FR/FreeSpec}}, a framework for the Coq proof
-  assistant to \emph{modularly} verify programs with effects and effects
-  handlers with our approach.
-%
-\item We have modelled and verified a simplified subset of an x86 computing
-  system with FreeSpec in order to illustrate how our formalism can be leveraged
-  to tackle our initial objective, that is modeling and verifying computing
-  platforms.
-\end{itemize}
+This Chapter focuses on our second contribution: an approach to model and verify
+each component of a component-based system in isolation, while providing the
+necessary abstractions to compose these components\,\cite{letan2018freespec},
+along with a companion framework for Coq to support this
+approach\,\cite{letan2018freespeccode}.
 
 The rest of the Chapter proceeds as follows.
 %
-We first discuss our motivations to propose a compositional reasoning for Coq,
-based on our experience implementing the proofs of
+We justified our contribution with the experience implementing the proofs of
 Chapter~\ref{chapter:speccert2} (Section~\ref{sec:freespec:why}).
 %
-Then, we describe how we model components in terms of programs with effects and effect
-handlers (Section~\ref{sec:freespec:specifying}) and we introduce so-called
-abstract specifications to verify their respective properties
+Then, we describe how we model components in terms of programs with effects and
+effect handlers (Section~\ref{sec:freespec:specifying}) and we introduce
+so-called abstract specifications to verify their respective properties
 (Section~\ref{sec:freespec:verifying}).
-%
-To illustrate our definitions, we use a running example in the form of the
-specification and verification of a simplified memory controller.
 %
 Then, we discuss how the different levels of composition of FreeSpec can be
 leveraged to scale the modeling and verification work for larger systems
@@ -95,9 +47,6 @@ leveraged to scale the modeling and verification work for larger systems
 \label{sec:freespec:why}
 % ==============================================================================
 
-Implementing the proofs of correctness of \( \Delta_{\mathtt{bios}} \) has been
-very insightful.
-%
 In this Section, we emphasize three limitations of {\scshape Minx86} which makes
 its use at a larger scale unlikely (\ref{subsec:freespec:minx86lim}).
 %
@@ -544,11 +493,28 @@ Secondly, we want to automate as much as possible the
 \texttt{remember};~\texttt{destruct};~\texttt{assert};~\texttt{apply}, in a way
 that enables formally reasoning about the temporary violation problem.
 %
-To that end, we leverage
+This objective is reminiscent of the programming language problematic to model
+and verify large programs with side effects.
 %
-\thomasrk[inline]{TODO, décider si on reste vague ici ou si on parle plus
-  précisément du fait qu’on utilise un paradigme bien précis qui nous permet de
-  le faire (choisir le niveau de détail, en soit)}
+Reasoning about side effects in purely functional languages such as {\textsc
+  Gallina}, the Coq specification language, is difficult, firstly because they
+imply to somehow take into account an outer \emph{stateful} environment and
+secondly, because the composition of stateful computations is not well-handled
+by traditional (monadic) approaches.
+%
+Algebraic effects and handlers\,\cite{bauer2015effects} overcome this double
+challenge.
+%
+They allow to model large classes of effects (e.g., exception, state,
+non-determinism) and to compose effects within purely functional programs, while
+deferring the realizations of these effects to dedicated handlers.
+%
+In this Chapter, we aim to show how a variant of algebraic effects based on free
+monads can be used to reason about large systems, by modeling their components
+as effect handlers.
+%
+\thomasrk[inline]{Est-ce que c'est suffisant, est-ce que ça mériterait pas plus
+  de détail ?}
 
 \subsection{FreeSpec Overview}
 \label{freespec:subsec:freespecoverview}
@@ -623,9 +589,8 @@ We now give an overview of the formalism that we propose as a solution to
 overcome {\scshape Minx86} flaws, both to model and verify a hardware
 architecture.
 %
-Its key concept is to focus of components \emph{interfaces}, where an
-interface is a set of interdependent operations which are expected to produce a
-value.
+Its key concept is to focus of components \emph{interfaces}, where an interface
+is a set of interdependent operations which are expected to produce a value.
 
 \paragraph{Interface and Component}
 %
@@ -817,8 +782,8 @@ results.
 In this Section, we have discussed the limitations of {\scshape Minx86}, and the
 strategies that we implemented to mitigate them.
 %
-This necessary assessment allowed us to propose an alternative formalism to
-both model verify the x86 hardware architecture.
+This necessary assessment allowed us to propose an alternative formalism to both
+model verify the x86 hardware architecture.
 %
 In the rest of this Chapter, we describe in depth this formalism.
 
@@ -1142,9 +1107,9 @@ operators to compose them and the Program monad to model programs with effects
 which belong to these interfaces, we now have all we need to model a given
 component which exposes an interface $\I$ and uses another interface $\J$.
 %
-We proceed with the following steps: modeling the component in terms of
-programs with effects, then deriving one operational semantics for $\I$ from
-these programs, assuming provided an operational semantics for $\J$.
+We proceed with the following steps: modeling the component in terms of programs
+with effects, then deriving one operational semantics for $\I$ from these
+programs, assuming provided an operational semantics for $\J$.
 
 The behaviour of a component is often determined by a local, mutable state.
 %
