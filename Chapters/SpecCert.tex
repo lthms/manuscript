@@ -558,9 +558,9 @@ mechanism is a safety property: trusted software components shall \emph{never}
 generate a software transition which does not satisfy the requirements of the
 \ac{hse} mechanism.
 %
-Because the purpose of these requirements over software transitions is to
+The purpose of these requirements over software transitions is to
 prevent untrusted software components to reach a hardware configuration wherein
-the requirements over states are not satisfied, so the initial state of the
+the requirements over states are not satisfied. This implies that the initial state of the
 trace must satisfy the requirements over states.
 %
 A trace whose initial state satisfies the requirements over states and where
@@ -589,6 +589,7 @@ to comply with this mechanism.
   attack\,\cite{kallenberg2015racecondition}.
   %
   If the \ac{bios} fails to do so, then the related trace is not compliant.
+  \GH{cet exemple n'illustre que l'état initial. Il faudrait dire en outre que lorsqu'une exécution est exécutée en SMM elle respecter les software req...}
 \end{example}
 
 \begin{lemma}[HSE Invariant Enforcement]
@@ -644,7 +645,7 @@ called the SMRAM.
 %
 In such a case, only a core in \ac{smm} can read or write to the SMRAM.
 %
-As it stands, the \ac{hse} mechanism described here satisfies both laws.
+As it stands, the \ac{hse} mechanism described here satisfies both laws. \GH{pourquoi? Il faudrait expliquer rapidement pourquoi c'est bien le cas.}
 %
 However, between the core and the memory controller lies the cache, as pictured
 in Figure~\ref{fig:speccert:smram}.
@@ -653,7 +654,7 @@ If the cache does not take into account the SMRAM ---as it was the case in
 2009--- it can be used to somehow circumvent the protection enforced by the
 memory controller: as we have already explained in
 Subsection~\ref{subsec:usecase:hse:smram}, the integrity of the SMRAM is
-enforced, but the core does not read its content when it needs it.
+enforced, but the core does not read its content when it needs it. \GH{la fin de cette phrase n'est pas claire. Reformuler}
 
 \begin{figure}
   \centering
@@ -695,16 +696,19 @@ transpose these definitions to our theory.
   on traces or a predicate on transitions.
 \end{definition}
 
-In most cases, the security policy is expected to be enforce in all traces of a
+In most cases, the security policy is expected to be enforced in all traces of a
 given system, that is \( \mathcal{R}(\Sigma) \).
 %
 However, hardware architectures are unsafe by default, and have to be configured
 by trusted software components in order to enforce a targeted security policy at
-all time.
+all time. \GH{Je vois ce que tu veux dire mais telle quelle, ton explication apporte plus de confusion qu'autre chose. Surtout la première partie. Il faudrait plutôt dire que les architecture matérielle n'étant pas safe par defaut, la politique de sécurité ne s'applique pas à l'ensembles des traces du système R(Sigma). Il faut que le mécanisme hardrware soit correctement initialié et utilisé par le code trusté. Par conséquent, un HSE est correcte si la politique de sécurté est vérfiée sur le sous-ensemble des traces qui vérifent les contraintes de configuration et de bonne utilisation par le code trusté, donc C. }
 %
 As a consequence, the correctness relation of a \ac{hse} mechanism \( \Delta \)
 is expressed with respect to \( \mathcal{C}(\Delta) \) rather than
-\( \mathcal{R}(\Sigma) \).
+\( \mathcal{R}(\Sigma) \). A proof that a \ac{hse} mechanism \( \Delta \) is correct with respect to a
+security policy \( P \) rules out the risk of a vulnerability in the
+hardware features of the hardware model.
+
 
 \begin{definition}[Correct HSE Mechanism]
   A \ac{hse} mechanism $\Delta$ is correct with respect to a security policy $P$
@@ -725,14 +729,11 @@ is expressed with respect to \( \mathcal{C}(\Delta) \) rather than
   \]
 \end{definition}
 
-A proof that a \ac{hse} mechanism \( \Delta \) is correct with respect to a
-security policy \( P \) rules out the risk of a vulnerability based on the
-hardware features which are part of the scope of the hardware model.
 %
 Verifying that a \ac{hse} mechanism is correct with respect to a security policy
 can be difficult.
 %
-In the context of this thesis, we focus on safety properties.
+In the context of this thesis, we focus on safety properties. \GH{tu pourrais argumenter un peu en indiquant que, de fait, la plupart des HSE implémente une politique de safety}
 %
 The reasoning is facilitate because they are characterized by predicates on
 transitions.
@@ -777,28 +778,16 @@ The following theorem takes advantage of this fact.
   \end{proof}
 \end{theorem}
 
-A proof of correctness of a given \ac{hse} mechanism in our theory asserts the
+A proof of correctness of a given \ac{hse} mechanism asserts that the
 hardware architecture enforces a targeted security policy \emph{if trusted
   software components correctly implement this \ac{hse} mechanism}, that is
 their executions only imply software transitions which satisfy the appropriate
 software requirements.
 %
-If an untrusted software component proves to be capable of exploiting a security
-vulnerability of a trusted software component program, this condition would
-instantaneously become false and the security policy enforcement would no longer
-be guaranteed, even though the hardware architecture is capable of enforcing it.
-
-Besides, an hypothesis of our model remains implicit: our reasoning is based on
-the fact that we can determine the behavior of a software component based on the
-current hardware configuration.
+If attackers are able to modify the instructions of the trusted software
+components programs, they can defeat the security enforcement by
+modifying the instruction responsible to implement it. \GH{ce n'est pas le seul risque (même si c'est le plus important). De manière générale, si un composant non trusté peu influencer le comportement d'un code trusté (par exemple, en perturbant son flot d'exécution), il peut l'amener à ne plus respecter les software req. Mais c'est le problème du software trusté. Il doit être correct ET robuste aux attaques.}
 %
-In practice, this is not true: the behavior of a software component is based on
-its programs, as fetched by the core which executes it.
-%
-If attackers is able to modify the instructions which form the trusted software
-components programs, then they can trivially defeat the security enforcement by
-modifying the instruction responsible to implement it.
-
 This is why trusted software components are expected to protect themselves
 against untrusted software components attempt to modify their program.
 %
