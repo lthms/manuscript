@@ -1017,7 +1017,7 @@ location in which these data are stored.
   A transition-software mapping
   $\func{fetched}_{\Sigma}: H \times L \rightarrow \powerset(S)$ is a function
   which takes an initial hardware state, a transition label and returns the set
-  of owners of the fetched instructions during this transition.
+  of owners of the fetched instructions during this transition. \GH{fetched instruction n'est pas défini clairement.}
 \end{definition}
 
 With this mapping, specific to a given hardware model, it becomes possible to
@@ -1026,9 +1026,9 @@ decoded and executed.
 %
 \( s \in \func{fetched}_{\Sigma}(h, l) \) means that an instruction owned by $s$
 was fetched in order to be executed by the processor during a transition labeled
-with \( l \) from a state \( h \).
+with \( l \) from a state \( h \). \GH{Cette phrase est ambigüe. Est-ce que c'est le fetch qui a lieu durant la software transition? J'avais cru comprendre que l'exécution d'une instruction pouvait correspondre à plusieurs "software transition". Du coup, pour chacune des ces transition, fetched renvoie la même valeur? Ou pas? Ce n'est pas claire}
 
-With a hardware-software mapping and an transition-software mapping, we give a
+With a hardware-software mapping and a transition-software mapping, we give a
 formal definition of a \textit{code injection}.
 
 % GH: "Event-software mapping" c'est la même chose que "transition-software
@@ -1065,7 +1065,7 @@ A software component initialization is most of the time the result of a code
 injection.
 
 \begin{example}[Application Code Injection]
-  When the user of a computer starts a new application, the operating system
+  When a user starts \GH{execute plutôt que start?} a new application, the operating system
   loads the code of this application into the \ac{dram}.
   %
   Therefore, when the processor starts the execution of the application in
@@ -1073,8 +1073,7 @@ injection.
 \end{example}
 
 On the contrary, an illegitimate code injection poses a significant threats
-against the security of the software stack, because it constitutes a
-straightforward attack vector for a privilege escalation.
+against the security of the software stack, because it constitutes an attack vector for privilege escalation.
 %
 Low-level software components, such as the \ac{bios}, partly rely on the
 hardware architecture to protect them against illegitimate code injection.
@@ -1101,9 +1100,9 @@ injection.
 \label{subsec:speccert:globalsec}
 
 We leverage the code injection definition to propose a generic formalization of
-code injection policy, to determine if a given software component is authorized
+code injection policy. This policy determines if a given software component is authorized
 to make a code injection against another software component in the context of a
-particular software stack.
+particular software stack. \GH{virer "in the context  of a particular software stack"? Je ne vois pas trop ce que çà apporte}
 
 \begin{definition}[Code Injection Policy]
   \label{def:speccert:global}
@@ -1193,7 +1192,7 @@ system and \( n \) applications.
 
   The definition of the corresponding $\func{context}$ shall obey the following
   logic: when the processor is in \ac{smm}, the \ac{bios} is executed; when the
-  processor is not in \ac{smm} and is in ring 0, the system software component
+  processor is not in \ac{smm} and is in ring 0, the system software component \GH{comme tu utilise le terme OS avant dans ta définition, je dirais OS ici plutot que system software}
   is executed; when the processor is not in \ac{smm} and is in ring 3, one of
   the applications ---identified by the page tables used by the processor--- is
   executed.
