@@ -208,18 +208,18 @@ Thus, $H(S)$ is defined as follows:
 %
 \( \mathtt{Cache} \) and \( \mathtt{Mem} \) are parameterized by \( S \) because
 they expose memory locations to the core which can contain instructions to be
-fetched, and to implement the tracking of memory ownership within our model, we
-need to taint the memory locations with their respective owner.
+fetched. To implement the tracking of memory ownership within our model, we
+need to taint the memory locations with their respective owner, which belongs to \( S \).
 %
 We do not consider core registers in {\scshape Minx86} yet.
 %
 When we extend our model to that end, we will need to taint them accordingly,
-and \( \mathtt{Core} \) will have to be parameterized by \( S \) too.
+and \( \mathtt{Core} \) will have to be parameterized by \( S \) too. \GH{je virerai ces deux dernières phrases car elles ont tendances à être négatives. En outre, plus loin, on se rend compte que tu modélise PC, qui est bien un registre du processeur! Eventuellement, dire que ton modèle n'a pas besoin de suivre la provenance des contenus des registres (et encore...)}
 
 \paragraph{Address Spaces.}
 %
-We define $\texttt{PhysAddr}$ the set of physical addresses the core uses to
-perform \IO and $\texttt{HardAddr}$ the set of hardware addresses exposed by the
+We define $\texttt{PhysAddr}$, the set of physical addresses that the core uses to
+perform \IO and $\texttt{HardAddr}$, the set of hardware addresses exposed by the
 \ac{dram} and VGA controllers.
 %
 To distinguish between \ac{dram} and VGA addresses, we use two different
