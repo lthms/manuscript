@@ -1146,7 +1146,7 @@ we have introduced in Chapter~\ref{chapter:speccert}, that is
   targeted security policy.
 \end{inparaenum}
 
-Because the targeted security policy has already been defined previously
+Since the targeted security policy has already been defined previously
 (Definition~\ref{def:speccert:biospol}), it leaves steps (1) and (3) to
 complete.
 %
@@ -1252,7 +1252,7 @@ Given \( h \in H(S) \), we have identified six requirements over states for
   \]
 \end{enumerate}
 
-We do not consider the boot sequence in this verification problem and the
+We do not consider \GH{'we do not consider " fait un peu négatif. En fait, comme tu t'intéresse à isoler le BIOS de l'OS et des appli, ca n'a pas de sens de vérifier pendant le BOOT puisque le BIOS est le seul à s'exécuter pendant ce temps là. Du coup, forcement, la propriété recherché ne s'applique qu'après le boot. En outre, les hypothèse sur l'initialisation sont de même nature que les hypothèse sur le comportement du BIOS à runtime : ce sont des hypothèse sur le logiciel trusté. Il faut le formuler comme çà. Tel que tu l'as formulé, on a l'impression que c'est un cas non couvert.}the boot sequence in this verification problem and the
 \ac{bios} must correctly configure the hardware architecture prior to start the
 execution of the operating system for the initial state of the considered trace
 to satisfy our 6 requirements over states.
@@ -1279,12 +1279,9 @@ First, we force the \ac{bios} execution to remain confined within the SMRAM.
 %
 The reason is simple: the OS can tamper with the memory outside the SMRAM.
 %
-As a consequence, jumping outside the SMRAM is the best way to fail the security
-policy.
+Secondly, we prevent the \ac{bios} to update the \ac{smrr} registers.
 %
-Secondly, we prevent the \ac{bios} to update the \ac{smrr} registers;
-%
-the latter should have been properly configured during the boot sequence, and
+These registers should have been properly configured during the boot sequence, and
 there is no need to further update them.
 %
 \[
@@ -1324,7 +1321,7 @@ The second law requires the state requirements to be invariant with respect to
 the software requirements.
 %
 We prove this by case enumeration of \( l \in L_S \uplus L_H \) and
-\( h \in H(S) \), we check that each requirement described previously is
+\( h \in H(S) \). We check that each requirement described previously is
 preserved by \func{bios\_req}.
 %
 In practice, these proofs turned out to be the more demanding, especially for
@@ -1359,7 +1356,7 @@ there are three case scenarios to consider:
 \item The core is configured to read the content of \( pa \) from the cache, and
   may have to perform a cache eviction if necessary (write-back strategy).
   %
-  This last case is the more complex to consider, because we have to consider:
+  This last case is the more complex, because we have to consider:
   %
   whether the core is in \ac{smm} or not;
   %
@@ -1384,7 +1381,7 @@ there are three case scenarios to consider:
   transitions\,\footnote{The interesting reader can have a look at the file
     \texttt{src/Smm/Delta/Preserve/Architecture.v}
     in~\ref{letan2016speccertcode}, which gather these proofs, and
-    \texttt{src/Smm/Delta/Preserve/\{Read,Write\}.v} to see them in action.}.
+    \texttt{src/Smm/Delta/Preserve/\{Read,Write\}.v} to see them in action.}. \GH{attention, la référence dans la footnote est cassée}
 \end{enumerate}
 %
 Once each requirement has been shown to be preserved during a transition, we can
