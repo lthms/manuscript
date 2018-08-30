@@ -83,12 +83,15 @@ mapping of {\scshape Minx86} (\ref{subsec:minx86:fetched}).
 
 \paragraph{Hardware Features.}
 %
-We consider the core \GH{Il faudrait préciser "a cpu core". En outre, considères-tu pour l'instant seulement un seul coeur par CPU? Il faudrait le rappeler ici explicitement.} can be either in System Management Mode (\ac{smm}) or in an
-unprivileged mode.
+We consider the core \GH{Il faudrait préciser "a cpu core". En outre,
+  considères-tu pour l'instant seulement un seul coeur par CPU? Il faudrait le
+  rappeler ici explicitement.} can be either in System Management Mode
+(\ac{smm}) or in an unprivileged mode.
 %
 As explained in Section~\ref{subsec:usecase:firm:sec}, when a processor receives
-a System Management Interrupt (SMI), it halts its current execution, reconfigures itself to a hard-coded state, and then executes the code stored in memory at the address
-$\mathtt{SMBASE} + \val{0x8000}$.
+a System Management Interrupt (SMI), it halts its current execution,
+reconfigures itself to a hard-coded state, and then executes the code stored in
+memory at the address $\mathtt{SMBASE} + \val{0x8000}$.
 %
 In practice, the SMBASE value points to the beginning of a memory region called
 the SMRAM.
@@ -96,15 +99,14 @@ the SMRAM.
 Leaving the \ac{smm} is done by executing a special purpose instruction called
 \texttt{rsm} (for \emph{resume}).
 
-The core relies on a cache to reduce the Input/Output (\IO, \GH{tu es sur que c'est la première fois que tu utilises le terme d'I/O? Tu ne l'a pas fait en background? Si tu l'as déjà utiilisé, tu as du le définir à ce moment. Inutile de le redéfinir ici dans ce cas.} that is a read or
-write access to the memory) latency.
+The core relies on a cache to reduce the \IO latency.
 %
 We model one level of cache which stores both data and instructions and we
 consider two cache strategies: uncacheable (UC) and writeback (WB).
 %
-With the UC strategy, the cache is not used and all \IOs are forwarded to
-the memory controller, whereas with the WB strategy, the cache is used as much
-as possible\,\footnote{These cache strategies are explained in
+With the UC strategy, the cache is not used and all \IOs are forwarded to the
+memory controller, whereas with the WB strategy, the cache is used as much as
+possible\,\footnote{These cache strategies are explained in
   \cite{intel2014manual}, Volume 3A, Chapter 11, Section 11.3 (page 2316 --
   2317)}.
 %
@@ -130,7 +132,9 @@ VGA controller.
 %
 It exposes a unified view (the memory map) of the system memory to the core.
 %
-The core manipulates this memory map with a set of physical addresses and the memory controller uses a special range of these physical addresses to host the SMRAM.
+The core manipulates this memory map with a set of physical addresses and the
+memory controller uses a special range of these physical addresses to host the
+SMRAM.
 %
 This memory area is dedicated to store the code intended to be executed when the
 core is in \ac{smm}.

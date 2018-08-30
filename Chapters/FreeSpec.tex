@@ -490,8 +490,8 @@ specify how they interact together, and specify requirements over these
 interactions.
 
 Secondly, we want to automate as much as possible the
-\texttt{remember};~\texttt{destruct};~\texttt{assert};~\texttt{apply}, in a way
-that enables formally reasoning about the temporary violation problem.
+\texttt{remember};~\texttt{destruct};~\texttt{assert};~\texttt{apply} pattern,
+in a way that enables formally reasoning about the temporary violation problem.
 %
 This objective is reminiscent of the programming language problematic to model
 and verify large programs with side effects.
@@ -510,11 +510,8 @@ non-determinism) and to compose effects within purely functional programs, while
 deferring the realizations of these effects to dedicated handlers.
 %
 In this Chapter, we aim to show how a variant of algebraic effects based on free
-monads can be used to reason about large systems, by modeling their components
-as effect handlers.
-%
-\thomasrk[inline]{Est-ce que c'est suffisant, est-ce que ça mériterait pas plus
-  de détail ?}
+monads can be used to support reasoning about component-based systems, including
+with respect to the temporary violation problem.
 
 \subsection{FreeSpec Overview}
 \label{freespec:subsec:freespecoverview}
@@ -799,17 +796,7 @@ implemented with a variant of the Free monad called the Program monad as defined
 in the \texttt{operational} package of Haskell\,\cite{operational}.
 
 This section and the one afterwards proceed through a running example: a
-minimalist Memory Controller Hub (MCH) of the x86 hardware architecture.
-%
-The MCH acts as a dispatcher for the CPU memory accesses; in our case, to the
-VGA controller or the DRAM controller.
-%
-The MCH takes part in the isolation of the SMRAM, that is the special-purpose
-memory region inside the system memory which contains the SMM code.
-%
-If correctly configured, the MCH will reroute any memory access which targets
-the SMRAM to the VGA controlled, if this access is done by a CPU in another
-execution mode than SMM.
+minimalist memory controller, as depicted in Figure~\ref{fig:freespec:memc}.
 
 % pictured in the Figure~\ref{fig:mch-running-example}.
 % \begin{figure}
@@ -835,7 +822,7 @@ symbolic value which describes the request and its potential result.
 For $\I$ an interface, we denote by $\Interface{\I}{\mathcal{A}} \subseteq \I$
 the subset of effects whose results belong to a set~$\mathcal{A}$.
 
-\begin{example}[MCH Interfaces]
+\begin{example}[Memory Controller Interfaces]
   The VGA and the DRAM controllers exhibit a similar interface which allows for
   reading and writing into a memory region.
   %
@@ -868,7 +855,7 @@ the subset of effects whose results belong to a set~$\mathcal{A}$.
   memory access to read the value~$v \in \mathpzc{Val}$ stored at the
   location~$l \in \mathpzc{Loc}$.
 
-  The MCH interface is similar, but it distinguishes between privileged and
+  The memory controller interface is similar, but it distinguishes between privileged and
   unprivileged accesses.
   %
   It also provides one effect to lock the SMRAM protection mechanism, i.e. it
@@ -879,7 +866,7 @@ the subset of effects whose results belong to a set~$\mathcal{A}$.
   distinguish between privileged memory accesses made by a CPU in SMM and
   unprivileged accesses made the rest of the time.
   %
-  The MCH interface, denoted by $\I_{\mathrm{MCH}}$, is defined with three
+  The memory controller interface, denoted by $\I_{\mathrm{MCH}}$, is defined with three
   constructors:
   \begin{itemize}
   \item
@@ -928,8 +915,8 @@ operational semantics, which encapsulates the new state of the component.
 
 A component may use more than one interface.
 %
-For instance, the MCH of our running example can access the system memory and
-the memory shared by the VGA controller.
+For instance, the memory controller of our running example can access the system
+memory and the memory shared by the VGA controller.
 %
 But an operational semantics is defined for only one interface.
 %
@@ -939,14 +926,20 @@ ones.
 \begin{definition}[Interfaces Composition]
   Let $\I$ and $\J$ be two interfaces. $\oplus$~is the interface composition
   operator, defined with two constructors:
-  \begin{itemize}
-  \item
-    $\func{InL} : \forall \mathcal{A}, \Interface{\I}{\mathcal{A}} \rightarrow
-    \Interface{(\I \oplus \J)}{\mathcal{A}}$
-  \item
-    $\func{InR} : \forall \mathcal{A}, \Interface{\J}{\mathcal{A}} \rightarrow
-    \Interface{(\I \oplus \J)}{\mathcal{A}}$
-  \end{itemize}
+  %
+  \[
+    \begin{array}{rcl}
+      \I \oplus \J
+      & \triangleq
+      & \func{InL} : \forall \mathcal{A},
+        \Interface{\I}{\mathcal{A}} \rightarrow
+        \Interface{(\I \oplus \J)}{\mathcal{A}} \\
+
+      & |
+      & \func{InR} : \forall \mathcal{A}, \Interface{\J}{\mathcal{A}}
+        \rightarrow \Interface{(\I \oplus \J)}{\mathcal{A}}
+    \end{array}
+  \]
 \end{definition}
 
 The resulting interface $\I \oplus \J$ contains the effects of both $\I$ and
@@ -1032,39 +1025,47 @@ belongs to $\I$, modelled thanks to the Program monad, and whose result belongs
 to a set $\mathcal{A}$.
 
 \begin{definition}[Program Monad]
-  $P_{\I}(\mathcal{A})$ is defined with three constructors:
-  \begin{itemize}
-  \item $\func{Pure} : \mathcal{A} \rightarrow P_{\I}(\mathcal{A})$
-  \item
-    $\func{Bind} : \forall \mathcal{B}, P_{\I}(\mathcal{B}) \rightarrow
-    (\mathcal{B} \rightarrow P_{\I}(\mathcal{A})) \rightarrow
-    P_{\I}(\mathcal{A})$
-  \item
-    $\func{Request} : \Interface{\I}{\mathcal{A}} \rightarrow
-    P_{\I}(\mathcal{A})$
-  \end{itemize}
+  The Program monad is defined with three constructors:
+  %
+  \[
+    \begin{array}{rcl}
+      P_{\I}(\mathcal{A})
+      & \triangleq
+      & \func{Pure} : \mathcal{A} \rightarrow P_{\I}(\mathcal{A}) \\
+
+      & |
+      & \func{Bind} : \forall \mathcal{B}, P_{\I}(\mathcal{B}) \rightarrow
+        (\mathcal{B} \rightarrow P_{\I}(\mathcal{A})) \rightarrow
+        P_{\I}(\mathcal{A}) \\
+
+      & |
+      & \func{Request} : \Interface{\I}{\mathcal{A}} \rightarrow
+        P_{\I}(\mathcal{A})
+    \end{array}
+  \]
 \end{definition}
 %
 These constructors allow for the construction of values which act similarly to
 abstract syntax trees to model programs with effects.
 %
-On the one hand, $\func{Pure}$ and $\func{Request}$ are comparable to the leaves
-of a syntax tree and model atomic computations; $\func{Pure}$ models local
-computations, whereas $\func{Request}$ models deferring a computational request
-to a handler and waiting for its result.
+On the one hand, $\func{Pure}$ and
+$\func{Request}$ are comparable to the leaves of a syntax tree and model atomic
+computations; $\func{Pure}$ models local computations, whereas
+$\func{Request}$ models deferring a computational request to a handler and
+waiting for its result.
 %
-On the other hand, $\func{Bind}$ (usually written thanks to the infix operator
+On the other hand,
+$\func{Bind}$ (usually written thanks to the infix operator
 $\bind$) models the control flow of a program with effects, like the abstract
 syntax tree nodes would.
 %
 It defines how the result of one computation determines the following ones.
 
 \begin{example}[Copy]
-  We define
-  $\func{copy} : \mathpzc{Loc} \rightarrow \mathpzc{Loc} \rightarrow
-  P_{\I_{\mathrm{DRAM}}}(\{\ac{unit}\})$ such that $\func{copy}(l, l')$ models a
-  program with effects that returns no result, but copies the value $v$ stored
-  at the memory location $l$ inside the memory location $l'$.
+  We define $\func{copy} : \mathpzc{Loc} \rightarrow \mathpzc{Loc} \rightarrow
+  P_{\I_{\mathrm{DRAM}}}(\{\ac{unit}\})$ such that $\func{copy}(l,
+  l')$ models a program with effects that returns no result, but copies the
+  value $v$ stored at the memory location $l$ inside the memory location $l'$.
   %
   \[ \func{copy}(l, l') \triangleq
     \func{Request}(\func{Read}_{\mathrm{DRAM}}(l)) \bind \lambda
@@ -1140,10 +1141,12 @@ component.
 Hence, $C$ specifies how the component handles computational requests, both in
 terms of computation results and state changes.
 
-\begin{example}[Minimal MCH Model] \label{ex:mch-specs} Let $C_{\mathrm{MCH}}$
-  be the MCH defined in terms of programs with effects of
-  $\I_{\mathrm{DRAM}} \oplus \I_{\mathrm{VGA}}$, then $C_{\mathrm{MCH}}$ is of
-  the form
+\begin{example}[Minimal Memory Controller Model]
+  \label{ex:mch-specs}
+
+  Let $C_{\mathrm{MCH}}$ be the memory controller defined in terms of programs
+  with effects of $\I_{\mathrm{DRAM}} \oplus \I_{\mathrm{VGA}}$, then
+  $C_{\mathrm{MCH}}$ is of the form
   \[
     \forall \mathcal{A}, \Interface{\I_{\mathrm{MCH}}}{\mathcal{A}} \rightarrow
     \mathcal{S}_{\mathrm{MCH}} \rightarrow P_{\I_{\mathrm{DRAM}} \oplus
@@ -1153,12 +1156,12 @@ terms of computation results and state changes.
   ($\val{off}$).
 
   One the one hand, the \func{Lock} effect will activate the isolation mechanism
-  of the MCH, setting its state to $\val{on}$.
+  of the memory controller, setting its state to $\val{on}$.
   %
   On the other hand, the effects constructed with $\func{Read}_{\mathrm{MCH}}$
-  and $\func{Write}_{\mathrm{MCH}}$ will use the current state of the MCH, the
-  privileged parameter of the effect and the memory location to lookup to
-  determine if it uses the DRAM or the VGA controller.
+  and $\func{Write}_{\mathrm{MCH}}$ will use the current state of the memory
+  controller, the privileged parameter of the effect and the memory location to
+  lookup to determine if it uses the DRAM or the VGA controller.
   %
   By default, it fetches the memory of the DRAM controller, except if the
   isolation mechanism is activated, the access is unprivileged and the targeted
@@ -1235,8 +1238,8 @@ preserve this property.
 %
 This procedure can help to prevent or uncover architectural attacks.
 
-In this section, we proceed with our running example by verifying that the MCH
-correctly isolates the SMRAM.
+In this section, we proceed with our running example by verifying that the
+memory controller correctly isolates the SMRAM.
 %
 In order to do that, we define an abstract specification which states that
 privileged reads targeting the SMRAM returns the value which has previously been
@@ -1301,8 +1304,9 @@ Using $\func{run}_{\func{step}}$, we can determine both the precondition over
 effects and the postcondition over effects results while an operational
 semantics realizes a program with effects.
 
-\begin{example}[MCH Abstract Specification] \label{ex:mch-abs-specs} Let
-  $A_{\mathrm{MCH}}$ be the abstract specification such that
+\begin{example}[Memory Controller Abstract
+  Specification] \label{ex:mch-abs-specs} Let $A_{\mathrm{MCH}}$ be the abstract
+  specification such that
   $A_{\mathrm{MCH}} = \langle \Omega_{\mathrm{MCH}}, \func{step}_{\mathrm{MCH}},
   \func{pre}_{\mathrm{MCH}}, \func{post}_{\mathrm{MCH}} \rangle$.
   %
@@ -1327,7 +1331,7 @@ semantics realizes a program with effects.
         \end{array}
       \right.
     \]
-  \item There is no precondition to the use of the MCH effects, so
+  \item There is no precondition to the use of the memory controller effects, so
     \[ \forall e \in \I,\forall \omega \in \Omega_{\mathrm{MCH}},
       \func{pre}_{\mathrm{MCH}}(e, \omega) \]
   \item The postcondition enforces that the result $x$ of a privileged read
@@ -1574,7 +1578,7 @@ invariant for the induction, and a sufficient condition to enforce compliance.
   \]
 \end{theorem}
 
-\begin{example}[MCH Compliance]
+\begin{example}[Memory Controller Compliance]
   We want to prove we can derive an operational semantics from
   $C_{\mathrm{MCH}}$ (Example~\ref{ex:mch-specs}) which complies with
   $A_{\mathrm{MCH}}$ (Example~\ref{ex:mch-abs-specs}).
@@ -1587,7 +1591,7 @@ invariant for the induction, and a sufficient condition to enforce compliance.
     to a memory location which belongs to the SMRAM return the value which have
     been previously written at this memory location}.'' In particular,
   $\Omega_{\mathrm{DRAM}} = \Omega_{\mathrm{MCH}}$, i.e. they are two views of
-  the SMRAM, as exposed by the DRAM controller or by the MCH.
+  the SMRAM, as exposed by the DRAM controller or by the memory controller.
   %
   In this context, the behaviour of VGA is not relevant. Let $\top$ be the
   abstract specification which has no state and such that its precondition and
@@ -1606,7 +1610,7 @@ invariant for the induction, and a sufficient condition to enforce compliance.
   \] Hence, we start our reasoning from a situation where the SMRAM isolation is
   already activated and the states of the two abstract specifications are the
   same, meaning the two views of the SMRAM (as stored in the DRAM, and as
-  exposed by the MCH) coincide.
+  exposed by the memory controller) coincide.
   %
   We prove $\func{sync}_{\mathrm{MCH}}$ satisfies the three premises of the
   Theorem~\ref{theorem:der-compliance}. We conclude we can derive an operational
@@ -1689,7 +1693,7 @@ In other words, a second component which only uses the effects that satisfies
 $\func{pnf}$ can use the interface concurrently to a component that abstracts it
 away with $A$.
 
-\begin{example}[MCH and IOMMU]
+\begin{example}[Memory Controller and IOMMU]
   As pictured in Figure\,\ref{fig:freespec:computing-platform}, the Memory
   controller not only arbitrates the memory accesses of the CPU, but also to
   other hardware components (mostly PCI and PCIe devices).
@@ -1704,8 +1708,8 @@ away with $A$.
 \label{sec:freespec:scale}
 
 For two sections, we have introduced the FreeSpec key definitions and theorems
-so that we could model a minimal MCH component and verify its properties in the
-presence of a well-behaving DRAM controller.
+so that we could model a minimal memory controller component and verify its
+properties in the presence of a well-behaving DRAM controller.
 %
 This example has been driven by a real mechanism commonly found inside x86-based
 computing platforms.
