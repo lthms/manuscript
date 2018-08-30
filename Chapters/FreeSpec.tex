@@ -837,14 +837,19 @@ the subset of effects whose results belong to a set~$\mathcal{A}$.
   %
   We define $\I_{\mathrm{DRAM}}$ (respectively $\I_{\mathrm{VGA}}$) with two
   constructors:
-  \begin{itemize}
-  \item
-    $\func{Read}_{\mathrm{DRAM}} : \mathpzc{Loc} \rightarrow
-    \Interface{\I_{\mathrm{DRAM}}}{\mathpzc{Val}}$
-  \item
-    $\func{Write}_{\mathrm{DRAM}} : \mathpzc{Loc} \rightarrow \mathpzc{Val}
-    \rightarrow \Interface{\I_{\mathrm{DRAM}}}{\{\ac{unit}\}}$
-  \end{itemize}
+  %
+  \[
+    \begin{array}{rcl}
+      \I_{\mathrm{DRAM}}
+      & \triangleq
+      & \func{Read}_{\mathrm{DRAM}} : \mathpzc{Loc} \rightarrow
+        \Interface{\I_{\mathrm{DRAM}}}{\mathpzc{Val}} \\
+
+      & |
+      & \func{Write}_{\mathrm{DRAM}} : \mathpzc{Loc} \rightarrow \mathpzc{Val}
+        \rightarrow \Interface{\I_{\mathrm{DRAM}}}{\{\ac{unit}\}}
+    \end{array}
+  \]
 
   Then,
   $\I_{\mathrm{DRAM}} =
@@ -855,29 +860,36 @@ the subset of effects whose results belong to a set~$\mathcal{A}$.
   memory access to read the value~$v \in \mathpzc{Val}$ stored at the
   location~$l \in \mathpzc{Loc}$.
 
-  The memory controller interface is similar, but it distinguishes between privileged and
-  unprivileged accesses.
+  The memory controller interface is similar, but it distinguishes between
+  privileged and unprivileged accesses.
   %
   It also provides one effect to lock the SMRAM protection mechanism, i.e. it
   enables the SMRAM isolation until the next hardware reset.
   %
   We define the set
-  $\mathpzc{Priv}~\triangleq~\{\,\val{smm}, \val{unprivileged}\,\}$ to
-  distinguish between privileged memory accesses made by a CPU in SMM and
-  unprivileged accesses made the rest of the time.
+  $\mathpzc{Priv}~\triangleq~\{\,\val{privileged}, \val{unprivileged}\,\}$ to
+  distinguish between privileged memory accesses made by a processor in \ac{smm}
+  and unprivileged accesses made the rest of the time.
   %
-  The memory controller interface, denoted by $\I_{\mathrm{MCH}}$, is defined with three
-  constructors:
-  \begin{itemize}
-  \item
-    $\func{Read}_{\mathrm{MCH}} : \mathpzc{Loc} \rightarrow \mathpzc{Priv}
-    \rightarrow \Interface{\I_{\mathrm{MCH}}}{\mathpzc{Val}}$
-  \item
-    $\func{Write}_{\mathrm{MCH}} : \mathpzc{Loc} \rightarrow \mathpzc{Val}
-    \rightarrow \mathpzc{Priv} \rightarrow
-    \Interface{\I_{\mathrm{MCH}}}{\{\ac{unit}\}}$
-  \item $\func{Lock} : \Interface{\I_{\mathrm{MCH}}}{\{\ac{unit}\}}$
-  \end{itemize}
+  The memory controller interface, denoted by $\I_{\mathrm{MCH}}$, is defined
+  with three constructors:
+  %
+  \[
+    \begin{array}{rcl}
+      \I_{\mathrm{MCH}}
+      & \triangleq
+      & \func{Read}_{\mathrm{MCH}} : \mathpzc{Loc} \rightarrow \mathpzc{Priv}
+        \rightarrow \Interface{\I_{\mathrm{MCH}}}{\mathpzc{Val}} \\
+
+      & |
+      & \func{Write}_{\mathrm{MCH}} : \mathpzc{Loc} \rightarrow \mathpzc{Val}
+        \rightarrow \mathpzc{Priv} \rightarrow
+        \Interface{\I_{\mathrm{MCH}}}{\{\ac{unit}\}} \\
+
+      & |
+      & \func{Lock} : \Interface{\I_{\mathrm{MCH}}}{\{\ac{unit}\}}
+    \end{array}
+  \]
 \end{example}
 
 \subsection{Operational Semantics for Effects}
@@ -1139,7 +1151,7 @@ component.
 \end{definition}
 
 Hence, $C$ specifies how the component handles computational requests, both in
-terms of computation results and state changes.
+terms of computation results and state updates.
 
 \begin{example}[Minimal Memory Controller Model]
   \label{ex:mch-specs}
@@ -1209,7 +1221,7 @@ semantics from $C_{\mathrm{MCH}}$.
 The resulting operational semantics can take part in the derivation of a cache
 defined in terms of programs with effects of $\I_{\mathrm{MCH}}$, to model a
 larger part of the system pictured in the
-Figure~\ref{fig:freespec:computing-platform}.
+Figure~\ref{fig:freespec:interfacedriven}.
 
 \section{Modular Verification of Programs with Effects}
 % =============================================================================
@@ -1325,7 +1337,7 @@ semantics realizes a program with effects.
     \[ \func{step}_{\mathrm{MCH}}(e, x, \omega) \triangleq \left\{
         \begin{array}{l}
           \lambda l'.  \text{ (if } l = l' \text{ then } v \text{ else } \omega(l')) \\
-          \qquad\ \ \text{ if } e = \func{Write}_{\mathrm{MCH}}(l, v, \val{smm})
+          \qquad\ \ \text{ if } e = \func{Write}_{\mathrm{MCH}}(l, v, \val{privileged})
           \text{ and } l \in \mathpzc{Smram} \\
           \omega \qquad \text{ otherwise}
         \end{array}
@@ -1335,12 +1347,12 @@ semantics realizes a program with effects.
     \[ \forall e \in \I,\forall \omega \in \Omega_{\mathrm{MCH}},
       \func{pre}_{\mathrm{MCH}}(e, \omega) \]
   \item The postcondition enforces that the result $x$ of a privileged read
-    targeting the SMRAM ($\func{Read}(l, \val{smm})$) has to match the value
-    stored in $A_{\mathrm{MCH}}$ abstract state, i.e. the expected content for
-    this memory location $\omega(l)$.
+    targeting the SMRAM ($\func{Read}(l, \val{privileged})$) has to match the
+    value stored in $A_{\mathrm{MCH}}$ abstract state, i.e. the expected content
+    for this memory location $\omega(l)$.
     \[ \func{post}_{\mathrm{MCH}}(e, x, \omega) \triangleq \forall l \in
-      \mathpzc{Loc}, e = \func{Read}_{\mathrm{MCH}}(l, \val{smm}) \wedge l \in
-      \mathpzc{Smram} \Rightarrow x = \omega(l)
+      \mathpzc{Loc}, e = \func{Read}_{\mathrm{MCH}}(l, \val{privileged}) \wedge
+      l \in \mathpzc{Smram} \Rightarrow x = \omega(l)
     \]
   \end{itemize}
 \end{example}
@@ -1551,7 +1563,8 @@ invariant for the induction, and a sufficient condition to enforce compliance.
 
 \begin{theorem}[Derivation Compliance] \label{theorem:der-compliance} Let
   $\func{sync}$, a relation between abstract states of $\Omega_{\I}$ and
-  $\Omega_\J$, states of $\mathcal{S}$, be a predicate of synchronization.
+  $\Omega_\J$ and concrete states of $\mathcal{S}$, be a predicate of
+  synchronization.
   %
   Then, it is expected that, $\forall \omega_i \in \Omega_{\I}$,
   $s \in \mathcal{S}$ and $\omega_j \in \Omega_{\J}$ such that
@@ -1571,7 +1584,7 @@ invariant for the induction, and a sufficient condition to enforce compliance.
   where
   $((x, s'), \sigma_j', \omega_j') = \func{run}_{\func{step}_{\J}}(\sigma_j,
   C(e, s), \omega_j)$ and $\omega_i' = \func{step}_{\I}(e, x, \omega_i)$.
-  %
+
   Should these three properties be verified, then we show that
   \[ \func{sync}(\omega_i, s, \omega_j) \wedge \sigma_j \models A_{\J}[\omega_j]
     \Rightarrow \langle C, s, \sigma_j \rangle \models A_{\I}[\omega_i].
@@ -1624,39 +1637,13 @@ than one other component.
 %
 FreeSpec provides a theorem which allows for extending the result obtained with
 the Theorem~\ref{theorem:der-compliance}, in the specific case where concurrent
-accesses do not lead to any change of the abstract state.
+accesses do not lead to any abstract state update.
 %
-In FreeSpec, two interfaces are assumed to be independent, which means the use
-of one does not interfere with the use of the other.
+This represents an important constraint, but matches realistic use cases.
 %
-This key property allows a FreeSpec user to compose interfaces and operational
-semantics together and abstract them away with abstract specifications.
-%
-With the operational semantics composition
-(Definition\,\ref{def:freespec:semantics-composition}), we can specify a tree of
-components, where each node, from the root to the leaves, exhibits one interface
-and uses as many independent interfaces as it needs.
-%
-With the abstract specifications
-(Definition\,\ref{def:freespec:abstract-specs}), we can abstract away the upper
-and lower layers of the tree for each node.
-%
-This leaves one common pattern we have not covered yet: the concurrent use of
-one interface by several components.
-
-Dealing with concurrency in FreeSpec is a challenge in the general case.
-%
-If two components are using the same functionalities of an interface, there is a
-great chance they both have an influence on its abstraction.
-%
-As a consequence, this scenario implies verifying all the possible effects
-interlacing their concurrent uses may induce. It can quickly become unbearable.
-
-Nevertheless, if the use of one component does not interfere with the
-abstraction used by another, then from the point of view of the latter, the
-verification work is dramatically simplified.
-%
-This property is not necessarily symmetric.
+In particular, when hardware components interfaces are very large, two
+components are likely to use different classes of effects that do not interfere
+with each others.
 
 \begin{definition}[Predicate of Non-Interference]
   Let $\I$ be an interface and
@@ -1680,27 +1667,43 @@ theorem to help and guide the verification work of its users.
 
 \begin{theorem}[Non-Interference and Concurrency]
   Let $\sigma \in \Sigma_{\I}$ be an operational semantics dedicated to
-  $\mathcal{I}$. Let $\func{pnf} : \I \rightarrow \ac{prop}$ be a subset of
-  effects. Let $\sigma\!\!\downarrow\!\!\func{pnf}$ be the operational semantics
-  built upon $\sigma$ which executes arbitrary sequences of effects satisfying
-  $\func{pnf}$ between two effects.  We prove that
-  \[ A \| \func{pnf} \wedge \sigma \models A[\omega] \Rightarrow
+  \( \mathcal{I}\).
+  %
+  Let \( \func{pnf} : \I \rightarrow \ac{prop} \) be a subset of effects. Let
+  \( \sigma\!\!\downarrow\!\!\func{pnf} \) be the operational semantics built
+  upon \( \sigma \) which executes arbitrary sequences of effects satisfying
+  \func{pnf} between two effects.
+  %
+  We prove that
+  \[
+    A \| \func{pnf} \wedge \sigma \models A[\omega] \Rightarrow
     \sigma\!\!\downarrow\!\!\func{pnf} \models A[\omega]
   \]
 \end{theorem}
 
 In other words, a second component which only uses the effects that satisfies
-$\func{pnf}$ can use the interface concurrently to a component that abstracts it
-away with $A$.
+$\func{pnf}$ can use the interface concurrently to a component proved to be
+correct with respect to \( A \).
 
 \begin{example}[Memory Controller and IOMMU]
-  As pictured in Figure\,\ref{fig:freespec:computing-platform}, the Memory
+  As pictured in Figure\,\ref{fig:freespec:interfacedriven}, the Memory
   controller not only arbitrates the memory accesses of the CPU, but also to
   other hardware components (mostly PCI and PCIe devices).
   %
-  One possible predicate of non-interference for $A_{MCH}$ is to deny the IOMMU
-  the possibility to perform privileged write, so that only the main CPU could
-  do it.
+  One possible predicate of non-interference for $A_{\mathrm{MCH}}$ is to deny
+  the IOMMU the possibility to perform privileged write, so that only the main
+  CPU could do it, that is
+  %
+  \[
+    \func{pnf}_{\mathrm{IOMMU}}(e) \triangleq \forall (l, v) \in \mathpzc{Loc}
+    \times \mathpzc{Val}, e \neq \func{Write}_{\mathrm{MCH}}(l, v,
+    \texttt{privileged})
+  \]
+  %
+  By definition of \( A_{\mathrm{MCH}} \), and more precisely according to its
+  transition function, only privileged write accesses update its abstract state.
+  %
+  Therefore,
 \end{example}
 
 \section{Conclusion}
@@ -1731,7 +1734,7 @@ abstract specification needs to be updated, the required modifications may
 impact its neighbours.
 %
 For instance, modeling a x86-based computing system, as pictured in
-Figure~\ref{fig:freespec:computing-platform}, using FreeSpec requires to take
+Figure~\ref{fig:freespec:interfacedriven}, using FreeSpec requires to take
 into account the CPU cache, and to verify it complies with an abstract
 specification similar to the one defined in Example~\ref{ex:mch-abs-specs}.
 %
