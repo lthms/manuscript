@@ -1038,7 +1038,7 @@ same as \( \func{Read}(h.\func{core}.\func{pc}) \).
 We define \(\textsc{Minx86}\func{\_fetched}\) a transition-software mapping for
 $\formatLTS{Minx86}$ (Definition~\ref{def:speccert:transsoft}), to map an
 initial state of a transition and the label of this transition to the set of
-software components which own an instruction fetched during this transition.
+software components which own the instruction fetched during this transition.
 %
 In the case of \formatLTS{Minx86}, there is only one event which implies
 fetching instructions: \func{Fetch}.
@@ -1095,6 +1095,7 @@ transition-software mapping of {\scshape Minx86} as follows:
   \right.
 \]
 %
+\GH{dans la formule, je mettrai les "where..." qui précise la formule, à gauche et je laisserai sur la colonne de droite les "if..." qui préscisent quel cas s'appliqe. En outre, je rappelerais pour le dernier cas qu'il correspond à read\_from\_cache = false}
 We consider four cases.
 %
 Firstly, an instruction is fetched during a \func{Fetch} transition only, so for
@@ -1102,7 +1103,7 @@ other transitions, the function returns the empty set.
 %
 Secondly, if a core not in \ac{smm} tries to read the content of a physical
 addresses which belongs to the range specified by its SMRR, the specification
-states that the result of this \IO is a predefined value, hence the function
+states that the result of this \IO is a predefined \GH{constant? dummy? value} value, hence the function
 returns also the empty set in this case.
 %
 For the two last cases, we based our decision on the \func{read\_from\_cache}
