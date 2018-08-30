@@ -66,8 +66,9 @@ implementation, at the same time, of two \ac{hse} mechanisms or more--- possible
 \label{subsec:speccert:hardware}
 
 We model a hardware architecture, which can execute different software
-components, as a particular \ac{lts} (Definition~\ref{def:sota:lts}) \GH{la défintion 3.1 est loin. Si on lit le pdf en version informatique, on clique sur le lien et çà va. Si le texte est imprimé, il faudrait peut-être rappeler la section est la page ce cette défintion).} with two
-sets of labels instead of one.
+components, as a particular \ac{lts}
+(Definition~\ref{def:sota:lts})\,\footnote{On page~\pageref{def:sota:lts}.}
+with two sets of labels instead of one.
 
 \paragraph{States.}
 %
@@ -185,8 +186,8 @@ additional software configuration to enforce security properties.
 For instance, it is legitimate, from a x86 specification perspective, to enter
 ring 3 mode with a page table which allows for modifying kernel code and data.
 %
-We aim to model \ac{hse} mechanisms as traces subsets 	\GH{je pense (mais je peux me tromper) que lorsque tu place un nom devant un autre pour marquer le possessif, ce nom à valeur d'adjectif et qu'il doit être au singulier. Donc "trace subsets" plutôt que "traces subsets". Il faudrait vérifier que tu n'as pas le même souci ailleur}, to discard traces that are
-legitimate from a hardware specification perspective, yet dangerous from a
+We aim to model \ac{hse} mechanisms as subsets of traces, to discard traces that
+are legitimate from a hardware specification perspective, yet dangerous from a
 security perspective.
 
 \subsection{HSE Mechanisms}
@@ -484,16 +485,9 @@ This could mean that constraints over trusted software components execution are
 incomplete, or that requirements over hardware states are too restrictive.
 %
 If the requirements over hardware states cannot be loosen without threatening
-the security policy enforcement or to find additional restrictions over trusted
+the security policy enforcement or finding restrictions over trusted
 software execution, then the \ac{hse} mechanism probably does not serve its
-purpose. \GH{cette phrase est longue et on ne voit plus trop à quoi se rattache "to find aaitionnal...". S'il se rattache à "cannot be losen without", il faudrait utiliser le gérondif "without ... finding additionnal restrictions.}
-% \TODO{Cela veut surrement dire que les contraintes sur l'exécution du code
-% trusté sont incomplètes ou que le la restriction sur l'état du hardware est au
-% contraire trop restrictive. S'il n'est pas possible de trouver une contrainte
-% sur l'état du hardware moins restrictive permettant d'assurer la propriété de
-% sécurité ou de restreindre le code trusté pour vérifier cette seconde loi, il
-% y a de forte chance que le HSE ne permette pas d'assurer la propriété de
-% sécurité visée.... }
+purpose.
 
 \begin{example}[Flash Memory Lockdown Inconsistency]
   We can convince ourselves that the informal definition description we have
@@ -558,10 +552,10 @@ mechanism is a safety property: trusted software components shall \emph{never}
 generate a software transition which does not satisfy the requirements of the
 \ac{hse} mechanism.
 %
-The purpose of these requirements over software transitions is to
-prevent untrusted software components to reach a hardware configuration wherein
-the requirements over states are not satisfied. This implies that the initial state of the
-trace must satisfy the requirements over states.
+The purpose of these requirements over software transitions is to prevent
+untrusted software components to reach a hardware configuration wherein the
+requirements over states are not satisfied. This implies that the initial state
+of the trace must satisfy the requirements over states.
 %
 A trace whose initial state satisfies the requirements over states and where
 trusted software components do correctly implement a \ac{hse} mechanism is said
@@ -589,7 +583,9 @@ to comply with this mechanism.
   attack\,\cite{kallenberg2015racecondition}.
   %
   If the \ac{bios} fails to do so, then the related trace is not compliant.
-  \GH{cet exemple n'illustre que l'état initial. Il faudrait dire en outre que lorsqu'une exécution est exécutée en SMM elle respecter les software req...}
+  %
+  \GH{cet exemple n'illustre que l'état initial. Il faudrait dire en outre que
+    lorsqu'une exécution est exécutée en SMM elle respecter les software req...}
 \end{example}
 
 \begin{lemma}[HSE Invariant Enforcement]
@@ -645,16 +641,26 @@ called the SMRAM.
 %
 In such a case, only a core in \ac{smm} can read or write to the SMRAM.
 %
-As it stands, the \ac{hse} mechanism described here satisfies both laws. \GH{pourquoi? Il faudrait expliquer rapidement pourquoi c'est bien le cas.}
+As it stands, the \ac{hse} mechanism described here satisfies both laws.
+%
+\GH{pourquoi? Il faudrait expliquer rapidement pourquoi c'est bien le cas.}
 %
 However, between the core and the memory controller lies the cache, as pictured
 in Figure~\ref{fig:speccert:smram}.
 %
-If the cache does not take into account the SMRAM ---as it was the case in
-2009--- it can be used to somehow circumvent the protection enforced by the
-memory controller: as we have already explained in
-Subsection~\ref{subsec:usecase:hse:smram}, the integrity of the SMRAM is
-enforced, but the core does not read its content when it needs it. \GH{la fin de cette phrase n'est pas claire. Reformuler}
+If the cache does not implement an access control mechanism to protect its
+copies of the SMRAM content ---as it was the case in 2009--- it can be used to
+circumvent the protection enforced by the memory controller.
+%
+As we have already explained in Subsection~\ref{subsec:usecase:hse:smram}, the
+integrity of the SMRAM is enforced, so only a core in \ac{smm} can access to the
+content of the SMRAM.
+%
+However, when this core leaves the \ac{smm}, the content of the SMRAM remains in
+the cache, and nothing an untrusted software component to modify these copies.
+%
+When the core enters in \ac{smm} again, it fetches the (modified) content of the
+cache in place of the true SMRAM content.
 
 \begin{figure}
   \centering
@@ -696,19 +702,15 @@ transpose these definitions to our theory.
   on traces or a predicate on transitions.
 \end{definition}
 
-In most cases, the security policy is expected to be enforced in all traces of a
-given system, that is \( \mathcal{R}(\Sigma) \).
+Hardware features leveraged in the context of a \ac{hse} mechanism \( \Delta \)
+are not safe by default and require to be configured by trusted software
+components.
 %
-However, hardware architectures are unsafe by default, and have to be configured
-by trusted software components in order to enforce a targeted security policy at
-all time. \GH{Je vois ce que tu veux dire mais telle quelle, ton explication apporte plus de confusion qu'autre chose. Surtout la première partie. Il faudrait plutôt dire que les architecture matérielle n'étant pas safe par defaut, la politique de sécurité ne s'applique pas à l'ensembles des traces du système R(Sigma). Il faut que le mécanisme hardrware soit correctement initialié et utilisé par le code trusté. Par conséquent, un HSE est correcte si la politique de sécurté est vérfiée sur le sous-ensemble des traces qui vérifent les contraintes de configuration et de bonne utilisation par le code trusté, donc C. }
-%
-As a consequence, the correctness relation of a \ac{hse} mechanism \( \Delta \)
-is expressed with respect to \( \mathcal{C}(\Delta) \) rather than
-\( \mathcal{R}(\Sigma) \). A proof that a \ac{hse} mechanism \( \Delta \) is correct with respect to a
-security policy \( P \) rules out the risk of a vulnerability in the
-hardware features of the hardware model.
-
+As a consequence, the security policy \( P \) targeted by \( \Delta \) does not
+apply to the set of all traces of the hardware model, but we expect that
+satisfying the requirements of \( \Delta \) ---which is modeled in our theory by
+the set of compliant traces \( \mathcal{C}(\Delta) \)--- is a sufficient
+condition for enforcing \( P \).
 
 \begin{definition}[Correct HSE Mechanism]
   A \ac{hse} mechanism $\Delta$ is correct with respect to a security policy $P$
@@ -733,7 +735,10 @@ hardware features of the hardware model.
 Verifying that a \ac{hse} mechanism is correct with respect to a security policy
 can be difficult.
 %
-In the context of this thesis, we focus on safety properties. \GH{tu pourrais argumenter un peu en indiquant que, de fait, la plupart des HSE implémente une politique de safety}
+In the context of this thesis, we focus on safety properties.
+%
+To the extent of our knowledge, the majority of \ac{hse} mechanisms target
+access control policies, which qualify as safety properties.
 %
 The reasoning is facilitate because they are characterized by predicates on
 transitions.
@@ -778,15 +783,21 @@ The following theorem takes advantage of this fact.
   \end{proof}
 \end{theorem}
 
-A proof of correctness of a given \ac{hse} mechanism asserts that the
-hardware architecture enforces a targeted security policy \emph{if trusted
-  software components correctly implement this \ac{hse} mechanism}, that is
-their executions only imply software transitions which satisfy the appropriate
+A proof of correctness of a given \ac{hse} mechanism asserts that the hardware
+architecture enforces a targeted security policy \emph{if trusted software
+  components correctly implement this \ac{hse} mechanism}, that is their
+executions only imply software transitions which satisfy the appropriate
 software requirements.
 %
 If attackers are able to modify the instructions of the trusted software
-components programs, they can defeat the security enforcement by
-modifying the instruction responsible to implement it. \GH{ce n'est pas le seul risque (même si c'est le plus important). De manière générale, si un composant non trusté peu influencer le comportement d'un code trusté (par exemple, en perturbant son flot d'exécution), il peut l'amener à ne plus respecter les software req. Mais c'est le problème du software trusté. Il doit être correct ET robuste aux attaques.}
+components programs, they can defeat the security enforcement by modifying the
+instruction responsible to implement it.
+%
+\GH{ce n'est pas le seul risque (même si c'est le plus important). De manière
+  générale, si un composant non trusté peu influencer le comportement d'un code
+  trusté (par exemple, en perturbant son flot d'exécution), il peut l'amener à
+  ne plus respecter les software req. Mais c'est le problème du software
+  trusté. Il doit être correct ET robuste aux attaques.}
 %
 This is why trusted software components are expected to protect themselves
 against untrusted software components attempt to modify their program.
@@ -942,31 +953,28 @@ it is not possible to implement both at the same time.
 %
 We anticipate there are other scenarios more unclear, for instance if the set of
 compliant traces \( \mathcal{C}(\Delta_1 \sqcap \Delta_2) \) contains only
-traces where a given software component prevents a given \GH{"another" plutot que a given} software component to
-correctly implement its functional specification. \GH{Cette phrase n'est pas très claire. Il faudrait développer en NOMMANT les choses. Un software component s1....}
+traces where a given software component prevents another software component to
+correctly implement its functional specification.
+%
+\GH{Cette phrase n'est pas très claire. Il faudrait développer en NOMMANT les
+  choses. Un software component s1....}
 %
 We advocate that a similar situation can occur for a single \ac{hse} mechanism.
 %
 Because we aimed to focused on hardware architecture verification in the context
-of this thesis, we therefore did not investigated further the compatibility of \ac{hse} mechanisms.
-
-\subsection*{}
-
-In this Section, we introduced our theory to formally specify and verify
+of this thesis, we therefore did not investigated further the compatibility of
 \ac{hse} mechanisms.
-%
-It allows us to verify each \ac{hse} mechanism in isolation, but we also
-introduced a composition operator as a first step toward reasoning about the
-implementation of two \ac{hse} mechanisms or more at the same time.
-%
-In the next Section, we proceed with a case study focused on so-called code
-injection policies, to act as a detailed example on \ac{hse} compositions.
-
-\GH{Cette conclusion intermédiaire est un peu "too much" (pourtant j'aime bien les conclu intermédiaire). Comme elle n'est pas séparée du reste, on la relie à tort à la sous-section 4.1.4. Je serai pour la supprimer (en tout cas, supprimer la sous-section). Eventuellement, reprendre le début (In this section...at the same time) comme introduction de la section suivante. Ca fera une bonne transition avec "We now aim to ..". Dans tous les cas, virer "In the next Section... hse composition" qui est redondant avec ce qui suit.}
 
 \section{Case Study: Code Injection Policy}
 \label{sec:speccert:casestudy}
 
+In the previous Section, we introduced our theory to formally specify and verify
+\ac{hse} mechanisms.
+%
+It allows us to verify each \ac{hse} mechanism in isolation, and we also
+introduced a composition operator as a first step toward reasoning about the
+implementation of two \ac{hse} mechanisms or more at the same time.
+%
 We now aim to illustrate further how our theory can be leveraged in order to
 reason about security enforcement by means of several \ac{hse} mechanisms
 implemented at the same time.
@@ -1017,7 +1025,8 @@ location in which these data are stored.
   A transition-software mapping
   $\func{fetched}_{\Sigma}: H \times L \rightarrow \powerset(S)$ is a function
   which takes an initial hardware state, a transition label and returns the set
-  of owners of the fetched instructions during this transition. \GH{fetched instruction n'est pas défini clairement.}
+  of owners of the fetched instructions during this transition. \GH{fetched
+    instruction n'est pas défini clairement.}
 \end{definition}
 
 With this mapping, specific to a given hardware model, it becomes possible to
@@ -1026,7 +1035,13 @@ decoded and executed.
 %
 \( s \in \func{fetched}_{\Sigma}(h, l) \) means that an instruction owned by $s$
 was fetched in order to be executed by the processor during a transition labeled
-with \( l \) from a state \( h \). \GH{Cette phrase est ambigüe. Est-ce que c'est le fetch qui a lieu durant la software transition? J'avais cru comprendre que l'exécution d'une instruction pouvait correspondre à plusieurs "software transition". Du coup, pour chacune des ces transition, fetched renvoie la même valeur? Ou pas? Ce n'est pas claire}
+with \( l \) from a state \( h \).
+%
+\GH{Cette phrase est ambigüe. Est-ce que c'est le fetch qui a lieu durant la
+  software transition? J'avais cru comprendre que l'exécution d'une instruction
+  pouvait correspondre à plusieurs "software transition". Du coup, pour chacune
+  des ces transition, fetched renvoie la même valeur? Ou pas? Ce n'est pas
+  claire}
 
 With a hardware-software mapping and a transition-software mapping, we give a
 formal definition of a \textit{code injection}.
@@ -1065,15 +1080,16 @@ A software component initialization is most of the time the result of a code
 injection.
 
 \begin{example}[Application Code Injection]
-  When a user starts \GH{execute plutôt que start?} a new application, the operating system
-  loads the code of this application into the \ac{dram}.
+  When a user executes a new application, the operating system loads the code of
+  this application into the \ac{dram}.
   %
   Therefore, when the processor starts the execution of the application in
   ring~3, it executes instructions which are owned by the OS.
 \end{example}
 
 On the contrary, an illegitimate code injection poses a significant threats
-against the security of the software stack, because it constitutes an attack vector for privilege escalation.
+against the security of the software stack, because it constitutes an attack
+vector for privilege escalation.
 %
 Low-level software components, such as the \ac{bios}, partly rely on the
 hardware architecture to protect them against illegitimate code injection.
@@ -1100,9 +1116,8 @@ injection.
 \label{subsec:speccert:globalsec}
 
 We leverage the code injection definition to propose a generic formalization of
-code injection policy. This policy determines if a given software component is authorized
-to make a code injection against another software component in the context of a
-particular software stack. \GH{virer "in the context  of a particular software stack"? Je ne vois pas trop ce que çà apporte}
+code injection policy. This policy determines if a given software component is
+authorized to make a code injection against another software component.
 
 \begin{definition}[Code Injection Policy]
   \label{def:speccert:global}
@@ -1192,9 +1207,9 @@ system and \( n \) applications.
 
   The definition of the corresponding $\func{context}$ shall obey the following
   logic: when the processor is in \ac{smm}, the \ac{bios} is executed; when the
-  processor is not in \ac{smm} and is in ring 0, the system software component \GH{comme tu utilise le terme OS avant dans ta définition, je dirais OS ici plutot que system software}
-  is executed; when the processor is not in \ac{smm} and is in ring 3, one of
-  the applications ---identified by the page tables used by the processor--- is
+  processor is not in \ac{smm} and is in ring 0, the operating system is
+  executed; when the processor is not in \ac{smm} and is in ring 3, one of the
+  applications ---identified by the page tables used by the processor--- is
   executed.
 \end{definition}
 
@@ -1306,7 +1321,11 @@ form of requirements over a hardware model.
 %
 We emphasize that our approach requires a general-purpose hardware model to
 define and verify \ac{hse} mechanisms to enable the verification of several
-mechanisms against the same reference, both in isolation and in composition. \GH{attention avec ce claim un peu fort. Tu affirmes haut et fort qu'il te faut un modèle générique de x86 sauf que juste après, en section 5, tu vas annoncer que tu as fait un modèle réduit avec seulement les features qui t'intéressaient pour modéliser la SMM...}
+mechanisms against the same reference, both in isolation and in composition.
+\GH{attention avec ce claim un peu fort. Tu affirmes haut et fort qu'il te faut
+  un modèle générique de x86 sauf que juste après, en section 5, tu vas annoncer
+  que tu as fait un modèle réduit avec seulement les features qui
+  t'intéressaient pour modéliser la SMM...}
 %
 We believe this is an essential property; in practice, these multiple mechanisms
 are implemented at the same time by different software components, and they may
