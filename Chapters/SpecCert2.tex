@@ -840,7 +840,7 @@ The postconditions for \( \func{Read}(\var{pa}) \) and
 in order to determine which memory locations are updated and modify their
 respective owner accordingly.
 %
-We discuss two specific cases of a transition labeled
+We discuss two specific cases of the transition labeled
 \( \func{Write}(v, \func{pa}) \) from a state \( h \) to a state \( h' \) in
 order to illustrate the definition of the postcondition predicate:
 %
@@ -858,9 +858,10 @@ order to illustrate the definition of the postcondition predicate:
     \mathtt{true}
   \]
   %
-  then the content of the cache line is written back to memory, and the cache
+  \GH{cette formule dépasse un peu de la page. Peut-être peux tu enlever le "= true"}
+  Then, the content of the cache line is written back to memory and the cache
   line is updated with \( v \) as its new content, \( context(h) \) as its new
-  owner, \( pa \) as its new tag and its dirty bit is set.
+  owner, \( pa \) as its new tag, and its dirty bit is set.
   %
   For this specific case, with
   \( \var{ha} = \func{dispatch}(h.\func{mc}, h.\func{in\_smm},
@@ -888,6 +889,7 @@ order to illustrate the definition of the postcondition predicate:
     \end{array}
   \]
   %
+  \GH{on a (j'ai) perdu de vue ce que dispatch signifie. Il faudrait peut-être le rappeler brièvement}
   Note that the same scenario applies if \( \var{pa} \) belongs to the range
   specified by the core SMRR, and the cache strategy specified by the SMRR is
   \( \mathtt{WB} \).
@@ -896,7 +898,7 @@ order to illustrate the definition of the postcondition predicate:
   already present inside the cache, then only the cache is updated.
   %
   The new owner of the selected cache line is the software component currently
-  executed by the core, its new content is \( v \) and its dirty bit is set,
+  executed by the core, its new content is \( v \) \GH{a quoi correspond v? Dans le reste de la phrase, tu désigne explicitement les choses, sauf v, ce qui fait un peu bizarre} and its dirty bit is set,
   while the tag of the cache line remains untouched.
   %
   In this second scenario, the postcondition is
