@@ -214,11 +214,6 @@ Thus, $H(S)$ is defined as follows:
 they expose memory locations to the core which can contain instructions to be
 fetched. To implement the tracking of memory ownership within our model, we
 need to taint the memory locations with their respective owner, which belongs to \( S \).
-%
-We do not consider core registers in {\scshape Minx86} yet.
-%
-When we extend our model to that end, we will need to taint them accordingly,
-and \( \mathtt{Core} \) will have to be parameterized by \( S \) too. \GH{je virerai ces deux dernières phrases car elles ont tendances à être négatives. En outre, plus loin, on se rend compte que tu modélise PC, qui est bien un registre du processeur! Eventuellement, dire que ton modèle n'a pas besoin de suivre la provenance des contenus des registres (et encore...)}
 
 \paragraph{Address Spaces.}
 %
@@ -1380,8 +1375,9 @@ there are three case scenarios to consider:
   general-purpose lemmas which applies to both \func{Read} and \func{Write}
   transitions\,\footnote{The interesting reader can have a look at the file
     \texttt{src/Smm/Delta/Preserve/Architecture.v}
-    in~\ref{letan2016speccertcode}, which gather these proofs, and
-    \texttt{src/Smm/Delta/Preserve/\{Read,Write\}.v} to see them in action.}. \GH{attention, la référence dans la footnote est cassée}
+    in~\cite{letan2016speccertcode}, which gather these proofs, and
+    \texttt{src/Smm/Delta/Preserve/\{Read,Write\}.v} to see them in
+    action.}.
 \end{enumerate}
 %
 Once each requirement has been shown to be preserved during a transition, we can
@@ -1418,7 +1414,7 @@ For {\scshape Minx86}, this only happens during transitions labeled by
 Subsection~\ref{subsec:minx86:fetched}).
 %
 \( \func{Fetch} \) is a hardware transition \GH{a bon? Ce n'est pas évident à première vue. Et sauf erreur de ma part, ce n'est pas précisé avant. Cela devrait l'être. Tu devrais mieux définir ce qu'est "fetch", quand et comment cet événement arrive... lorsque tu décrit MinX86}, and therefore is not concerned by
-\func{bios\_req}. 
+\func{bios\_req}.
 %
 As a consequence, we can simplify our proof goal as follows:
 %
@@ -1448,7 +1444,7 @@ our proof goal as follows:
 The rest of the proof leverages the definition of \func{hardware\_req}.
 %
 Because of requirements 1., we know that
-\( h.\func{core}.\func{pc} belongs to the \texttt{pSmram} \). \GH{il y a un problème dans une de tes commandes. Les mots sont soudainement tous attachés}
+\( h.\func{core}.\func{pc} \) belongs to the \( \texttt{pSmram} \).
 %
 By definition of \( \textsc{Minx86}\func{\_fetched} \), we know that we have two
 cases to consider:
