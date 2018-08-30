@@ -35,13 +35,11 @@ We justify our contribution with the experience implementing the proofs of
 Chapter~\ref{chapter:speccert2} (Section~\ref{sec:freespec:why}).
 %
 Then, we describe how we model components in terms of programs with effects and
-effect handlers (Section~\ref{sec:freespec:specifying}) and we introduce
-so-called abstract specifications to verify their respective properties
-(Section~\ref{sec:freespec:verifying}).
+effect handlers (Section~\ref{sec:freespec:specifying}).
 %
-Then, we discuss how the different levels of composition of FreeSpec can be
-leveraged to scale the modeling and verification work for larger systems
-(Section~\ref{sec:freespec:scale}).
+Finally, we introduce so-called abstract specifications to verify their
+respective properties, and discuss two verification strategies which leverage
+them (Section~\ref{sec:freespec:verifying}).
 
 \section{Lessons Learned from {\scshape Minx86}}
 \label{sec:freespec:why}
@@ -248,9 +246,9 @@ Continuing with a similar logic would mean modifying the model each time we want
 to reason about a security policy which requires additional information.
 %
 For instance, if we want to determine how many times memory locations have been
-updated since the beginning of the trace, we would have to modify the definitions
-of \( H(S) \) and of the transition relation to add a counter along with the
-owner of a memory location.
+updated since the beginning of the trace, we would have to modify the
+definitions of \( H(S) \) and of the transition relation to add a counter along
+with the owner of a memory location.
 %
 Modifying the transition relation is likely to break all proofs previously
 written, and therefore this greatly reduces the opportunity to reuse {\scshape
@@ -1519,7 +1517,9 @@ In its current state, FreeSpec provides some theorems to verify the properties
 of a component model in terms of an abstract specification, depending on the
 composition pattern.
 
-The most favourable scenario consists of one component which uses many
+\paragraph{Predicate of Synchronization.}
+%
+The most favorable scenario consists of one component which uses many
 components, and is only used by one other component.
 %
 Let $\I$ and $\J$ be two interfaces and let $C$, a component with a set of
@@ -1626,14 +1626,15 @@ invariant for the induction, and a sufficient condition to enforce compliance.
   semantics from $C_{\mathrm{MCH}}$ which complies with $A_{\mathrm{MCH}}$.
 \end{example}
 
-\paragraph{}
+\paragraph{Predicate of Non-Interference.}
 %
 Another common composition pattern consists of a component which is used by more
 than one other component.
 %
 FreeSpec provides a theorem which allows for extending the result obtained with
 the Theorem~\ref{theorem:der-compliance}, in the specific case where concurrent
-accesses do not lead to any abstract state update.
+accesses do not lead to any abstract state update, and always satisfy the
+requirements over effects.
 %
 This represents an important constraint, but matches realistic use cases.
 %
@@ -1682,7 +1683,7 @@ $\func{pnf}$ can use the interface concurrently to a component proved to be
 correct with respect to \( A \).
 
 \begin{example}[Memory Controller and IOMMU]
-  As pictured in Figure\,\ref{fig:freespec:interfacedriven}, the Memory
+  As pictured in Figure\,\ref{fig:freespec:interfacedriven}, the memory
   controller not only arbitrates the memory accesses of the CPU, but also to
   other hardware components (mostly PCI and PCIe devices).
   %
@@ -1691,7 +1692,7 @@ correct with respect to \( A \).
   CPU could do it, that is
   %
   \[
-    \func{pnf}_{\mathrm{IOMMU}}(e) \triangleq \forall (l, v) \in \mathpzc{Loc}
+    \func{pnf}_{\mathrm{IOMMU}}(e) \triangleq \forall l \in \mathpzc{Loc}, v \in
     \times \mathpzc{Val}, e \neq \func{Write}_{\mathrm{MCH}}(l, v,
     \texttt{privileged})
   \]
@@ -1699,7 +1700,20 @@ correct with respect to \( A \).
   By definition of \( A_{\mathrm{MCH}} \), and more precisely according to its
   transition function, only privileged write accesses update its abstract state.
   %
-  Therefore,
+  Therefore, we prove
+  %
+  \[
+    \forall \mathcal{A}, \omega \in \Omega_{\mathrm{MCH}}, e \in
+    \I|_{\mathrm{\mathcal{A}}}, x \in \mathcal{A},
+    \func{pnf}_{\mathrm{IOMMU}}(e) \Rightarrow
+    \func{step}_{\mathrm{MCH}}(\omega, e, x, \omega) = \omega
+  \]
+  %
+  Besides, the precondition \( \func{pre}_{\mathrm{MCH}} \) always holds true.
+
+  As a consequence, \( A_{\mathrm{MCH}} \| \func{pnf}_{\mathrm{IOMMU}} \), that
+  is \( \func{pnf}_{\mathrm{IOMMU}} \) is a predicate of non-interference of \(
+  A_{\mathrm{MCH}} \).
 \end{example}
 
 \section{Conclusion}
@@ -1727,18 +1741,18 @@ system, as long as they agree on the interfaces and abstract specifications.
 %
 If, during the verification process, one group finds out a given interface or
 abstract specification needs to be updated, the required modifications may
-impact its neighbours.
+impact its neighbors.
 %
 For instance, modeling a x86-based computing system, as pictured in
 Figure~\ref{fig:freespec:interfacedriven}, using FreeSpec requires to take into
-account the CPU cache, and to verify it complies with an abstract specification
+account the cache, and to verify it complies with an abstract specification
 similar to the one defined in Example~\ref{ex:mch-abs-specs}.
 %
 Thus, FreeSpec could have helped uncover the SMRAM cache poisoning attack
 previously mentioned\,\cite{wojtczuk2009smram,duflot2009smram}, and other
 similar architectural attacks.
 
-The abstract specifications are defined in terms of interfaces, i.e.
+The abstract specifications are defined in terms of interfaces, \emph{i.e.}
 independently from components.
 %
 It has two advantages.
