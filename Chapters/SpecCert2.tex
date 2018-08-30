@@ -1203,7 +1203,7 @@ Once we have properly introduced both, we verify our definition of
 \( \Delta_{\mathtt{bios}} \) satisfies the \ac{hse} laws
 (Definition~\ref{def:speccert:laws}).
 
-\paragraph{Requirements over States.}
+\paragraph{Requirements over States.} \GH{je viens de réaliser que tu as renommé les "hardware requirements" en "requirement over states". Outre que le nom devient long je ne suis pas sur qu'il ne reste pas quelques mentions de hardware requirement dans le manuscrit. Il faut vérifier}
 %
 Given \( h \in H(S) \), we have identified six requirements over states for
 \( h \) to satisfy \func{hardware\_req}.
@@ -1417,8 +1417,8 @@ For {\scshape Minx86}, this only happens during transitions labeled by
 \func{Fetch} by definition of \( \textsc{Minx86}\func{\_fetched} \) (see
 Subsection~\ref{subsec:minx86:fetched}).
 %
-\( \func{Fetch} \) is a hardware transition, and therefore is not concerned by
-\func{bios\_req}.
+\( \func{Fetch} \) is a hardware transition \GH{a bon? Ce n'est pas évident à première vue. Et sauf erreur de ma part, ce n'est pas précisé avant. Cela devrait l'être. Tu devrais mieux définir ce qu'est "fetch", quand et comment cet événement arrive... lorsque tu décrit MinX86}, and therefore is not concerned by
+\func{bios\_req}. 
 %
 As a consequence, we can simplify our proof goal as follows:
 %
@@ -1448,7 +1448,7 @@ our proof goal as follows:
 The rest of the proof leverages the definition of \func{hardware\_req}.
 %
 Because of requirements 1., we know that
-\( h.\func{core}.\func{pc} belongs to the \texttt{pSmram} \).
+\( h.\func{core}.\func{pc} belongs to the \texttt{pSmram} \). \GH{il y a un problème dans une de tes commandes. Les mots sont soudainement tous attachés}
 %
 By definition of \( \textsc{Minx86}\func{\_fetched} \), we know that we have two
 cases to consider:
@@ -1464,7 +1464,7 @@ cases to consider:
   In this context, we can conclude thanks to the requirements 4.
 \item Otherwise, the instruction is read from the underlying memories.
   %
-  More precisely, by definition \func{dispatch}
+  More precisely, by the definition of \func{dispatch}
   (Definition~\ref{def:speccert2:dispatch}), we know the instruction is read
   from the \ac{dram}, and as a consequence the requirements 3. allows us to
   conclude.
