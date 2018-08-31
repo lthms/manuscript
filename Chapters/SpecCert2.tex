@@ -1024,9 +1024,14 @@ counter register.
 As a consequence, the definition of its precondition and postcondition are the
 same as \( \func{Read}(h.\func{core}.\func{pc}) \).
 %
-% We distinguish between \func{Read} and \func{Fetch} because a software
-% component does not always decide the value of the program counter register of
-% the Core.
+\func{Fetch} is a hardware transition because the address used to fetch the next
+instruction is determined by the program counter register of the core.
+%
+A software component can modify the value of this register ---this is modeled by
+\func{NextInstruction}--- but it is not alone in this case.
+%
+The hardware architecture will update the register independently to the software
+component it currently executes, \emph{e.g.} when it receives an interrupt.
 %%
 % \TODO{Je comprends la fin de la phrase mais je ne vois pas le lien avec "We
 % distinguish between \func{Read} and \func{Fetch}". Difficile de comprendre ce
@@ -1209,11 +1214,6 @@ As \func{context} has already been specified, only \func{hardware\_req} and
 Once we have properly introduced both, we verify our definition of
 \( \Delta_{\mathtt{bios}} \) satisfies the \ac{hse} laws
 (Definition~\ref{def:speccert:laws}).
-
-\GH{je viens de réaliser que tu as renommé les "hardware requirements" en
-  "requirement over states". Outre que le nom devient long je ne suis pas sur
-  qu'il ne reste pas quelques mentions de hardware requirement dans le
-  manuscrit. Il faut vérifier}
 
 \paragraph{Requirements over States.}
 %
@@ -1435,7 +1435,7 @@ For {\scshape Minx86}, this only happens during transitions labeled by
 \func{Fetch} by definition of \( \textsc{Minx86}\func{\_fetched} \) (see
 Subsection~\ref{subsec:minx86:fetched}).
 %
-\( \func{Fetch} \) is a hardware transition \GH{a bon? Ce n'est pas évident à première vue. Et sauf erreur de ma part, ce n'est pas précisé avant. Cela devrait l'être. Tu devrais mieux définir ce qu'est "fetch", quand et comment cet événement arrive... lorsque tu décrit MinX86}, and therefore is not concerned by
+\( \func{Fetch} \) is a hardware transition, and therefore is not concerned by
 \func{bios\_req}.
 %
 As a consequence, we can simplify our proof goal as follows:
@@ -1465,8 +1465,8 @@ our proof goal as follows:
 %
 The rest of the proof leverages the definition of \func{hardware\_req}.
 %
-Because of requirements 1., we know that
-\( h.\func{core}.\func{pc} \) belongs to the \( \texttt{pSmram} \).
+Because of requirements 1., we know that \( h.\func{core}.\func{pc} \) belongs
+to the \( \texttt{pSmram} \).
 %
 By definition of \( \textsc{Minx86}\func{\_fetched} \), we know that we have two
 cases to consider:
