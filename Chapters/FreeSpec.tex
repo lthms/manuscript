@@ -1243,12 +1243,10 @@ terms of computation results and state updates.
   %
   On the other hand, the effects constructed with $\func{Read}_{\mathrm{MCH}}$
   and $\func{Write}_{\mathrm{MCH}}$ will use the current state of the memory
-  controller, the privileged parameter of the effect and the memory location to
-  lookup to determine if it uses the DRAM or the VGA controller.
+  controller, the privileged parameter of the effect and the memory location of the access
+   to determine if it uses the DRAM or the VGA controller.
   %
-  By default, it fetches the memory of the DRAM controller, except if the
-  isolation mechanism is activated, the access is unprivileged and the targeted
-  memory location belongs to the SMRAM.
+  By default, it fetches the memory of the DRAM controller, except if all of the three following conditions are satisfied : (1) the  isolation mechanism is activated, (2) the access is unprivileged, and (3) the targeted  memory location belongs to the SMRAM.
   %
   In such a case, it reroutes access to the VGA controller.
 \end{example}
@@ -1272,6 +1270,8 @@ To do that, we need to derive an operational semantics for~$\I$ from $C$.
     \sigma_j' \rangle) \text{ where } ((x, s'), \sigma_j') = \sigma_j[C (i, s)]
   \]
 \end{definition}
+
+\GH{la j'avoue, j'ai décroché sur la définition 6.7. Peut-être qu'un petit exemple ou une petite description de la formule en anglais aiderait à la compréhension.}
 
 % On the one hand, components are defined in terms of programs with effects,
 % meaning each component can be modelled independently from the rest of the
