@@ -1344,7 +1344,7 @@ parameterize an abstraction specification with an abstract state and a step
 function to update this state after each effect realization.
 
 \begin{definition}[Abstract Specification] \label{def:freespec:abstract-specs}
-  We write $A$ for an abstract specification dedicated to an interface $\I$,
+  An abstract specification $A$ dedicated to an interface $\I$ is 
   defined as a tuple
   $\langle \Omega, \func{step}, \func{pre}, \func{post} \rangle$ where
   \begin{itemize}
@@ -1356,14 +1356,15 @@ function to update this state after each effect realization.
   \item $\func{pre} \subseteq \I \times \Omega$ is the precondition over
     effects, such that $(e, \omega) \in \func{pre}$ if and only if the effect
     $e$ satisfies the precondition parameterized with the abstract state
-    $\omega$ (denoted by $\func{pre}(e, \omega)$).
+    $\omega$ (denoted by $\func{pre}(e, \omega)$). \GH{je ne comprends pas le denoted by $\func{pre}(e, \omega)$. Quelle est la différence avec $(e, \omega) \in \func{pre}$?}
   \item
     $\func{post} \subseteq \bigcup_{\mathcal{A}} (\Interface{\I}{\mathcal{A}}
     \times \mathcal{A} \times \Omega)$ is the postcondition over effects
     results, such that $(e, x, \omega) \in \func{post}$ if and only if the
     results $x$ computed for the effects $e$ satisfies the postcondition
     parameterized with the abstract state $\omega$ (denoted by
-    $\func{post}(e, x, \omega)$).
+    $\func{post}(e, x, \omega)$). \GH{idem, je ne comprends pas denoted by
+    $\func{post}(e, x, \omega)$}
   \end{itemize}
 \end{definition}
 
@@ -1375,7 +1376,7 @@ the need to look at the effect handlers.
 %
 An abstract specification is dedicated to one verification problem (in our
 context, one security property), and it is possible to define as many
-abstraction specifications as required.
+abstract specifications as required.
 
 We write
 $\func{run}_{\func{step}} : \forall \mathcal{A}, \Sigma_{\I} \rightarrow
