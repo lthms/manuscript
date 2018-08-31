@@ -1020,6 +1020,8 @@ As a consequence, \emph{we cannot specify as-is a graph of components which
 This is the main limitation of FreeSpec, but its incidence is abated because
 computing platforms are often designed as a hierarchical succession of layers.
 
+\GH{Il manque ici une transition pour expliquer pourquoi on a besoin de la monad program. Tu nous parles de çà brusquement et on ne voit pas le lien avec ce qui précède.}
+
 \subsection{The Program Monad}
 % -----------------------------------------------------------------------------
 
@@ -1110,6 +1112,7 @@ $\mathcal{I}_{\mathrm{DRAM}}$.
   \]
 \end{definition}
 
+\GH{un petit exemple pour illustrer la précédente définition serait le bienvenu}
 \subsection{Components as Programs with Effects}
 % -----------------------------------------------------------------------------
 
@@ -1120,9 +1123,9 @@ component which exposes an interface $\I$ and uses another interface $\J$.
 %
 We proceed with the following steps: modeling the component in terms of programs
 with effects, then deriving one operational semantics for $\I$ from these
-programs, assuming provided an operational semantics for $\J$.
+programs, assuming provided an operational semantics for $\J$. \GH{la tournure "assuming provided an operational semantics for $\J$" me semble bizarre mais je comprends ce que tu as voulu dire. Reformuler?}
 
-The behaviour of a component is often determined by a local, mutable state.
+The behavior of a component is often determined by a local, mutable state.
 %
 When it computes the result of a computational request, not only a component may
 read its current state; but it can also modify it, for instance to handle the
