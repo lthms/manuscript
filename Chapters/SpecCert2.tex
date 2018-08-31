@@ -57,7 +57,9 @@ machines and we have used publicly available Intel
 documents\,\cite{intel2013celeron,intel2009mch,intel2014manual} to define it.
 %
 The hardware architecture we are modeling with $\formatLTS{Minx86}$ matches the
-one depicted in Figure~\ref{fig:speccert:smram}. It contains a core, a cache, a
+one depicted in Figure~\ref{fig:speccert:smram}. It contains one
+core\,\footnote{As discussed in the previous Chapter, we did not tackle the
+  challenge posed by multi-core computer in this thesis.}, one level of cache, a
 memory controller, a \ac{dram} controller and a VGA controller\,\footnote{A VGA
   controller is a hardware device which on we can connect a screen. It exposes
   some memory to the core for communication purposes.} which both expose some
@@ -83,10 +85,7 @@ mapping of {\scshape Minx86} (\ref{subsec:minx86:fetched}).
 
 \paragraph{Hardware Features.}
 %
-We consider the core \GH{Il faudrait préciser "a cpu core". En outre,
-  considères-tu pour l'instant seulement un seul coeur par CPU? Il faudrait le
-  rappeler ici explicitement.} can be either in System Management Mode
-(\ac{smm}) or in an unprivileged mode.
+We consider the core can be either in \ac{smm} or in an unprivileged mode.
 %
 As explained in Section~\ref{subsec:usecase:firm:sec}, when a processor receives
 a System Management Interrupt (SMI), it halts its current execution,
@@ -153,8 +152,8 @@ The memory ownership is updated through transitions according to three rules:
 \item When a cache line gets a copy of a \ac{dram} or VGA cell content, the
   owner of this cell becomes the new owner of this cache line.
 %
-\item When the content of a cache line is written back to a memory cell, the
-  new owner of this memory cell is the owner of the cache line.
+\item When the content of a cache line is written back to a memory cell, the new
+  owner of this memory cell is the owner of the cache line.
 %
 \item During a software transition whose purpose is to overwrite the content of
   a memory location, the software component currently executed ---and therefore
@@ -178,8 +177,8 @@ The memory ownership is updated through transitions according to three rules:
   components which form the software stack.
 \end{definition}
 
-We emphasize that there are many valid definitions of the \func{context} function,
-regarding the verification problem we consider.
+We emphasize that there are many valid definitions of the \func{context}
+function, regarding the verification problem we consider.
 %
 For instance, we need two different definitions of \func{context} whether we
 consider a hypervisor in the software stack or not.
@@ -192,15 +191,14 @@ parameter for the model.
 \label{subsec:speccert2:state}
 
 $H(S)$ is defined as the Cartesian product of the set of states of the core, the
-cache, the memory controller and the memories exposed by both the \ac{dram}
-and the VGA controllers.
+cache, the memory controller and the memories exposed by both the \ac{dram} and
+the VGA controllers.
 %
 Each of these sets is defined in order to model the hardware features we have
 previously described.
 %
 We use named tuples\,\footnote{See page \pageref{frontmatter:notations} for a
-  description of the notations we used to manipulate them.} to
-define them.
+  description of the notations we used to manipulate them.} to define them.
 %
 Thus, $H(S)$ is defined as follows:
 %
@@ -212,14 +210,15 @@ Thus, $H(S)$ is defined as follows:
 %
 \( \mathtt{Cache} \) and \( \mathtt{Mem} \) are parameterized by \( S \) because
 they expose memory locations to the core which can contain instructions to be
-fetched. To implement the tracking of memory ownership within our model, we
-need to taint the memory locations with their respective owner, which belongs to \( S \).
+fetched. To implement the tracking of memory ownership within our model, we need
+to taint the memory locations with their respective owner, which belongs to
+\( S \).
 
 \paragraph{Address Spaces.}
 %
-We define $\texttt{PhysAddr}$, the set of physical addresses that the core uses to
-perform \IO and $\texttt{HardAddr}$, the set of hardware addresses exposed by the
-\ac{dram} and VGA controllers.
+We define $\texttt{PhysAddr}$, the set of physical addresses that the core uses
+to perform \IO and $\texttt{HardAddr}$, the set of hardware addresses exposed by
+the \ac{dram} and VGA controllers.
 %
 To distinguish between \ac{dram} and VGA addresses, we use two different
 constructors\,\footnote{See page \pageref{frontmatter:notations}.}.
@@ -301,8 +300,8 @@ The set of states of the \acp{smrr} is denoted $\texttt{Smrr}$.
 \]
 %
 The set of physical addresses $\func{range}$ tells the core the location of the
-SMRAM and $\func{strat}$ indicates which cache strategy has to be used when the core
-is in \ac{smm}.
+SMRAM and $\func{strat}$ indicates which cache strategy has to be used when the
+core is in \ac{smm}.
 
 % which can be available or already used. A cache line already used is tagged
 % with the physical address of its content. For a given physical address, the
@@ -435,9 +434,9 @@ possible to have
 
 \paragraph{Memories.}
 %
-The physical memories (exposed by the DRAM and the VGA controllers)
-are modelled together with a mapping between the hardware addresses and both their
-contents and the software components which own them.
+The physical memories (exposed by the DRAM and the VGA controllers) are modelled
+together with a mapping between the hardware addresses and both their contents
+and the software components which own them.
 %
 We write $\texttt{Mem}(S)$ for the set of states of the physical memories.
 \[
@@ -827,9 +826,9 @@ The postconditions for \( \func{Read}(\var{pa}) \) and
 \( \func{Write}(\var{pa}, v) \) take into account
 %
 \begin{inparaenum}[(1)]
-\item the cache strategy configured for the address \( pa \),
+\item the cache strategy configured for the address \( \var{pa} \),
 \item the state of the cache line associated to the index
-  \( i = \func{index}(pa) \),
+  \( i = \func{index}(\var{pa}) \),
 \item whether \( pa \) belongs to the SMRAM or not,
 \item whether the core is in \ac{smm} or not, and
 \item whether the \texttt{D\_OPEN} bit of the \texttt{SMRAMC} register is set or
@@ -846,21 +845,30 @@ order to illustrate the definition of the postcondition predicate:
 \begin{enumerate}
 \item If the cache strategy for the address \( \var{pa} \) is set to
   \( \mathtt{WB} \), the content of this address is not currently cached by the
-  processor, the cache line indexed by \( i = \func{index}(pa) \) is marked as
-  ``dirty'', and \( \var{pa} \) does not fall in the range specified by the core
-  SMRR, that is
+  processor, the cache line indexed by \( i = \func{index}(\var{pa}) \) is
+  marked as ``dirty'', and \( \var{pa} \) does not fall in the range specified
+  by the core SMRR, that is
   %
   \[
-    h.\func{core}.\func{strat}(\var{pa}) = \mathtt{WB} \wedge \neg
-    \func{cache\_miss}(h.\func{cache}, \var{pa}) \wedge \var{pa} \not\in
-    h.\func{smrr}.\func{range} \wedge h.\func{cache}(i).\func{dirty} =
-    \mathtt{true}
+    \begin{array}{cl}
+      & h.\func{core}.\func{strat}(\var{pa}) = \mathtt{WB} \\
+      \wedge
+      & \neg \func{cache\_miss}(h.\func{cache}, \var{pa}) \\
+      \wedge
+      & \var{pa} \not\in h.\func{smrr}.\func{range} \\
+      \wedge
+      & h.\func{cache}(i).\func{dirty} = \mathtt{true}
+    \end{array}
   \]
   %
-  \GH{cette formule dépasse un peu de la page. Peut-être peux tu enlever le "= true"}
   Then, the content of the cache line is written back to memory and the cache
   line is updated with \( v \) as its new content, \( context(h) \) as its new
-  owner, \( pa \) as its new tag, and its dirty bit is set.
+  owner, \( \var{pa} \) as its new tag, and its dirty bit is set.
+  %
+  To know which memory location is associated with the address \( \var{pa} \),
+  we rely on the \func{dispatch} function (see
+  Definition~\ref{def:speccert2:dispatch}) which models the \IO resolution
+  mechanism of the memory controller.
   %
   For this specific case, with
   \( \var{ha} = \func{dispatch}(h.\func{mc}, h.\func{in\_smm},
@@ -888,7 +896,6 @@ order to illustrate the definition of the postcondition predicate:
     \end{array}
   \]
   %
-  \GH{on a (j'ai) perdu de vue ce que dispatch signifie. Il faudrait peut-être le rappeler brièvement}
   Note that the same scenario applies if \( \var{pa} \) belongs to the range
   specified by the core SMRR, and the cache strategy specified by the SMRR is
   \( \mathtt{WB} \).
@@ -897,7 +904,8 @@ order to illustrate the definition of the postcondition predicate:
   already present inside the cache, then only the cache is updated.
   %
   The new owner of the selected cache line is the software component currently
-  executed by the core, its new content is \( v \) \GH{a quoi correspond v? Dans le reste de la phrase, tu désigne explicitement les choses, sauf v, ce qui fait un peu bizarre} and its dirty bit is set,
+  executed by the core, its new content is \( v \) ---we remind the considered
+  transition is \( \func{Write}(v, \var{pa}) \)--- and its dirty bit is set,
   while the tag of the cache line remains untouched.
   %
   In this second scenario, the postcondition is
@@ -1090,15 +1098,19 @@ transition-software mapping of {\scshape Minx86} as follows:
   \right.
 \]
 %
-\GH{dans la formule, je mettrai les "where..." qui précise la formule, à gauche et je laisserai sur la colonne de droite les "if..." qui préscisent quel cas s'appliqe. En outre, je rappelerais pour le dernier cas qu'il correspond à read\_from\_cache = false}
-We consider four cases.
+% \GH{dans la formule, je mettrai les "where..." qui précise la formule, à
+% gauche et je laisserai sur la colonne de droite les "if..." qui préscisent
+% quel cas s'appliqe. En outre, je rappelerais pour le dernier cas qu'il
+% correspond à read\_from\_cache = false} We consider four cases.
 %
+% Thomas: J’ai essayé, ça ne rentre pas, pas envie/courage d’y passer des heures
+% pour gagner contre latex
 Firstly, an instruction is fetched during a \func{Fetch} transition only, so for
 other transitions, the function returns the empty set.
 %
 Secondly, if a core not in \ac{smm} tries to read the content of a physical
 addresses which belongs to the range specified by its SMRR, the specification
-states that the result of this \IO is a predefined \GH{constant? dummy? value} value, hence the function
+states that the result of this \IO is a constant value, hence the function
 returns also the empty set in this case.
 %
 For the two last cases, we based our decision on the \func{read\_from\_cache}
@@ -1198,7 +1210,12 @@ Once we have properly introduced both, we verify our definition of
 \( \Delta_{\mathtt{bios}} \) satisfies the \ac{hse} laws
 (Definition~\ref{def:speccert:laws}).
 
-\paragraph{Requirements over States.} \GH{je viens de réaliser que tu as renommé les "hardware requirements" en "requirement over states". Outre que le nom devient long je ne suis pas sur qu'il ne reste pas quelques mentions de hardware requirement dans le manuscrit. Il faut vérifier}
+\GH{je viens de réaliser que tu as renommé les "hardware requirements" en
+  "requirement over states". Outre que le nom devient long je ne suis pas sur
+  qu'il ne reste pas quelques mentions de hardware requirement dans le
+  manuscrit. Il faut vérifier}
+
+\paragraph{Requirements over States.}
 %
 Given \( h \in H(S) \), we have identified six requirements over states for
 \( h \) to satisfy \func{hardware\_req}.
@@ -1247,14 +1264,20 @@ Given \( h \in H(S) \), we have identified six requirements over states for
   \]
 \end{enumerate}
 
-We do not consider \GH{'we do not consider " fait un peu négatif. En fait, comme tu t'intéresse à isoler le BIOS de l'OS et des appli, ca n'a pas de sens de vérifier pendant le BOOT puisque le BIOS est le seul à s'exécuter pendant ce temps là. Du coup, forcement, la propriété recherché ne s'applique qu'après le boot. En outre, les hypothèse sur l'initialisation sont de même nature que les hypothèse sur le comportement du BIOS à runtime : ce sont des hypothèse sur le logiciel trusté. Il faut le formuler comme çà. Tel que tu l'as formulé, on a l'impression que c'est un cas non couvert.}the boot sequence in this verification problem and the
-\ac{bios} must correctly configure the hardware architecture prior to start the
-execution of the operating system for the initial state of the considered trace
-to satisfy our 6 requirements over states.
+During the boot sequence, the \ac{bios} is the only software component executed,
+so there is no untrusted software component execution whose execution need to be
+constrained.
 %
-Otherwise, the trace will not comply with \( \Delta_{\mathtt{bios}} \), and
-there is no guarantee that the security policy will be enforced, independently
-from the correctness of \( \Delta_{\mathtt{bios}} \).
+It is expected that the \ac{bios} configures the hardware architecture in a way
+which satisfies the requirements over states prior to start the execution of the
+rest of the software stack.
+%
+Otherwise, the runtime will not start from a ``safe'' states and the related
+traces will not comply to \( \Delta_{\mathtt{bios}} \)
+(Definition~\ref{def:speccert:complianttraces}).
+%
+In such a case, there is no guarantee that the security policy will be enforced,
+independently from the correctness of \( \Delta_{\mathtt{bios}} \).
 
 % \TODO{A la lecture de ces requirements, je m'aperçois que certains d'entre eux
 % s'apppuient sur une configuration réalisée au préalable par le code trusté,
@@ -1276,8 +1299,8 @@ The reason is simple: the OS can tamper with the memory outside the SMRAM.
 %
 Secondly, we prevent the \ac{bios} to update the \ac{smrr} registers.
 %
-These registers should have been properly configured during the boot sequence, and
-there is no need to further update them.
+These registers should have been properly configured during the boot sequence,
+and there is no need to further update them.
 %
 \[
   \begin{array}{rcl}
@@ -1376,8 +1399,7 @@ there are three case scenarios to consider:
   transitions\,\footnote{The interesting reader can have a look at the file
     \texttt{src/Smm/Delta/Preserve/Architecture.v}
     in~\cite{letan2016speccertcode}, which gather these proofs, and
-    \texttt{src/Smm/Delta/Preserve/\{Read,Write\}.v} to see them in
-    action.}.
+    \texttt{src/Smm/Delta/Preserve/\{Read,Write\}.v} to see them in action.}.
 \end{enumerate}
 %
 Once each requirement has been shown to be preserved during a transition, we can

@@ -562,6 +562,7 @@ trusted software components do correctly implement a \ac{hse} mechanism is said
 to comply with this mechanism.
 
 \begin{definition}[Compliant Traces]
+  \label{def:speccert:complianttraces}
   We write $\mathcal{C}(\Delta)$ for the set of the traces which comply with
   $\Delta$.
   %
@@ -788,7 +789,7 @@ A proof of correctness of a given \ac{hse} mechanism asserts that the hardware
 architecture enforces a targeted security policy \emph{if trusted software
   components correctly implement this \ac{hse} mechanism}, that is their
 executions only imply software transitions which satisfy the appropriate
-software requirements.
+requirements.
 %
 If attackers are able to modify the instructions of the trusted software
 components programs, they can defeat the security enforcement by modifying the
@@ -1322,13 +1323,8 @@ on the \ac{mmu} and the protection rings.
 In this Chapter, we have presented our theory of \ac{hse} mechanisms, in the
 form of requirements over a hardware model.
 %
-We emphasize that our approach requires a general-purpose hardware model to
-define and verify \ac{hse} mechanisms to enable the verification of several
-mechanisms against the same reference, both in isolation and in composition.
-\GH{attention avec ce claim un peu fort. Tu affirmes haut et fort qu'il te faut
-  un modèle générique de x86 sauf que juste après, en section 5, tu vas annoncer
-  que tu as fait un modèle réduit avec seulement les features qui
-  t'intéressaient pour modéliser la SMM...}
+We emphasize that our approach can be used to verify several \ac{hse} mechanisms
+against the same hardware model.
 %
 We believe this is an essential property; in practice, these multiple mechanisms
 are implemented at the same time by different software components, and they may
