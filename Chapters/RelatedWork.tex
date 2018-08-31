@@ -971,14 +971,15 @@ To the existing of our knowledge, the hardware features involved in this
 \ac{hse} mechanism are outside of the scope of existing models.
 %
 As a consequence, we have developed a minimal x86 model.
+
+Our theory is characterized by defining a model of the hardware architecture,
+specifying restrictions over the model, and verifying the resulting restricted
+model.
 %
-We anticipate the scale of the x86 hardware architecture, with hundreds of
-interdependent features, would make a general-purpose model subject to the state
-explosion problem, which would reduce the applicability of model checkers.
+This methodology is easily expressed in a theorem prover higher-logic.
 %
 Hardware verification by means of theorem provers has proven to be a practical
-alternative to model checking\,\cite{vijayaraghavan2015modular,choi2017kami},
-and a successful solution to address the state explosion problem.
+alternative to model checking\,\cite{vijayaraghavan2015modular,choi2017kami}.
 %
 For these reasons, we decided to implement our model and proofs using the Coq
 theorem prover, to challenge the applicability of our theory with a first, small
@@ -1041,15 +1042,12 @@ A \ac{hse} mechanism consists of requirements that trusted software components
 need to satisfy in order for the hardware architecture to correctly enforce a
 targeted security policy at all time.
 
-Our approach is reminiscent of assume-guarantee\,\cite{pnueli1985ag} and
+Our approach is reminiscent of compositional reasoning approaches, such as
+assume-guarantee\,\cite{pnueli1985ag} and
 rely-guarantee\,\cite{jones1983tentative} paradigms, where a component \( C \)
 is proven to enforce a guarantee \( G \) as long as an assumption \( A \) is
 met. \GH{On ne comprend pas pourquoi tu nous parles subitement de ces deux
   approches (et pourquoi tu n'en n'a pas parlé dans la section précédente)}
-%
-Compositional reasoning \GH{c'est quoi? Tu ne l'as pas défini avant} is not
-limited to reasoning about components in isolation, it also allows for verifying
-their composition.
 %
 If a component \( C' \) is proven to enforce \( A \), then the composition of
 \( C \) and \( C' \) enforces \( G \).
