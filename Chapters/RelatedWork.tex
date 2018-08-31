@@ -174,15 +174,15 @@ second door, and exits the chamber.
 
   \begin{itemize}
   \item A door of the system can be either \( \mathtt{open} \) or
-    \( \mathtt{close} \).
+    \( \mathtt{closed} \).
     %
     The set of states of the airlock system reflects the Cartesian product of
     the doors states.
     %
     \[
       \begin{array}{rcl}
-        S & \triangleq & \{ \mathtt{open}, \mathtt{close} \} \times \{ \mathtt{open},
-                         \mathtt{close} \}
+        S & \triangleq & \{ \mathtt{open}, \mathtt{closed} \} \times \{ \mathtt{open},
+                         \mathtt{closed} \}
       \end{array}
     \]
     %
@@ -202,14 +202,14 @@ second door, and exits the chamber.
     which leads to the state \( (\mathtt{open}, \mathtt{open}) \).
     \[
       \begin{array}{rcl}
-        R & \triangleq & \{ (\mathtt{close}, \mathtt{close}), \mathtt{Open_1},
-                         (\mathtt{open}, \mathtt{close}), \\
-          & & \ (\mathtt{close}, \mathtt{close}), \mathtt{Open_2},
-              (\mathtt{close}, \mathtt{open}), \\
-          & & \ (\mathtt{open}, \mathtt{close}), \mathtt{Close_1},
-              (\mathtt{close}, \mathtt{close}), \\
-          & & \ (\mathtt{close}, \mathtt{open}), \mathtt{Close_2},
-              (\mathtt{close}, \mathtt{close}) \}
+        R & \triangleq & \{ (\mathtt{closed}, \mathtt{closed}), \mathtt{Open_1},
+                         (\mathtt{open}, \mathtt{closed}), \\
+          & & \ (\mathtt{closed}, \mathtt{closed}), \mathtt{Open_2},
+              (\mathtt{closed}, \mathtt{open}), \\
+          & & \ (\mathtt{open}, \mathtt{closed}), \mathtt{Close_1},
+              (\mathtt{closed}, \mathtt{closed}), \\
+          & & \ (\mathtt{closed}, \mathtt{open}), \mathtt{Close_2},
+              (\mathtt{closed}, \mathtt{closed}) \}
       \end{array}
     \]
   \end{itemize}
@@ -223,13 +223,13 @@ second door, and exits the chamber.
     % a tikzpicture to illustrate the resulting automata
     \begin{tikzpicture}
       \node [draw, circle split, text width=30pt, text badly centered] (cc)
-      {\( \mathtt{close} \) \nodepart{lower} \( \mathtt{close} \)};%
+      {\( \mathtt{closed} \) \nodepart{lower} \( \mathtt{closed} \)};%
       \node [right=of cc] (x) {};%
       \node [draw, circle split, above=of x, text width=30pt, text badly
       centered] (oc) {\( \mathtt{open} \) \nodepart{lower}
-        \( \mathtt{close} \)};%
+        \( \mathtt{closed} \)};%
       \node [draw, circle split, below=of x, text width=30pt, text badly
-      centered] (co) {\( \mathtt{close} \) \nodepart{lower}
+      centered] (co) {\( \mathtt{closed} \) \nodepart{lower}
         \( \mathtt{open} \)};%
       \node [draw, circle split, right=of x, text width=30pt, text badly
       centered] (oo) {\( \mathtt{open} \) \nodepart{lower} \( \mathtt{open}
@@ -323,11 +323,11 @@ each state\,\cite{vijayaraghavan2015modular}.
   The crossing, by a user, of the airlock system is characterized by the
   following trace:
   \[
-    \footnotesize (\mathtt{close}, \mathtt{close})%
-    \!\xrightarrow{\mathtt{Open}_1}\!(\mathtt{open}, \mathtt{close})%
-    \!\xrightarrow{\mathtt{Close}_1}\!(\mathtt{close}, \mathtt{close})%
-    \!\xrightarrow{\mathtt{Open}_2}\!(\mathtt{close}, \mathtt{open})%
-    \!\xrightarrow{\mathtt{Close}_2}\!(\mathtt{close}, \mathtt{close})
+    \footnotesize (\mathtt{closed}, \mathtt{closed})%
+    \!\xrightarrow{\mathtt{Open}_1}\!(\mathtt{open}, \mathtt{closed})%
+    \!\xrightarrow{\mathtt{Close}_1}\!(\mathtt{closed}, \mathtt{closed})%
+    \!\xrightarrow{\mathtt{Open}_2}\!(\mathtt{closed}, \mathtt{open})%
+    \!\xrightarrow{\mathtt{Close}_2}\!(\mathtt{closed}, \mathtt{closed})
   \]
 \end{example}
 
@@ -371,14 +371,14 @@ where \( \rho_{[..n]} \) is the subtrace made with the \( n \) first elements of
   We formalize this property with the invariant \( \iota \), defined as follows:
   %
   \[
-    \iota( d_1, d_2) \triangleq d_1 = \mathtt{close} \vee d_2 = \mathtt{close}
+    \iota( d_1, d_2) \triangleq d_1 = \mathtt{closed} \vee d_2 = \mathtt{closed}
   \]
   %
   The specification of the airlock system is defined with a labeled transition
   system.
   %
   Assuming the airlock device is initialized in a correct state (\emph{e.g.}
-  both doors are close), we verify this specification is correct with respect to
+  both doors are closed), we verify this specification is correct with respect to
   the safety property characterized by \( \iota \) by exhibiting a proof that
   \( \iota \) is an invariant with respect to \( R \), that is
   %
@@ -391,17 +391,17 @@ where \( \rho_{[..n]} \) is the subtrace made with the \( n \) first elements of
     By definition of \( R \), there are four transitions to consider, and our
     proof consists in an enumeration of these cases.
     %
-    Case 1, both doors are close, that is \( d_1 = d_2 = \mathtt{close} \).  The
+    Case 1, both doors are closed, that is \( d_1 = d_2 = \mathtt{closed} \).  The
     system opens the first door, that is \( l = \mathtt{Open}_1 \). At the end
     of the transition, only the first door is open, that is
-    \( d_1' = \mathtt{open} \) and \( d_2' = \mathtt{close} \).
+    \( d_1' = \mathtt{open} \) and \( d_2' = \mathtt{closed} \).
       %
     By definition of \( \iota \), the statement to prove becomes
       %
     \[
-      \mathtt{close} = \mathtt{close} \vee \mathtt{close} = \mathtt{close}
-      \Rightarrow \mathtt{open} = \mathtt{close} \vee \mathtt{close} =
-      \mathtt{close}
+      \mathtt{closed} = \mathtt{closed} \vee \mathtt{closed} = \mathtt{closed}
+      \Rightarrow \mathtt{open} = \mathtt{closed} \vee \mathtt{closed} =
+      \mathtt{closed}
     \]
       %
     By definition of the disjunction \( \vee \), the statement reduces to
@@ -414,13 +414,13 @@ where \( \rho_{[..n]} \) is the subtrace made with the \( n \) first elements of
   \end{proof}
 
   In addition, we can also prove that both doors of the airlock will
-  \emph{eventually} be close.
+  \emph{eventually} be closed.
   %
   We can characterize this liveness property with the predicate \( \eta \) on
   subtraces of one element, such that
   %
   \[
-    \eta(d_1, d_2) \triangleq d_1 = \mathtt{close} \wedge d_2 = \mathtt{close}
+    \eta(d_1, d_2) \triangleq d_1 = \mathtt{closed} \wedge d_2 = \mathtt{closed}
   \]
   %
   We verify the specification of the airlock system is correct with respect to
@@ -1160,7 +1160,7 @@ simultaneously.
   %
   In this context, the most obvious component is the door.
   %
-  A door has two states: it can be either open or close.
+  A door has two states: it can be either open or closed.
   %
   It takes two input actions: \( \mathtt{Open} \) (the action to open the door)
   and \( \mathtt{Close} \) (the action to close the door).
@@ -1373,7 +1373,7 @@ demonstrate in the following example.
   channels used by its components to communicate, then starts their concurrent
   executions.
   %
-  A door is either open or close, and we model this with two mutually recursive
+  A door is either open or closed, and we model this with two mutually recursive
   processes \( \mathrm{CloseDoor} \) and \( \mathrm{OpenDoor} \).
   %
   They take one channel \( c \) as an argument, then wait for new inputs coming
@@ -1385,7 +1385,7 @@ demonstrate in the following example.
   It waits for new requests coming from \( c \).
   %
   When it receives a new request to open the first (resp. second) door, it first
-  close the second (resp. first) door, using the channel \( d_2 \) (resp.
+  closes the second (resp. first) door, using the channel \( d_2 \) (resp.
   \( d_1 \)).
   %
   Then, it opens the first (resp. second) door, using the channel \( d_1 \)
