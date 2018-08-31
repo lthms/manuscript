@@ -793,7 +793,7 @@ requirements.
 %
 If attackers are able to modify the instructions of the trusted software
 components programs, they can defeat the security enforcement by modifying the
-instruction responsible to implement it.
+instructions responsible to implement it.
 %
 \GH{ce n'est pas le seul risque (même si c'est le plus important). De manière
   générale, si un composant non trusté peu influencer le comportement d'un code
@@ -955,11 +955,8 @@ it is not possible to implement both at the same time.
 %
 We anticipate there are other scenarios more unclear, for instance if the set of
 compliant traces \( \mathcal{C}(\Delta_1 \sqcap \Delta_2) \) contains only
-traces where a given software component prevents another software component to
-correctly implement its functional specification.
-%
-\GH{Cette phrase n'est pas très claire. Il faudrait développer en NOMMANT les
-  choses. Un software component s1....}
+traces where the execution of trusted software components are secure, but is not
+able to serve its purpose.
 %
 We advocate that a similar situation can occur for a single \ac{hse} mechanism.
 %

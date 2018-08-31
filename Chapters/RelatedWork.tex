@@ -738,7 +738,6 @@ abstract away as many hardware details as possible to increase the applicability
 of the model.
 %
 For instance, memories are commonly limited to the \ac{dram}.
-%
 
 This approach works well when software components use a limited amount of
 hardware features, as applications typically do, and to reason about correction
@@ -1570,26 +1569,32 @@ mimics the separation between one component which interacts with a second one.
 \section{Conclusion}
 \label{sec:sota:conclusion}
 
-\GH{Je trouve que ta conclusion résume mal l'état de l'art. Tu te focalise trop
-  sur ton approche.}
-
-In this Chapter, we have discussed our two contributions with respect to related
-work.
+In this Chapter, we have explained how it is possible to formally verify a
+system with respect to a security policy by defining a transition system to
+model its behavior and reasoning about the set of its traces.
 %
-Our theory of \ac{hse} mechanisms, presented in Part~\ref{part:speccert}, aims
-to specify requirements that trusted software components have to satisfy in
-order for the underlying hardware architecture to enforce a targeted security
-policy at all time.
+This general verification approach does not fully apply in the context of
+\ac{hse} mechanisms, because the hardware architectures are not safe by default.
 %
-Our initial goal is to leverage formal \ac{hse} definition to support
-verification of hardware architectures, a research direction which was little
-investigated in the past, with the notable exception of the work of Jomaa
-\emph{et al.} about \ac{mmu}-based memory isolation\,\cite{jomaa2016mmu}.
+Our theory of \ac{hse} mechanisms, presented in Chapter~\ref{chapter:speccert},
+takes this into account.
 %
-Our approach presupposes the existence of a general-purpose model of the
-hardware architecture.
+To demonstrate how this theory can be leveraged in practice, we take the example
+of a \ac{hse} mechanism implemented by the \ac{bios} at runtime; and because the
+scope of existing x86 models does not cover the hardware features that we are
+interested in, we developed our own in our experiments detailed in
+Chapter~\ref{chapter:speccert2}.
 %
-To manage the scale of such a model, we propose in Part~\ref{part:freespec} a
-compositional reasoning framework for Coq, in the continuity of similar research
-efforts, notably Garg \emph{et al.}\,\cite{garg2010compositional} and Heyman
-\emph{et al.}\,\cite{heyman2012securemodel}.
+We decided to use Coq, because its higher-logic allows us to easily express the
+specificities of our approach.
+%
+However, a general-purpose x86 hardware model poses an important challenge due
+to the scale of the hardware architecture.
+%
+Previous work have advocated for compositional reasoning approaches, such as
+assume-guarantee\,\cite{pnueli1985ag} or
+rely-guarantee\,\cite{jones1983tentative} paradigms, as an interesting solution
+to tackle these challenges\,\cite{garg2010compositional,heyman2012securemodel}.
+%
+However, to our surprise, compositional reasoning for component-based systems
+has not been widely explored in Coq.
