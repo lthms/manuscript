@@ -49,12 +49,8 @@ them (Section~\ref{sec:freespec:verifying}).
 In this Section, we emphasize three limitations of {\scshape Minx86} which makes
 its use at a larger scale unlikely (\ref{subsec:freespec:minx86lim}).
 %
-Then, we explain how we manage to mitigate these limitations to a large extent
-when experimenting on {\scshape Minx86}, and discuss how we propose to take the
-resulting approach a step further (\ref{subsec:freespec:approachoverview}).
-%
-Finally, we give an overview of the key concepts of our compositional reasoning
-framework (\ref{freespec:subsec:freespecoverview}).
+Then, we give an overview of the approach we proposed to address them
+(\ref{freespec:subsec:freespecoverview}).
 
 \subsection{{\scshape Minx86} Limitations}
 \label{subsec:freespec:minx86lim}
@@ -64,8 +60,10 @@ identified three limitations which reduce the applicability of {\scshape Minx86}
 as we would increase its scope:
 \begin{enumerate}
 \item its monolithic design;
-\item  its weakness against the temporary violation problem\,\cite{muller2006tempviolation};
-\item the presence, within our supposedly general-purpose model, of abstract values that are specific to a particular case study.
+\item its weakness against the temporary violation
+  problem\,\cite{muller2006tempviolation};
+\item the presence, within our supposedly general-purpose model, of abstract
+  values that are specific to a particular case study.
 \end{enumerate}
 
 \paragraph{Monolithic Model.}
@@ -82,14 +80,6 @@ During the development of our proof of concept, changes to the definition of
 %
 We have no doubt that such situations will arise again if we try to increase the
 scope of {\scshape Minx86}.
-
-\begin{figure}
-  \inputminted{coq}{Listings/StateHell.v}
-
-  \caption{Raw postcondition of a \texttt{Write} transition with a writeback
-    strategy}
-  \label{fig:freespec:entrypoint}
-\end{figure}
 
 Besides, some transitions of {\scshape Minx86} imply several intermediary state
 updates.
@@ -113,14 +103,6 @@ considering it is already a subcase of the complete proof.
 %
 In this small snippet, we can identify four intermediary states (as shown in
 Figure~\ref{fig:freespec:remember}).
-
-\begin{figure}
-  \inputminted{coq}{Listings/RememberPattern.v}
-
-  \caption{Postcondition of a \texttt{Write} transition with a writeback
-    strategy, after the use of the \texttt{remember} tactic}
-  \label{fig:freespec:remember}
-\end{figure}
 
 \begin{figure}
   \bigcentering
@@ -287,191 +269,31 @@ written, and therefore this greatly reduces the opportunity to reuse {\scshape
 %  \caption{Scheme of the verification proof for a component}
 %\end{table}
 
-\subsection{Assessments and Perspectives}
-\label{subsec:freespec:approachoverview}
+\subsection{FreeSpec Overview}
+\label{freespec:subsec:freespecoverview}
 
 In the verification work presented in Chapter~\ref{chapter:speccert2}, we have
 successfully managed the limitations of {\scshape Minx86} partly because we have
 taken great care in organizing our development as modurarly as we could.
 %
-We now detail the approach we have used. \GH{autant j'hésite sur la section 6.1.1 autant celle là, telle que tu la présente ici, n'a rien à faire dans le chapitre 6.}
-
-\paragraph{Lessons Learned.}
+We detailed in Subsection~\ref{subsec:speccert2:coqproofs} the strategy we have
+leveraged to organize our proofs.
 %
+We have decoupled the hardware components as much as possible, and we leveraged
+the ``\texttt{remember};~\texttt{destruct};~\texttt{assert};~\texttt{apply}''
+pattern to reason about their successive state updates.
 %
-Each hardware component has been defined in isolation from the rest of the
-hardware architecture, with a set of functions, a set of properties and a set of
-general-purpose lemmas.
+As a result, the proofs are structured around smaller, more atomic proof goals.
 %
-For instance, the directory \texttt{src/Cache/} contains four files:
-\texttt{Cache\_def.v}, \texttt{Cache\_func.v}, \texttt{Cache\_proofs.v}, and
-\texttt{Cache\_prop.v}.
-%
-We then have defined \( H(S) \), that is the Cartesian product of
-individual components, in a similar manner.
-%
-Inside the \texttt{src/x86/Architecture/} directory, we defined general-purpose
-functions (\texttt{Architecture\_func.v}) and lemmas
-(\texttt{Architecture\_proofs.v}) to reason about the hardware architecture as a
-whole as often as possible.
-
-This approach has proven to be valuable to deal with the many cases to cover,
-when used in conjunction with a recurring pattern we call
-``\texttt{remember};~\texttt{destruct};~\texttt{assert};~\texttt{apply}'', after
-the Coq tactics.
-%
-We illustrate the use of this pattern with the proof goal pictured in
-Figure~\ref{fig:freespec:entrypoint}.
-%
-\begin{enumerate}
-\item Using \texttt{remember}, we can make the sequence of intermediary state
-  updates more visible (see Figure~\ref{fig:freespec:remember}, compared to
-  Figure~\ref{fig:freespec:entrypoint}).
-  %
-  Each \( \mathtt{a\_}i \) is an intermediary state resulting of a call to a
-  general-purpose function from the \texttt{Architecture\_func.v} file.
-\item Using \texttt{destruct}, we can explore the alternative paths resulting
-  from the use of {\scshape Gallina} constructions such as pattern matching, or
-  \texttt{if-then-else}.
-  %
-  For instance, regarding the initial state of the system, the content of the
-  address \( \var{pa} \) may or may not be present in the cache
-  (Figure~\ref{fig:freespec:remember}, line 14).
-  %
-  We explore both alternatives thanks to the \texttt{destruct} tactic (see the
-  two simplified goals in Figure~\ref{fig:freespec:destruct}, more particularly
-  on the value of \texttt{a\_3}).
-  %
-\item Using \texttt{assert}, we can introduce now goals to prove intermediary
-  results (like the one in Figure~\ref{fig:freespec:assert}, for instance).
-  %
-  In our case, we will prove that the predicate \texttt{hardware\_req} remains
-  satisfied after each state update.
-  %
-\item Using \texttt{apply}, we can leverage lemmas about \texttt{hardware\_req}
-  preservation for a given state update, \emph{e.g.} exported by the
-  \texttt{Architecture\_proofs.v} or \texttt{Cache\_proofs.v} files.
-  %
-  For instance, the function \texttt{update\_cache\_content}
-  (Figure~\ref{fig:freespec:remember}, line 11) has a companion lemma called
-  \texttt{update\_cache\_content\-\_with\_context\_preserves\_inv} that we can
-  use to conclude about the goal introduced in Figure~\ref{fig:freespec:assert}.
-\end{enumerate}
-
-\begin{figure}
-  \inputminted{coq}{Listings/DestructGoal.v}
-
-  \inputminted{coq}{Listings/DestructGoal2.v}
-
-  \caption{Exploring alternative paths thanks to the \texttt{destruct} tactics}
-  \label{fig:freespec:destruct}
-\end{figure}
-
-\begin{figure}
-  \inputminted{coq}{Listings/InvGoals.v}
-
-  \caption{Intermediary statements, generated thanks to \texttt{assert} tactics}
-  \label{fig:freespec:assert}
-\end{figure}
-
-\begin{figure}
-{\bigcentering%
-  \AxiomC{}%
-  \LeftLabel{\footnotesize {\scshape Id}} \UnaryInfC{\(
-    \begin{array}{l}
-      \iota(h) \\
-      \hline
-      \vdash \iota(h)
-    \end{array}
-    \)}%
-  \AxiomC{}%
-  \RightLabel{\footnotesize {\scshape Inv}\( _r \)} \UnaryInfC{\(
-    \begin{array}{l}
-      \iota(h) \\
-      h_1 = r(h) \\
-      \hline
-      \vdash \iota(h) \Rightarrow \iota(h_1)
-    \end{array}
-    \)}%
-  \LeftLabel{\footnotesize {\scshape M-P}}%
-  \BinaryInfC{\(
-    \begin{array}{l}
-      \iota(h) \\
-      h_1 = r(h) \\
-      \hline
-      \vdash \iota(h_1)
-    \end{array}
-    \)}%
-  \AxiomC{}%
-  \RightLabel{\footnotesize {\scshape Inv}\( _s \)} \UnaryInfC{\(
-    \begin{array}{l}
-      \iota(h) \\
-      h_1 = r(h) \\
-      h_2 = s(h_1) \\
-      \hline
-      \vdash \iota(h_1) \Rightarrow \iota(h_2)
-    \end{array}
-    \)}%
-  \LeftLabel{\footnotesize {\scshape M-P}}%
-  \BinaryInfC{\(
-    \begin{array}{l}
-      \iota(h) \\
-      h_1 = r(h) \\
-      h_2 = s(h_1) \\
-      \hline
-      \vdash \iota(h_2)
-    \end{array}
-    \)}%
-  \AxiomC{}%
-  \RightLabel{\footnotesize {\scshape Inv}\( _t \)} \UnaryInfC{\(
-    \begin{array}{l}
-      \iota(h) \\
-      h_1 = r(h) \\
-      h_2 = s(h_1) \\
-      h' = t(h_2) \\
-      \hline \vdash \iota(h_2) \Rightarrow \iota (h')
-    \end{array}
-    \)}%
-  \RightLabel{\footnotesize {\scshape M-P}}%
-  \BinaryInfC{\(
-    \begin{array}{l}
-      \iota(h) \\
-      h_1 = r(h) \\
-      h_2 = s(h_1) \\
-      h' = t(h_2) \\
-      \hline \vdash \iota (h')
-    \end{array}
-    \)}%
-  \DisplayProof%
-
-  \vspace{0.5cm} where {\scshape M-P} is the \emph{Modus ponens}, and {\scshape
-    Inv}\( _r \), {\scshape Inv}\( _s \), and {\scshape Inv}\( _t \) are
-  intermediary lemmas previously proved true.%
-}
-
-\caption{Dividing a transition into a sequences of intermediary state updates}
-\label{freespec:figure:seqproof}
-\end{figure}
-
-Figure \ref{freespec:figure:seqproof} depicts the typical shape of resulting
-proofs trees.
-%
-The proofs are structured around smaller, more atomic proof goals of the form
-\( \iota(h_i) \Rightarrow \iota(h_{i+1}) \), where \( \iota \) is supposedly an
-invariant, \( h_i \) is an intermediary state, and \( h_{i+1} \) its successor.
-%
-Beside, it can help uncover temporary violation problems thanks to the
-intermediary goals introduced with \texttt{assert}.
-
-\paragraph{Perspectives.}
-%
-Decoupling the hardware components as much as possible, and relying on the
-``\texttt{remember};~\texttt{destruct};~\texttt{assert};~\texttt{apply}''
-pattern to reason about their successive state updates has proven to be an
-effective way to mitigate the monolithic design of {\scshape Minx86}, and has
-the potential to address the temporary violation problem.
+That is, our proof strategy has proven to be an effective way to mitigate the
+monolithic design of {\scshape Minx86}, and has the potential to address the
+temporary violation problem (thanks to the intermediary sub-case we introduce
+with the \texttt{assert} tactic).
 %
 However, it remains cumbersome to use manually.
+
+
+\paragraph{Objectives.}
 %
 With FreeSpec, our objective is twofold.
 
@@ -482,8 +304,8 @@ interactions between neighboring components.
 To that end, we take the principle of our theory of \ac{hse} mechanism a step
 further.
 %
-Our approach is based onto a clear separation between hardware components from the
-one side, and software components from the other side.
+Our approach is based onto a clear separation between hardware components from
+the one side, and software components from the other side.
 %
 Software components can interact with hardware components through the execution
 of instructions, modeled by the software transitions of the hardware model, and
@@ -517,9 +339,6 @@ deferring the realizations of these effects to dedicated handlers.
 In this Chapter, we aim to show how a variant of algebraic effects based on free
 monads can be used to support reasoning about component-based systems, including
 with respect to the temporary violation problem.
-
-\subsection{FreeSpec Overview}
-\label{freespec:subsec:freespecoverview}
 
 \begin{figure}
   \centering
@@ -587,14 +406,13 @@ with respect to the temporary violation problem.
   \label{fig:freespec:interfacedriven}
 \end{figure}
 
-We now give an overview of the formalism that we propose to
-overcome {\scshape Minx86} limitations, both to model and verify a hardware
-architecture.
+We now give an overview of the formalism that we propose to overcome {\scshape
+  Minx86} limitations, both to model and verify a hardware architecture.
 %
 Its key concept is to focus of components \emph{interfaces}, where an interface
 is a set of interdependent operations which are expected to produce a value.
 
-\paragraph{Interface and Component}
+\paragraph{Interface and Component.}
 %
 A component is characterized primarily by the interface it exposes to the rest
 of the system, and secondarily by its current state and the interfaces it uses
@@ -622,7 +440,7 @@ interface, and sends operations requests to other components it is connected to
   into account in the proofs in Chapter~\ref{chapter:freespec}.
 \end{example}
 
-\paragraph{Abstract Specifications}
+\paragraph{Abstract Specifications.}
 %
 To enable compositional reasoning about component-based systems, we introduce
 so-called abstract specifications which are characterized by requirements over
@@ -779,13 +597,10 @@ results.
   \label{fig:freespec:cachec}
 \end{figure}
 
-\subsection*{}
-
-In this Section, we have discussed the limitations of {\scshape Minx86}, and the
-strategies that we implemented to mitigate them.
+In this Section, we have discussed the limitations of {\scshape Minx86}.
 %
-This necessary assessment allowed us to propose an alternative formalism to both
-model verify the x86 hardware architecture.
+This necessary assessment allowed us to propose an alternative formalism to
+address them.
 %
 In the rest of this Chapter, we describe in depth this formalism.
 
@@ -1532,7 +1347,7 @@ compliance.
 As for interfaces (with $\oplus$) and operational semantics (with $\otimes$), we
 have also defined an abstract specification composition operator $\odot$.
 %
-We do not detail its definition in this article, but it has the significant
+We do not detail its definition in this Chapter, but it has the significant
 property to allow for reasoning about the composition of interfaces and
 composition of operational semantics.
 
