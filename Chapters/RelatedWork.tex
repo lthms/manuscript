@@ -1048,6 +1048,8 @@ assumption \( A \) is met.
 %
 If a component \( C' \) is proven to enforce \( A \), then the composition of
 \( C \) and \( C' \) enforces \( G \).
+%
+Our objective is to apply compositional reasoning paradigms in Coq.
 
 % \GH{Tout comme la conclusion précédente, cette introduction est à revoir. Elle
 % manque de clareté. Elle doit être concise}
@@ -1454,8 +1456,10 @@ However, and similarly to previous hardware verification researches, the proofs
 focus on properties that are transparent to software components and do not
 require configuration from their part.
 %
-The verification process relies on successive refinements, rather than a
-compositional reasoning based on assume-guarantee paradigm.
+The approach used by {\scshape Kami} in order to model interconnect components
+is very promising, but the verification process relies on successive
+refinements, rather than a compositional reasoning ---which remains our
+objective.
 %
 % GH: et?
 %
@@ -1472,8 +1476,9 @@ Several
 approaches\,\cite{souquieres2005verifying,chouali2006proving,lanoix:hal-00105041}
 have been proposed to implement compositional reasoning for the
 B-method\,\cite{abrial2005b}, a well-established method of software development
-based on the B formal system.
-%
+based on the B formal system, set the bar high for compositional reasoning by
+means of a theorem prover.
+
 B allows for the definition of functional specifications, called abstract
 machines, and the refinement of these specifications up to executable code.
 %
@@ -1563,6 +1568,10 @@ have already proposed for the B-method, in particular by Lanoix \emph{et
 %
 This is because the separation between program with effects and effect handlers
 mimics the separation between one component which interacts with a second one.
+%
+We believe they allow for modeling component similarly to what {\scshape Kami}
+achieves, but constitute in the same time a more familiar formalism for the
+functional programming community whom Coq developers belong to.
 
 \section{Conclusion}
 \label{sec:sota:conclusion}
