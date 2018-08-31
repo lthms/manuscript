@@ -307,9 +307,13 @@ For instance, the directory \texttt{src/Cache/} contains four files:
 \texttt{Cache\_def.v}, \texttt{Cache\_func.v}, \texttt{Cache\_proofs.v}, and
 \texttt{Cache\_prop.v}.
 %
-They are combined together in the \texttt{src/x86/Architecture/} directory, in a
-similar fashion, \emph{e.g.} there is a \texttt{Architecture\_func.v} file
-accompanied by a \texttt{Architecture\_proofs.v} file. \GH{Je ne comprends pas ce que tu veux dire avec cette dernière phrase (pas de soucis avec la précédente, en revanche)}
+We then have defined \( H(S) \), that is the Cartesian product of
+individual components, in a similar manner.
+%
+Inside the \texttt{src/x86/Architecture/} directory, we defined general-purpose
+functions (\texttt{Architecture\_func.v}) and lemmas
+(\texttt{Architecture\_proofs.v}) to reason about the hardware architecture as a
+whole as often as possible.
 
 This approach has proven to be valuable to deal with the many cases to cover,
 when used in conjunction with a recurring pattern we call
