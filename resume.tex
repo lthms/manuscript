@@ -2,8 +2,95 @@
 
 \begin{otherlanguage}{french}
   Dans le cadre de cette thèse, nous nous intéressons à une classe particulière
-  de mécanismes d’application de politiques de sécurité qui consistent à la
+  de mécanismes d’application de politiques de sécurité qui consistent en la
   configuration, par un ou plusieurs logiciels de confiance, de la plate-forme
   matérielle afin de contraindre l’exécution du reste de la pile logicielle à
   respecter une politique de sécurité donnée.
+  %
+  Nous qualifierons par la suite de mécanisme HSE (de l’anglais
+  \emph{Hardware-based Security Enforcement mechanisms}) les instances de cette
+  classe.
+  %
+  L’utilisation par le système d’exploitation des mécanismes de pagination pour
+  isoler chaque application est sûrement l’exemple le plus courant de la mise en
+  pratique d’un mécanisme HSE.
+
+  \subsection{Contexte}
+
+  Le contournement d’une politique de sécurité normalement assurée par le biais
+  d’un mécanisme HSE peut s’expliquer par une erreur dans sa mise en œuvre aussi
+  bien dans l’un des logiciels de confiance que dans les mécanisme matériels sur
+  lesquels il se repose.
+  %
+  Dans le cadre de cette thèse, nous nous somme intéressés à ce second cas, et
+  plus spécifiquement encore au problème des erreurs affectant les
+  spécifications de la plate-forme.
+  %
+  Cette dernière est composée de plusieurs dizaines de composants interagissant
+  ensemble; la complexité résultante de ces interactions rend en pratique
+  difficile la conception d’un mécanisme à visée sécuritaire.
+  %
+  Pour chaque nouvelle fonctionnalité que le concepteur de la plate-forme désire
+  ajouter, il doit la mettre en perspective des mécanismes déjà présents, pour
+  s’assurer
+  %
+  \begin{inparaenum}[(1)]
+  \item qu’elle n’interfère pas avec les mécanismes HSE existants et
+  %
+  \item qu’elle n’est pas contournable par le biais d’une fonctionnalité
+    antérieure.
+  \end{inparaenum}
+  %
+  Un exemple extrême de ces risques est l’attaque \emph{\texttt{SENTER} Sandman}
+  présentée en 2015 par Xeno Kovah \emph{et al.}\,\cite{kovah2015senter}.
+  %
+  Les auteurs ont montré qu’il était possible de modifier le contenu de la
+  mémoire flash d’un ordinateur en utilisant une extension de l’architecture x86
+  nommée Intel TXT\,\cite{intel2015txt}.
+  %
+  Ils ont en effet remarqué que l’instruction \texttt{SENTER} permettait
+  ---~dans sa première version~--- de désactiver une composante essentielle du
+  mécanisme de protection en intégrité de la mémoire flash.
+
+  La multiplication des chemins d’attaque potentiels liée au nombre grandissant
+  des composants constitue une menace clairement identifiée dans la
+  littérature\,\cite{wing2003compositionalattack}.
+  %
+  Dans le cas particulier des mécanismes HSE, les vulnérabilités successives
+  affectant l’architecture
+  x86\,\cite{duflot2009smram,wojtczuk2009smram,domas2015sinkhole,kallenberg2015racecondition,kovah2015senter}
+  ont été caractérisée par une sévérité très importante, car les-dits mécanismes
+  visaient à assurer l’isolation de la couche la plus basse ---~et, par voie de
+  conséquence, la plus privilégiée~--- de la pile logicielle.
+
+  \subsection{Objectifs}
+
+  Dans cette thèse, nous avons cherché à proposer une approche rigoureuse pour
+  spécifier et vérifier, par le biais de méthodes formelles, des mécanismes HSE.
+  %
+  Notre hypothèse de départ est qu’une telle approche bénéficierait aux à la
+  fois aux concepteurs des plate-formes matérielles et aux développeurs de
+  logiciels.
+  %
+  Les premiers pourraient vérifier que leurs mécanismes matériels permettent
+  effectivement l’application des politiques de sécurité visées.
+  %
+  Quant aux seconds, ils pourraient profiter de spécifications décrivant sans
+  ambiguïtés les exigences auxquelles leurs logiciels doivent se conformer pour
+  pouvoir profiter de ces politiques.
+
+  \subsection{Contributions}
+
+  Dans cette thèse, nous présentons deux contributions complémentaires, qui ont
+  chacune fait l’objet d’une publication à la conférence \emph{Formal Methods};
+  d’abord en 2016\,\cite{letan2016speccert}, puis en
+  2018\,\cite{letan2018freespec}.
+
+  \paragraph{Une théorie des mécanismes HSE.}
+  %
+  Notre première contribution est une théorie des mécanismes HSE, dont
+  l’objectif premier est de servir de support à la spécification et à la
+  vérification de ces derniers.
+
+  \subsection{Travaux futures}
 \end{otherlanguage}
