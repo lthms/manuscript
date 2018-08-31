@@ -25,7 +25,7 @@ The formal verification of a system consists of proving its correctness with
 respect to a \emph{specification}\,\cite{gupta1992formal}, that is a description
 of properties targeted by the system.
 %
-To that end, a model of the system is defined to enable rigorous reasoning of
+To that end, a model of the system is defined to enable rigorous reasoning on
 the system behavior by means of formal methods.
 %
 % We distinguish between \emph{functional} specifications, which describe
@@ -59,8 +59,8 @@ numerous configurable hardware features is less subject to formal verification.
 The rest of this Chapter proceeds as follows.
 %
 We detail how transition systems have been widely and successfully used in order
-to model and verify hardware and software systems, and where does our approach
-stand with respect to previous work (Section~\ref{sec:sota:formalisms}).
+to model and verify hardware and software systems, and where our approach
+stands with respect to previous work (Section~\ref{sec:sota:formalisms}).
 %
 Then, we introduce and justify our interest in compositional verification
 approaches, which enable the ``divide and conquer'' strategy to reduce the
@@ -686,14 +686,15 @@ left as a parameter of the proof.
 To experiment with our approach, we decided to focus on the \ac{hse} mechanism
 implemented by the \ac{bios} at runtime to remain isolated from the rest of the
 software stack (Section \ref{sec:usecase:hse}). We specify this mechanism and
-verify its correctness with the security policy it aims to enforce using Coq.
+verify its correctness with respect to the security policy it aims to enforce
+using Coq.
 %
 We now give an overview of existing x86 models, and justify our choice to
 develop our own model.
 
 \paragraph{x86 Models by Intel.}
 %
-Intel has integrated formal verification in its processors design process for
+Intel has integrated formal verification in its processor design process for
 more than a decade now.
 %
 Intel engineers first verified arithmetic operations performed by the
@@ -779,14 +780,16 @@ functional implementation modeled in the Isabelle/HOL theorem prover, and the
 authors have proven this model correctly enforces security policies including
 integrity and confidentiality policies\,\cite{klein2009sel4}.
 %
-In practice, the hardware model focus on \ac{mmu}, cache and interrupt handling.
+In practice, the hardware model focuses on \ac{mmu}, cache and interrupt
+handling.
+%
 In large parts the exact behavior of hardware devices is left non-deterministic,
 in order to reduce the assumptions made by the model about the hardware.
 %
 Besides, we already mentioned the work of Jomaa \emph{et
   al.}\,\cite{jomaa2016mmu}.
 %
-In 2016, they have proposed a formal machine-checked proof (in Coq) of guests
+In 2016, they have proposed a formal machine-checked proof (in Coq) of guest
 isolation by an idealized protokernel based on a \ac{mmu}.
 %
 Similarly to seL4, their hardware model focus on \ac{mmu} and interrupt
@@ -1002,7 +1005,7 @@ in a theorem prover such as Coq.
 %   to manage the scale of the x86 hardware architecture.
 % \end{inparaenum}
 %%
-% It would require a tremendous amount of efforts to be developed, reviewed and
+% It would require a tremendous effort to be developed, reviewed and
 % validated, and the question of its applicability in a verification process
 % would have to be demonstrated.
 %
@@ -1109,7 +1112,7 @@ If a component \( C' \) is proven to enforce \( A \), then the composition of
 %sufficient about the guarantee of \( S \).
 %%
 %In practice, \( T \) may use another component \( U \) to operate, and a proof
-%of correctness for \( U \) will therefore follows the same approach.
+%of correctness for \( U \) will therefore follow the same approach.
 
 The rest of this Section proceeds as follows.
 %
@@ -1498,7 +1501,7 @@ following reasoning:
   %
 \item A model of a component which uses an interface can \emph{include} the
   abstract machine which models this interface and uses its operations,
-  similarly to what aggregation enables in object orienting programming
+  similarly to what aggregation enables in object-orienting programming
   language.
 \end{itemize}
 
@@ -1589,7 +1592,7 @@ specificities of our approach.
 However, a general-purpose x86 hardware model poses an important challenge due
 to the scale of the hardware architecture.
 %
-Previous work have advocated for compositional reasoning approaches, such as
+Previous works have advocated for compositional reasoning approaches, such as
 assume-guarantee\,\cite{pnueli1985ag} or
 rely-guarantee\,\cite{jones1983tentative} paradigms, as an interesting solution
 to tackle these challenges\,\cite{garg2010compositional,heyman2012securemodel}.

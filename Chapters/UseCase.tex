@@ -31,7 +31,7 @@ These attacks have motivated our effort to provide a formal framework for
 reasoning about \ac{hse} mechanisms.
 %
 However, it is important to emphasize that other mainstream architectures
-(\emph{e.g.}  ARM) work on a similar basis and potentially suffer similar issues.
+(\emph{e.g.}  ARM) work in a similar basis and potentially suffer similar issues.
 %
 Our contributions are thus intended to be applicable to other hardware
 architectures.
@@ -40,7 +40,7 @@ The rest of this Chapter proceeds as follows.
 %
 We provide the necessary details on how a typical x86 hardware architecture
 works (Section~\ref{sec:usecase:architecture}) and we explain why and how the
-\ac{bios} remain isolated from the rest of the software stack at runtime
+\ac{bios} remains isolated from the rest of the software stack at runtime
 (Section~\ref{sec:usecase:firmware}).
 %
 This background allows us to describe the critical compositional attacks we
@@ -293,7 +293,7 @@ they manipulate.
 %
 A core decides the semantics of a given memory cell depending on the context,
 \emph{e.g.}  the same binary sequence can be decoded as an instruction or
-interpreted as an operand of an arithmetical operation.
+interpreted as an operand of an arithmetic operation.
 %
 In addition, other hardware components also provide additional memory regions
 that cores can read from or write to.
@@ -304,7 +304,7 @@ specific to each peripheral.
 For instance, an x86 processor integrates a display controller which exposes a
 frame buffer to the cores.
 %
-By writing to the frame buffer, a core changes the pictures displayed by the
+By writing to the frame buffer, a core changes the pictures displayed on the
 computer screen.
 
 \paragraph{Address Spaces.}
@@ -313,7 +313,7 @@ Cores interact with memories \emph{via} two distinct memory address spaces,
 characterized by a set of addresses and a set of instructions.
 %
 The most important address space is the \emph{system memory}, and most of the
-x86 instructions (\emph{e.g.} \texttt{mov} variants, arithmetical operations
+x86 instructions (\emph{e.g.} \texttt{mov} variants, arithmetic operations
 such as \texttt{sub} and \texttt{add}) are designed to manipulate it.
 %
 Addresses of the system memory are referred to as physical addresses and the
@@ -416,7 +416,7 @@ Actions comprise reading from and writing to a memory location. From a core
 perspective, it is also common to distinguish between reading data and reading
 instructions.
 
-For instance, the \ac{mmu} is probably the most well-know hardware feature to
+For instance, the \ac{mmu} is probably the most well-known hardware feature to
 implement an access control policy.
 %
 Thanks to the \ac{mmu}, an operating system can attribute ranges of \ac{dram} to
@@ -955,10 +955,10 @@ architecture, and is responsible for initiating the execution of following
 software components (\emph{e.g.} an operating system), it is commonly designated
 as the root of trust\,\cite{rutkowska2015intel} for the software stack.
 %
-As such, the integrity of the \ac{bios} code is primordial, and several
-strategies have been proposed to detect \ac{bios} code corruption during the
-boot sequence, with the two most predominant being Secure
-Boot\,\cite{rosenbaum2012secboot} and Trusted Boot\,\cite{trustedboot}.
+As such, the integrity of the \ac{bios} code is critical, and several strategies
+have been proposed to detect \ac{bios} code corruption during the boot sequence,
+with the two most predominant being Secure Boot\,\cite{rosenbaum2012secboot} and
+Trusted Boot\,\cite{trustedboot}.
 %
 Secure Boot and Trusted Boot can uncover certain \ac{bios} corruptions prior to
 the execution of the illegitimate code.
@@ -977,8 +977,10 @@ code.
 More recently, the NIST has published the Special Communication 800-193
 ---\emph{Platform Firmware Resiliency
   Guidelines}\,\cite{regenscheid2018nist800193}--- which specifically tackles
-the challenge posed by illegitimate firmware modification. These approaches have all in common to aim at enforcing the correct
-initialization of the platform by the \ac{bios}.
+the challenge posed by illegitimate firmware modification.
+%
+These approaches have in common to aim at enforcing the correct initialization
+of the platform by the \ac{bios}.
 
 % \TODO{En quoi Secure Boot et Trusted Boot permettent de détecter des
 % corruptions du BIOS?}  \TODO{Cette sous-section n'est pas censé parler de
@@ -1262,7 +1264,7 @@ sequence, prior to executing another software component.
 
 \paragraph{System Management Interrupt.}
 
-The \ac{smi} is a hardware interrupt which makes cores ``enters'' \ac{smm}.
+The \ac{smi} is a hardware interrupt which makes cores ``enter'' \ac{smm}.
 %
 More precisely, when a core receives a \ac{smi}, it saves its current state
 (\emph{e.g.} its registers, current execution mode, etc.) in the SMRAM, then it
@@ -1564,9 +1566,9 @@ it provides a trusted execution environment to the system software component.
 
 \paragraph{Attack Path.}
 %
-The flash memory lockdown mechanism was based under the assumption that
-unlocking the flash memory would force the execution of the \ac{bios}, so that
-the latter could lock it again.
+The flash memory lockdown mechanism was based on the assumption that unlocking
+the flash memory would force the execution of the \ac{bios}, so that the latter
+could lock it again.
 %
 To that end, the \ac{pch} triggers a \ac{smi} at the same time as it unlocks the
 flash memory.
