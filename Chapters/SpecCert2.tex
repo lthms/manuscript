@@ -1169,6 +1169,9 @@ rest of the software stack (\ref{subsec:speccert2:bioshsedef}).
 Then, we verify its correctness with respect to the \ac{bios} code injection
 sub-policy \( I_{\mathtt{bios}} \) (Definition~\ref{def:speccert:biospol})
 (\ref{subsec:speccert2:bioshsecorrect}).
+%
+We conclude this Section with an overview of the approach we used to organize
+our machine-checked proof, written in Coq (\ref{subsec:speccert2:coqproofs})
 
 \subsection{BIOS HSE Definition}
 \label{subsec:speccert2:bioshsedef}
@@ -1517,6 +1520,204 @@ address which belongs to the SMRAM is owned by an untrusted software component.
 In this scenario, we could even exhibit a trace which complies the \ac{hse}
 mechanism, but does not satisfies the security policy.
 
+\subsection{On SpecCert Machine-Checked Proofs}
+\label{subsec:speccert2:coqproofs}
+
+As we already explained in the introduction, we have implemented the model and
+proofs of this Chapter in Coq, to increase our confidence in our results.
+%
+The resulting project\,\cite{letan2016speccertcode} counts around 4\,500 lines
+of code, divided into 2\,000 lines of code of definition and specification and
+2\,500 lines of code of proofs.
+%
+We have taken a great care to organize our development in order to manage the
+many sub-cases notably induced by the write-back strategy.
+
+Each hardware component has been defined in isolation from the rest of the
+hardware architecture, with a set of functions, a set of properties and a set of
+general-purpose lemmas.
+%
+For instance, the directory \texttt{src/Cache/} contains four files:
+\texttt{Cache\_def.v}, \texttt{Cache\_func.v}, \texttt{Cache\_proofs.v}, and
+\texttt{Cache\_prop.v}.
+%
+We then have defined \( H(S) \), that is the Cartesian product of individual
+components, in a similar manner.
+%
+Inside the \texttt{src/x86/Architecture/} directory, we defined general-purpose
+functions (\texttt{Architecture\_func.v}) and lemmas
+(\texttt{Architecture\_proofs.v}) to reason about the hardware architecture as a
+whole as often as possible.
+
+\begin{figure}
+  \inputminted{coq}{Listings/StateHell.v}
+
+  \caption{Raw postcondition of a \texttt{Write} transition with a writeback
+    strategy}
+  \label{fig:freespec:entrypoint}
+\end{figure}
+
+\begin{figure}
+  \inputminted{coq}{Listings/RememberPattern.v}
+
+  \caption{Postcondition of a \texttt{Write} transition with a writeback
+    strategy, after the use of the \texttt{remember} tactic}
+  \label{fig:freespec:remember}
+\end{figure}
+
+This approach has proven to be valuable to deal with the many cases to cover,
+when used in conjunction with a recurring pattern we call
+``\texttt{remember};~\texttt{destruct};~\texttt{assert};~\texttt{apply}'', after
+the Coq tactics.
+%
+We illustrate the use of this pattern with the proof goal pictured in
+Figure~\ref{fig:freespec:entrypoint}.
+%
+\begin{enumerate}
+\item Using \texttt{remember}, we can make the sequence of intermediary state
+  updates more visible (see Figure~\ref{fig:freespec:remember}, compared to
+  Figure~\ref{fig:freespec:entrypoint}).
+  %
+  Each \( \mathtt{a\_}i \) is an intermediary state resulting of a call to a
+  general-purpose function from the \texttt{Architecture\_func.v} file.
+\item Using \texttt{destruct}, we can explore the alternative paths resulting
+  from the use of {\scshape Gallina} constructions such as pattern matching, or
+  \texttt{if-then-else}.
+  %
+  For instance, regarding the initial state of the system, the content of the
+  address \( \var{pa} \) may or may not be present in the cache
+  (Figure~\ref{fig:freespec:remember}, line 14).
+  %
+  We explore both alternatives thanks to the \texttt{destruct} tactic (see the
+  two simplified goals in Figure~\ref{fig:freespec:destruct}, more particularly
+  on the value of \texttt{a\_3}).
+  %
+\item Using \texttt{assert}, we can introduce now goals to prove intermediary
+  results (like the one in Figure~\ref{fig:freespec:assert}, for instance).
+  %
+  In our case, we will prove that the predicate \texttt{hardware\_req} remains
+  satisfied after each state update.
+  %
+\item Using \texttt{apply}, we can leverage lemmas about \texttt{hardware\_req}
+  preservation for a given state update, \emph{e.g.} exported by the
+  \texttt{Architecture\_proofs.v} or \texttt{Cache\_proofs.v} files.
+  %
+  For instance, the function \texttt{update\_cache\_content}
+  (Figure~\ref{fig:freespec:remember}, line 11) has a companion lemma called
+  \texttt{update\_cache\_content\-\_with\_context\_preserves\_inv} that we can
+  use to conclude about the goal introduced in Figure~\ref{fig:freespec:assert}.
+\end{enumerate}
+
+\begin{figure}
+  \inputminted{coq}{Listings/DestructGoal.v}
+
+  \inputminted{coq}{Listings/DestructGoal2.v}
+
+  \caption{Exploring alternative paths thanks to the \texttt{destruct} tactics}
+  \label{fig:freespec:destruct}
+\end{figure}
+
+\begin{figure}
+  \inputminted{coq}{Listings/InvGoals.v}
+
+  \caption{Intermediary statements, generated thanks to \texttt{assert} tactics}
+  \label{fig:freespec:assert}
+\end{figure}
+
+\begin{figure}
+{\bigcentering%
+  \AxiomC{}%
+  \LeftLabel{\footnotesize {\scshape Id}} \UnaryInfC{\(
+    \begin{array}{l}
+      \iota(h) \\
+      \hline
+      \vdash \iota(h)
+    \end{array}
+    \)}%
+  \AxiomC{}%
+  \RightLabel{\footnotesize {\scshape Inv}\( _r \)} \UnaryInfC{\(
+    \begin{array}{l}
+      \iota(h) \\
+      h_1 = r(h) \\
+      \hline
+      \vdash \iota(h) \Rightarrow \iota(h_1)
+    \end{array}
+    \)}%
+  \LeftLabel{\footnotesize {\scshape M-P}}%
+  \BinaryInfC{\(
+    \begin{array}{l}
+      \iota(h) \\
+      h_1 = r(h) \\
+      \hline
+      \vdash \iota(h_1)
+    \end{array}
+    \)}%
+  \AxiomC{}%
+  \RightLabel{\footnotesize {\scshape Inv}\( _s \)} \UnaryInfC{\(
+    \begin{array}{l}
+      \iota(h) \\
+      h_1 = r(h) \\
+      h_2 = s(h_1) \\
+      \hline
+      \vdash \iota(h_1) \Rightarrow \iota(h_2)
+    \end{array}
+    \)}%
+  \LeftLabel{\footnotesize {\scshape M-P}}%
+  \BinaryInfC{\(
+    \begin{array}{l}
+      \iota(h) \\
+      h_1 = r(h) \\
+      h_2 = s(h_1) \\
+      \hline
+      \vdash \iota(h_2)
+    \end{array}
+    \)}%
+  \AxiomC{}%
+  \RightLabel{\footnotesize {\scshape Inv}\( _t \)} \UnaryInfC{\(
+    \begin{array}{l}
+      \iota(h) \\
+      h_1 = r(h) \\
+      h_2 = s(h_1) \\
+      h' = t(h_2) \\
+      \hline \vdash \iota(h_2) \Rightarrow \iota (h')
+    \end{array}
+    \)}%
+  \RightLabel{\footnotesize {\scshape M-P}}%
+  \BinaryInfC{\(
+    \begin{array}{l}
+      \iota(h) \\
+      h_1 = r(h) \\
+      h_2 = s(h_1) \\
+      h' = t(h_2) \\
+      \hline \vdash \iota (h')
+    \end{array}
+    \)}%
+  \DisplayProof%
+
+  \vspace{0.5cm} where {\scshape M-P} is the \emph{Modus ponens}, and {\scshape
+    Inv}\( _r \), {\scshape Inv}\( _s \), and {\scshape Inv}\( _t \) are
+  intermediary lemmas previously proved true.%
+}
+
+\caption{Dividing a transition into a sequences of intermediary state updates}
+\label{freespec:figure:seqproof}
+\end{figure}
+
+Figure \ref{freespec:figure:seqproof} depicts the typical shape of resulting
+proofs trees.
+%
+The proofs are structured around smaller, more atomic proof goals of the form
+\( \iota(h_i) \Rightarrow \iota(h_{i+1}) \), where \( \iota \) is supposedly an
+invariant, \( h_i \) is an intermediary state, and \( h_{i+1} \) its successor.
+
+The resulting ``proof strategy'' has proven to be effective to manage the
+relative complexity of our proof goals.
+%
+However, it remains cumbersome to use manually, because it requires to generate
+\emph{manually} an important number of hypotheses (\emph{via} one per
+\texttt{remember} and \texttt{assert} use), which sometimes increases
+significantly the size of the proof obligation generated by Coq.
+
 \section{Conclusion}
 \label{sec:speccert:discuss}
 
@@ -1541,13 +1742,10 @@ As we have already mentioned, our proofs have been implemented within the Coq
 theorem prover to increase our confidence in our results, and have been released
 as free software\,\cite{letan2016speccertcode}.
 %
-The resulting project counts around 4\,500 lines of code, divided into 2\,000
-lines of code of definition and specification and 2\,500 lines of code of
-proofs.
-%
-We believe this represents a manageable size regarding the complexity of the
-model, but whether our approach remains applicable for a large-scale models
-remained to be proven when we first released this work in 2016.
+The resulting project counts around 4\,500 lines of code, and we believe this
+represents a manageable size regarding the complexity of the model, but whether
+our approach remains applicable for a large-scale models remained to be proven
+when we first released this work in 2016.
 %
 Subsequently, we have experimented increasing the scope of {\scshape Minx86}
 with pagination, and have been convinced that considering the whole architecture
