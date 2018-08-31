@@ -21,22 +21,23 @@
 \vspace{1cm}%
 \noindent
 %
-The formal verification of a system consists of proving its correctness with
+The formal verification of a system consists in proving its correctness with
 respect to a \emph{specification}\,\cite{gupta1992formal}, that is a description
 of properties targeted by the system.
 %
-To that end, a model of the system is defined to enable rigorous reasoning of
+To that end, a model of the system is defined to enable rigorous reasoning on
 the system behavior by means of formal methods.
 %
 % We distinguish between \emph{functional} specifications, which describe
 % expected behaviors of their implementations, and \emph{non-functional}
 % specifications, which notably include security policies.
 %
+
 In this thesis, our objective is to give a formal theory of \ac{hse} mechanisms
 in the form of requirements that trusted software components have to satisfy,
 and to verify that these requirements do effectively provide the enforcement of
 targeted security policies.
-
+%
 We steer a middle course between two domains: hardware verification and system
 software verification.
 %
@@ -59,13 +60,12 @@ numerous configurable hardware features is less subject to formal verification.
 The rest of this Chapter proceeds as follows.
 %
 We detail how transition systems have been widely and successfully used in order
-to model and verify hardware and software systems, and where does our approach
-stand with respect to previous work (Section~\ref{sec:sota:formalisms}).
+to model and verify hardware and software systems, and where our approach stands
+with respect to previous work (Section~\ref{sec:sota:formalisms}).
 %
 Then, we introduce and justify our interest in compositional verification
 approaches, which enable the ``divide and conquer'' strategy to reduce the
-burden of verifying large systems, and compare our compositional framework for
-Coq\,\cite{coq} with existing solutions (Section~\ref{section:sota:compsec}).
+burden of verifying large systems (Section~\ref{section:sota:compsec}).
 
 \section{Towards the Formal Verification of HSE Mechanisms}
 \label{sec:sota:formalisms}
@@ -94,8 +94,8 @@ in terms of hardware components, rather than verifying each \ac{hse} mechanism
 against a specific model.
 %
 Many x86 models have been proposed over years, but to the extent of our
-knowledge, none of them aims to describe the x86 architecture as a whole
-(\ref{subsec:sota:ltsrelated}).
+knowledge, none of them cover the hardware features we are primarily interested
+in (\ref{subsec:sota:ltsrelated}).
 %
 To experiment with our formal theory of \ac{hse} mechanisms, we compromise and
 relied on a ad-hoc model, with the aim of identifying desirable properties for a
@@ -174,15 +174,15 @@ second door, and exits the chamber.
 
   \begin{itemize}
   \item A door of the system can be either \( \mathtt{open} \) or
-    \( \mathtt{close} \).
+    \( \mathtt{closed} \).
     %
     The set of states of the airlock system reflects the Cartesian product of
     the doors states.
     %
     \[
       \begin{array}{rcl}
-        S & \triangleq & \{ \mathtt{open}, \mathtt{close} \} \times \{ \mathtt{open},
-                         \mathtt{close} \}
+        S & \triangleq & \{ \mathtt{open}, \mathtt{closed} \} \times \{ \mathtt{open},
+                         \mathtt{closed} \}
       \end{array}
     \]
     %
@@ -202,14 +202,14 @@ second door, and exits the chamber.
     which leads to the state \( (\mathtt{open}, \mathtt{open}) \).
     \[
       \begin{array}{rcl}
-        R & \triangleq & \{ (\mathtt{close}, \mathtt{close}), \mathtt{Open_1},
-                         (\mathtt{open}, \mathtt{close}), \\
-          & & \ (\mathtt{close}, \mathtt{close}), \mathtt{Open_2},
-              (\mathtt{close}, \mathtt{open}), \\
-          & & \ (\mathtt{open}, \mathtt{close}), \mathtt{Close_1},
-              (\mathtt{close}, \mathtt{close}), \\
-          & & \ (\mathtt{close}, \mathtt{open}), \mathtt{Close_2},
-              (\mathtt{close}, \mathtt{close}) \}
+        R & \triangleq & \{ (\mathtt{closed}, \mathtt{closed}), \mathtt{Open_1},
+                         (\mathtt{open}, \mathtt{closed}), \\
+          & & \ (\mathtt{closed}, \mathtt{closed}), \mathtt{Open_2},
+              (\mathtt{closed}, \mathtt{open}), \\
+          & & \ (\mathtt{open}, \mathtt{closed}), \mathtt{Close_1},
+              (\mathtt{closed}, \mathtt{closed}), \\
+          & & \ (\mathtt{closed}, \mathtt{open}), \mathtt{Close_2},
+              (\mathtt{closed}, \mathtt{closed}) \}
       \end{array}
     \]
   \end{itemize}
@@ -223,13 +223,13 @@ second door, and exits the chamber.
     % a tikzpicture to illustrate the resulting automata
     \begin{tikzpicture}
       \node [draw, circle split, text width=30pt, text badly centered] (cc)
-      {\( \mathtt{close} \) \nodepart{lower} \( \mathtt{close} \)};%
+      {\( \mathtt{closed} \) \nodepart{lower} \( \mathtt{closed} \)};%
       \node [right=of cc] (x) {};%
       \node [draw, circle split, above=of x, text width=30pt, text badly
       centered] (oc) {\( \mathtt{open} \) \nodepart{lower}
-        \( \mathtt{close} \)};%
+        \( \mathtt{closed} \)};%
       \node [draw, circle split, below=of x, text width=30pt, text badly
-      centered] (co) {\( \mathtt{close} \) \nodepart{lower}
+      centered] (co) {\( \mathtt{closed} \) \nodepart{lower}
         \( \mathtt{open} \)};%
       \node [draw, circle split, right=of x, text width=30pt, text badly
       centered] (oo) {\( \mathtt{open} \) \nodepart{lower} \( \mathtt{open}
@@ -323,11 +323,11 @@ each state\,\cite{vijayaraghavan2015modular}.
   The crossing, by a user, of the airlock system is characterized by the
   following trace:
   \[
-    \footnotesize (\mathtt{close}, \mathtt{close})%
-    \!\xrightarrow{\mathtt{Open}_1}\!(\mathtt{open}, \mathtt{close})%
-    \!\xrightarrow{\mathtt{Close}_1}\!(\mathtt{close}, \mathtt{close})%
-    \!\xrightarrow{\mathtt{Open}_2}\!(\mathtt{close}, \mathtt{open})%
-    \!\xrightarrow{\mathtt{Close}_2}\!(\mathtt{close}, \mathtt{close})
+    \footnotesize (\mathtt{closed}, \mathtt{closed})%
+    \!\xrightarrow{\mathtt{Open}_1}\!(\mathtt{open}, \mathtt{closed})%
+    \!\xrightarrow{\mathtt{Close}_1}\!(\mathtt{closed}, \mathtt{closed})%
+    \!\xrightarrow{\mathtt{Open}_2}\!(\mathtt{closed}, \mathtt{open})%
+    \!\xrightarrow{\mathtt{Close}_2}\!(\mathtt{closed}, \mathtt{closed})
   \]
 \end{example}
 
@@ -371,15 +371,15 @@ where \( \rho_{[..n]} \) is the subtrace made with the \( n \) first elements of
   We formalize this property with the invariant \( \iota \), defined as follows:
   %
   \[
-    \iota( d_1, d_2) \triangleq d_1 = \mathtt{close} \vee d_2 = \mathtt{close}
+    \iota( d_1, d_2) \triangleq d_1 = \mathtt{closed} \vee d_2 = \mathtt{closed}
   \]
   %
   The specification of the airlock system is defined with a labeled transition
   system.
   %
   Assuming the airlock device is initialized in a correct state (\emph{e.g.}
-  both doors are close), we verify this specification is correct with respect to
-  the safety property characterized by \( \iota \) by exhibiting a proof that
+  both doors are closed), we verify this specification is correct with respect
+  to the safety property characterized by \( \iota \) by exhibiting a proof that
   \( \iota \) is an invariant with respect to \( R \), that is
   %
   \[
@@ -391,17 +391,17 @@ where \( \rho_{[..n]} \) is the subtrace made with the \( n \) first elements of
     By definition of \( R \), there are four transitions to consider, and our
     proof consists in an enumeration of these cases.
     %
-    Case 1, both doors are close, that is \( d_1 = d_2 = \mathtt{close} \).  The
-    system opens the first door, that is \( l = \mathtt{Open}_1 \). At the end
-    of the transition, only the first door is open, that is
-    \( d_1' = \mathtt{open} \) and \( d_2' = \mathtt{close} \).
+    Case 1, both doors are closed, that is \( d_1 = d_2 = \mathtt{closed} \).
+    The system opens the first door, that is \( l = \mathtt{Open}_1 \). At the
+    end of the transition, only the first door is open, that is
+    \( d_1' = \mathtt{open} \) and \( d_2' = \mathtt{closed} \).
       %
     By definition of \( \iota \), the statement to prove becomes
       %
     \[
-      \mathtt{close} = \mathtt{close} \vee \mathtt{close} = \mathtt{close}
-      \Rightarrow \mathtt{open} = \mathtt{close} \vee \mathtt{close} =
-      \mathtt{close}
+      \mathtt{closed} = \mathtt{closed} \vee \mathtt{closed} = \mathtt{closed}
+      \Rightarrow \mathtt{open} = \mathtt{closed} \vee \mathtt{closed} =
+      \mathtt{closed}
     \]
       %
     By definition of the disjunction \( \vee \), the statement reduces to
@@ -414,13 +414,13 @@ where \( \rho_{[..n]} \) is the subtrace made with the \( n \) first elements of
   \end{proof}
 
   In addition, we can also prove that both doors of the airlock will
-  \emph{eventually} be close.
+  \emph{eventually} be closed.
   %
   We can characterize this liveness property with the predicate \( \eta \) on
   subtraces of one element, such that
   %
   \[
-    \eta(d_1, d_2) \triangleq d_1 = \mathtt{close} \wedge d_2 = \mathtt{close}
+    \eta(d_1, d_2) \triangleq d_1 = \mathtt{closed} \wedge d_2 = \mathtt{closed}
   \]
   %
   We verify the specification of the airlock system is correct with respect to
@@ -636,24 +636,18 @@ Temporal logic formulas are commonly verified thanks to model checkers,
 TLA+\,\cite{lamport2002tla}.
 
 Despite improvements in algorithms, model checkers remains subject to the
-\emph{state explosion problem}\,\cite{clarke2012model}.
-%
-\thomasrk[inline]{Pose toi, prends bien le temps de justifier. Tu veux dire que
-  gérer un modèle complexe en modèle checking, même pour les théories les plus
-  avancées, nécessite un travail de l’utilisateur et donc que ce n’est plus
-  complètement automatisé.}
+\emph{state explosion problem}\,\cite{clarke2012model}, whose mitigation reduces
+the automation of the approach.
 %
 % Other approaches can be used to that end ---for instance Gilles Barthe
 % \emph{et al.} have encoded \( \square \) and \( \Diamond \) in
 % Coq\,\cite{barthe2011virtcert1}--- yet model checkers have the benefit of
 % automation and counter-example generation.
 %
-Symbolic model checking requires to manually provide invariants to act as
-inductive hypotheses\,\cite{mcmillan2000symbolic}.
-%
-Bounded model checkers requires to decide an upper bound for traces size, with
-the risk to abate the result in the chosen number is too
-low\,\cite{biere2003bounded}.
+For instance, symbolic model checking requires to manually provide invariants to
+act as inductive hypotheses\,\cite{mcmillan2000symbolic}, and bounded model
+checkers require to fix an upper bound for traces size, with the risk to abate
+the result in the chosen number is too low\,\cite{biere2003bounded}.
 
 \paragraph{Higher-order Logic.}
 %
@@ -690,14 +684,15 @@ left as a parameter of the proof.
 To experiment with our approach, we decided to focus on the \ac{hse} mechanism
 implemented by the \ac{bios} at runtime to remain isolated from the rest of the
 software stack (Section \ref{sec:usecase:hse}). We specify this mechanism and
-verify its correctness with the security policy it aims to enforce using Coq.
+verify its correctness with respect to the security policy it aims to enforce
+using Coq.
 %
 We now give an overview of existing x86 models, and justify our choice to
 develop our own model.
 
 \paragraph{x86 Models by Intel.}
 %
-Intel has integrated formal verification in its processors design process for
+Intel has integrated formal verification in its processor design process for
 more than a decade now.
 %
 Intel engineers first verified arithmetic operations performed by the
@@ -742,7 +737,6 @@ abstract away as many hardware details as possible to increase the applicability
 of the model.
 %
 For instance, memories are commonly limited to the \ac{dram}.
-%
 
 This approach works well when software components use a limited amount of
 hardware features, as applications typically do, and to reason about correction
@@ -784,14 +778,16 @@ functional implementation modeled in the Isabelle/HOL theorem prover, and the
 authors have proven this model correctly enforces security policies including
 integrity and confidentiality policies\,\cite{klein2009sel4}.
 %
-In practice, the hardware model focus on \ac{mmu}, cache and interrupt handling.
+In practice, the hardware model focuses on \ac{mmu}, cache and interrupt
+handling.
+%
 In large parts the exact behavior of hardware devices is left non-deterministic,
 in order to reduce the assumptions made by the model about the hardware.
 %
 Besides, we already mentioned the work of Jomaa \emph{et
   al.}\,\cite{jomaa2016mmu}.
 %
-In 2016, they have proposed a formal machine-checked proof (in Coq) of guests
+In 2016, they have proposed a formal machine-checked proof (in Coq) of guest
 isolation by an idealized protokernel based on a \ac{mmu}.
 %
 Similarly to seL4, their hardware model focus on \ac{mmu} and interrupt
@@ -883,8 +879,8 @@ This means the ASL model has to be compiled to another representation,
 \emph{e.g.} Verilog or a model checker modeling language.
 %
 On the contrary, we decided to implement our model directly in the language used
-by the tool supporting our verification process because we were targeting a
-proof of concept.
+by the tool supporting our verification process, in order to avoid this
+translation step.
 
 The \ac{xom} microprocessor architecture maintains separate so-called
 \emph{compartments} for applications\,\cite{lie2000architectural}.
@@ -966,10 +962,13 @@ of the software stack at runtime.
 This case study illustrates the challenges faced by the \ac{hse} mechanisms in
 general.
 %
-To the existing of our knowledge, the hardware features involved in this
-\ac{hse} mechanism are outside of the scope of existing models.
+To the best of our knowledge, the hardware features involved in this \ac{hse}
+mechanism are outside of the scope of existing models, which is why we developed
+our own.
 %
-As a consequence, we have developed a minimal x86 model.
+We drew on modeling approaches like VirtCert\,\cite{barthe2011virtcert1} and
+XOM\,\cite{lie2003xom}, and how they handle the interaction with the rest of the
+system.
 
 Our theory is characterized by defining a model of the hardware architecture,
 specifying restrictions over the model, and verifying the resulting restricted
@@ -981,7 +980,7 @@ Hardware verification by means of theorem provers has proven to be a practical
 alternative to model checking\,\cite{vijayaraghavan2015modular,choi2017kami}.
 %
 For these reasons, we decided to implement our model and proofs using the Coq
-theorem prover, to challenge the applicability of our theory with a first, small
+theorem prover, to challenge the applicability of our theory with a focused
 verification problem.
 %
 This experience convinced us of the interest of a general-purpose hardware model
@@ -1004,9 +1003,9 @@ in a theorem prover such as Coq.
 %   to manage the scale of the x86 hardware architecture.
 % \end{inparaenum}
 %%
-% It would require a tremendous amount of efforts to be developed, reviewed and
-% validated, and the question of its applicability in a verification process
-% would have to be demonstrated.
+% It would require a tremendous effort to be developed, reviewed and validated,
+% and the question of its applicability in a verification process would have to
+% be demonstrated.
 %
 % Therefore, we decided to compromise and experiment on an ad-hoc model with the
 % aim of identifying desirable properties for a large-scale, general-purpose
@@ -1020,108 +1019,98 @@ in a theorem prover such as Coq.
 % mécanisme (même s'il pourrait sans doute être étendu).}%
 % \thomasrk[inline]{Est-ce que ça te semble mieux ?}
 
-%
-However, to verify a specific \ac{hse} mechanism, the need for higher-logic is
-not prominent because first-order logic quantifiers are expressive enough.
-%
-Therefore, we can theoretically leverage a large class of tools, in particular
-model checkers which have the benefit of automation.
+% However, to verify a specific \ac{hse} mechanism, the need for higher-logic is
+% not prominent because first-order logic quantifiers are expressive enough.
+% %
+% Therefore, we can theoretically leverage a large class of tools, in particular
+% model checkers which have the benefit of automation.
 
 \section{Compositional Verification}
 \label{section:sota:compsec}
 
-\GH{Tout comme la conclusion précédente, cette introduction est à revoir. Elle
-  manque de clareté. Elle doit être concise}
-
-Our formal theory of \ac{hse} mechanisms makes a clear distinction between
-software components and the underlying hardware architecture which executes
-them.
+The formal verification of a system as complex as the x86 hardware architecture
+poses significant challenges.
 %
-A \ac{hse} mechanism consists of requirements that trusted software components
-need to satisfy in order for the hardware architecture to correctly enforce a
-targeted security policy at all time.
-
-Our approach is reminiscent of compositional reasoning approaches, such as
-assume-guarantee\,\cite{pnueli1985ag} and
-rely-guarantee\,\cite{jones1983tentative} paradigms, where a component \( C \)
-is proven to enforce a guarantee \( G \) as long as an assumption \( A \) is
-met. \GH{On ne comprend pas pourquoi tu nous parles subitement de ces deux
-  approches (et pourquoi tu n'en n'a pas parlé dans la section précédente)}
+This is especially true considering that we focus on security policies and
+compositional attacks ---each hardware feature which is absent from the model
+can potentially be part of an attack path.
+%
+Previous work have advocated for compositional reasoning approaches, such as
+assume-guarantee\,\cite{pnueli1985ag} or
+rely-guarantee\,\cite{jones1983tentative} paradigms, as an interesting solution
+to tackle these challenges\,\cite{garg2010compositional,heyman2012securemodel}.
+%
+In the context of computational reasoning, the system is break down into several
+component.
+%
+A component \( C \) is proven to enforce a guarantee \( G \) as long as an
+assumption \( A \) is met.
 %
 If a component \( C' \) is proven to enforce \( A \), then the composition of
 \( C \) and \( C' \) enforces \( G \).
 
-Our second contribution generalizes the key idea of our formal theory of
-\ac{hse} mechanisms ---that is specifying requirements and verifying they
-fulfill their promises--- with compositional reasoning, in order to address the
-challenge posed by the inevitable complexity of a general-purpose hardware
-architecture model.
-%
-\GH{On est dans l'état de l'art. Pourquoi tu nous parles déjà de ta
-  contribution? Il faut évoquer les problèmes, puis parler des approches de
-  l'état de l'art qui pourrait permettre de résoudre ce problème mais en fait
-  pas tellement. Puis évoquer ta contribution. La tu le fait dans le
-  désordre.}Given three components, such that a component \( R \) uses a
-component \( S \) to operate, and \( S \) uses a third component \( T \), we
-target a verification approach that we summarize as follows.
+% \GH{Tout comme la conclusion précédente, cette introduction est à revoir. Elle
+% manque de clareté. Elle doit être concise}
 
-\begin{center}
-  \begin{tikzpicture}
-    \node [draw, inner sep=16pt, text badly centered] (A) {\( R \)};%
-    \node [draw, inner sep=16pt, text badly centered, right=35pt of A] (B)
-    {\( S \)};%
-    \node [draw, inner sep=16pt, text badly centered, right=35pt of B] (C)
-    {\( T \)};%
-
-    \draw [-latex] ([yshift=7pt]A.east) to node [above] {(2)}
-    ([yshift=7pt]B.west);%
-    \draw [-latex] ([yshift=7pt]B.east) to node [above] {(3)}
-    ([yshift=7pt]C.west);%
-    \draw [-latex] ([yshift=-7pt]C.west) to node [below] {(4)}
-    ([yshift=-7pt]B.east);%
-    \draw [-latex] ([yshift=-7pt]B.west) to node [below] {(1)}
-    ([yshift=-7pt]A.east);%
-  \end{tikzpicture}
-\end{center}
-
-The verification goal is to prove that \( S \) enforce a guarantee for \( R \)
-(1), as long as \( R \) satisfies certain assumption (2).
+% Our formal theory of \ac{hse} mechanisms makes a clear distinction between
+% software components and the underlying hardware architecture which executes
+% them.
+%%
+% A \ac{hse} mechanism consists of requirements that trusted software components
+% need to satisfy in order for the hardware architecture to correctly enforce a
+% targeted security policy at all time.
 %
-% note: “cannot but” est l’équivalent anglais de “ne peut que”, que j’aime
-% personnellement beaucoup
-Because \( S \) uses \( T \), such a proof cannot but depend \GH{cannot but
-  depend?} on how \( T \) operates.
+% Our approach is reminiscent of compositional reasoning approaches, such as
+% \GH{On ne comprend pas pourquoi tu nous parles subitement de ces deux
+% approches (et pourquoi tu n'en n'a pas parlé dans la section précédente)}
 %
-We propose to define another pair of assumption and guarantee for \( T \), and
-assume \( T \) is correct with respect to this pair.
+% Our second contribution generalizes the key idea of our formal theory of
+% \ac{hse} mechanisms ---that is specifying requirements and verifying they
+% fulfill their promises--- with compositional reasoning, in order to address
+% the challenge posed by the inevitable complexity of a general-purpose hardware
+% architecture model.
+%%
+% \GH{On est dans l'état de l'art. Pourquoi tu nous parles déjà de ta
+% contribution? Il faut évoquer les problèmes, puis parler des approches de
+% l'état de l'art qui pourrait permettre de résoudre ce problème mais en fait
+% pas tellement. Puis évoquer ta contribution. La tu le fait dans le
+% désordre.}Given three components, such that a component \( R \) uses a
+% component \( S \) to operate, and \( S \) uses a third component \( T \), we
+% target a verification approach that we summarize as follows.
 %
-In this context, it is possible to prove that \( S \) enforces its guarantee if
-it satisfies the assumptions of \( T \), and if the guarantee of \( T \) are
-sufficient about the guarantee of \( S \).
+% \begin{center}
+%   \begin{tikzpicture}
+%     \node [draw, inner sep=16pt, text badly centered] (A) {\( R \)};%
+%     \node [draw, inner sep=16pt, text badly centered, right=35pt of A] (B)
+%     {\( S \)};%
+%     \node [draw, inner sep=16pt, text badly centered, right=35pt of B] (C)
+%     {\( T \)};%
 %
-In practice, \( T \) may use another component \( U \) to operate, and a proof
-of correctness for \( U \) will therefore follows the same approach.
-
-Previous work have already advocated for compositional reasoning for security,
-notably Garg \emph{et al.}\,\cite{garg2010compositional} and Heyman \emph{et
-  al.}\,\cite{heyman2012securemodel}.
+%     \draw [-latex] ([yshift=7pt]A.east) to node [above] {(2)}
+%     ([yshift=7pt]B.west);%
+%     \draw [-latex] ([yshift=7pt]B.east) to node [above] {(3)}
+%     ([yshift=7pt]C.west);%
+%     \draw [-latex] ([yshift=-7pt]C.west) to node [below] {(4)}
+%     ([yshift=-7pt]B.east);%
+%     \draw [-latex] ([yshift=-7pt]B.west) to node [below] {(1)}
+%     ([yshift=-7pt]A.east);%
+%   \end{tikzpicture}
+% \end{center}
 %
-Therefore, this reasoning methodology goes beyond our initial scope, that is
-\ac{hse} mechanisms specification and verification, and can be leveraged for a
-large range of verification problems involving interconnected components.
-%
-For this reason, we aim to propose a general-purpose framework for Coq to
-support this approach, with two objectives in particular:
-%
-\begin{inparaenum}[(1)]
-\item we want to use well-established constructions in functional programming
-  communities \GH{pourquoi? Il faut rappeler ici que Galina est un langage
-    fonctionnel. Donc l'aspect fonctionnel t'es imposé par le choix de ton
-    outil. Ca ne transparait pas assez!} in order to favor adoption, and
-\item we want to enable component models to be executable if needed, \emph{e.g.}
-  to validate them against concrete implementation or to act as a reference
-  implementation.
-\end{inparaenum}
+% The verification goal is to prove that \( S \) enforce a guarantee for \( R \)
+% (1), as long as \( R \) satisfies certain assumption (2).
+%%
+% Because \( S \) uses \( T \), such a proof depends on how \( T \) operates.
+%%
+% We propose to define another pair of assumption and guarantee for \( T \), and
+% assume \( T \) is correct with respect to this pair.
+%%
+% In this context, it is possible to prove that \( S \) enforces its guarantee
+% if it satisfies the assumptions of \( T \), and if the guarantee of \( T \)
+% are sufficient about the guarantee of \( S \).
+%%
+% In practice, \( T \) may use another component \( U \) to operate, and a proof
+% of correctness for \( U \) will therefore follow the same approach.
 
 The rest of this Section proceeds as follows.
 %
@@ -1130,17 +1119,8 @@ interacting components (\ref{subsec:sota:ioauto}), and how process algebra
 systems have been used to facilitate the definition of these interactions
 (\ref{subsec:sota:palgebra}).
 %
-\GH{Il manque une transition avec la suite. On comprend pourquoi tu va nous
-  parler de la composition dans les LTS et de l'algebre de processsus. Mais
-  alors, pourquoi va tu nous parler d'une troisième chose après?}  We then
-explain how we take advantage of a functional programming language \GH{encore
-  une fois, tu mélanges la description de ton approche avec l'état de
-  l'art. "how we take advantage" laisse penser que tu décrit ton approche. Il
-  faudrait plutôt dire que ces approches semble intéressantes pour ton
-  problème.}  paradigm called programs with effects and effect handlers as a
-foundation for a compositional reasoning framework for Coq, drawn from these two
-approaches \GH{quelles approches?} and which addresses our objectives
-(\ref{subsec:sota:peff}).
+Finally, we detail how compositional reasoning has been implemented specifically
+in theorem provers (\ref{subsec:sota:peff}).
 
 \subsection{Labeled Transition Systems and Components Composition}
 \label{subsec:sota:ioauto}
@@ -1178,7 +1158,7 @@ simultaneously.
   %
   In this context, the most obvious component is the door.
   %
-  A door has two states: it can be either open or close.
+  A door has two states: it can be either open or closed.
   %
   It takes two input actions: \( \mathtt{Open} \) (the action to open the door)
   and \( \mathtt{Close} \) (the action to close the door).
@@ -1294,15 +1274,14 @@ However, it is a fairly low-level modeling structure, which complicates its
 usage for a large scale model --- for instance, our airlock system controller is
 modeled with seven different states--- and impair the model readability.
 %
-As a possible solution to overcome this difficulty, we investigate the
-possibility to associate input actions with ``programs'' of output actions a
-component executes.
+In particular, it is hard to formally establish the causal relation between
+inputs and outputs actions.
 %
-To continue with the airlock system example, the input action ``Request to open
-the first door'' could be associate with the sequence of output actions ``Close
-the second door'' then ``Open the first door''. \GH{Cette dernière partie n'est
-  pas très claire. Est-ce une transition vers ce qui suit? Un positionnement de
-  ton approche? Que veux tu dire par "we investigate"?}
+Rather than defining an automaton manually, it is possible to leverage process
+algebra formal languages.
+%
+They allows for modeling, by means of formal languages, interacting components
+as concurrent processes which exchange message through channels.
 
 \subsection{Process Algebra}
 \label{subsec:sota:palgebra}
@@ -1392,7 +1371,7 @@ demonstrate in the following example.
   channels used by its components to communicate, then starts their concurrent
   executions.
   %
-  A door is either open or close, and we model this with two mutually recursive
+  A door is either open or closed, and we model this with two mutually recursive
   processes \( \mathrm{CloseDoor} \) and \( \mathrm{OpenDoor} \).
   %
   They take one channel \( c \) as an argument, then wait for new inputs coming
@@ -1404,7 +1383,7 @@ demonstrate in the following example.
   It waits for new requests coming from \( c \).
   %
   When it receives a new request to open the first (resp. second) door, it first
-  close the second (resp. first) door, using the channel \( d_2 \) (resp.
+  closes the second (resp. first) door, using the channel \( d_2 \) (resp.
   \( d_1 \)).
   %
   Then, it opens the first (resp. second) door, using the channel \( d_1 \)
@@ -1414,8 +1393,8 @@ demonstrate in the following example.
 Process algebras such as \( \pi \)-calculus are well suited formalisms for
 describing component interactions.
 %
-In our case, we implement a simple pattern: wait for requests, act accordingly,
-then start again.
+In the context of the previous example, we implement a simple pattern: wait for
+requests, act accordingly, then start again.
 %
 A similar approach has been proposed by Choi \emph{et al.} in 2017.
 %
@@ -1476,86 +1455,24 @@ focus on properties that are transparent to software components and do not
 require configuration from their part.
 %
 The verification process relies on successive refinements, rather than a
-compositional reasoning based on assume-guarantee paradigm. \GH{et?}
+compositional reasoning based on assume-guarantee paradigm.
 %
-Besides, {\scshape Kami} targets hardware designers, and the syntax used to
-define modules is heavily inspired by the BlueSpec language.
+% GH: et?
 %
-On the contrary, we aim to provide a more general-purpose framework, which
-enables compositional reasoning.
+% Thomas: l'intro dit maintenant clairement qu'on veut faire du
+% assume-guarantee.
+%
+We now give an overview of computational reasoning framework implemented in
+theorem provers.
 
-\GH{il manque une transition vers la prochaine sous-section.}
-
-\subsection{Programs with Effects and Effect Handlers}
+\subsection{Compositional Reasoning for Theorem Provers}
 \label{subsec:sota:peff}
 
-We remind our initial objective: reasoning about the interactions of a component
-with the rest of the system.
-%
-We believe it is reminiscent of the functional programming language problematic
-to model and verify large programs with side-effects.
-%
-These side-effects are often carried out by an outer environment.
-%
-For example, a program which reads the content of a file relies on an operating
-system to access the file stored in a hard drive and makes this content
-available in its address space.
-%
-Modeling side effects in pure programming language, such as Haskell or {\scshape
-  Gallina}, is usually achieved thanks to
-monads\,\cite{wadler1990comprehending,jones2005io}. \GH{Dans ce qui suit, tu
-  supposes que tout le monde sait ce que sont les monades. J'en doute. En outre,
-  tu as été super pédagogique avec ce qui précède (et qui est finalement assez
-  éloigné de ton approche) et tu vas très (trop) vite sur la fin, alors que ce
-  sont les travaux les plus proches! Tu pourrais par exemple utiliser ton
-  exemple de air-lock} However, monads have a reputation not to compose very
-well\,\cite{hyland2006combining}, despite constructions such as monad
-transformers\,\cite{liang1995mtl}.
-
-Recently, algebraic effects and effect handlers\,\cite{bauer2015effects}
-\GH{Idem que pour les monades. Il faudrait expliquer un peu ce que sont les
-  effets algébric et les effect handlers} have been proposed to address this
-limitation, and they have been the object of implementations for several
-significant functional programming languages (\emph{e.g.}
-Eff\,\cite{bauer2015effects}, {\scshape Idris}\,\cite{brady2013idris}, or
-Haskell\,\cite{kiselyov2013extensible}).
-%
-We advocate that an approach based on algebraic effects and effect handlers
-addresses our two objectives \GH{on a un peu perdu de vue ces deux objectifs. En
-  remontant un peu je m'aperçoit que tu voulais un formalisme bien établis dans
-  la communauté (ok, c'est ce que tu expliques après) et d'une spec
-  exécutable. Tu ne parles pas de ce deuxième point, il me semble}: we can
-leverage the ``do-notation'' ---already used in language such as
-Haskell\,\cite{haskell13}--- to improve our models readability, and the paradigm
-is now well-established in the functional programming language community.
-
-%
-The \texttt{Coq.io} framework, developed and released by Guillaume Claret
-\emph{et al.}\,\cite{claret2015coqiowww}, is a first step in that direction.
-%
-Programs with effects in \texttt{Coq.io} are defined in a dedicated monad, with
-side effects (\emph{e.g.}  system calls to read from or write to a file)
-axiomatized as monadic operations of this monad.
-%
-The proofs rely on scenarios which determine how an environment (\emph{e.g.} an
-operating system) would react to the program requests.
-%
-The verification goal is to verify that, under the hypothesis that the
-environment is correct with respect to a scenario, then a program with effects
-is also correct with respect to an expected trace of side effects operations it
-produces.
-%
-\texttt{Coq.io} paves the road towards a compositional approach reasoning in
-Coq, but remains incomplete in our perspective.
-%
-A program with effects can be verified, but the verification of the composition
-of this program with its environment is out of the scope of the project.
-
-Our approach replaces \texttt{Coq.io} scenarios by so-called abstract
-specifications which enable compositional reasoning similar to what have been
-proposed\,\cite{souquieres2005verifying,chouali2006proving,lanoix:hal-00105041}
-for the B-method\,\cite{abrial2005b}, a well-established method of software
-development based on the B formal system.
+Several
+approaches\,\cite{souquieres2005verifying,chouali2006proving,lanoix:hal-00105041}
+have been proposed to implement compositional reasoning for the
+B-method\,\cite{abrial2005b}, a well-established method of software development
+based on the B formal system.
 %
 B allows for the definition of functional specifications, called abstract
 machines, and the refinement of these specifications up to executable code.
@@ -1582,73 +1499,100 @@ following reasoning:
   %
 \item A model of a component which uses an interface can \emph{include} the
   abstract machine which models this interface and uses its operations,
-  similarly to what aggregation enables in object orienting programming
+  similarly to what aggregation enables in object-orienting programming
   language.
 \end{itemize}
 
-\GH{et? Le passage sur la méthode B semble un peu tomber du ciel et tu laisse le
-  lecteur sur sa fin.}
-% The formal framework proposed by Garg \emph{et
-% al.}\,\cite{garg2010compositional} does not suffer this limitation.
-% %
-% It consists in a logic of programs with effects and a companion proof system
-% that enables compositional reasoning.
-% %
+To the extend of our knowledge, the \texttt{Coq.io} framework, developed and
+released by Guillaume Claret \emph{et al.}\,\cite{claret2015coqiowww},
+represents the closest approach for Coq.
 %
-% but to the extent of our knowledge, it lacks an implementation of their
-% approach, and the examples which support the description of the paper rely on
-% paper proofs.
+It addresses a different problem, that is reasoning about functional program
+(such as {\scshape Gallina}) in presence of side-effects.
+%
+These side-effects are often carried out by an outer environment.
+%
+For example, a program which reads the content of a file relies on an operating
+system to access the file stored in a hard drive and makes this content
+available in its address space.
 
-\subsection*{}
+Modeling side effects in pure programming language, such as Haskell or {\scshape
+  Gallina}, is usually achieved thanks to
+monads\,\cite{wadler1990comprehending,jones2005io}. \GH{Dans ce qui suit, tu
+  supposes que tout le monde sait ce que sont les monades. J'en doute. En outre,
+  tu as été super pédagogique avec ce qui précède (et qui est finalement assez
+  éloigné de ton approche) et tu vas très (trop) vite sur la fin, alors que ce
+  sont les travaux les plus proches! Tu pourrais par exemple utiliser ton
+  exemple de air-lock}
 
-Our formal theory of \ac{hse} mechanisms is reminiscent of the assume-guarantee
-paradigm, where a component is verified in isolation in terms of assumptions it
-has on the rest of the system and guarantees it enforces for that system if its
-assumptions are met.
+Programs with effects in \texttt{Coq.io} are defined in a dedicated monad, with
+side effects (\emph{e.g.}  system calls to read from or write to a file)
+axiomatized as monadic operations of this monad.
 %
-To address the inevitable complexity of a general-purpose hardware architecture
-model, we make an additional step in that direction and verify each hardware
-component in isolation with a similar reasoning. \GH{on ne comprends pas ce que
-  cet "additional step" apporte par rapport à l'approche initial, tel qu'il est
-  formulé}
+The proofs rely on scenarios which determine how an environment (\emph{e.g.} an
+operating system) would react to the program requests.
 %
-With FreeSpec\,\cite{letan2018freespeccode}, we aim to provide a generic
-compositional reasoning framework for Coq.
+The verification goal is to verify that, under the hypothesis that the
+environment is correct with respect to a scenario, then a program with effects
+is also correct with respect to an expected trace of side effects operations it
+produces.
 %
-As detailed in Chapter~\ref{chapter:freespec}, FreeSpec leverages programs with
-effects and effect handlers to model component-based system.
+\texttt{Coq.io} paves the road towards a compositional approach reasoning in
+Coq, but remains incomplete in our perspective.
 %
-FreeSpec relies on so-called abstract specification in order to enable a
-verification methodology inspired by the assume-guarantee paradigm similar to
-what Lanoix \emph{et al.} for the B-method\,\cite{lanoix:hal-00105041} \GH{il
-  manque un verbe à cette proposition}.
+A program with effects can be verified, but the verification of the composition
+of this program with its environment is out of the scope of the project.
+
+Monads have a reputation not to compose very well\,\cite{hyland2006combining},
+despite constructions such as monad transformers\,\cite{liang1995mtl}.
+%
+Recently, algebraic effects and effect handlers\,\cite{bauer2015effects}
+%
+\GH{Idem que pour les monades. Il faudrait expliquer un peu ce que sont les
+  effets algébric et les effect handlers}
+%
+have been proposed to address this limitation, and they have been the object of
+implementations for several significant functional programming languages
+(\emph{e.g.}  Eff\,\cite{bauer2015effects}, {\scshape
+  Idris}\,\cite{brady2013idris}, or Haskell\,\cite{kiselyov2013extensible}).
+%
+We advocate that an approach inspired by algebraic effects and effect handlers
+can be used to implement a compositional approach for Coq similar to what others
+have already proposed for the B-method, in particular by Lanoix \emph{et
+  al.}\,\cite{lanoix:hal-00105041}.
+%
+This is because the separation between program with effects and effect handlers
+mimics the separation between one component which interacts with a second one.
 
 \section{Conclusion}
 \label{sec:sota:conclusion}
-\GH{Tu as une sous-section et un section qui se suivent qui portent le même
-  titre (conclusion). Ce n'est pas très élégant, il faudrait modifier un des
-  titres.}
 
-\GH{Je trouve que ta conclusion résume mal l'état de l'art. Tu te focalise trop
-  sur ton approche.}
-
-In this Chapter, we have discussed our two contributions with respect to related
-work.
+In this Chapter, we have explained how it is possible to formally verify a
+system with respect to a security policy by defining a transition system to
+model its behavior and reasoning about the set of its traces.
 %
-Our theory of \ac{hse} mechanisms, presented in Part~\ref{part:speccert}, aims
-to specify requirements that trusted software components have to satisfy in
-order for the underlying hardware architecture to enforce a targeted security
-policy at all time.
+This general verification approach does not fully apply in the context of
+\ac{hse} mechanisms, because the hardware architectures are not safe by default.
 %
-Our initial goal is to leverage formal \ac{hse} definition to support
-verification of hardware architectures, a research direction which was little
-investigated in the past, with the notable exception of the work of Jomaa
-\emph{et al.} about \ac{mmu}-based memory isolation\,\cite{jomaa2016mmu}.
+Our theory of \ac{hse} mechanisms, presented in Chapter~\ref{chapter:speccert},
+takes this into account.
 %
-Our approach presupposes the existence of a general-purpose model of the
-hardware architecture.
+To demonstrate how this theory can be leveraged in practice, we take the example
+of a \ac{hse} mechanism implemented by the \ac{bios} at runtime; and because the
+scope of existing x86 models does not cover the hardware features that we are
+interested in, we developed our own in our experiments detailed in
+Chapter~\ref{chapter:speccert2}.
 %
-To manage the scale of such a model, we propose in Part~\ref{part:freespec} a
-compositional reasoning framework for Coq, in the continuity of similar research
-efforts, notably Garg \emph{et al.}\,\cite{garg2010compositional} and Heyman
-\emph{et al.}\,\cite{heyman2012securemodel}.
+We decided to use Coq, because its higher-logic allows us to easily express the
+specificities of our approach.
+%
+However, a general-purpose x86 hardware model poses an important challenge due
+to the scale of the hardware architecture.
+%
+Previous works have advocated for compositional reasoning approaches, such as
+assume-guarantee\,\cite{pnueli1985ag} or
+rely-guarantee\,\cite{jones1983tentative} paradigms, as an interesting solution
+to tackle these challenges\,\cite{garg2010compositional,heyman2012securemodel}.
+%
+However, to our surprise, compositional reasoning for component-based systems
+has not been widely explored in Coq.

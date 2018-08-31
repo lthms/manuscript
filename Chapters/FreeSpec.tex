@@ -61,7 +61,7 @@ framework (\ref{freespec:subsec:freespecoverview}).
 
 Having reasoned about the correctness of \( \Delta_{\mathtt{bios}} \), we have
 identified three limitations which reduce the applicability of {\scshape Minx86}
-as we would increase its scope: 
+as we would increase its scope:
 \begin{enumerate}
 \item its monolithic design;
 \item  its weakness against the temporary violation problem\,\cite{muller2006tempviolation};
@@ -107,11 +107,12 @@ Subsection~\ref{subsec:speccert2:bioshsedef} when we explained the structure of
 the proof that \( \Delta_{\mathtt{bios}} \) complies with the second \ac{hse}
 law.
 %
-The proof goal depicted in Figure~\ref{fig:freespec:entrypoint} is a good
-illustration of that, considering it is already a subcase of the complete proof.
+The proof goal depicted in Figure~\ref{fig:freespec:entrypoint} ---as presented
+by Coq when we are constructing our proof--- is a good illustration of that,
+considering it is already a subcase of the complete proof.
 %
 In this small snippet, we can identify four intermediary states (as shown in
-Figure~\ref{fig:freespec:remember}). \GH{Il faudrait donner le langage utilisé. En outre, c'est un peu dommage de ne voir ce genre d'extrait que pour illustrer des limites. Tu pourrais peux-être placer un ou deux extrait du même genre pour illustrer des preuves que tu décris dans le chapitre 5.}
+Figure~\ref{fig:freespec:remember}).
 
 \begin{figure}
   \inputminted{coq}{Listings/RememberPattern.v}
@@ -163,9 +164,10 @@ A well known illustration of this threat is ---once again--- the airlock system.
   As a reminder, the targeted security policy for an airlock system is that at
   least one door shall be closed at all time.
   %
-  We did that by avoiding transitions between states \GH{attention, en anglais fermé se dit "closed" et pas "close" qui veut dire "pres de "}
-  \( (\mathtt{open}, \mathtt{close}) \) and
-  \( (\mathtt{close}, \mathtt{open}) \).
+  We did that by avoiding transitions between states
+  %
+  \( (\mathtt{open}, \mathtt{closed}) \) and
+  \( (\mathtt{closed}, \mathtt{open}) \).
   %
   We can define a transition system which is correct with respect to the
   targeted safety property \emph{and} includes these transitions.
@@ -173,13 +175,13 @@ A well known illustration of this threat is ---once again--- the airlock system.
   \begin{center}
     \begin{tikzpicture}
       \node [draw, circle split, text width=30pt, text badly centered] (cc)
-      {\( \mathtt{close} \) \nodepart{lower} \( \mathtt{close} \)};%
+      {\( \mathtt{closed} \) \nodepart{lower} \( \mathtt{closed} \)};%
       \node [right=60pt of cc] (x) {};%
       \node [draw, circle split, above=of x, text width=30pt, text badly
       centered] (oc) {\( \mathtt{open} \) \nodepart{lower}
-        \( \mathtt{close} \)};%
+        \( \mathtt{closed} \)};%
       \node [draw, circle split, below=of x, text width=30pt, text badly
-      centered] (co) {\( \mathtt{close} \) \nodepart{lower}
+      centered] (co) {\( \mathtt{closed} \) \nodepart{lower}
         \( \mathtt{open} \)};%
       \node [draw, circle split, right=60pt of x, text width=30pt, text badly
       centered] (oo) {\( \mathtt{open} \) \nodepart{lower} \( \mathtt{open}
@@ -210,7 +212,7 @@ A well known illustration of this threat is ---once again--- the airlock system.
   \item The airlock system first opens one door before closing the
     other. \label{enum:freespec:badairlock}
     %
-  \end{inparaenum}
+  \end{inparaenum}[(1)]
   %
   The systems modeled in Examples~\ref{example:sota:airlocklts},
   \ref{example:sota:airlockinterface}, and \ref{example:sota:airlockprocess}
@@ -241,12 +243,13 @@ direct consequence to complicate the model.
 \paragraph{Abstract Model.}
 %
 Our decision to embed the memory location ownership directly inside {\scshape
-  Minx86}, along side with the concrete content of each memory location, remains
-a mistake \GH{mistake est un peu trop fort. "ne satisfait pas pleinement" ou "ne respecte pas complètement"...} with respect to our objective to rely on general-purpose models to
-specify and verify \ac{hse} mechanisms.
+  Minx86}, along side with the concrete content of each memory location,
+contradicts our objective to rely on general-purpose models to specify and
+verify \ac{hse} mechanisms.
 %
 Continuing with a similar logic would mean modifying the model each time we want
-to reason about a security policy which requires to maintain additional information.
+to reason about a security policy which requires to maintain additional
+information.
 %
 For instance, if we want to determine how many times memory locations have been
 updated since the beginning of the trace, we would have to modify the
@@ -304,9 +307,13 @@ For instance, the directory \texttt{src/Cache/} contains four files:
 \texttt{Cache\_def.v}, \texttt{Cache\_func.v}, \texttt{Cache\_proofs.v}, and
 \texttt{Cache\_prop.v}.
 %
-They are combined together in the \texttt{src/x86/Architecture/} directory, in a
-similar fashion, \emph{e.g.} there is a \texttt{Architecture\_func.v} file
-accompanied by a \texttt{Architecture\_proofs.v} file. \GH{Je ne comprends pas ce que tu veux dire avec cette dernière phrase (pas de soucis avec la précédente, en revanche)}
+We then have defined \( H(S) \), that is the Cartesian product of
+individual components, in a similar manner.
+%
+Inside the \texttt{src/x86/Architecture/} directory, we defined general-purpose
+functions (\texttt{Architecture\_func.v}) and lemmas
+(\texttt{Architecture\_proofs.v}) to reason about the hardware architecture as a
+whole as often as possible.
 
 This approach has proven to be valuable to deal with the many cases to cover,
 when used in conjunction with a recurring pattern we call
@@ -953,22 +960,33 @@ ones.
 \end{definition}
 
 The resulting interface $\I \oplus \J$ contains the effects of both $\I$ and
-$\J$, wrapped into either $\func{InL}$ or $\func{InR}$ constructors, defined to
-preserve the effects results sets. \GH{A ce stage on ne comprend pas pourquoi on a 2 constructueurs, ni la partie "defined to
-preserve the effects results sets".Trop d'implicite, il faut détailler un peux}
+$\J$, wrapped into either $\func{InL}$ or $\func{InR}$ constructors.
+%
+Because constructors images are mutually exclusive\,\footnote{See
+  page~\pageref{frontmatter:notations}}, this means we can consider
+\( \I \oplus \I \) that is the composition of \( \I \) with itself.
+%
+This is necessary if we want to be able to reason about a component connected to
+two other components which both exhibit the same interface.
+%
+Besides, \( \oplus \) preserves the effects results, \emph{e.g.} given any
+effect \( e \in \I|_{\mathcal{A}} \), then
+\( \func{InL(e)} \in \Interface{(\I \oplus \J)}{\mathcal{A}} \).
 %
 % Notice that this usage of a tagged union allows for composing the same
 % interface twice, so a component can use two components which exhibit the same
 % interface.
 
 \begin{example}[VGA and DRAM Composition]
-  We consider $\I_{\mathrm{DRAM}} \oplus \I_{\mathrm{VGA}}$. Then,
+  We consider $\I_{\mathrm{DRAM}} \oplus \I_{\mathrm{VGA}}$.
+  %
+  Then,
   $\func{InL}(\func{Read}_{\mathrm{DRAM}}(l)) \in \Interface{(\I_{\mathrm{DRAM}}
     \oplus \I_{\mathrm{VGA}})}{\mathpzc{Val}}$ is an effect that describes a
   read access targeting the DRAM controller, whereas
-  $\func{InR}(\func{Write}_{\mathrm{VGA}}(l, c)) \in
-  \Interface{(\I_{\mathrm{DRAM}} \oplus \I_{\mathrm{VGA}})}{\{\ac{unit}\}}$ is
-  an effect that describes a write access targeting the VGA controller. \GH{comme dans ton exemple tu changer à la fois l'effet (read ou write) et l'interface, on ne saisi pas ce qui justifie qu'on ait utilisé InL ou InR. Il faudrait ne faire varier que le paramètre important pour bien insister. I et J se ressemble beaucoup dans ta définition 6.2 donc il faut être super attentif. L'exemple devrait permettre d'insister}
+  $\func{InR}(\func{Read}_{\mathrm{VGA}}(l)) \in \Interface{(\I_{\mathrm{DRAM}}
+    \oplus \I_{\mathrm{VGA}})}{\{\ac{unit}\}}$ is an effect that describes a
+  read access targeting the VGA controller.
 \end{example}
 
 Using $\oplus$, we can compose several interfaces together.
@@ -983,8 +1001,7 @@ semantics for the composed interface.
   two interfaces, $\sigma_i \in \Sigma_{\I}$ and $\sigma_j \in \Sigma_{\J}$ be
   two operational semantics dedicated to these interfaces.
   %
-  In this article, we use the $\lambda$-calculus abstraction notation for
-  functions. \GH{est-ce vraiement indispensable? Il y a déjà beaucoup de notions assez diverse à maitriser pour comprendre ton document. Si on peut s'éviter celle là...}
+  We use the $\lambda$-calculus abstraction notation for unnamed functions.
   %
   $\otimes$~is the composition operator for operational semantics, defined as
   \[ \sigma_i \otimes \sigma_j \triangleq \lambda e. \left \{
@@ -1005,20 +1022,73 @@ semantics for the composed interface.
   \]
 \end{definition}
 
-The definition of $\otimes$ has an important impact over what can be specified in
-FreeSpec.
+The definition of $\otimes$ has an important impact over what can be specified
+in FreeSpec.
 %
 % When $\sigma_i \otimes \sigma_j$ handles an effect of $\I$, only $\sigma_i$
 % ``changes.''
 %
-Handling an effect of $\I$ (respectively $\J$) does not interfere \GH{plutôt que interfere, je préfererais "update" qui est plus proche de ce qui se passe.} with
-$\sigma_j$ (respectively $\sigma_i$).
+Handling an effect of $\I$ (respectively $\J$) does not update $\sigma_j$
+(respectively $\sigma_i$).
 %
 As a consequence, \emph{we cannot specify as-is a graph of components which
-  contains a cycle or a diamond}. \GH{il faudrait s'attarder un peu plus là dessus et expliquer pourquoi a partir d'un exemple (le diamand, par exemple). Cela permettrait d'ailleurs d'expliquer un peu mieux la composition d'interface à travers un exemple}
+  contains a cycle or a diamond}.
 %
 This is the main limitation of FreeSpec, but its incidence is abated because
 computing platforms are often designed as a hierarchical succession of layers.
+%
+We illustrate it with the four-component system depicted in
+Figure~\ref{fig:freespec:diamondpattern}.
+%
+When \( C_1 \) uses an effect of the interface \( I_{C_2} \), it is possible
+that the component \( C_2 \) will itself use an effect of the interface
+\( I_{C_4} \).
+%
+If that happens, the state of the component \( C_4 \), leading the result of the
+next effect used by \( C_3 \) to be different, compared it could have been
+without the action of \( C_2 \).
+
+\begin{figure}
+  \begin{center}
+    \begin{tikzpicture}
+      % c4
+      \node [draw, inner sep=10pt, text badly centered, text width=60pt] (C4)
+      {$C_4$};%
+      \draw ([yshift=5pt, xshift=3pt]C4.north west) -- ([yshift=5pt,
+      xshift=-3pt]C4.north east);%
+      \node [left=4pt of C4.north west, yshift=3pt] (IC4) {$I_{C_4}$};%
+
+      \node [above=of C4] (Cmid) {};%
+
+      % c2
+      \node [draw, text badly centered, text width=20pt, inner sep=10pt,
+      left=1pt of Cmid] (C2) {\( C_2 \)};%
+      \draw ([yshift=5pt, xshift=3pt]C2.north west) -- ([yshift=5pt,
+      xshift=-3pt]C2.north east);%
+      \node [left=4pt of C2.north west, yshift=3pt] (IC2) {$I_{C_2}$};%
+      % c3
+      \node [draw, text badly centered, text width=20pt, inner sep=10pt,
+      right=1pt of Cmid] (C3) {\( C_3 \)};%
+      \draw ([yshift=5pt, xshift=3pt]C3.north west) -- ([yshift=5pt,
+      xshift=-3pt]C3.north east);%
+      \node [right=4pt of C3.north east, yshift=3pt] (IC3) {$I_{C_3}$};%
+
+      % c1
+      \node [draw, text badly centered, text width=60pt, inner sep=10pt,
+      above=of Cmid] (C1) {\( C_1 \)};%
+
+      % arrows
+      \draw [-latex] ([yshift=18pt]C2.north) -- ([yshift=5pt]C2.north);%
+      \draw [-latex] ([yshift=18pt]C3.north) -- ([yshift=5pt]C3.north);%
+
+      \draw [-latex] (C2.south) -- ([yshift=-13pt]C2.south);%
+      \draw [-latex] (C3.south) -- ([yshift=-13pt]C3.south);%
+    \end{tikzpicture}
+  \end{center}
+
+  \caption{Illustration of the diamond pattern}
+  \label{fig:freespec:diamondpattern}
+\end{figure}
 
 \GH{Il manque ici une transition pour expliquer pourquoi on a besoin de la monad program. Tu nous parles de çà brusquement et on ne voit pas le lien avec ce qui précède.}
 

@@ -562,6 +562,7 @@ trusted software components do correctly implement a \ac{hse} mechanism is said
 to comply with this mechanism.
 
 \begin{definition}[Compliant Traces]
+  \label{def:speccert:complianttraces}
   We write $\mathcal{C}(\Delta)$ for the set of the traces which comply with
   $\Delta$.
   %
@@ -582,10 +583,12 @@ to comply with this mechanism.
   should be set, to avoid the Speed Racer
   attack\,\cite{kallenberg2015racecondition}.
   %
-  If the \ac{bios} fails to do so, then the related trace is not compliant.
+  If the \ac{bios} fails to do so, then the related trace is not compliant to
+  begin with.
   %
-  \GH{cet exemple n'illustre que l'état initial. Il faudrait dire en outre que
-    lorsqu'une exécution est exécutée en SMM elle respecter les software req...}
+  If it succeeds, then it still needs to carefully satisfy its requirements over
+  transitions throughout its execution for the trace to remain compliant over
+  time.
 \end{example}
 
 \begin{lemma}[HSE Invariant Enforcement]
@@ -643,7 +646,9 @@ In such a case, only a core in \ac{smm} can read or write to the SMRAM.
 %
 As it stands, the \ac{hse} mechanism described here satisfies both laws.
 %
-\GH{pourquoi? Il faudrait expliquer rapidement pourquoi c'est bien le cas.}
+The rest of the software component can try to read from or write to the SMRAM
+(first law), but the memory controller will protect its integrity in presence of
+a core not in \ac{smm} (second law).
 %
 However, between the core and the memory controller lies the cache, as pictured
 in Figure~\ref{fig:speccert:smram}.
@@ -788,17 +793,20 @@ A proof of correctness of a given \ac{hse} mechanism asserts that the hardware
 architecture enforces a targeted security policy \emph{if trusted software
   components correctly implement this \ac{hse} mechanism}, that is their
 executions only imply software transitions which satisfy the appropriate
-software requirements.
+requirements.
 %
 If attackers are able to modify the instructions of the trusted software
 components programs, they can defeat the security enforcement by modifying the
-instruction responsible to implement it.
+instructions responsible to implement it.
 %
-\GH{ce n'est pas le seul risque (même si c'est le plus important). De manière
-  générale, si un composant non trusté peu influencer le comportement d'un code
-  trusté (par exemple, en perturbant son flot d'exécution), il peut l'amener à
-  ne plus respecter les software req. Mais c'est le problème du software
-  trusté. Il doit être correct ET robuste aux attaques.}
+%\GH{ce n'est pas le seul risque (même si c'est le plus important). De manière
+%  générale, si un composant non trusté peu influencer le comportement d'un code
+%  trusté (par exemple, en perturbant son flot d'exécution), il peut l'amener à
+%  ne plus respecter les software req. Mais c'est le problème du software
+%  trusté. Il doit être correct ET robuste aux attaques.}
+%
+% Thomas : en fait, j’ai l’impression que sans rien ajouter, c’est finalement
+% assez clair.
 %
 This is why trusted software components are expected to protect themselves
 against untrusted software components attempt to modify their program.
@@ -954,11 +962,8 @@ it is not possible to implement both at the same time.
 %
 We anticipate there are other scenarios more unclear, for instance if the set of
 compliant traces \( \mathcal{C}(\Delta_1 \sqcap \Delta_2) \) contains only
-traces where a given software component prevents another software component to
-correctly implement its functional specification.
-%
-\GH{Cette phrase n'est pas très claire. Il faudrait développer en NOMMANT les
-  choses. Un software component s1....}
+traces where the execution of trusted software components are secure, but is not
+able to serve its purpose.
 %
 We advocate that a similar situation can occur for a single \ac{hse} mechanism.
 %
@@ -1026,8 +1031,11 @@ location in which these data are stored.
   A transition-software mapping
   $\func{fetched}_{\Sigma}: H \times L \rightarrow \powerset(S)$ is a function
   which takes an initial hardware state, a transition label and returns the set
-  of owners of the fetched instructions during this transition. \GH{fetched
-    instruction n'est pas défini clairement.}
+  of owners of the instructions read during this transition by the core in
+  order to execute them afterwards.
+  %
+  The word ``fetch'' is used in the hardware industry to describe this subset of
+  read accesses targeting instructions.
 \end{definition}
 
 With this mapping, specific to a given hardware model, it becomes possible to
@@ -1037,12 +1045,6 @@ decoded and executed.
 \( s \in \func{fetched}_{\Sigma}(h, l) \) means that an instruction owned by $s$
 was fetched in order to be executed by the processor during a transition labeled
 with \( l \) from a state \( h \).
-%
-\GH{Cette phrase est ambigüe. Est-ce que c'est le fetch qui a lieu durant la
-  software transition? J'avais cru comprendre que l'exécution d'une instruction
-  pouvait correspondre à plusieurs "software transition". Du coup, pour chacune
-  des ces transition, fetched renvoie la même valeur? Ou pas? Ce n'est pas
-  claire}
 
 With a hardware-software mapping and a transition-software mapping, we give a
 formal definition of a \textit{code injection}.
@@ -1322,13 +1324,8 @@ on the \ac{mmu} and the protection rings.
 In this Chapter, we have presented our theory of \ac{hse} mechanisms, in the
 form of requirements over a hardware model.
 %
-We emphasize that our approach requires a general-purpose hardware model to
-define and verify \ac{hse} mechanisms to enable the verification of several
-mechanisms against the same reference, both in isolation and in composition.
-\GH{attention avec ce claim un peu fort. Tu affirmes haut et fort qu'il te faut
-  un modèle générique de x86 sauf que juste après, en section 5, tu vas annoncer
-  que tu as fait un modèle réduit avec seulement les features qui
-  t'intéressaient pour modéliser la SMM...}
+We emphasize that our approach can be used to verify several \ac{hse} mechanisms
+against the same hardware model.
 %
 We believe this is an essential property; in practice, these multiple mechanisms
 are implemented at the same time by different software components, and they may
