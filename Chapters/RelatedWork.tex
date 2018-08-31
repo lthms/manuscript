@@ -21,7 +21,7 @@
 \vspace{1cm}%
 \noindent
 %
-The formal verification of a system consists of proving its correctness with
+The formal verification of a system consists in proving its correctness with
 respect to a \emph{specification}\,\cite{gupta1992formal}, that is a description
 of properties targeted by the system.
 %
@@ -32,11 +32,12 @@ the system behavior by means of formal methods.
 % expected behaviors of their implementations, and \emph{non-functional}
 % specifications, which notably include security policies.
 %
+
 In this thesis, our objective is to give a formal theory of \ac{hse} mechanisms
 in the form of requirements that trusted software components have to satisfy,
 and to verify that these requirements do effectively provide the enforcement of
 targeted security policies.
-
+%
 We steer a middle course between two domains: hardware verification and system
 software verification.
 %
@@ -59,13 +60,12 @@ numerous configurable hardware features is less subject to formal verification.
 The rest of this Chapter proceeds as follows.
 %
 We detail how transition systems have been widely and successfully used in order
-to model and verify hardware and software systems, and where our approach
-stands with respect to previous work (Section~\ref{sec:sota:formalisms}).
+to model and verify hardware and software systems, and where our approach stands
+with respect to previous work (Section~\ref{sec:sota:formalisms}).
 %
 Then, we introduce and justify our interest in compositional verification
 approaches, which enable the ``divide and conquer'' strategy to reduce the
-burden of verifying large systems, and compare our compositional framework for
-Coq\,\cite{coq} with existing solutions (Section~\ref{section:sota:compsec}).
+burden of verifying large systems (Section~\ref{section:sota:compsec}).
 
 \section{Towards the Formal Verification of HSE Mechanisms}
 \label{sec:sota:formalisms}
@@ -94,8 +94,8 @@ in terms of hardware components, rather than verifying each \ac{hse} mechanism
 against a specific model.
 %
 Many x86 models have been proposed over years, but to the extent of our
-knowledge, none of them aims to describe the x86 architecture as a whole
-(\ref{subsec:sota:ltsrelated}).
+knowledge, none of them cover the hardware features we are primarily interested
+in (\ref{subsec:sota:ltsrelated}).
 %
 To experiment with our formal theory of \ac{hse} mechanisms, we compromise and
 relied on a ad-hoc model, with the aim of identifying desirable properties for a
@@ -378,8 +378,8 @@ where \( \rho_{[..n]} \) is the subtrace made with the \( n \) first elements of
   system.
   %
   Assuming the airlock device is initialized in a correct state (\emph{e.g.}
-  both doors are closed), we verify this specification is correct with respect to
-  the safety property characterized by \( \iota \) by exhibiting a proof that
+  both doors are closed), we verify this specification is correct with respect
+  to the safety property characterized by \( \iota \) by exhibiting a proof that
   \( \iota \) is an invariant with respect to \( R \), that is
   %
   \[
@@ -391,9 +391,9 @@ where \( \rho_{[..n]} \) is the subtrace made with the \( n \) first elements of
     By definition of \( R \), there are four transitions to consider, and our
     proof consists in an enumeration of these cases.
     %
-    Case 1, both doors are closed, that is \( d_1 = d_2 = \mathtt{closed} \).  The
-    system opens the first door, that is \( l = \mathtt{Open}_1 \). At the end
-    of the transition, only the first door is open, that is
+    Case 1, both doors are closed, that is \( d_1 = d_2 = \mathtt{closed} \).
+    The system opens the first door, that is \( l = \mathtt{Open}_1 \). At the
+    end of the transition, only the first door is open, that is
     \( d_1' = \mathtt{open} \) and \( d_2' = \mathtt{closed} \).
       %
     By definition of \( \iota \), the statement to prove becomes
@@ -644,12 +644,10 @@ the automation of the approach.
 % Coq\,\cite{barthe2011virtcert1}--- yet model checkers have the benefit of
 % automation and counter-example generation.
 %
-Symbolic model checking requires to manually provide invariants to act as
-inductive hypotheses\,\cite{mcmillan2000symbolic}.
-%
-Bounded model checkers requires to decide an upper bound for traces size, with
-the risk to abate the result in the chosen number is too
-low\,\cite{biere2003bounded}.
+For instance, symbolic model checking requires to manually provide invariants to
+act as inductive hypotheses\,\cite{mcmillan2000symbolic}, and bounded model
+checkers require to fix an upper bound for traces size, with the risk to abate
+the result in the chosen number is too low\,\cite{biere2003bounded}.
 
 \paragraph{Higher-order Logic.}
 %
@@ -964,9 +962,9 @@ of the software stack at runtime.
 This case study illustrates the challenges faced by the \ac{hse} mechanisms in
 general.
 %
-To the existing of our knowledge, the hardware features involved in this
-\ac{hse} mechanism are outside of the scope of existing models, which is why we
-developed our own.
+To the best of our knowledge, the hardware features involved in this \ac{hse}
+mechanism are outside of the scope of existing models, which is why we developed
+our own.
 %
 We drew on modeling approaches like VirtCert\,\cite{barthe2011virtcert1} and
 XOM\,\cite{lie2003xom}, and how they handle the interaction with the rest of the
@@ -982,7 +980,7 @@ Hardware verification by means of theorem provers has proven to be a practical
 alternative to model checking\,\cite{vijayaraghavan2015modular,choi2017kami}.
 %
 For these reasons, we decided to implement our model and proofs using the Coq
-theorem prover, to challenge the applicability of our theory with a first, small
+theorem prover, to challenge the applicability of our theory with a focused
 verification problem.
 %
 This experience convinced us of the interest of a general-purpose hardware model
@@ -1005,9 +1003,9 @@ in a theorem prover such as Coq.
 %   to manage the scale of the x86 hardware architecture.
 % \end{inparaenum}
 %%
-% It would require a tremendous effort to be developed, reviewed and
-% validated, and the question of its applicability in a verification process
-% would have to be demonstrated.
+% It would require a tremendous effort to be developed, reviewed and validated,
+% and the question of its applicability in a verification process would have to
+% be demonstrated.
 %
 % Therefore, we decided to compromise and experiment on an ad-hoc model with the
 % aim of identifying desirable properties for a large-scale, general-purpose
@@ -1051,68 +1049,68 @@ assumption \( A \) is met.
 If a component \( C' \) is proven to enforce \( A \), then the composition of
 \( C \) and \( C' \) enforces \( G \).
 
-%\GH{Tout comme la conclusion précédente, cette introduction est à revoir. Elle
-%  manque de clareté. Elle doit être concise}
+% \GH{Tout comme la conclusion précédente, cette introduction est à revoir. Elle
+% manque de clareté. Elle doit être concise}
 
-%Our formal theory of \ac{hse} mechanisms makes a clear distinction between
-%software components and the underlying hardware architecture which executes
-%them.
+% Our formal theory of \ac{hse} mechanisms makes a clear distinction between
+% software components and the underlying hardware architecture which executes
+% them.
 %%
-%A \ac{hse} mechanism consists of requirements that trusted software components
-%need to satisfy in order for the hardware architecture to correctly enforce a
-%targeted security policy at all time.
+% A \ac{hse} mechanism consists of requirements that trusted software components
+% need to satisfy in order for the hardware architecture to correctly enforce a
+% targeted security policy at all time.
 %
-%Our approach is reminiscent of compositional reasoning approaches, such as
-%\GH{On ne comprend pas pourquoi tu nous parles subitement de ces deux approches
-%  (et pourquoi tu n'en n'a pas parlé dans la section précédente)}
+% Our approach is reminiscent of compositional reasoning approaches, such as
+% \GH{On ne comprend pas pourquoi tu nous parles subitement de ces deux
+% approches (et pourquoi tu n'en n'a pas parlé dans la section précédente)}
 %
-%Our second contribution generalizes the key idea of our formal theory of
-%\ac{hse} mechanisms ---that is specifying requirements and verifying they
-%fulfill their promises--- with compositional reasoning, in order to address the
-%challenge posed by the inevitable complexity of a general-purpose hardware
-%architecture model.
+% Our second contribution generalizes the key idea of our formal theory of
+% \ac{hse} mechanisms ---that is specifying requirements and verifying they
+% fulfill their promises--- with compositional reasoning, in order to address
+% the challenge posed by the inevitable complexity of a general-purpose hardware
+% architecture model.
 %%
-%\GH{On est dans l'état de l'art. Pourquoi tu nous parles déjà de ta
-%  contribution? Il faut évoquer les problèmes, puis parler des approches de
-%  l'état de l'art qui pourrait permettre de résoudre ce problème mais en fait
-%  pas tellement. Puis évoquer ta contribution. La tu le fait dans le
-%  désordre.}Given three components, such that a component \( R \) uses a
-%component \( S \) to operate, and \( S \) uses a third component \( T \), we
-%target a verification approach that we summarize as follows.
+% \GH{On est dans l'état de l'art. Pourquoi tu nous parles déjà de ta
+% contribution? Il faut évoquer les problèmes, puis parler des approches de
+% l'état de l'art qui pourrait permettre de résoudre ce problème mais en fait
+% pas tellement. Puis évoquer ta contribution. La tu le fait dans le
+% désordre.}Given three components, such that a component \( R \) uses a
+% component \( S \) to operate, and \( S \) uses a third component \( T \), we
+% target a verification approach that we summarize as follows.
 %
-%\begin{center}
-%  \begin{tikzpicture}
-%    \node [draw, inner sep=16pt, text badly centered] (A) {\( R \)};%
-%    \node [draw, inner sep=16pt, text badly centered, right=35pt of A] (B)
-%    {\( S \)};%
-%    \node [draw, inner sep=16pt, text badly centered, right=35pt of B] (C)
-%    {\( T \)};%
+% \begin{center}
+%   \begin{tikzpicture}
+%     \node [draw, inner sep=16pt, text badly centered] (A) {\( R \)};%
+%     \node [draw, inner sep=16pt, text badly centered, right=35pt of A] (B)
+%     {\( S \)};%
+%     \node [draw, inner sep=16pt, text badly centered, right=35pt of B] (C)
+%     {\( T \)};%
 %
-%    \draw [-latex] ([yshift=7pt]A.east) to node [above] {(2)}
-%    ([yshift=7pt]B.west);%
-%    \draw [-latex] ([yshift=7pt]B.east) to node [above] {(3)}
-%    ([yshift=7pt]C.west);%
-%    \draw [-latex] ([yshift=-7pt]C.west) to node [below] {(4)}
-%    ([yshift=-7pt]B.east);%
-%    \draw [-latex] ([yshift=-7pt]B.west) to node [below] {(1)}
-%    ([yshift=-7pt]A.east);%
-%  \end{tikzpicture}
-%\end{center}
+%     \draw [-latex] ([yshift=7pt]A.east) to node [above] {(2)}
+%     ([yshift=7pt]B.west);%
+%     \draw [-latex] ([yshift=7pt]B.east) to node [above] {(3)}
+%     ([yshift=7pt]C.west);%
+%     \draw [-latex] ([yshift=-7pt]C.west) to node [below] {(4)}
+%     ([yshift=-7pt]B.east);%
+%     \draw [-latex] ([yshift=-7pt]B.west) to node [below] {(1)}
+%     ([yshift=-7pt]A.east);%
+%   \end{tikzpicture}
+% \end{center}
 %
-%The verification goal is to prove that \( S \) enforce a guarantee for \( R \)
-%(1), as long as \( R \) satisfies certain assumption (2).
+% The verification goal is to prove that \( S \) enforce a guarantee for \( R \)
+% (1), as long as \( R \) satisfies certain assumption (2).
 %%
-%Because \( S \) uses \( T \), such a proof depends on how \( T \) operates.
+% Because \( S \) uses \( T \), such a proof depends on how \( T \) operates.
 %%
-%We propose to define another pair of assumption and guarantee for \( T \), and
-%assume \( T \) is correct with respect to this pair.
+% We propose to define another pair of assumption and guarantee for \( T \), and
+% assume \( T \) is correct with respect to this pair.
 %%
-%In this context, it is possible to prove that \( S \) enforces its guarantee if
-%it satisfies the assumptions of \( T \), and if the guarantee of \( T \) are
-%sufficient about the guarantee of \( S \).
+% In this context, it is possible to prove that \( S \) enforces its guarantee
+% if it satisfies the assumptions of \( T \), and if the guarantee of \( T \)
+% are sufficient about the guarantee of \( S \).
 %%
-%In practice, \( T \) may use another component \( U \) to operate, and a proof
-%of correctness for \( U \) will therefore follow the same approach.
+% In practice, \( T \) may use another component \( U \) to operate, and a proof
+% of correctness for \( U \) will therefore follow the same approach.
 
 The rest of this Section proceeds as follows.
 %
@@ -1545,9 +1543,8 @@ Coq, but remains incomplete in our perspective.
 A program with effects can be verified, but the verification of the composition
 of this program with its environment is out of the scope of the project.
 
-Monads have a reputation not to compose very
-well\,\cite{hyland2006combining}, despite constructions such as monad
-transformers\,\cite{liang1995mtl}.
+Monads have a reputation not to compose very well\,\cite{hyland2006combining},
+despite constructions such as monad transformers\,\cite{liang1995mtl}.
 %
 Recently, algebraic effects and effect handlers\,\cite{bauer2015effects}
 %
