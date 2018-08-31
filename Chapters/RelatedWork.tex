@@ -878,10 +878,8 @@ This means the ASL model has to be compiled to another representation,
 \emph{e.g.} Verilog or a model checker modeling language.
 %
 On the contrary, we decided to implement our model directly in the language used
-by the tool supporting our verification process because we were targeting a
-proof of concept.
-
-\thomasrk[inline]{Reformuler, pour moins faire valoir le poc}
+by the tool supporting our verification process, in order to avoid this
+translation step.
 
 The \ac{xom} microprocessor architecture maintains separate so-called
 \emph{compartments} for applications\,\cite{lie2000architectural}.
