@@ -747,6 +747,7 @@ The following theorem takes advantage of this fact.
 
 \begin{theorem}[Correct HSE Mechanism for Predicate on Transitions]
   \label{theorem:speccert:correcthse}
+
   Given a security policy $P$ defined as a predicate on transitions, then
   %
   \[
@@ -1254,6 +1255,8 @@ Without any knowledge about the \ac{hse} mechanisms used to enforce
 imply the enforcement of \( I \).
 
 \begin{theorem}[Code Injection Policy Enforcement]
+  \label{theorem:speccert:compoenforced}
+
   Given two \ac{hse} mechanisms \( \Delta_{\mathtt{os}} \) and
   \( \Delta_{\mathtt{os}} \), if \( \Delta_{\mathtt{bios}} \) is correct with
   respect to \( I_{\mathtt{bios}} \) and \( \Delta_{\mathtt{os}} \) is correct

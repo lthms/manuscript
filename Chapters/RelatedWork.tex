@@ -638,19 +638,22 @@ TLA+\,\cite{lamport2002tla}.
 Despite improvements in algorithms, model checkers remains subject to the
 \emph{state explosion problem}\,\cite{clarke2012model}.
 %
-\thomasrk[inline]{Pose toi, prends bien le temps de justifier.}
+\thomasrk[inline]{Pose toi, prends bien le temps de justifier. Tu veux dire que
+  gérer un modèle complexe en modèle checking, même pour les théories les plus
+  avancées, nécessite un travail de l’utilisateur et donc que ce n’est plus
+  complètement automatisé.}
 %
 % Other approaches can be used to that end ---for instance Gilles Barthe
 % \emph{et al.} have encoded \( \square \) and \( \Diamond \) in
 % Coq\,\cite{barthe2011virtcert1}--- yet model checkers have the benefit of
 % automation and counter-example generation.
 %
-Bounded model checkers partially overcome this
-limitation by considering only finite traces.
+Symbolic model checking requires to manually provide invariants to act as
+inductive hypotheses\,\cite{mcmillan2000symbolic}.
 %
-As a consequence, temporal logic formula can be translated into acceptable
-inputs for SMT solvers, but this can abate the verification results, in
-particular if the chosen maximum length of traces is too low. \GH{ref?}
+Bounded model checkers requires to decide an upper bound for traces size, with
+the risk to abate the result in the chosen number is too
+low\,\cite{biere2003bounded}.
 
 \paragraph{Higher-order Logic.}
 %
@@ -673,17 +676,13 @@ Isabelle/HOL\,\cite{nipkow2002isabelle}, or more recently
 Lean\,\cite{de2015lean}) are based on higher-order logic.
 
 We leverage a higher-order logic to propose our formal theory of \ac{hse}
-mechanisms, which allows us to reason about high-level properties implying
-\ac{hse} mechanisms.
+mechanisms.
 %
-For example, in Subsection~\ref{subsec:speccert:compo}, we reason about the
-composition of two \ac{hse} mechanisms whose only the targeted security policies
-are known ---even the hardware model is left as a parameter of the proof.
-
-\GH{je trouve que le choix de Coq mériterait d'être un peu mieux
-  justifié. Pourquoi a-t-on besoin d'une logic d'ordre supérieur. Tu ne le
-  justifie que sur un aspect assez anecdotique de ton travail (la composition
-  des HSE).}
+This allows us to reason about high-level properties implying \ac{hse}
+mechanisms ---\emph{e.g.} safety property enforcement
+(Theorem~\ref{theorem:speccert:correcthse}), mechanisms composition
+(Theorem~\ref{theorem:speccert:compoenforced})--- where the hardware model is
+left as a parameter of the proof.
 
 \subsection{Tour of Existing x86 Models}
 \label{subsec:sota:ltsrelated}
@@ -1308,9 +1307,8 @@ the second door'' then ``Open the first door''. \GH{Cette dernière partie n'est
 \subsection{Process Algebra}
 \label{subsec:sota:palgebra}
 
-Process algebra have been developed to reason about programs executed in
-parallel. It comes with a proof system to verifying the resulting
-system. \GH{répétition de "système"}
+Process algebra and their proof systems have been developed to reason about
+programs executed in parallel.
 %
 In process algebra such as Calculus of Communication
 Systems\,\cite{milner1980ccs} or Communicating Sequential
@@ -1497,10 +1495,11 @@ with the rest of the system.
 We believe it is reminiscent of the functional programming language problematic
 to model and verify large programs with side-effects.
 %
-These side-effects are often carried out by an outer environment. For example, a
-program which reads the content of a file relies on an operating system to
-access the file stored in a hard drive and makes this content available in its
-address space.
+These side-effects are often carried out by an outer environment.
+%
+For example, a program which reads the content of a file relies on an operating
+system to access the file stored in a hard drive and makes this content
+available in its address space.
 %
 Modeling side effects in pure programming language, such as Haskell or {\scshape
   Gallina}, is usually achieved thanks to
