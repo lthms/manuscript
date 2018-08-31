@@ -960,24 +960,33 @@ ones.
 \end{definition}
 
 The resulting interface $\I \oplus \J$ contains the effects of both $\I$ and
-$\J$, wrapped into either $\func{InL}$ or $\func{InR}$ constructors, defined to
-preserve the effects results sets. \GH{A ce stage on ne comprend pas pourquoi on
-  a 2 constructueurs, ni la partie "defined to preserve the effects results
-  sets".Trop d'implicite, il faut détailler un peux}
+$\J$, wrapped into either $\func{InL}$ or $\func{InR}$ constructors.
+%
+Because constructors images are mutually exclusive\,\footnote{See
+  page~\pageref{frontmatter:notations}}, this means we can consider
+\( \I \oplus \I \) that is the composition of \( \I \) with itself.
+%
+This is necessary if we want to be able to reason about a component connected to
+two other components which both exhibit the same interface.
+%
+Besides, \( \oplus \) preserves the effects results, \emph{e.g.} given any
+effect \( e \in \I|_{\mathcal{A}} \), then
+\( \func{InL(e)} \in \Interface{(\I \oplus \J)}{\mathcal{A}} \).
 %
 % Notice that this usage of a tagged union allows for composing the same
 % interface twice, so a component can use two components which exhibit the same
 % interface.
 
 \begin{example}[VGA and DRAM Composition]
-  We consider $\I_{\mathrm{DRAM}} \oplus \I_{\mathrm{VGA}}$. Then,
+  We consider $\I_{\mathrm{DRAM}} \oplus \I_{\mathrm{VGA}}$.
+  %
+  Then,
   $\func{InL}(\func{Read}_{\mathrm{DRAM}}(l)) \in \Interface{(\I_{\mathrm{DRAM}}
     \oplus \I_{\mathrm{VGA}})}{\mathpzc{Val}}$ is an effect that describes a
   read access targeting the DRAM controller, whereas
   $\func{InR}(\func{Read}_{\mathrm{VGA}}(l)) \in \Interface{(\I_{\mathrm{DRAM}}
     \oplus \I_{\mathrm{VGA}})}{\{\ac{unit}\}}$ is an effect that describes a
-  read access targeting the VGA controller. \GH{L'exemple devrait permettre
-    d'insister}
+  read access targeting the VGA controller.
 \end{example}
 
 Using $\oplus$, we can compose several interfaces together.
@@ -992,10 +1001,7 @@ semantics for the composed interface.
   two interfaces, $\sigma_i \in \Sigma_{\I}$ and $\sigma_j \in \Sigma_{\J}$ be
   two operational semantics dedicated to these interfaces.
   %
-  In this article, we use the $\lambda$-calculus abstraction notation for
-  functions. \GH{est-ce vraiement indispensable? Il y a déjà beaucoup de notions
-    assez diverse à maitriser pour comprendre ton document. Si on peut s'éviter
-    celle là...}
+  We use the $\lambda$-calculus abstraction notation for unnamed functions.
   %
   $\otimes$~is the composition operator for operational semantics, defined as
   \[ \sigma_i \otimes \sigma_j \triangleq \lambda e. \left \{
@@ -1022,18 +1028,67 @@ in FreeSpec.
 % When $\sigma_i \otimes \sigma_j$ handles an effect of $\I$, only $\sigma_i$
 % ``changes.''
 %
-Handling an effect of $\I$ (respectively $\J$) does not interfere \GH{plutôt que
-  interfere, je préfererais "update" qui est plus proche de ce qui se passe.}
-with $\sigma_j$ (respectively $\sigma_i$).
+Handling an effect of $\I$ (respectively $\J$) does not update $\sigma_j$
+(respectively $\sigma_i$).
 %
 As a consequence, \emph{we cannot specify as-is a graph of components which
-  contains a cycle or a diamond}. \GH{il faudrait s'attarder un peu plus là
-  dessus et expliquer pourquoi a partir d'un exemple (le diamand, par
-  exemple). Cela permettrait d'ailleurs d'expliquer un peu mieux la composition
-  d'interface à travers un exemple}
+  contains a cycle or a diamond}.
 %
 This is the main limitation of FreeSpec, but its incidence is abated because
 computing platforms are often designed as a hierarchical succession of layers.
+%
+We illustrate it with the four-component system depicted in
+Figure~\ref{fig:freespec:diamondpattern}.
+%
+When \( C_1 \) uses an effect of the interface \( I_{C_2} \), it is possible
+that the component \( C_2 \) will itself use an effect of the interface
+\( I_{C_4} \).
+%
+If that happens, the state of the component \( C_4 \), leading the result of the
+next effect used by \( C_3 \) to be different, compared it could have been
+without the action of \( C_2 \).
+
+\begin{figure}
+  \begin{center}
+    \begin{tikzpicture}
+      % c4
+      \node [draw, inner sep=10pt, text badly centered, text width=60pt] (C4)
+      {$C_4$};%
+      \draw ([yshift=5pt, xshift=3pt]C4.north west) -- ([yshift=5pt,
+      xshift=-3pt]C4.north east);%
+      \node [left=4pt of C4.north west, yshift=3pt] (IC4) {$I_{C_4}$};%
+
+      \node [above=of C4] (Cmid) {};%
+
+      % c2
+      \node [draw, text badly centered, text width=20pt, inner sep=10pt,
+      left=1pt of Cmid] (C2) {\( C_2 \)};%
+      \draw ([yshift=5pt, xshift=3pt]C2.north west) -- ([yshift=5pt,
+      xshift=-3pt]C2.north east);%
+      \node [left=4pt of C2.north west, yshift=3pt] (IC2) {$I_{C_2}$};%
+      % c3
+      \node [draw, text badly centered, text width=20pt, inner sep=10pt,
+      right=1pt of Cmid] (C3) {\( C_3 \)};%
+      \draw ([yshift=5pt, xshift=3pt]C3.north west) -- ([yshift=5pt,
+      xshift=-3pt]C3.north east);%
+      \node [right=4pt of C3.north east, yshift=3pt] (IC3) {$I_{C_3}$};%
+
+      % c1
+      \node [draw, text badly centered, text width=60pt, inner sep=10pt,
+      above=of Cmid] (C1) {\( C_1 \)};%
+
+      % arrows
+      \draw [-latex] ([yshift=18pt]C2.north) -- ([yshift=5pt]C2.north);%
+      \draw [-latex] ([yshift=18pt]C3.north) -- ([yshift=5pt]C3.north);%
+
+      \draw [-latex] (C2.south) -- ([yshift=-13pt]C2.south);%
+      \draw [-latex] (C3.south) -- ([yshift=-13pt]C3.south);%
+    \end{tikzpicture}
+  \end{center}
+
+  \caption{Illustration of the diamond pattern}
+  \label{fig:freespec:diamondpattern}
+\end{figure}
 
 \subsection{The Program Monad}
 % -----------------------------------------------------------------------------
