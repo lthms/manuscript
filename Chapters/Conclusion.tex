@@ -19,25 +19,24 @@ These attacks have in common to leverage inconsistencies in the hardware
 specifications to defeat security policies supposedly enforced by the hardware
 architecture.
 
-In this thesis, we have identified a class of security mechanism enforcement we
-called Hardwase-based Security Enforcement (HSE) mechanisms, which consist of
+In this thesis, we have identified a class of security enforcement mechanisms we
+called Hardwase-based Security Enforcement (HSE) mechanisms, which consist in
 the configuration by a trusted software component of the underlying hardware
 architecture in order to constrain the execution of untrusted software
 components with respect to a targeted security policy.
 %
-We investigated the use of formal methods to formally specify and verify
+We have investigated the use of formal methods to formally specify and verify
 \ac{hse} mechanisms as a potential solution to uncover compositional attacks.
 %
 We steer a middle course between two domains: hardware verification and system
 software verification.
 %
-Generally, hardware verification focus on properties which are transparent to
+Generally, hardware verification focuses on properties which are transparent to
 the executed software (\emph{e.g.} cache
 coherency\,\cite{stern1995cachecoherence}, linearizability of SGX
 instructions\,\cite{leslie2015linsgx}, or hardware-based memory
 isolation\,\cite{lie2003xom}), and system software verification relies on
-hardware models which abstract as much as possible of the architecture
-complexity.
+hardware models which abstract the architecture complexity as much as possible .
 %
 On the contrary, when it comes to \ac{hse} mechanisms it is important to
 consider that
@@ -48,8 +47,8 @@ consider that
   mechanisms, and
   %
 \item \label{needreduce}%
-  hardware features involved in \ac{hse} mechanisms are not safe by default,
-  hence the role played by trusted software components to configure them.
+  hardware features involved in \ac{hse} mechanisms are not safe by default.
+  % hence the role played by trusted software components to configure them.
 \end{inparaenum}
 
 The rest of this final Chapter proceeds as follows.
@@ -65,8 +64,7 @@ work.
 
 Our contribution is twofold.
 %
-As a first step, we have proposed a theory of HSE mechanisms whose one principle
-is to rely on general-purpose hardware model.
+As a first step, we have proposed a theory of HSE mechanisms.
 %
 Furthermore, we have proposed a compositional reasoning framework for Coq, based
 on our experience in implementing a proof of concept for our theory.
@@ -101,14 +99,14 @@ enables modular verification of complex systems made of interconnected
 components.
 %
 This approach is the result of various lessons learned during the development of
-our theory proof of concept, and we believe it represents a first step towards
+our proof of concept, and we believe it represents a first step towards
 addressing the challenge posed by the scale of the x86 hardware architecture.
 %
 Components of a system are primarily identified by the interface they expose,
 and secondarily by their current state and the interfaces they uses.
 %
 We have introduced so-called abstract specifications to allow for reasoning
-about component in isolation \emph{and} about the expected properties of their
+about components in isolation \emph{and} about the expected properties of their
 composition.
 %
 Besides, the resulting Coq framework, called FreeSpec and also made available as
@@ -122,12 +120,11 @@ components as well.
 As they stand, our theory of \ac{hse} mechanisms and our compositional reasoning
 framework for Coq remain two separated projects.
 %
-The most natural continuation of our work would be to connect these two works,
-\emph{e.g.} by substituting {\scshape Minx86} with a model developed thanks to
-FreeSpec.
+The most natural continuation of our work would be to connect them, \emph{e.g.}
+by substituting {\scshape Minx86} with a model developed thanks to FreeSpec.
 %
 Going further, we are convinced a general-purpose model for the x86 architecture
-would worth every time and effort spent to its construction.
+would worth the time and effort spent to its construction.
 %
 For the latter to be trustworthy, the validation of this model is of key
 importance.
@@ -142,6 +139,6 @@ towards a practical model validation framework.
 Validating a model of a \ac{pch}, for instance, promises to be challenging
 because of its tight integration inside Intel chips.
 %
-Focusing our efforts on open source processors, like the
-Leon4\,\cite{gaisler2007leon} for instance, could allow us to investigate
-further this research direction.
+Focusing our efforts on open source processors, such as
+Leon4\,\cite{gaisler2007leon}, could allow us to investigate further this avenue
+of research.
