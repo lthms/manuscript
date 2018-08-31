@@ -954,7 +954,8 @@ ones.
 
 The resulting interface $\I \oplus \J$ contains the effects of both $\I$ and
 $\J$, wrapped into either $\func{InL}$ or $\func{InR}$ constructors, defined to
-preserve the effects results sets.
+preserve the effects results sets. \GH{A ce stage on ne comprend pas pourquoi on a 2 constructueurs, ni la partie "defined to
+preserve the effects results sets".Trop d'implicite, il faut détailler un peux}
 %
 % Notice that this usage of a tagged union allows for composing the same
 % interface twice, so a component can use two components which exhibit the same
@@ -967,7 +968,7 @@ preserve the effects results sets.
   read access targeting the DRAM controller, whereas
   $\func{InR}(\func{Write}_{\mathrm{VGA}}(l, c)) \in
   \Interface{(\I_{\mathrm{DRAM}} \oplus \I_{\mathrm{VGA}})}{\{\ac{unit}\}}$ is
-  an effect that describes a write access targeting the VGA controller.
+  an effect that describes a write access targeting the VGA controller. \GH{comme dans ton exemple tu changer à la fois l'effet (read ou write) et l'interface, on ne saisi pas ce qui justifie qu'on ait utilisé InL ou InR. Il faudrait ne faire varier que le paramètre important pour bien insister. I et J se ressemble beaucoup dans ta définition 6.2 donc il faut être super attentif. L'exemple devrait permettre d'insister}
 \end{example}
 
 Using $\oplus$, we can compose several interfaces together.
@@ -983,7 +984,7 @@ semantics for the composed interface.
   two operational semantics dedicated to these interfaces.
   %
   In this article, we use the $\lambda$-calculus abstraction notation for
-  functions.
+  functions. \GH{est-ce vraiement indispensable? Il y a déjà beaucoup de notions assez diverse à maitriser pour comprendre ton document. Si on peut s'éviter celle là...}
   %
   $\otimes$~is the composition operator for operational semantics, defined as
   \[ \sigma_i \otimes \sigma_j \triangleq \lambda e. \left \{
@@ -1004,17 +1005,17 @@ semantics for the composed interface.
   \]
 \end{definition}
 
-The definition of $\otimes$ has an important impact over what we can specify in
+The definition of $\otimes$ has an important impact over what can be specified in
 FreeSpec.
 %
 % When $\sigma_i \otimes \sigma_j$ handles an effect of $\I$, only $\sigma_i$
 % ``changes.''
 %
-Handling an effect of $\I$ (respectively $\J$) does not interfere with
+Handling an effect of $\I$ (respectively $\J$) does not interfere \GH{plutôt que interfere, je préfererais "update" qui est plus proche de ce qui se passe.} with
 $\sigma_j$ (respectively $\sigma_i$).
 %
 As a consequence, \emph{we cannot specify as-is a graph of components which
-  contains a cycle or a diamond}.
+  contains a cycle or a diamond}. \GH{il faudrait s'attarder un peu plus là dessus et expliquer pourquoi a partir d'un exemple (le diamand, par exemple). Cela permettrait d'ailleurs d'expliquer un peu mieux la composition d'interface à travers un exemple}
 %
 This is the main limitation of FreeSpec, but its incidence is abated because
 computing platforms are often designed as a hierarchical succession of layers.
