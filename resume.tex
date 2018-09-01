@@ -18,10 +18,10 @@
 
   Le contournement d’une politique de sécurité normalement assurée par le biais
   d’un mécanisme HSE peut s’expliquer par une erreur dans sa mise en œuvre,
-  aussi bien dans l’un des logiciels de confiance chargé de sa configuration que
+  aussi bien dans l’un des logiciels de confiance chargés de sa configuration que
   dans les mécanismes matériels sur lesquels il se repose.
   %
-  Nous nous somme intéressés à ce second cas, et plus spécifiquement encore au
+  Nous nous sommes intéressés à ce second cas, et plus spécifiquement encore au
   problème des erreurs affectant les spécifications de la plate-forme.
   %
   Cette dernière est composée de plusieurs dizaines de composants interagissant
@@ -58,7 +58,7 @@
   affectant l’architecture
   x86\,\cite{duflot2009smram,wojtczuk2009smram,domas2015sinkhole,kallenberg2015racecondition,kovah2015senter}
   ont été caractérisées par une sévérité très importante, car ces mécanismes
-  visent à assurer l’isolation de les couches les plus basses ---~et, par voie de
+  visent à assurer l’isolation des couches les plus basses ---~et, par voie de
   conséquence, les plus privilégiées~--- de la pile logicielle.
 
   \subsection*{Objectifs}
@@ -67,11 +67,11 @@
   spécifier et vérifier, par le biais de méthodes formelles, des mécanismes HSE.
   %
   Notre hypothèse de départ est qu’une telle approche bénéficierait à la fois
-  aux concepteurs des plate-formes matérielles et aux développeurs de logiciels
-  qui s'appuient sur les mécanismes matériels de ces plate-formes.
+  aux concepteurs des plates-formes matérielles et aux développeurs de logiciels
+  qui s'appuient sur les mécanismes matériels de ces plates-formes.
   %
   Les premiers pourraient vérifier que leurs mécanismes matériels permettent
-  effectivement de mettre en œuvres les politiques de sécurité visées.
+  effectivement de mettre en œuvre les politiques de sécurité visées.
   %
   Quant aux seconds, ils pourraient profiter de spécifications décrivant sans
   ambiguïtés les exigences auxquelles leurs logiciels doivent se conformer pour
@@ -85,7 +85,7 @@
   %
   De nombreux travaux ont ainsi cherché à vérifier des protocoles de cohérence
   de caches\,\cite{stern1995cachecoherence,vijayaraghavan2015modular}, ou la
-  correction de implémentation d’un modèle mémoire par un
+  correction de l’implémentation d’un modèle mémoire par un
   processeur\,\cite{choi2017kami}.
   %
   La vérification de logiciels bas niveaux, notamment des systèmes
@@ -174,15 +174,15 @@
     et le contenu de la DRAM;
   \item \( L_S \) est l’ensemble des étiquettes attachées aux transitions dites
     logicielles, qui sont une conséquence directe et prévisible de l’exécution,
-    par la plate-forme matérielle, d’une instruction faisant parti du programme
+    par la plate-forme matérielle, d’une instruction faisant partie du programme
     d’un logiciel;
   \item \( L_H \) est l’ensemble des étiquettes attachées aux transitions dites
     matérielles;
   \item \( \rightarrow \) est la relation de transition du système.
   \end{itemize}
 
-  En se basant sur ce type de modèle matériel, nous pouvons spécifier un
-  mécanisme HSE sous la forme d’un ensemble le logiciels de confiance chargés
+  En nous basant sur ce type de modèle matériel, nous pouvons spécifier un
+  mécanisme HSE sous la forme d’un ensemble de logiciels de confiance chargés
   d’implémenter ce mécanisme et d’exigences qu’ils doivent respecter pendant
   leurs exécutions.
   %
@@ -193,11 +193,11 @@
   %
   Par la suite, un mécanisme HSE peut être prouvé correct vis-à-vis de la
   politique de sécurité qu’il cherche à mettre en œuvre, si le sous-ensemble des
-  traces du modèle matériel qui le caractérisent satisfont le prédicat
+  traces du modèle matériel qui le caractérisent satisfait le prédicat
   formalisant la politique.
 
   Nous avons déroulé notre méthodologie sur un exemple réel, à savoir le
-  mécanisme \ac{hse} implémenté par le BIOS des plate-formes x86 pour isoler
+  mécanisme \ac{hse} implémenté par le BIOS des plates-formes x86 pour isoler
   leur exécution de celles des logiciels appartenant au reste de la pile
   logicielle.
   %
@@ -210,8 +210,8 @@
   d’Intel ---~au même titre que les \emph{rings}, par exemple~--- nommé le
   \emph{System Management Mode} (SMM).
   %
-  Le SMM à ceci d’intéressant qu’il est le contexte d’exécution le plus
-  privilégiés de l’architecture x86, si bien qu’une escalade de privilège
+  Le SMM a ceci d’intéressant qu’il est le contexte d’exécution le plus
+  privilégié de l’architecture x86, si bien qu’une escalade de privilège
   permettant d’exécuter du code malveillant en SMM peut avoir des conséquences
   désastreuses pour la sécurité de la plate-forme.
   %
@@ -220,8 +220,8 @@
   dans son
   isolation\,\cite{duflot2009smram,wojtczuk2009smram,domas2015sinkhole}.
   %
-  Parce que le SMM, ainsi que les autres mécanismes matériels impliqués dans le
-  mécanisme HSE qui nous intéresse, ne sont pas pris en compte dans les modèles
+  Parce que le SMM et les autres mécanismes matériels impliqués dans le
+  mécanisme HSE qui nous intéresse ne sont pas pris en compte dans les modèles
   x86 de notre connaissance, nous avons dû en définir un nouveau.
   %
   Cette démarche s’est révélée riche d’enseignement quant aux propriétés qu’un
@@ -255,7 +255,7 @@
   L’originalité de notre contribution est de mettre à profit des paradigmes
   fonctionnels ---~les monades\,\cite{jones2005io}, les effets algébriques et
   les \emph{handlers} d’effets\,\cite{bauer2015effects}~--- pour les appliquer
-  au domaine de la vérification de plate-formes matérielles.
+  au domaine de la vérification de plates-formes matérielles.
   %
   Les modèles écrits dans notre formalisme sont facilement lisibles et soulignent bien les
   connexions entre les différents composants.
@@ -266,7 +266,7 @@
 
   Rien ne cantonne cependant le résultat de ce travail à la vérification de mécanismes HSE.
   Il peut ainsi tout à fait s’appliquer dans le cadre de la
-  vérification d’un système purement logiciel, dès lors que ce logiciel puisse être décrit sous la forme de
+  vérification d’un système purement logiciel, dès lors que ce logiciel peut être décrit sous la forme de
    plusieurs composants interagissant ensemble.
   %
   La principale limitation de notre approche tient dans les contraintes que nous
@@ -281,9 +281,9 @@
   où les composants s’organisent en arbre, selon une hiérarchie par couches
   successives.
 
-  \subsection*{Travaux futures}
+  \subsection*{Travaux futurs}
   %
-  La suite logique de nos travaux seraient d’appliquer le formalisme de FreeSpec
+  La suite logique de nos travaux serait d’appliquer le formalisme de FreeSpec
   dans le cadre de la vérification complète d’un mécanisme HSE par le biais de
   notre théorie.
   %
@@ -292,7 +292,7 @@
   et juger l’impact que cela aurait sur le travail de vérification.
   %
   Nous ne doutons par ailleurs pas que les limitations actuelles de l’approche
-  que nous proposons avec FreeSpec se heurtera à la
+  que nous proposons avec FreeSpec se heurteront à la
   complexité inhérente aux architectures matérielles.
   %
   Les résoudre nous permettrait d’envisager le passage à l’échelle et donc la
@@ -308,7 +308,7 @@
   %
   Dans notre cas, elle est rendue plus complexe par le fait que beaucoup de
   composants matériels sont fortement intégrés à la plate-forme matérielle et
-  difficilement accessibles séparément.
+  difficilement accessible séparément.
   %
   C'est par exemple le cas du \emph{Platform Controller Hub} (PCH), le composant
   matériel qui fait l’intermédiaire entre le processeur et les périphériques les
