@@ -1008,7 +1008,10 @@ component which exposes an interface $\I$ and uses another interface $\J$.
 %
 We proceed with the following steps: modeling the component in terms of programs
 with effects, then deriving one operational semantics for $\I$ from these
-programs, assuming provided an operational semantics for $\J$. \GH{la tournure "assuming provided an operational semantics for $\J$" me semble bizarre mais je comprends ce que tu as voulu dire. Reformuler?}
+programs, assuming provided an operational semantics for $\J$.
+%
+\GH{la tournure "assuming provided an operational semantics for $\J$" me semble
+  bizarre mais je comprends ce que tu as voulu dire. Reformuler?}
 
 The behavior of a component is often determined by a local, mutable state.
 %
@@ -1058,10 +1061,13 @@ terms of computation results and state updates.
   %
   On the other hand, the effects constructed with $\func{Read}_{\mathrm{MCH}}$
   and $\func{Write}_{\mathrm{MCH}}$ will use the current state of the memory
-  controller, the privileged parameter of the effect and the memory location of the access
-   to determine if it uses the DRAM or the VGA controller.
+  controller, the privileged parameter of the effect and the memory location of
+  the access to determine if it uses the DRAM or the VGA controller.
   %
-  By default, it fetches the memory of the DRAM controller, except if all of the three following conditions are satisfied : (1) the  isolation mechanism is activated, (2) the access is unprivileged, and (3) the targeted  memory location belongs to the SMRAM.
+  By default, it fetches the memory of the DRAM controller, except if all of the
+  three following conditions are satisfied : (1) the isolation mechanism is
+  activated, (2) the access is unprivileged, and (3) the targeted memory
+  location belongs to the SMRAM.
   %
   In such a case, it reroutes access to the VGA controller.
 \end{example}
@@ -1086,7 +1092,9 @@ To do that, we need to derive an operational semantics for~$\I$ from $C$.
   \]
 \end{definition}
 
-\GH{la j'avoue, j'ai décroché sur la définition 6.7. Peut-être qu'un petit exemple ou une petite description de la formule en anglais aiderait à la compréhension.}
+\GH{la j'avoue, j'ai décroché sur la définition 6.7. Peut-être qu'un petit
+  exemple ou une petite description de la formule en anglais aiderait à la
+  compréhension.}
 
 % On the one hand, components are defined in terms of programs with effects,
 % meaning each component can be modelled independently from the rest of the
@@ -1159,27 +1167,24 @@ parameterize an abstraction specification with an abstract state and a step
 function to update this state after each effect realization.
 
 \begin{definition}[Abstract Specification] \label{def:freespec:abstract-specs}
-  An abstract specification $A$ dedicated to an interface $\I$ is 
-  defined as a tuple
-  $\langle \Omega, \func{step}, \func{pre}, \func{post} \rangle$ where
+  An abstract specification $A$ dedicated to an interface $\I$ is defined as a
+  tuple $\langle \Omega, \func{step}, \func{pre}, \func{post} \rangle$ where
   \begin{itemize}
   \item $\Omega$ is a set of abstract states
   \item
     $\func{step} : \forall \mathcal{A}, \Interface{\I}{\mathcal{A}} \rightarrow
     \mathcal{A} \rightarrow \Omega \rightarrow \Omega$ is a transition function
     for the abstract state.
-  \item $\func{pre} \subseteq \I \times \Omega$ is the precondition over
-    effects, such that $(e, \omega) \in \func{pre}$ if and only if the effect
-    $e$ satisfies the precondition parameterized with the abstract state
-    $\omega$ (denoted by $\func{pre}(e, \omega)$). \GH{je ne comprends pas le denoted by $\func{pre}(e, \omega)$. Quelle est la différence avec $(e, \omega) \in \func{pre}$?}
-  \item
-    $\func{post} \subseteq \bigcup_{\mathcal{A}} (\Interface{\I}{\mathcal{A}}
-    \times \mathcal{A} \times \Omega)$ is the postcondition over effects
-    results, such that $(e, x, \omega) \in \func{post}$ if and only if the
-    results $x$ computed for the effects $e$ satisfies the postcondition
-    parameterized with the abstract state $\omega$ (denoted by
-    $\func{post}(e, x, \omega)$). \GH{idem, je ne comprends pas denoted by
-    $\func{post}(e, x, \omega)$}
+  \item $\func{pre}$ is the precondition over effects, \emph{i.e} a predicate on
+    $\I \times \Omega$ such that $\func{pre}(e, \omega)$ is true if and only if
+    the effect $e$ satisfies the precondition parameterized with the abstract
+    state $\omega$.
+  \item $\func{post}$ is the postcondition over effects results, \emph{i.e.} a
+    predicate on
+    $\bigcup_{\mathcal{A}} (\Interface{\I}{\mathcal{A}} \times \mathcal{A}
+    \times \Omega)$ such that $\func{post}(e, x, \omega)$ is true if and only if
+    the results $x$ computed for the effects $e$ satisfies the postcondition
+    parameterized with the abstract state $\omega$.
   \end{itemize}
 \end{definition}
 
@@ -1190,8 +1195,8 @@ As a consequence, reasoning about a program with effects can be achieved without
 the need to look at the effect handlers.
 %
 An abstract specification is dedicated to one verification problem (in our
-context, one security property), and it is possible to define as many
-abstract specifications as required.
+context, one security property), and it is possible to define as many abstract
+specifications as required.
 
 We write
 $\func{run}_{\func{step}} : \forall \mathcal{A}, \Sigma_{\I} \rightarrow
@@ -1406,14 +1411,16 @@ composition operator $\otimes$
 Notably, a graph of components which contains a cycle, a diamond or a forward
 edge cannot be easily modelled and verified in FreeSpec.
 %
-In its current state, FreeSpec provides some theorems to verify the properties
-of a component model in terms of an abstract specification, depending on the
-composition pattern. \GH{Cette phrase est un peu vague. Soit plus précis sur ce qui est couvert actuelement. Quel théorème (lien vers le code) couvre quels pattern? Inutile de faire une longue descritption juste préciser le périmètre.}
+In its current state, FreeSpec provides two theorems to verify the properties
+of a component model in terms of an abstract specification, dedicated to two
+composition patterns: when a component is being used by one component, and
+when a component is being used by more than one components
 
 \paragraph{Predicate of Synchronization.}
 %
 The most favorable scenario consists of one component which uses many
-components, and is only used by one other component. \GH{fait une figure pour illustrer ce cas}
+components, and is only used by one other component. \GH{fait une figure pour
+  illustrer ce cas}
 %
 Let $\I$ and $\J$ be two interfaces and let $C$, a component with a set of
 possible states $\mathcal{S}$, which exhibits $\I$ and uses $\J$.
@@ -1509,21 +1516,31 @@ invariant for the induction, and a sufficient condition to enforce compliance.
   that
   \[ \func{sync}_{\mathrm{MCH}}(\omega_i, s, \omega_j) \triangleq s = \val{on}
     \wedge \forall l \in \mathpzc{Smram}, \omega_i(l) = \omega_j(l)
-  \] Hence, we start our reasoning from a situation where the SMRAM isolation is
+  \]
+  %
+  Hence, we start our reasoning from a situation where the SMRAM isolation is
   already activated and the states of the two abstract specifications are the
   same, meaning the two views of the SMRAM (as stored in the DRAM, and as
   exposed by the memory controller) coincide.
   %
   We prove $\func{sync}_{\mathrm{MCH}}$ satisfies the three premises of the
   Theorem~\ref{theorem:der-compliance}. We conclude we can derive an operational
-  semantics from $C_{\mathrm{MCH}}$ which complies with $A_{\mathrm{MCH}}$. \GH{lien vers le code Coq}
+  semantics from $C_{\mathrm{MCH}}$ which complies with
+  $A_{\mathrm{MCH}}$.
+  %
+  \GH{lien vers le code Coq}
 \end{example}
 
 \paragraph{Predicate of Non-Interference.}
 %
-\GH{je trouve le terme non-interference casse gueule... Il faudrait a minima dire que c'est différent de la propriété de non-interference classiquemen utilisée en IFC... Le mieux est de trouver un autre nom}
+\GH{je trouve le terme non-interference casse gueule... Il faudrait a minima
+  dire que c'est différent de la propriété de non-interference classiquemen
+  utilisée en IFC... Le mieux est de trouver un autre nom}
+%
 Another common composition pattern consists of a component which is used by more
-than one other component. \GH{petite figure}
+than one other component, \emph{e.g.} the memory controller in
+Figure~\ref{fig:freespec:interfacedriven} is being used by the IOMMU and the
+cache.
 %
 FreeSpec provides a theorem which allows for extending the result obtained with
 the Theorem~\ref{theorem:der-compliance}, in the specific case where concurrent
@@ -1606,16 +1623,21 @@ correct with respect to \( A \).
   Besides, the precondition \( \func{pre}_{\mathrm{MCH}} \) always holds true.
 
   As a consequence, \( A_{\mathrm{MCH}} \| \func{pnf}_{\mathrm{IOMMU}} \), that
-  is \( \func{pnf}_{\mathrm{IOMMU}} \) is a predicate of non-interference of \(
-  A_{\mathrm{MCH}} \). \GH{de ce que je comprends, dans ce cas, tu donne juste le prédicat mais tu ne fais pas de preuve car tu es à la limite de ce que tu as modélisé. Il faudrait le préciser. Sinon, comme d'habitude, lien vers le code Coq}
+  is \( \func{pnf}_{\mathrm{IOMMU}} \) is a predicate of non-interference of
+  \( A_{\mathrm{MCH}} \).
+  %
+  This means if we can prove that the effects used by the IOMMU always satisfy
+  \( \func{pnf}_{\mathrm{IOMMU}} \) predicate, then we can safely compose it
+  with a cache knowing that, from the security perspective of the cache, it is
+  like the IOMMU ``is not here'' (it does not interfere).
 \end{example}
 
 \section{Conclusion}
 % =============================================================================
 \label{sec:freespec:scale}
 
-In this Chapter, we have introduced the FreeSpec key definitions and theorems
-so that we could model a minimal memory controller component and verify its
+In this Chapter, we have introduced the FreeSpec key definitions and theorems so
+that we could model a minimal memory controller component and verify its
 properties in the presence of a well-behaving DRAM controller.
 %
 This example has been driven by a real mechanism commonly found inside x86-based
@@ -1633,7 +1655,10 @@ system, as long as they agree on the interfaces and abstract specifications.
 %
 If, during the verification process, one group finds out a given interface or
 abstract specification needs to be updated, the required modifications may
-impact its neighbors. \GH{cette phrase n'est pas très claire. On pourrait comprendre que cela va à l'encontre de la modularité}
+impact its neighbors.
+%
+In other word, this verification process can help uncover inconsistencies in
+hardware specifications which pave the road towards compositional attacks.
 %
 For instance, modeling a x86-based computing system, as pictured in
 Figure~\ref{fig:freespec:interfacedriven}, using FreeSpec requires to take into
@@ -1641,8 +1666,9 @@ account the cache, and to verify it complies with an abstract specification
 similar to the one defined in Example~\ref{ex:mch-abs-specs}.
 %
 Thus, FreeSpec could have helped uncover the SMRAM cache poisoning attack
-previously mentioned\,\cite{wojtczuk2009smram,duflot2009smram}, and other
-similar architectural attacks. \GH{on ne comprend pas trop pourquoi}
+previously mentioned\,\cite{wojtczuk2009smram,duflot2009smram}.
+%
+\GH{on ne comprend pas trop pourquoi}
 
 The abstract specifications are defined in terms of interfaces, \emph{i.e.}
 independently from components.

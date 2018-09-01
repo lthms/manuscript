@@ -1378,8 +1378,8 @@ policies targeted by the \ac{bios}.
 The SMRAM Cache Poisoning Attack allowed for circumventing the SMRAM access
 control mechanism (\ref{subsec:usecase:hse:smram}).
 %
-The so-called SENTER Sandman attack prevented the execution of the \ac{bios} and
-led to modifying the content of the flash memory
+The so-called \texttt{SENTER} Sandman attack prevented the execution of the
+\ac{bios} and led to modifying the content of the flash memory
 (\ref{subsec:usecase:hse:sandman}).
 %
 The Speed Racer attack resulted into an authorized modification of the flash
@@ -1413,8 +1413,8 @@ The attack proceeds as follows:
   operating system exposes a software interface to manage the cache from the
   userland).
 %
-\item They write to the \texttt{APM\_CNT} register in order to
-  trigger of a \ac{smi}.
+\item They write to the \texttt{APM\_CNT} register in order to trigger of a
+  \ac{smi}.
 %
 \item The \ac{bios} code stored in SMRAM is executed in SMM, leading the cache
   to be filled with copies of that code, and the processor leaves \ac{smm} when
@@ -1507,7 +1507,7 @@ Write Protection).
 If the \texttt{SMM\_BWP} is set, the \ac{pch} discards any write access which
 targets the flash memory \emph{unless all processors are in \ac{smm}}.
 
-\subsection{SENTER Sandman}
+\subsection{\texttt{SENTER} Sandman}
 \label{subsec:usecase:hse:sandman}
 
 Another attack has defeated the flash memory lockdown protection.
