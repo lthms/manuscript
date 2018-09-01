@@ -91,7 +91,7 @@ compromise between expressiveness, automation, and applicability
 In this thesis, we advocate for defining \ac{hse} mechanisms of a given hardware
 architecture against a general-purpose model of this architecture, comprehensive
 in terms of hardware components, rather than verifying each \ac{hse} mechanism
-against a specific model.
+against a specific model. \GH{cette phrase est peut-être un peu forte par rapport à ce que tu as fait réellement. Je propose de la supprimer}
 %
 Many x86 models have been proposed over years, but to the extent of our
 knowledge, none of them cover the hardware features we are primarily interested
@@ -99,7 +99,8 @@ in (\ref{subsec:sota:ltsrelated}).
 %
 To experiment with our formal theory of \ac{hse} mechanisms, we compromise and
 relied on a ad-hoc model, with the aim of identifying desirable properties for a
-large-scale model that would optimize the applicability of our approach.
+large-scale model that would optimize the applicability of our approach. \GH{plutot que "compromise" qui donne l'impression de s'excuser, je dirai "on a proposé un modèle qui couvre les features dont on a besoin. La specification de ce modèle nous a permis d'identifier les propriétés nécessaire "for a
+large-scale model that would optimize the applicability of our approach"}
 
 \subsection{Modeling a Hardware Architecture}
 \label{subsec:sota:ltsdef}
@@ -329,7 +330,9 @@ each state\,\cite{vijayaraghavan2015modular}.
     \!\xrightarrow{\mathtt{Open}_2}\!(\mathtt{closed}, \mathtt{open})%
     \!\xrightarrow{\mathtt{Close}_2}\!(\mathtt{closed}, \mathtt{closed})
   \]
+  \GH{l'exemple dépasse du cadre}
 \end{example}
+
 
 Afterwards, we write \( \Sigma(M) \) for the set of traces of a labeled
 transition system \( M \).
@@ -546,7 +549,7 @@ On the one hand, the most generic approach is the construction a proof, that is
 a succession of inference rules to derive the statement to be proven from
 formulas known to be true.
 %
-Theorem provers provide facilities to construct proofs, and a checker to
+Theorem provers provide facilities to construct proofs and a checker to
 automatically verify these proofs.
 %
 On the other hand, it is possible to rely on algorithms whose correctness have
@@ -577,7 +580,7 @@ We have organized it according to the formal language they rely on.
 %
 Propositional logic is characterized by \emph{terms}, which represents objects,
 and \emph{logical operators}, such as conjunction \( \wedge \), disjunction
-\( \vee \), implication \( \Rightarrow \), negation \( \neg \).
+\( \vee \), implication \( \Rightarrow \), and negation \( \neg \).
 %
 First-order logic\,\cite{smullyan2012fol} extends propositional logic with
 \emph{predicates}, that is parameterized formulas that can be true or false with
@@ -618,7 +621,7 @@ Linear Temporal Logic (LTL)\,\cite{sistla1985ltl} and Computation Logic Tree
 (CTL)\,\cite{clarke1981ctl}.
 %
 Examples of LTL modular operators are \( \square P \) (\( P \) is always true),
-\( \Diamond P \) (\( P \) will eventually become true), \( \bigcirc P \)
+\( \Diamond P \) (\( P \) will eventually become true), and \( \bigcirc P \)
 (\( P \) will be true after the next transition of the system).
 %
 CTL considers trees of possible futures (by opposition to a \emph{linear}
@@ -674,7 +677,7 @@ mechanisms.
 %
 This allows us to reason about high-level properties implying \ac{hse}
 mechanisms ---\emph{e.g.} safety property enforcement
-(Theorem~\ref{theorem:speccert:correcthse}), mechanisms composition
+(Theorem~\ref{theorem:speccert:correcthse}) or mechanisms composition
 (Theorem~\ref{theorem:speccert:compoenforced})--- where the hardware model is
 left as a parameter of the proof.
 
@@ -707,7 +710,7 @@ specification\,\cite{leslie2015linsgx}.
 
 Each project focused on one aspect of the x86 architecture and led to uncover
 logic errors and inconsistencies in processor designs, while we aim for a more
-general-purpose model with a large scope with respect to hardware components.
+general-purpose model with a large scope with respect to hardware components. \GH{plutot que large scope (ce qui est discutable) tu pourrais insister sur l'interraction entre plusieurs composants. Les travaux d'Intel, de ce que je comprends, se sont plus intéressé à des propriétés "locales" à un composant. En outre, tu t'intéresse plus à la sécurité qu'à la spec fonctionnelle}
 %
 To the extend of our knowledge, Intel has not advertised about a ``global''
 model of its architecture, even though Nachiketh Potlapally, who was working at
@@ -746,7 +749,7 @@ It is less suitable in the context of \ac{hse} mechanisms verification with
 respect to security policies, where multiple hardware components are involved,
 and the many features exposed by the latter may interfere with each others.
 
-It has been shown in the past that it is possible to extend them, when their
+It has been shown in the past that it is possible to extend such approaches, when their
 abstraction is too strong.
 %
 For instance, Chen \emph{et al.} have extended the hardware model of CompCertX,
@@ -832,7 +835,7 @@ protection against cache-timing attacks, notoriously harder to reason with.
 %
 The model combines hardware and software components behavior, but remains
 remains an idealized \emph{hypervisor} model and we would have to make
-significant changes prior to using it.
+significant changes prior to using it. \GH{mouais, un peu vague. Il faut que tu soigne le positionnonement sur ce travail car c'est l'un de tes reviewer.}
 %
 % \GH{pas d'autres limitation? Ca fait un peu léger. Peut-être que le modèle est
 % trop spécifique aux hyperviseurs?}
