@@ -59,9 +59,9 @@ documents\,\cite{intel2013celeron,intel2009mch,intel2014manual} to define it.
 The hardware architecture we are modeling with $\formatLTS{Minx86}$ matches the
 one depicted in Figure~\ref{fig:speccert:smram}. It contains one
 core\,\footnote{As discussed in the previous Chapter, we did not tackle the
-  challenge posed by multi-core computer in this thesis.}, one level of cache, a
+  challenge posed by multi-core computers in this thesis.}, one level of cache, a
 memory controller, a \ac{dram} controller and a VGA controller\,\footnote{A VGA
-  controller is a hardware device which on we can connect a screen. It exposes
+  controller is a hardware device on which we can connect a screen. It exposes
   some memory to the core for communication purposes.} which both expose some
 memory to the core.
 %
@@ -285,7 +285,7 @@ The physical address $\func{smbase}$ models the register of the same name.
 The map $\func{strat}$ abstracts away the numerous mechanisms of x86
 microprocessors to determine which cache strategy to use for a given \IO, where
 $\texttt{CacheStrat} \triangleq \setshortdef{\val{UC}, \val{WB}}$ is the set of
-the modelled cache strategies.
+the modeled cache strategies.
 %
 The set of states of the \acp{smrr} is denoted $\texttt{Smrr}$.
 % \TODO{SMRR est noté ici en majuscule mais la variable censé les modélisé est
@@ -325,7 +325,7 @@ algorithm.
 %
 The set of states of the cache line is denoted by $\texttt{CacheLine}(S)$.
 %
-In addition to modeling the hardware specifications, the definition of
+In addition to modeling hardware specifications, the definition of
 $\texttt{CacheLine}(S)$ attaches a software owner to a cache line.
 %
 \[
@@ -335,7 +335,7 @@ $\texttt{CacheLine}(S)$ attaches a software owner to a cache line.
   S~\rangle
 \]
 %
-The cache is modelled as a mapping between address indexes and cache lines.
+The cache is modeled as a mapping between address indexes and cache lines.
 %
 \[
   \texttt{Cache}(S) \triangleq \texttt{Index} \rightarrow \texttt{CacheLine}(S)
@@ -434,7 +434,7 @@ possible to have
 
 \paragraph{Memories.}
 %
-The physical memories (exposed by the DRAM and the VGA controllers) are modelled
+The physical memories (exposed by the DRAM and the VGA controllers) are modeled
 together with a mapping between the hardware addresses and both their contents
 and the software components which own them.
 %
@@ -497,7 +497,7 @@ We write $\texttt{Mem}(S)$ for the set of states of the physical memories.
 
 In accordance with Definition~\ref{def:speccert:model}, we consider two sets of
 labels to distinguish between software transitions (direct, foreseeable
-consequences of instructions execution, denoted by $L_S$) and hardware
+consequences of instruction execution, denoted by $L_S$) and hardware
 transitions (denoted by $L_H$).
 %
 For each transition label we define
@@ -596,7 +596,7 @@ counter register with $\func{NextInstruction}(\var{pa})$.
 %   \BinaryInfC{\( h \xrightarrow[\func{context}]{l} h' \)}%
 % \end{prooftree}
 
-We now give description of the pre and postconditions for each label.
+We now give a description of the pre and postconditions for each label.
 %
 The interested readers can refer to the Coq
 development\,\cite{letan2016speccertcode} in case they want to review their
@@ -1116,9 +1116,9 @@ other transitions, the function returns the empty set.
 Secondly, if a core not in \ac{smm} tries to read the content of a physical
 addresses which belongs to the range specified by its SMRR, the specification
 states that the result of this \IO is a constant value, hence the function
-returns also the empty set in this case.
+also returns the empty set in this case.
 %
-For the two last cases, we based our decision on the \func{read\_from\_cache}
+For the last two cases, we based our decision on the \func{read\_from\_cache}
 function to determine the content of the singleton returned by
 \( \textsc{Minx86}\func{\_fetched} \).
 
@@ -1268,19 +1268,19 @@ Given \( h \in H(S) \), we have identified six requirements over states for
 \end{enumerate}
 
 During the boot sequence, the \ac{bios} is the only software component executed,
-so there is no untrusted software component execution whose execution need to be
+so there is no untrusted software component whose execution needs to be
 constrained.
 %
 It is expected that the \ac{bios} configures the hardware architecture in a way
 which satisfies the requirements over states prior to start the execution of the
 rest of the software stack.
 %
-Otherwise, the runtime will not start from a ``safe'' states and the related
+Otherwise, the runtime will not start from a ``safe'' state and the related
 traces will not comply to \( \Delta_{\mathtt{bios}} \)
 (Definition~\ref{def:speccert:complianttraces}).
 %
 In such a case, there is no guarantee that the security policy will be enforced,
-independently from the correctness of \( \Delta_{\mathtt{bios}} \).
+independently of the correctness of \( \Delta_{\mathtt{bios}} \).
 
 % \TODO{A la lecture de ces requirements, je m'aperçois que certains d'entre eux
 % s'apppuient sur une configuration réalisée au préalable par le code trusté,
@@ -1328,7 +1328,7 @@ and there is no need to further update them.
 For $\Delta_{\mathtt{bios}}$ to be a \ac{hse} mechanism, we need to prove it
 satisfies the two \ac{hse} laws.
 
-The first law states that the \( \func{bios\_req} \) is always satisfied when a
+The first law states that \( \func{bios\_req} \) is always satisfied when a
 non-trusted software component, i.e. different from the \ac{bios}, is executed
 by the hardware architecture.
 %
@@ -1355,7 +1355,7 @@ We take the example of \func{Read} transitions; a similar approach applies to
 \func{Write} transitions.
 
 Given a transition labeled \( \func{Read}(\var{pa}) \) from \( h \) to \( h' \),
-there are three case scenarios to consider:
+there are three cases to consider:
 %
 \begin{enumerate}
 \item The core discards the read, as part of the SMRAM cache poisoning
@@ -1414,7 +1414,7 @@ conclude for \func{hardware\_req} as a whole.
 Our objective is to prove that \( \Delta_{\mathtt{bios}} \) is correct with
 respect to \( I_{\mathtt{bios}} \).
 %
-Because \( I_{\mathtt{bios}} \) is a security policy modelled with a predicate
+Because \( I_{\mathtt{bios}} \) is a security policy modeled with a predicate
 on transitions, we know thanks to Theorem~\ref{theorem:speccert:correcthse} that
 %
 \[
@@ -1518,7 +1518,7 @@ Indeed, we cannot discard the case where a cache line tagged with a physical
 address which belongs to the SMRAM is owned by an untrusted software component.
 %
 In this scenario, we could even exhibit a trace which complies the \ac{hse}
-mechanism, but does not satisfies the security policy.
+mechanism, but does not satisfy the security policy.
 
 \subsection{On SpecCert Machine-Checked Proofs}
 \label{subsec:speccert2:coqproofs}
@@ -1527,10 +1527,10 @@ As we already explained in the introduction, we have implemented the model and
 proofs of this Chapter in Coq, to increase our confidence in our results.
 %
 The resulting project\,\cite{letan2016speccertcode} counts around 4\,500 lines
-of code, divided into 2\,000 lines of code of definition and specification and
+of code divided into 2\,000 lines of code of definition and specification and
 2\,500 lines of code of proofs.
 %
-We have taken a great care to organize our development in order to manage the
+We have taken great care to organize our development in order to manage the
 many sub-cases notably induced by the write-back strategy.
 
 Each hardware component has been defined in isolation from the rest of the
@@ -1565,7 +1565,7 @@ whole as often as possible.
   \label{fig:freespec:remember}
 \end{figure}
 
-This approach has proven to be valuable to deal with the many cases to cover,
+This approach has proven to be valuable to deal with the many cases to cover
 when used in conjunction with a recurring pattern we call
 ``\texttt{remember};~\texttt{destruct};~\texttt{assert};~\texttt{apply}'', after
 the Coq tactics.
@@ -1578,7 +1578,7 @@ Figure~\ref{fig:freespec:entrypoint}.
   updates more visible (see Figure~\ref{fig:freespec:remember}, compared to
   Figure~\ref{fig:freespec:entrypoint}).
   %
-  Each \( \mathtt{a\_}i \) is an intermediary state resulting of a call to a
+  Each \( \mathtt{a\_}i \) is an intermediary state resulting in a call to a
   general-purpose function from the \texttt{Architecture\_func.v} file.
 \item Using \texttt{destruct}, we can explore the alternative paths resulting
   from the use of {\scshape Gallina} constructions such as pattern matching, or
@@ -1592,7 +1592,7 @@ Figure~\ref{fig:freespec:entrypoint}.
   two simplified goals in Figure~\ref{fig:freespec:destruct}, more particularly
   on the value of \texttt{a\_3}).
   %
-\item Using \texttt{assert}, we can introduce now goals to prove intermediary
+\item Using \texttt{assert}, we can introduce new goals to prove intermediary
   results (like the one in Figure~\ref{fig:freespec:assert}, for instance).
   %
   In our case, we will prove that the predicate \texttt{hardware\_req} remains
@@ -1699,12 +1699,12 @@ Figure~\ref{fig:freespec:entrypoint}.
   intermediary lemmas previously proved true.%
 }
 
-\caption{Dividing a transition into a sequences of intermediary state updates}
+\caption{Dividing a transition into sequences of intermediary states updates}
 \label{freespec:figure:seqproof}
 \end{figure}
 
 Figure \ref{freespec:figure:seqproof} depicts the typical shape of resulting
-proofs trees.
+proof trees.
 %
 The proofs are structured around smaller, more atomic proof goals of the form
 \( \iota(h_i) \Rightarrow \iota(h_{i+1}) \), where \( \iota \) is supposedly an
