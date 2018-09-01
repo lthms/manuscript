@@ -334,7 +334,7 @@ Section SpecCert.
       try discriminate.
   Qed.
 
-  Definition tamper_with
+  Definition code_injection
              {m:    model}
              (tr:   transition m)
              (x y:  software_stack)
@@ -342,24 +342,24 @@ Section SpecCert.
     ss_fetched (from #tr) (labelled #tr) y
     /\ ss_context (from #tr) = y.
 
-  Definition isolation_policy
+  Definition code_injection_policy
              {m:   model}
              (tr:  transition m)
     : Prop :=
     forall (x y:  software_stack),
-      tamper_with tr x y
+      code_injection tr x y
       -> stack_ge x y.
 
-  Corollary isolation_policy_aux
+  Corollary code_injection_policy_aux
             {m:   model}
             (tr:  transition m)
-    : isolation_policy tr
+    : code_injection_policy tr
       <-> forall (x y:  software_stack),
-        ~ stack_ge x y -> ~ tamper_with tr x y.
+        ~ stack_ge x y -> ~ code_injection tr x y.
   Proof.
     split.
     + intros Hiso x y Hnge Htamper.
-      unfold isolation_policy in Hiso.
+      unfold code_injection_policy in Hiso.
       apply Hiso in Htamper.
       apply Hnge.
       exact Htamper.
@@ -384,7 +384,7 @@ Section SpecCert.
     : Prop :=
     forall (u y:  software_stack),
       U u
-      -> tamper_with tr u y
+      -> code_injection tr u y
       -> stack_ge u y.
 
   Inductive os_only
@@ -534,30 +534,50 @@ Section SpecCert.
       induction l; cbn in *; auto.
   Qed.
 
+  Definition bios_code_injection_policy
+             {m:         model}
+             (tr:  transition m)
+    : Prop :=
+    forall (x:  software_stack),
+      code_injection tr x BIOS
+      -> x = BIOS.
+
+  Definition os_code_injection_policy
+             {m:         model}
+             (tr:  transition m)
+    : Prop :=
+    forall (x:  software_stack)
+           (n:  nat),
+      code_injection tr (App n) x
+      -> x = App n.
+
   Theorem constrain_everyone
           {m:         model}
           (hse_bios:  HSE m)
           (hse_os:    HSE m)
           (Hcomp:     compatible_hse hse_bios hse_os)
     : correct_hse hse_bios
-                  (safety_property (constrain_to_isolation os_only))
+                  (safety_property bios_code_injection_policy)
       -> correct_hse hse_os
-                     (safety_property (constrain_to_isolation apps_only))
+                     (safety_property os_code_injection_policy)
       -> correct_hse (HSE_cap hse_bios hse_os Hcomp)
-                     (safety_property isolation_policy).
+                     (safety_property code_injection_policy).
   Proof.
     intros Hbios Hos rho Hct tr Htrans.
     apply compliant_trace_intersec_intersec_compliant_trace in Hct.
     inversion Hct as [Hrb Hro].
     intros x y Htamper.
-    unfold correct_hse, safety_property, constrain_to_isolation in *.
+    unfold correct_hse, safety_property in *.
+    unfold bios_code_injection_policy, os_code_injection_policy in *.
     induction x.
     + constructor.
-    + apply (Hbios rho Hrb tr Htrans).
+    + induction y.
+      ++ apply (Hbios rho Hrb tr Htrans) in Htamper.
+         discriminate.
       ++ constructor.
-      ++ exact Htamper.
-    + apply (Hos rho Hro tr Htrans).
       ++ constructor.
-      ++ exact Htamper.
+    + apply (Hos rho Hro tr Htrans) in Htamper.
+      rewrite Htamper.
+      constructor.
   Qed.
 End SpecCert.

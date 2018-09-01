@@ -292,7 +292,6 @@ with the \texttt{assert} tactic).
 %
 However, it remains cumbersome to use manually.
 
-
 \paragraph{Objectives.}
 %
 With FreeSpec, our objective is twofold.
@@ -423,6 +422,8 @@ interface, and sends operations requests to other components it is connected to
 \emph{via} their interfaces and waits for their results.
 
 \begin{example}[{\scshape Minx86} as a component-based system]
+  \label{example:freespec:compoattack}
+
   Figure~\ref{fig:freespec:interfacedriven} pictures an alternative model to
   {\scshape Minx86}.
   %
@@ -617,6 +618,10 @@ in the \texttt{operational} package of Haskell\,\cite{operational}.
 
 This section and the one afterwards proceed through a running example: a
 minimalist memory controller, as depicted in Figure~\ref{fig:freespec:memc}.
+%
+As before, we have implemented our proofs in Coq, and interesting readers can
+refer specifically to the file \texttt{examples/Smram.v} of
+\cite{letan2018freespeccode}.
 
 % pictured in the Figure~\ref{fig:mch-running-example}.
 % \begin{figure}
@@ -905,7 +910,12 @@ without the action of \( C_2 \).
   \label{fig:freespec:diamondpattern}
 \end{figure}
 
-\GH{Il manque ici une transition pour expliquer pourquoi on a besoin de la monad program. Tu nous parles de çà brusquement et on ne voit pas le lien avec ce qui précède.}
+Using interfaces, we model how components interact with each others, and we aim
+to model a component which exposes an interface as an operational semantics for
+this interface.
+%
+We now present a formalism --the Program monad--- to model how a component uses
+its neighbors when it handles computational requests of its interface.
 
 \subsection{The Program Monad}
 % -----------------------------------------------------------------------------
@@ -914,9 +924,11 @@ Modeling programs with side effects in purely functional languages such as
 {\textsc Gallina} (the Coq specification language) or Haskell is usually
 achieved thanks to monads\,\cite{hoareetal2001monad}.
 %
-FreeSpec leverages a variant of the Free monad called the Program
-monad\,\cite{operational} to model programs with effects. Operational semantics
-play the role of \texttt{operational}\,\cite{operational} interpreters.
+FreeSpec leverages a variant of the free monad called the Program
+monad\,\cite{operational} to model programs with effects.
+%
+Operational semantics play the role of \texttt{operational}\,\cite{operational}
+interpreters.
 %
 We write $P_{\I}(\mathcal{A})$ for the set of programs with effects which
 belongs to $\I$, modelled thanks to the Program monad, and whose result belongs
@@ -977,11 +989,12 @@ To assign an interpretation of this program, it must be completed with an
 operational semantics which realizes the interface
 $\mathcal{I}_{\mathrm{DRAM}}$.
 
-\begin{definition}[Program With Effects
-  Realization] \label{def:freespec:realisation} Let $\I$ be an interface,
-  $\sigma \in \Sigma_{\I}$ an operational semantics for this interface and
-  $\rho \in P_{\I}(\mathcal{A})$ a program with effects which belong to this
-  interface.
+\begin{definition}[Program With Effects Realization]
+  \label{def:freespec:realisation}
+
+  Let $\I$ be an interface, $\sigma \in \Sigma_{\I}$ an operational semantics
+  for this interface and $\rho \in P_{\I}(\mathcal{A})$ a program with effects
+  which belong to this interface.
   %
   $\sigma[\rho] \in \mathcal{A} \times \Sigma_{\I}$ denotes the realization of
   this program by $\sigma$, defined as:
@@ -997,7 +1010,9 @@ $\mathcal{I}_{\mathrm{DRAM}}$.
   \]
 \end{definition}
 
-\GH{un petit exemple pour illustrer la précédente définition serait le bienvenu}
+% \GH{un petit exemple pour illustrer la précédente définition serait le
+% bienvenu}
+
 \subsection{Components as Programs with Effects}
 % -----------------------------------------------------------------------------
 
@@ -1008,10 +1023,7 @@ component which exposes an interface $\I$ and uses another interface $\J$.
 %
 We proceed with the following steps: modeling the component in terms of programs
 with effects, then deriving one operational semantics for $\I$ from these
-programs, assuming provided an operational semantics for $\J$.
-%
-\GH{la tournure "assuming provided an operational semantics for $\J$" me semble
-  bizarre mais je comprends ce que tu as voulu dire. Reformuler?}
+programs, assuming an operational semantics for $\J$ has been provided.
 
 The behavior of a component is often determined by a local, mutable state.
 %
@@ -1028,8 +1040,11 @@ effects of $\J$.
 These programs must compute the effect result and the new state of the
 component.
 
-\begin{definition}[Component] \label{def:freespec:component-model} Let $\I$ be
-  the interface exhibited by a component and $\J$ the interface it uses.
+\begin{definition}[Component]
+  \label{def:freespec:component-model}
+
+  Let $\I$ be the interface exhibited by a component and $\J$ the interface it
+  uses.
   %
   Let $\mathcal{S}$ be the set of its states.
   %
@@ -1077,10 +1092,11 @@ to compute the result of a given effect.
 %
 To do that, we need to derive an operational semantics for~$\I$ from $C$.
 
-\begin{definition}[Deriving Operational
-  Semantics] \label{def:freespec:derivation} Let $C$ be a component which
-  exhibits an interface $\I$, uses an interface~$\J$ and whose states belong to
-  $\mathcal{S}$.
+\begin{definition}[Deriving Operational Semantics]
+  \label{def:freespec:derivation}
+
+  Let $C$ be a component which exhibits an interface $\I$, uses an
+  interface~$\J$ and whose states belong to $\mathcal{S}$.
   %
   Let $s \in \mathcal{S}$ be the current state of the component and
   $\sigma_j \in \Sigma_{\J}$ be an operational semantics for~$\J$.
@@ -1092,9 +1108,19 @@ To do that, we need to derive an operational semantics for~$\I$ from $C$.
   \]
 \end{definition}
 
-\GH{la j'avoue, j'ai décroché sur la définition 6.7. Peut-être qu'un petit
-  exemple ou une petite description de la formule en anglais aiderait à la
-  compréhension.}
+For each incoming effect \( e \in \I \), we realize the program with effects
+associated with this effect, \emph{i.e.} \( C(e, s) \) where \( s \) is the
+current state of the component, with an operational semantics \( \sigma_j \) of
+\J.
+%
+According the Definition~\ref{def:freespec:realisation}, we get the result of
+this program with effect and a new operational semantics \( \sigma_j' \).
+%
+According to Definition~\ref{def:freespec:component-model}, this result is a
+pair of the result of \( e \) and the new state \( s' \) of the component.
+%
+Using \( s' \) and \( \sigma_j' \), we can construct the new operational
+semantics of \I to use after handling \( e \).
 
 % On the one hand, components are defined in terms of programs with effects,
 % meaning each component can be modelled independently from the rest of the
@@ -1353,7 +1379,10 @@ compliance.
 As for interfaces (with $\oplus$) and operational semantics (with $\otimes$), we
 have also defined an abstract specification composition operator $\odot$.
 %
-We do not detail its definition in this Chapter \GH{pourquoi?}, but it has the significant
+We do not detail its definition in this Chapter\,\footnote{Interesting readers
+  can refer to the file \texttt{theories/Compose.v} of
+  \cite{letan2018freespeccode} to find its definition, but the latter is not
+  require to understand the rest of this Chapter.}, but it has the significant
 property to allow for reasoning about the composition of interfaces and
 composition of operational semantics.
 
@@ -1419,8 +1448,8 @@ when a component is being used by more than one components
 \paragraph{Predicate of Synchronization.}
 %
 The most favorable scenario consists of one component which uses many
-components, and is only used by one other component. \GH{fait une figure pour
-  illustrer ce cas}
+components, and is only used by one other component, \emph{e.g.} in
+Figure~\ref{fig:freespec:memc}.
 %
 Let $\I$ and $\J$ be two interfaces and let $C$, a component with a set of
 possible states $\mathcal{S}$, which exhibits $\I$ and uses $\J$.
@@ -1525,17 +1554,10 @@ invariant for the induction, and a sufficient condition to enforce compliance.
   %
   We prove $\func{sync}_{\mathrm{MCH}}$ satisfies the three premises of the
   Theorem~\ref{theorem:der-compliance}. We conclude we can derive an operational
-  semantics from $C_{\mathrm{MCH}}$ which complies with
-  $A_{\mathrm{MCH}}$.
-  %
-  \GH{lien vers le code Coq}
+  semantics from $C_{\mathrm{MCH}}$ which complies with $A_{\mathrm{MCH}}$.
 \end{example}
 
 \paragraph{Predicate of Non-Interference.}
-%
-\GH{je trouve le terme non-interference casse gueule... Il faudrait a minima
-  dire que c'est différent de la propriété de non-interference classiquemen
-  utilisée en IFC... Le mieux est de trouver un autre nom}
 %
 Another common composition pattern consists of a component which is used by more
 than one other component, \emph{e.g.} the memory controller in
@@ -1665,10 +1687,12 @@ Figure~\ref{fig:freespec:interfacedriven}, using FreeSpec requires to take into
 account the cache, and to verify it complies with an abstract specification
 similar to the one defined in Example~\ref{ex:mch-abs-specs}.
 %
+As we explained in Example~\ref{example:freespec:compoattack}, such a proof was
+not possible to write prior to 2009, because the cache was lacking an access
+control mechanism for the SMRAM at that time.
+%
 Thus, FreeSpec could have helped uncover the SMRAM cache poisoning attack
 previously mentioned\,\cite{wojtczuk2009smram,duflot2009smram}.
-%
-\GH{on ne comprend pas trop pourquoi}
 
 The abstract specifications are defined in terms of interfaces, \emph{i.e.}
 independently from components.
