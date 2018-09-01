@@ -1474,13 +1474,14 @@ theorem provers.
 
 \subsection{Compositional Reasoning for Theorem Provers}
 \label{subsec:sota:peff}
-
+\GH{l'approche B arrive un peu comme un cheveu sur la soupe. Il faudrait une petite phrase d'accroche qui justifie pourquoi tu vas nous parler de çà. Peut-être un truc qui dit que l'approche qui a le plus étudié la composition est la méthode B, ou un truc du genre. En outre, B n'apparait pas dans la section précédente sur les outils. Peut-être est-ce par ce que B n'est qu'une méthodologie et que plusieurs ouils peuvent être utilisé. Il faudrait le rappeler.}
 Several
 approaches\,\cite{souquieres2005verifying,chouali2006proving,lanoix:hal-00105041}
 have been proposed to implement compositional reasoning for the
 B-method\,\cite{abrial2005b}, a well-established method of software development
 based on the B formal system, set the bar high for compositional reasoning by
-means of a theorem prover.
+means of a theorem prover. \GH{la fin de la phrase "set the bar high for compositional reasoning by
+means of a theorem prover." est bizarre. Il faudrait a minima faire 2 phrases et expliciter un peu la seconde.}
 
 B allows for the definition of functional specifications, called abstract
 machines, and the refinement of these specifications up to executable code.
@@ -1510,6 +1511,8 @@ following reasoning:
   similarly to what aggregation enables in object-orienting programming
   language.
 \end{itemize}
+
+\GH{il manque ici une mini conclusion sur B et une transition plus marquée vers ce qui suit. }
 
 To the extend of our knowledge, the \texttt{Coq.io} framework, developed and
 released by Guillaume Claret \emph{et al.}\,\cite{claret2015coqiowww},
@@ -1552,7 +1555,7 @@ A program with effects can be verified, but the verification of the composition
 of this program with its environment is out of the scope of the project.
 
 Monads have a reputation not to compose very well\,\cite{hyland2006combining},
-despite constructions such as monad transformers\,\cite{liang1995mtl}.
+despite constructions such as monad transformers\,\cite{liang1995mtl}. \GH{En fait, ce qui n'est pas très claire dans ce passage, c'est que cette sous-section est censée parler de "compositional Reasoning for theorem prover". On ne comprends donc pas pourquoi tu nous parles d'un truc (les monades) "[that] have a reputation not to compose very well"}
 %
 Recently, algebraic effects and effect handlers\,\cite{bauer2015effects}
 %
@@ -1598,7 +1601,8 @@ Chapter~\ref{chapter:speccert2}.
 We decided to use Coq, because its higher-logic allows us to easily express the
 specificities of our approach.
 %
-However, a general-purpose x86 hardware model poses an important challenge due
+
+A general-purpose x86 hardware model poses an important challenge due
 to the scale of the hardware architecture.
 %
 Previous works have advocated for compositional reasoning approaches, such as
@@ -1607,4 +1611,4 @@ rely-guarantee\,\cite{jones1983tentative} paradigms, as an interesting solution
 to tackle these challenges\,\cite{garg2010compositional,heyman2012securemodel}.
 %
 However, to our surprise, compositional reasoning for component-based systems
-has not been widely explored in Coq.
+has not been widely explored in Coq. \GH{il manque une phrase pour positionner ton travail sur freepsec et annoncer ce que tu vas présenter en section 6, comme tu l'a fait dans le paragraphe précédent pour ce qui relève de speccert.}
