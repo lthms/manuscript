@@ -3,7 +3,7 @@
 \label{chapter:speccert}
 
 \endquote{``\emph{The purpose of abstraction is not to be vague, but to create a
-    new semantic level in which one can be absolutely precise}''
+    new semantic level in which one can be absolutely precise.}’’
 
   \hfill\footnotesize --- Edsger Dijkstra}
 
@@ -32,7 +32,7 @@ proceed through a case study focused on a so-called code injection policy.
 More precisely, we prove how we can enforce this policy by means of two \ac{hse}
 mechanisms implemented at the same time (Section~\ref{sec:speccert:casestudy}).
 %
-This case study is used as the basis of a more in-depth experiment in the next
+This case study is used as the basis for a more in-depth experiment in the next
 Chapter.
 
 For readers familiar with Coq, we present an implementation of our theory in
@@ -58,7 +58,7 @@ Our motivation to separate the model of the hardware architecture and \ac{hse}
 mechanism definitions is to enable the reuse of the same hardware model to
 verify the correctness of several \ac{hse} mechanisms.
 %
-Beside, it makes reasoning about \ac{hse} mechanisms composition ---that is, the
+Besides, it makes reasoning about \ac{hse} mechanisms composition ---that is, the
 implementation, at the same time, of two \ac{hse} mechanisms or more--- possible
 (\ref{subsec:speccert:compo}).
 
@@ -72,7 +72,7 @@ with two sets of labels instead of one.
 
 \paragraph{States.}
 %
-The set of states of the \ac{lts} models the possible configurations of the
+The set of states of the \ac{lts} models possible configurations of the
 hardware components.
 %
 This configuration changes over time with respect to the hardware specifications
@@ -84,7 +84,7 @@ These state transformations occur during the system's transitions.
 \paragraph{Labeled Transitions.}
 %
 We distinguish between two classes of transitions: the software transitions
-which are direct and foreseeable side effects of the execution of an instruction
+which are direct and foreseeable side effects of the execution of instructions
 and the hardware transitions which are not.
 %
 Following the terminology of David Basin \emph{et
@@ -462,7 +462,7 @@ disposal cannot put the system into an unsafe state.
 \end{definition}
 
 On the one hand, a \ac{hse} mechanism definition which does not satisfy the
-first law is incorrectly making assumption about ``untrusted'' software
+first law is incorrectly making assumptions about ``untrusted'' software
 components.
 %
 This makes these components part of the \ac{tcb} \emph{de facto}, even though
@@ -478,14 +478,14 @@ As it stands, it lets the hardware architecture reach a state wherein the
 hardware configuration does not satisfy the requirements over states, despite
 the correct implementation of the mechanism by the trusted software components.
 %
-In such a condition, the hardware architecture may stop to constrain the
+In such a condition, the hardware architecture may stop constraining the
 execution of untrusted software components with respect to the targeted security
 policy.
 %
 This could mean that constraints over trusted software components execution are
 incomplete, or that requirements over hardware states are too restrictive.
 %
-If the requirements over hardware states cannot be loosen without threatening
+If the requirements over hardware states cannot be loosened without threatening
 the security policy enforcement or finding restrictions over trusted software
 execution, then the \ac{hse} mechanism probably does not serve its purpose.
 
@@ -524,12 +524,12 @@ execution, then the \ac{hse} mechanism probably does not serve its purpose.
   %
   First, the flash memory is effectively opened.
   %
-  This has to be modelled by a software transition.
+  This has to be modeled by a software transition.
   %
   Then, the \ac{pch} triggers a \ac{smi}, leading the \ac{cpu} to enter
   \ac{smm}.
   %
-  A \ac{smi} has to be modelled as a hardware transition.
+  A \ac{smi} has to be modeled as a hardware transition.
   %
   Between the modification of the \texttt{BIOS\_CNTL} register and the treatment
   of the \ac{smi} by the \ac{cpu}, the \func{hardware\_req} predicate is not
@@ -593,7 +593,7 @@ to comply with this mechanism.
 
 \begin{lemma}[HSE Invariant Enforcement]
   \label{lemma:speccert:hseinv}
-  As intended, \func{hardware\_req} is an invariant of traces which complies
+  As intended, \func{hardware\_req} is an invariant of traces which comply
   with $\Delta$, that is
   %
   \[
@@ -622,7 +622,7 @@ mechanism.
 \label{subsec:speccert:security}
 
 It is important to keep in mind that preserving a set of requirements over
-states is only a mean to an end.
+states is only a means to an end.
 %
 The true purpose of a \ac{hse} mechanism is to constrain the execution of
 untrusted software components with respect to a targeted security policy.
@@ -647,7 +647,7 @@ In such a case, only a core in \ac{smm} can read or write to the SMRAM.
 As it stands, the \ac{hse} mechanism described here satisfies both laws.
 %
 The rest of the software component can try to read from or write to the SMRAM
-(first law), but the memory controller will protect its integrity in presence of
+(first law), but the memory controller will protect its integrity in the presence of
 a core not in \ac{smm} (second law).
 %
 However, between the core and the memory controller lies the cache, as pictured
@@ -662,7 +662,7 @@ integrity of the SMRAM is enforced, so only a core in \ac{smm} can access to the
 content of the SMRAM.
 %
 However, when this core leaves the \ac{smm}, the content of the SMRAM remains in
-the cache, and nothing an untrusted software component to modify these copies.
+the cache, and nothing prevents an untrusted software component to modify these copies.
 %
 When the core enters in \ac{smm} again, it fetches the (modified) content of the
 cache in place of the true SMRAM content.
@@ -745,7 +745,7 @@ In the context of this thesis, we focus on safety properties.
 To the extent of our knowledge, the majority of \ac{hse} mechanisms target
 access control policies, which qualify as safety properties.
 %
-The reasoning is facilitate because they are characterized by predicates on
+The reasoning is facilitated because they are characterized by predicates on
 transitions.
 %
 The following theorem takes advantage of this fact.
@@ -771,7 +771,7 @@ The following theorem takes advantage of this fact.
   \]
 
   \begin{proof}
-    By definition, a HSE mechanisn \( \Delta \) is correct with respect to a
+    By definition, a HSE mechanism \( \Delta \) is correct with respect to a
     security policy characterized by a predicate on transitions \( P \) if the
     transitions of its compliant traces satisfy \( P \).
     %
@@ -781,7 +781,7 @@ The following theorem takes advantage of this fact.
     We also know by definition of compliant traces that their transitions
     satisfy \func{software\_req}.
     %
-    Therefore, if we can prove that transition which satisfy both
+    Therefore, if we can prove that transitions which satisfy both
     \func{hardware\_req} and \func{software\_req} also satisfy \( P \), then we
     can conclude that transitions of compliant traces satisfy \( P \).
     %
@@ -789,7 +789,7 @@ The following theorem takes advantage of this fact.
   \end{proof}
 \end{theorem}
 
-A proof of correctness of a given \ac{hse} mechanism asserts that the hardware
+A proof of the correctness of a given \ac{hse} mechanism asserts that the hardware
 architecture enforces a targeted security policy \emph{if trusted software
   components correctly implement this \ac{hse} mechanism}, that is their
 executions only imply software transitions which satisfy the appropriate
@@ -797,7 +797,7 @@ requirements.
 %
 If attackers are able to modify the instructions of the trusted software
 components programs, they can defeat the security enforcement by modifying the
-instructions responsible to implement it.
+instructions responsible for implementing it.
 %
 % \GH{ce n'est pas le seul risque (même si c'est le plus important). De manière
 % générale, si un composant non trusté peu influencer le comportement d'un code
@@ -883,7 +883,7 @@ a list of sub-mechanisms is not important.
 Secondly, the set of compliant traces of the composition of two mechanisms is
 the intersection of the sets of compliant traces of these mechanisms.
 %
-In other word, to comply with the composition of two \ac{hse} mechanisms, a
+In other words, to comply with the composition of two \ac{hse} mechanisms, a
 trace has to comply with each mechanism individually.
 
 \begin{lemma}[Commutative Monoid]
@@ -910,7 +910,7 @@ trace has to comply with each mechanism individually.
   \begin{proof}
     \( \sqcap \) is defined with operators which themselves form monoids.
     %
-    For each properties, the proof consists in unfolding the definition of
+    For each property, the proof consists of unfolding the definition of
     \( \sqcap \) and relying on the properties of \( \cup \) and \( \wedge \).
     %
     \hfill \( \square \)
@@ -955,7 +955,7 @@ The definition of a composition operator poses the question of \ac{hse}
 mechanisms compatibility.
 %
 There are obvious scenarios where two \ac{hse} mechanisms \( \Delta_1 \) and
-\( \Delta_2 \) can be doubtlessly considered incompatible.
+\( \Delta_2 \) can doubtlessly be considered incompatible.
 %
 For instance, \( \mathcal{C}(\Delta_1 \sqcap \Delta_2) = \emptyset \) would mean
 it is not possible to implement both at the same time.
@@ -967,8 +967,8 @@ able to serve its purpose.
 %
 We advocate that a similar situation can occur for a single \ac{hse} mechanism.
 %
-Because we aimed to focused on hardware architecture verification in the context
-of this thesis, we therefore did not investigated further the compatibility of
+Because we aimed to focus on hardware architecture verification in the context
+of this thesis, we therefore did not investigate further the compatibility of
 \ac{hse} mechanisms.
 
 \section{Case Study: Code Injection Policy}
@@ -1077,7 +1077,7 @@ formal definition of a \textit{code injection}.
 \end{definition}
 
 It is important to emphasize that a code injection is not inherently a ``bad
-things.''
+thing.''
 %
 A software component initialization is most of the time the result of a code
 injection.
@@ -1090,7 +1090,7 @@ injection.
   ring~3, it executes instructions which are owned by the OS.
 \end{example}
 
-On the contrary, an illegitimate code injection poses a significant threats
+On the contrary, an illegitimate code injection poses a significant threat
 against the security of the software stack, because it constitutes an attack
 vector for privilege escalation.
 %
@@ -1180,7 +1180,7 @@ system and \( n \) applications.
 \begin{definition}[BIOS-OS-Applications Code Injection Policy]
   \label{definition:speccert:isolation}
 
-  For a software stack made of a \ac{bios}, an operating system an \( n \)
+  For a software stack made of a \ac{bios}, an operating system and \( n \)
   applications, that is
   \[
     S \triangleq \{ \mathtt{bios}, \mathtt{os}, \mathtt{app}_1, \dots
@@ -1296,7 +1296,7 @@ imply the enforcement of \( I \).
       satisfies \( I \)
       %
     \item Because of \( I_{\mathtt{os}} \), an application can only perform a
-      case injection against iteslf, which also satisfies \( I \). \hfill
+      case injection against itself, which also satisfies \( I \). \hfill
       \( \square \)
     \end{itemize}
   \end{proof}
@@ -1304,7 +1304,7 @@ imply the enforcement of \( I \).
 
 \subsection*{}
 
-In this Section, we specified a general-purpose called code injection policy,
+In this Section, we specified a general-purpose policy called code injection policy,
 and detailed how we could apply it to a typical software stack made of a
 \ac{bios}, an operating system and \( n \) applications.
 %
@@ -1329,7 +1329,7 @@ against the same hardware model.
 %
 We believe this is an essential property; in practice, these multiple mechanisms
 are implemented at the same time by different software components, and they may
-interfere with each other, as illustrated by the SENTER Sandman attack discussed
+interfere with each other, as illustrated by the \texttt{SENTER} Sandman attack discussed
 in Subsection~\ref{subsec:usecase:hse:sandman}.
 
 Throughout this Chapter, we have tried to illustrate our definitions with
