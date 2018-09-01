@@ -88,19 +88,18 @@ proposed. Choosing between one of these tools means making a necessary
 compromise between expressiveness, automation, and applicability
 (\ref{subsec:sota:tools}).
 %
-In this thesis, we advocate for defining \ac{hse} mechanisms of a given hardware
-architecture against a general-purpose model of this architecture, comprehensive
-in terms of hardware components, rather than verifying each \ac{hse} mechanism
-against a specific model. \GH{cette phrase est peut-être un peu forte par rapport à ce que tu as fait réellement. Je propose de la supprimer}
+Regarding our objective, we need to use hardware models which take into account
+the composition of the many hardware components involved in \ac{hse} mechanisms
+implementation.
 %
 Many x86 models have been proposed over years, but to the extent of our
 knowledge, none of them cover the hardware features we are primarily interested
 in (\ref{subsec:sota:ltsrelated}).
 %
-To experiment with our formal theory of \ac{hse} mechanisms, we compromise and
-relied on a ad-hoc model, with the aim of identifying desirable properties for a
-large-scale model that would optimize the applicability of our approach. \GH{plutot que "compromise" qui donne l'impression de s'excuser, je dirai "on a proposé un modèle qui couvre les features dont on a besoin. La specification de ce modèle nous a permis d'identifier les propriétés nécessaire "for a
-large-scale model that would optimize the applicability of our approach"}
+To experiment with our formal theory of \ac{hse} mechanisms, we propose our own
+model, and use this opportunity to identify necessary properties that a
+large-scale model should exhibit in order to remain applicable during a
+verification process.
 
 \subsection{Modeling a Hardware Architecture}
 \label{subsec:sota:ltsdef}
@@ -321,16 +320,16 @@ As for the labeled transition systems, their traces interleaves a label between
 each state\,\cite{vijayaraghavan2015modular}.
 
 \begin{example}[Airlock System Trace]
-  The crossing, by a user, of the airlock system is characterized by the
+  With \( \mathtt{c} = \mathtt{closed} \) and \( \mathtt{o} = \mathtt{open} \),
+  the crossing, by a user, of the airlock system is characterized by the
   following trace:
   \[
-    \footnotesize (\mathtt{closed}, \mathtt{closed})%
-    \!\xrightarrow{\mathtt{Open}_1}\!(\mathtt{open}, \mathtt{closed})%
-    \!\xrightarrow{\mathtt{Close}_1}\!(\mathtt{closed}, \mathtt{closed})%
-    \!\xrightarrow{\mathtt{Open}_2}\!(\mathtt{closed}, \mathtt{open})%
-    \!\xrightarrow{\mathtt{Close}_2}\!(\mathtt{closed}, \mathtt{closed})
+    \footnotesize (\mathtt{c}, \mathtt{c})%
+    \!\xrightarrow{\mathtt{Open}_1}\!(\mathtt{o}, \mathtt{c})%
+    \!\xrightarrow{\mathtt{Close}_1}\!(\mathtt{c}, \mathtt{c})%
+    \!\xrightarrow{\mathtt{Open}_2}\!(\mathtt{c}, \mathtt{o})%
+    \!\xrightarrow{\mathtt{Close}_2}\!(\mathtt{c}, \mathtt{c})
   \]
-  \GH{l'exemple dépasse du cadre}
 \end{example}
 
 
@@ -669,8 +668,8 @@ Therefore, higher order logic is more expressive than first-order logic, but it
 comes at a cost in terms of automation.
 %
 Interactive theorem provers (\emph{e.g.}  Coq\,\cite{coq},
-Isabelle/HOL\,\cite{nipkow2002isabelle}, or more recently
-Lean\,\cite{de2015lean}) are based on higher-order logic.
+Isabelle/HOL\,\cite{nipkow2002isabelle}, Atelier B\,\cite{abrial2005b}, or more
+recently Lean\,\cite{de2015lean}) are based on higher-order logic.
 
 We leverage a higher-order logic to propose our formal theory of \ac{hse}
 mechanisms.
@@ -710,7 +709,11 @@ specification\,\cite{leslie2015linsgx}.
 
 Each project focused on one aspect of the x86 architecture and led to uncover
 logic errors and inconsistencies in processor designs, while we aim for a more
-general-purpose model with a large scope with respect to hardware components. \GH{plutot que large scope (ce qui est discutable) tu pourrais insister sur l'interraction entre plusieurs composants. Les travaux d'Intel, de ce que je comprends, se sont plus intéressé à des propriétés "locales" à un composant. En outre, tu t'intéresse plus à la sécurité qu'à la spec fonctionnelle}
+general-purpose model which takes into account that hardware architecture are
+made of many components which interact together.
+%
+These (sometimes unsuspected) interactions may pave the road towards
+compositional attacks.
 %
 To the extend of our knowledge, Intel has not advertised about a ``global''
 model of its architecture, even though Nachiketh Potlapally, who was working at
@@ -719,7 +722,6 @@ Intel at the time, discussed the benefits of such a model in
 
 Besides, the models and tools used by Intel are rarely publicly available, hence
 we could not leverage them to experiment with our approach.
-%
 
 \paragraph{x86 ISA Models.}
 %
@@ -749,8 +751,8 @@ It is less suitable in the context of \ac{hse} mechanisms verification with
 respect to security policies, where multiple hardware components are involved,
 and the many features exposed by the latter may interfere with each others.
 
-It has been shown in the past that it is possible to extend such approaches, when their
-abstraction is too strong.
+It has been shown in the past that it is possible to extend such approaches,
+when their abstraction is too strong.
 %
 For instance, Chen \emph{et al.} have extended the hardware model of CompCertX,
 a variant of CompCert used in the development of formally verified
@@ -833,12 +835,13 @@ natural and straightforward (\emph{i.e.} an OS guest cannot write to or read
 from a page it does not own) up to non-interference variants including
 protection against cache-timing attacks, notoriously harder to reason with.
 %
-The model combines hardware and software components behavior, but remains
-remains an idealized \emph{hypervisor} model and we would have to make
-significant changes prior to using it. \GH{mouais, un peu vague. Il faut que tu soigne le positionnonement sur ce travail car c'est l'un de tes reviewer.}
+The use of labeled transitions to reason about the interactions of the guests
+with the underlying system ---made of the hardware architecture and the
+hypervisor--- constitutes an interesting approach that we could for modeling the
+interactions between the software components and the hardware model.
 %
-% \GH{pas d'autres limitation? Ca fait un peu léger. Peut-être que le modèle est
-% trop spécifique aux hyperviseurs?}
+However, the focus of VirtCert remains very specific and does not cover the
+\ac{smm} and related mechanisms.
 
 \paragraph{Models for Other Hardware Architectures.}
 %
@@ -1474,15 +1477,22 @@ theorem provers.
 
 \subsection{Compositional Reasoning for Theorem Provers}
 \label{subsec:sota:peff}
-\GH{l'approche B arrive un peu comme un cheveu sur la soupe. Il faudrait une petite phrase d'accroche qui justifie pourquoi tu vas nous parler de çà. Peut-être un truc qui dit que l'approche qui a le plus étudié la composition est la méthode B, ou un truc du genre. En outre, B n'apparait pas dans la section précédente sur les outils. Peut-être est-ce par ce que B n'est qu'une méthodologie et que plusieurs ouils peuvent être utilisé. Il faudrait le rappeler.}
+
+{\scshape Kami} demonstrates it is possible to model components in isolation,
+with an emphasis en how they interact together.
+%
+However, modeling the system is only a first step that proceeds a verification
+work.
+%
+To our surprise, compositional reasoning in presence of interconnected
+components has been less regarding in the theorem proving community, with the
+notable exception of the B-method\,\cite{abrial2005b}.
+
 Several
 approaches\,\cite{souquieres2005verifying,chouali2006proving,lanoix:hal-00105041}
-have been proposed to implement compositional reasoning for the
-B-method\,\cite{abrial2005b}, a well-established method of software development
-based on the B formal system, set the bar high for compositional reasoning by
-means of a theorem prover. \GH{la fin de la phrase "set the bar high for compositional reasoning by
-means of a theorem prover." est bizarre. Il faudrait a minima faire 2 phrases et expliciter un peu la seconde.}
-
+have been proposed to implement compositional reasoning for the B-method, a
+well-established method of software development based on the B formal system.
+%
 B allows for the definition of functional specifications, called abstract
 machines, and the refinement of these specifications up to executable code.
 %
@@ -1512,16 +1522,24 @@ following reasoning:
   language.
 \end{itemize}
 
-\GH{il manque ici une mini conclusion sur B et une transition plus marquée vers ce qui suit. }
+This approach implements the key concepts of compositional reasoning we are
+interested in.
+%
+However, the B-method proof environment is quit different from other theorem
+provers, such as Coq.
+%
+In particular, B is similar to imperative languages, when {\scshape Gallina} is
+a purely functional language.
 
 To the extend of our knowledge, the \texttt{Coq.io} framework, developed and
 released by Guillaume Claret \emph{et al.}\,\cite{claret2015coqiowww},
-represents the closest approach for Coq.
+represents the closest approach for Coq, but it addresses a different problem
+---that is reasoning about functional program in presence of side-effects--- and
+its compositional reasoning approach is far more limited.
 %
-It addresses a different problem, that is reasoning about functional program
-(such as {\scshape Gallina}) in presence of side-effects.
-%
-These side-effects are often carried out by an outer environment.
+\texttt{Coq.io} only considers two components: a program with side-effects, and
+an outer environment (typically the operating system) which carries out these
+effects.
 %
 For example, a program which reads the content of a file relies on an operating
 system to access the file stored in a hard drive and makes this content
@@ -1529,13 +1547,9 @@ available in its address space.
 
 Modeling side effects in pure programming language, such as Haskell or {\scshape
   Gallina}, is usually achieved thanks to
-monads\,\cite{wadler1990comprehending,jones2005io}. \GH{Dans ce qui suit, tu
-  supposes que tout le monde sait ce que sont les monades. J'en doute. En outre,
-  tu as été super pédagogique avec ce qui précède (et qui est finalement assez
-  éloigné de ton approche) et tu vas très (trop) vite sur la fin, alors que ce
-  sont les travaux les plus proches! Tu pourrais par exemple utiliser ton
-  exemple de air-lock}
-
+monads\,\cite{wadler1990comprehending,jones2005io}, and \texttt{Coq.io} is no
+exception.
+%
 Programs with effects in \texttt{Coq.io} are defined in a dedicated monad, with
 side effects (\emph{e.g.}  system calls to read from or write to a file)
 axiomatized as monadic operations of this monad.
@@ -1554,19 +1568,19 @@ Coq, but remains incomplete in our perspective.
 A program with effects can be verified, but the verification of the composition
 of this program with its environment is out of the scope of the project.
 
-Monads have a reputation not to compose very well\,\cite{hyland2006combining},
-despite constructions such as monad transformers\,\cite{liang1995mtl}. \GH{En fait, ce qui n'est pas très claire dans ce passage, c'est que cette sous-section est censée parler de "compositional Reasoning for theorem prover". On ne comprends donc pas pourquoi tu nous parles d'un truc (les monades) "[that] have a reputation not to compose very well"}
+Besides, traditional monadic approaches have a reputation not to compose very
+well\,\cite{hyland2006combining}, despite constructions such as monad
+transformers\,\cite{liang1995mtl}.
 %
-Recently, algebraic effects and effect handlers\,\cite{bauer2015effects}
+In our case, we explicitly need to handle the composition of several components,
+\emph{e.g.} if one component is connected to more than just one.
 %
-\GH{Idem que pour les monades. Il faudrait expliquer un peu ce que sont les
-  effets algébric et les effect handlers}
-%
-have been proposed to address this limitation, and they have been the object of
+Recently, algebraic effects and effect handlers\,\cite{bauer2015effects} have
+been proposed to address this limitation, and they have been the object of
 implementations for several significant functional programming languages
 (\emph{e.g.}  Eff\,\cite{bauer2015effects}, {\scshape
   Idris}\,\cite{brady2013idris}, or Haskell\,\cite{kiselyov2013extensible}).
-%
+
 We advocate that an approach inspired by algebraic effects and effect handlers
 can be used to implement a compositional approach for Coq similar to what others
 have already proposed for the B-method, in particular by Lanoix \emph{et
@@ -1602,13 +1616,16 @@ We decided to use Coq, because its higher-logic allows us to easily express the
 specificities of our approach.
 %
 
-A general-purpose x86 hardware model poses an important challenge due
-to the scale of the hardware architecture.
+A general-purpose x86 hardware model poses an important challenge due to the
+scale of the hardware architecture.
 %
 Previous works have advocated for compositional reasoning approaches, such as
 assume-guarantee\,\cite{pnueli1985ag} or
 rely-guarantee\,\cite{jones1983tentative} paradigms, as an interesting solution
 to tackle these challenges\,\cite{garg2010compositional,heyman2012securemodel}.
 %
-However, to our surprise, compositional reasoning for component-based systems
-has not been widely explored in Coq. \GH{il manque une phrase pour positionner ton travail sur freepsec et annoncer ce que tu vas présenter en section 6, comme tu l'a fait dans le paragraphe précédent pour ce qui relève de speccert.}
+However, to our surprise, the subject has not been widely explored in Coq.
+%
+In Chapter~\ref{chapter:freespec}, we propose a novel formalism which leverages
+existing functional programming language paradigms to enable compositional
+reasoning in Coq.
