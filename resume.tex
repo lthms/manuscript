@@ -1,14 +1,13 @@
+%!TEX root = ./main.tex
 \chapter{Résumé de la thèse}
 
 \begin{otherlanguage}{french}
   Dans le cadre de cette thèse, nous nous intéressons à une classe particulière
-  de mécanismes d’application de politiques de sécurité qui consistent en la
-  configuration, par un ou plusieurs logiciels de confiance, de la plate-forme
-  matérielle afin de contraindre l’exécution du reste de la pile logicielle à
+  de mécanismes de sécurité. Ces mécanismes nécessitent qu'un ou plusieurs logiciels de confiance configurent la plate-forme matérielle afin de contraindre l’exécution du reste de la pile logicielle à
   respecter une politique de sécurité donnée.
   %
   Nous qualifierons par la suite de mécanisme HSE (de l’anglais
-  \emph{Hardware-based Security Enforcement mechanisms}) les instances de cette
+  \emph{Hardware-based Security Enforcement}) les instances de cette
   classe.
   %
   L’utilisation par le système d’exploitation des mécanismes de pagination pour
@@ -18,30 +17,28 @@
   \subsection*{Contexte}
 
   Le contournement d’une politique de sécurité normalement assurée par le biais
-  d’un mécanisme HSE peut s’expliquer par une erreur dans sa mise en œuvre aussi
-  bien dans l’un des logiciels de confiance que dans les mécanisme matériels sur
-  lesquels il se repose.
+  d’un mécanisme HSE peut s’expliquer par une erreur dans sa mise en œuvre, aussi
+  bien dans l’un des logiciels de confiance chargé de sa configuration que dans les mécanismes matériels sur  lesquels il se repose.
   %
-  Dans le cadre de cette thèse, nous nous somme intéressés à ce second cas, et
+ Nous nous somme intéressés à ce second cas, et
   plus spécifiquement encore au problème des erreurs affectant les
   spécifications de la plate-forme.
   %
   Cette dernière est composée de plusieurs dizaines de composants interagissant
-  ensemble; la complexité résultante de ces interactions rend en pratique
+  ensemble et la complexité résultante de ces interactions rend en pratique
   difficile la conception d’un mécanisme à visée sécuritaire.
   %
   Pour chaque nouvelle fonctionnalité que le concepteur de la plate-forme désire
-  ajouter, il doit la mettre en perspective des mécanismes déjà présents, pour
-  s’assurer
+  ajouter, il est nécessaire de s’assurer
   %
   \begin{inparaenum}[(1)]
   \item qu’elle n’interfère pas avec les mécanismes HSE existants et
   %
-  \item qu’elle n’est pas contournable par le biais d’une fonctionnalité
+  \item qu'il n'est pas possible de la contourner par le biais d’une fonctionnalité
     antérieure.
   \end{inparaenum}
   %
-  Un exemple extrême de ces risques est l’attaque \emph{\texttt{SENTER} Sandman}
+  Ces risques peuvent être critiques pour la sécurité de la plate-forme comme l'illustre l’attaque \emph{\texttt{SENTER} Sandman}
   présentée en 2015 par Xeno Kovah \emph{et al.}\,\cite{kovah2015senter}.
   %
   Les auteurs ont montré qu’il était possible de modifier le contenu de la
@@ -59,21 +56,21 @@
   Dans le cas particulier des mécanismes HSE, les vulnérabilités successives
   affectant l’architecture
   x86\,\cite{duflot2009smram,wojtczuk2009smram,domas2015sinkhole,kallenberg2015racecondition,kovah2015senter}
-  ont été caractérisée par une sévérité très importante, car les-dits mécanismes
-  visaient à assurer l’isolation de la couche la plus basse ---~et, par voie de
-  conséquence, la plus privilégiée~--- de la pile logicielle.
-
+  ont été caractérisées par une sévérité très importante, car ces mécanismes
+  visent à assurer l’isolation de la couche la plus basse ---~et, par voie de
+  conséquence, la plus privilégiée~--- de la pile logicielle : le BIOS. \GH{j'ai rajouté explicitement le BIOS car sinon ta phrase était un peu vague. Par contre, il faudrait définir l'acronyme car c'est la première fois qu'il est utilisé il me semble. Je te laisse faire cela proprement.}
+ 
   \subsection*{Objectifs}
 
   Dans cette thèse, nous avons cherché à proposer une approche rigoureuse pour
   spécifier et vérifier, par le biais de méthodes formelles, des mécanismes HSE.
   %
-  Notre hypothèse de départ est qu’une telle approche bénéficierait aux à la
+  Notre hypothèse de départ est qu’une telle approche bénéficierait à la
   fois aux concepteurs des plate-formes matérielles et aux développeurs de
-  logiciels.
+  logiciels qui s'appuient sur les mécanismes matériels de ces plate-formes.
   %
   Les premiers pourraient vérifier que leurs mécanismes matériels permettent
-  effectivement l’application des politiques de sécurité visées.
+  effectivement de mettre en œuvres les politiques de sécurité visées.
   %
   Quant aux seconds, ils pourraient profiter de spécifications décrivant sans
   ambiguïtés les exigences auxquelles leurs logiciels doivent se conformer pour
@@ -82,15 +79,15 @@
   Notre démarche se place à la croisée de deux domaines de vérification.
   %
   La vérification matérielle, d’une part, se concentre généralement sur des
-  propriétés qui s’appliquent dans l’absolu à la plate-forme comme à la pile
+  propriétés qui s’appliquent dans l’absolu \GH{"inconditionnellement" me semble plus approprié que "dans l'absolu". Qu'en penses-tu? }à la plate-forme comme à la pile
   logicielle exécutée par cette dernière.
   %
   De nombreux travaux ont ainsi cherché à vérifier des protocoles de cohérence
-  de caches (REF), ou la correcte implémentation par un processeur d’un modèle
-  mémoire (REF).
+  de caches (REF), ou la correction de implémentation d’un modèle
+  mémoire par un processeur (REF). \GH{il te manque deux ref à mettre ;-)}
   %
   La vérification de logiciels bas niveaux, notamment des systèmes
-  d’exploitation ou des hyperviseurs, d’autre part, se repose naturellement sur
+  d’exploitation ou des hyperviseurs, se repose naturellement sur
   des modèles de la plate-forme matérielle sous-jacente.
   %
   Néanmoins, ces modèles abstraient bien souvent autant que faire se peut la
@@ -104,11 +101,11 @@
 
   Les travaux qui se rapprochent le plus de notre objectif et dont nous avons
   connaissance sont ceux de Jomaa \emph{et al.}\,\cite{jomaa2016mmu}, en lien
-  avec le protokernel Pip (REF).
+  avec le protokernel Pip (REF). \GH{reférence}
   %
   Nous nous inscrivons dans la continuité de cette approche, mais cherchons à
   dégager un formalisme beaucoup plus générique, qui reposerait notamment sur un
-  modèle matériel le plus générique et complet possible.
+  modèle matériel le plus générique possible.
   %
   Cependant, un tel modèle n’est pas sans poser de sérieux défis quant à son
   applicabilité dans un problème de vérification réaliste.
@@ -141,7 +138,7 @@
   %
   Elle s’articule autour d’une méthodologie divisée en plusieurs étapes.
   %
-  L’architecture matérielle est dans un premier temps modélisé sous la forme
+  L’architecture matérielle est dans un premier temps modélisée sous la forme
   d’un système de transitions étiquetées (\emph{labeled transition system}, en
   anglais, désigné par la suite par l’acronyme LTS).
   %
@@ -149,24 +146,26 @@
   d’étiquettes et une relation de transition.
   %
   Une étiquette est attachée à chaque transition pour permettre de leur attacher
-  un sens particulier.
+  un sens particulier. \GH{redondance de "attacher". Je suggère "pour leur donner une sémantique particulière" plutôt que "pour permettre de leur attacher
+  un sens particulier". Qu'en penses-tu?}
   %
   Le plus souvent, l’étiquette permet de décrire ce qui a causé la transition.
   %
-  Une trace d’un LTS est une séquence potentiellement infinie de transitions
-  décrit un comportement possible du système; dans le cas qui nous intéresse,
+  
+  Une trace d’un LTS est une séquence potentiellement infinie de transitions et
+  décrit un comportement possible du système. Dans le cas qui nous intéresse,
   une trace décrit une exécution d’une pile logicielle par la plate-forme.
   %
-  La formalisation de politique de sécurité pour des systèmes de transitions est
+  La formalisation de politiques de sécurité pour des systèmes de transitions est
   désormais bien établie.
   %
-  Ces dernières peuvent être formellement définies sous la forme de prédicats de
+  Ces politiques peuvent être formellement définies sous la forme de prédicats de
   traces\,\cite{lamport1977proving,lamport1985logical,lamport1985logical,alpern1985liveness}
   ou, dans les cas les plus complexes, d’ensemble de
   traces\,\cite{clarkson2010hyperproperties}.
 
-  Dans notre théorie, un modèle matériel dans notre théorie se présente sous la
-  forme d’un quadruplet \( \langle H, L_S, L_H, \rightarrow \rangle \), où
+  Dans notre théorie, un modèle matériel se présente sous la
+  forme d’un quadruplet \( \langle H, L_S, L_H, \rightarrow \rangle \), où :
   %
   \begin{itemize}
   \item \( H \) est l’ensemble des états que peut prendre le LTS, par exemple la
@@ -181,27 +180,27 @@
   \item \( \rightarrow \) est la relation de transition du système.
   \end{itemize}
 
-  En se basant sur un modèle matériel de cette forme, nous pouvons spécifier un
+  En se basant sur ce type de modèle matériel, nous pouvons spécifier un
   mécanisme HSE sous la forme d’un ensemble le logiciels de confiance chargés
   d’implémenter ce mécanisme et d’exigences qu’ils doivent respecter pendant
-  leur exécution.
+  leurs exécutions.
   %
   À partir de cette définition, il est possible de dégager un sous-ensemble de
   traces du modèle matériel dans lesquelles les logiciels de confiance ont
   correctement implémenté le mécanisme HSE étudié, en respectant à tout moment
   les deux exigences.
   %
-  Par la suite, un mécanisme HSE peut ensuite être prouvé correct vis-à-vis de
+  Par la suite, un mécanisme HSE peut être prouvé correct vis-à-vis de
   la politique de sécurité qu’il cherche à mettre en œuvre, si le sous-ensemble
   des traces du modèle matériel qui le caractérisent satisfont le prédicat
-  formalisant la-dite politique.
+  formalisant la politique.
 
   Nous avons déroulé notre méthodologie sur un exemple réel, à savoir le
   mécanisme \ac{hse} implémenté par les BIOS des plate-formes x86 pour isoler
-  leur exécution de celles du reste de la pile logicielle.
+  leur exécution de celles des logiciels appartenant au reste de la pile logicielle.
   %
   Ce mécanisme \ac{hse} repose sur des fonctionnalités matérielles relativement
-  peu connues, en particulier un contexte d’exécution particulier des
+  peu connues, notamment un contexte d’exécution particulier des
   processeurs d’Intel ---~au même titre que les \emph{rings}, par exemple~---
   nommé le \emph{System Management Mode} (SMM).
   %
@@ -211,26 +210,25 @@
   désastreuses pour la sécurité de la plate-forme.
   %
   Malheureusement, il a été l’objet en dix ans de plusieurs vulnérabilités
-  profitant d’incohérence dans les différents composants matériels impliqués
-  dans son
-  isolation\,\cite{duflot2009smram,wojtczuk2009smram,domas2015sinkhole}.
+  profitant d’incohérences dans les différents composants matériels impliqués
+  dans son  isolation\,\cite{duflot2009smram,wojtczuk2009smram,domas2015sinkhole}.
   %
-  Parce que le SMM et les autres mécanismes matériels impliqués dans le
-  mécanisme HSE qui nous intéresse n’est pas pris en compte dans les modèles x86
-  de notre connaissance, nous avons dû en définir un.
+  Parce que le SMM, ainsi que les autres mécanismes matériels impliqués dans le
+  mécanisme HSE qui nous intéresse, ne sont pas pris en compte dans les modèles x86
+  de notre connaissance, nous avons dû en définir un nouveau.
   %
   Cette démarche s’est révélée riche d’enseignement quant aux propriétés qu’un
-  modèle générique et complet d’une plate-forme matérielle devrait exhiber pour
+  modèle générique d’une plate-forme matérielle devrait exhiber pour
   que ce dernier demeure utilisable dans un processus de vérification.
   %
-  La modularité tant de la modélisation que du travail de vérification est, de
+  La modularité, tant de la modélisation que du travail de vérification est, de
   notre point de vue, l’élément clef à privilégier pour pouvoir accompagner au
   mieux un passage à l’échelle.
 
   \paragraph{Raisonnement par composition pour Coq.}
   %
   Le raisonnement par composition permet de vérifier chaque composant d’un
-  système complexe en isolation, en spécifier des hypothèses sur le comportement
+  système complexe en isolation, en spécifiant des hypothèses sur le comportement
   du reste du système d’une part et en s’assurant que le composant adoptera bien
   un comportement attendu en retour.
   %
@@ -238,7 +236,7 @@
   possible de raisonner sur la composition de chacun des éléments: si le
   comportement garanti pour un composant \( C_1 \) satisfait les hypothèses de
   raisonnement d’un second composant \( C_2 \), alors il est possible de
-  conclure que la composition de \( C_1 \) et de \( C_2 \) garanti le
+  conclure que la composition de \( C_1 \) et de \( C_2 \) garantit le
   comportement de \( C_2 \).
 
   Notre seconde contribution est une approche permettant la conduite de
@@ -252,20 +250,20 @@
   les \emph{handlers} d’effets\,\cite{bauer2015effects}~--- pour les appliquer
   au domaine de la vérification de plate-formes matérielles.
   %
-  Les modèles écrits dans notre formalisme sont lisibles et soulignent bien les
+  Les modèles écrits dans notre formalisme sont facilement lisibles et soulignent bien les
   connexions entre les différents composants.
   %
-  De plus, nous avons implémenter des tactiques dédiées permettant d’automatiser
+  De plus, nous avons implémenté des tactiques dédiées permettant d’automatiser
   en partie l’exploration de ces modèles, ce qui facilite grandement le travail
   de vérification.
 
-  Rien ne cantonne cependant le résultat de travail à ce seul domaine
-  d’application; il peut ainsi tout à fait s’appliquer dans le cadre de la
-  vérification d’un système purement logiciel, tant qu’il est découpé en
-  plusieurs composants interagissant ensemble,
+  Rien ne cantonne cependant le résultat de ce travail à la vérification de mécanismes HSE. 
+  Il peut ainsi tout à fait s’appliquer dans le cadre de la
+  vérification d’un système purement logiciel, dès lors que ce logiciel puisse être décrit sous la forme de
+   plusieurs composants interagissant ensemble.
   %
   La principale limitation de notre approche tient dans les contraintes que nous
-  imposons au interconnexions des composants du système.
+  imposons aux interconnexions des composants du système.
   %
   En l’état, FreeSpec ne permet par exemple pas de considérer des graphes qui
   contiennent des cycles ou des \og{} arêtes en avant \fg{} (\emph{forward
@@ -277,12 +275,9 @@
   successives.
 
   \subsection*{Travaux futures}
-
-  En l’état, nos deux contributions restent deux travaux de recherche clairement
-  identifiés et séparés.
   %
   La suite logique de nos travaux seraient d’appliquer le formalisme de FreeSpec
-  dans le cadre de la vérification d’un mécanisme HSE par le biais de notre
+  dans le cadre de la vérification complète d’un mécanisme HSE par le biais de notre
   théorie.
   %
   Par exemple, nous pourrions remplacer le modèle matériel que nous avons
@@ -291,7 +286,7 @@
   %
   Nous ne doutons par ailleurs pas que les limitations actuelles de notre
   approche pour un raisonnement par composition en Coq se heurtera à la
-  complexité inhérente aux architectures matérielles.
+  complexité inhérente aux architectures matérielles. \GH{Cette phrase n'est pas très claire. Peut-être que c'était le cas également de la version anglaise mais cela m'a échappé. On ne sait plus trop de quelle contribution tu parles (FreeSpec? SpecCert?)}
   %
   Les résoudre nous permettrait d’envisager le passage à l’échelle et donc la
   définition d’un modèle x86 générique, pouvant servir de support à une large
@@ -300,17 +295,16 @@
   %
   Cela poserait très vite la question de la confiance que l’on peut placer dans
   un tel modèle et notamment son adéquation avec ce qui est réellement
-  implémenter par le matériel.
+  implémenté par le matériel.
   %
   La validation de modèle est un problème de recherche à part entière.
   %
-  Dans notre cas, elle est rendue plus complexe par l’importante intégration des
-  composants matériels au sein de l’architecture.
+  Dans notre cas, elle est rendue plus complexe par le fait que beaucoup de
+  composants matériels sont fortement intégrés à la plate-forme matérielle et difficilement accessibles séparément. \GH{j'ai un peu reformulé ce passage. Est-ce que cela correspond à ce que tu voulais exprimer?}
   %
-  Quelle est la meilleure stratégie pour valider le modèle du \emph{Platform
+  C'est par exemple le cas du \emph{Platform
     Controller Hub} (PCH), le composant matériel qui fait l’intermédiaire entre
-  le processeur et les périphériques les moins demandant en vitesse d’accès, par
-  exemple ?
-  %
-  Ce dernier est paquagé directement dans la fabrique du processeur d’Intel.
+  le processeur et les périphériques les moins demandant en vitesse d’accès.
+    %
+  Ce dernier est maintenant directement intégré dans la fabrique du processeur d’Intel. \GH{je ne suis pas sur du sens de "fabrique" et de sa traduction française}
 \end{otherlanguage}
