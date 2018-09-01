@@ -116,14 +116,15 @@
   En effet, la complexité d’un modèle a un impact direct sur la facilité avec
   laquelle on peut l’exploiter.
   %
-  Il est donc important de se poser, en amont, les bonnes
-  questions quant à l’approche utilisée pour le définir, afin que les efforts
-  nécessaires pour sa conception ne soient pas dépensés en vain.
+  Il est donc important de se poser, en amont, les bonnes questions quant à
+  l’approche utilisée pour le définir, afin que les efforts nécessaires pour sa
+  conception ne soient pas dépensés en vain.
   %
-  Plusieurs travaux ont plaidé en faveur d’une approche basée sur le
-  \emph{compositional reasoning}, où le système est divisé en un sous-ensemble
-  de composants et la vérification axée autour de leurs interactions, pour faire
-  face à ces défis\,\cite{garg2010compositional,heyman2012securemodel}.
+  Plusieurs travaux ont plaidé en faveur d’une approche basée sur un
+  raisonnement par composition (\emph{compositional reasoning} en anglais), où
+  le système est divisé en un sous-ensemble de composants et la vérification
+  axée autour de leurs interactions, pour faire face à ces
+  défis\,\cite{garg2010compositional,heyman2012securemodel}.
 
   \subsection*{Contributions}
 
@@ -151,6 +152,18 @@
   un sens particulier.
   %
   Le plus souvent, l’étiquette permet de décrire ce qui a causé la transition.
+  %
+  Une trace d’un LTS est une séquence potentiellement infinie de transitions
+  décrit un comportement possible du système; dans le cas qui nous intéresse,
+  une trace décrit une exécution d’une pile logicielle par la plate-forme.
+  %
+  La formalisation de politique de sécurité pour des systèmes de transitions est
+  désormais bien établie.
+  %
+  Ces dernières peuvent être formellement définies sous la forme de prédicats de
+  traces\,\cite{lamport1977proving,lamport1985logical,lamport1985logical,alpern1985liveness}
+  ou, dans les cas les plus complexes, d’ensemble de
+  traces\,\cite{clarkson2010hyperproperties}.
 
   Dans notre théorie, un modèle matériel dans notre théorie se présente sous la
   forme d’un quadruplet \( \langle H, L_S, L_H, \rightarrow \rangle \), où
@@ -160,17 +173,144 @@
     valeur des registres des différents composants matériels de la plate-forme
     et le contenu de la DRAM;
   \item \( L_S \) est l’ensemble des étiquettes attachées aux transitions dites
-    logicielles;
+    logicielles, qui sont une conséquence directe et prévisible de l’exécution,
+    par la plate-forme matérielle, d’une instruction faisant parti du programme
+    d’un logiciel;
   \item \( L_H \) est l’ensemble des étiquettes attachées aux transitions dites
     matérielles;
   \item \( \rightarrow \) est la relation de transition du système.
   \end{itemize}
 
-  Une transition logicielle est une conséquence directe et prévisible de
-  l’exécution, par la plate-forme matérielle, d’une instruction faisant parti du
-  programme d’un logiciel.
+  En se basant sur un modèle matériel de cette forme, nous pouvons spécifier un
+  mécanisme HSE sous la forme d’un ensemble le logiciels de confiance chargés
+  d’implémenter ce mécanisme et d’exigences qu’ils doivent respecter pendant
+  leur exécution.
   %
-  Au contraire, une transition matérielle Les autres transitions, qui échappentn
+  À partir de cette définition, il est possible de dégager un sous-ensemble de
+  traces du modèle matériel dans lesquelles les logiciels de confiance ont
+  correctement implémenté le mécanisme HSE étudié, en respectant à tout moment
+  les deux exigences.
+  %
+  Par la suite, un mécanisme HSE peut ensuite être prouvé correct vis-à-vis de
+  la politique de sécurité qu’il cherche à mettre en œuvre, si le sous-ensemble
+  des traces du modèle matériel qui le caractérisent satisfont le prédicat
+  formalisant la-dite politique.
+
+  Nous avons déroulé notre méthodologie sur un exemple réel, à savoir le
+  mécanisme \ac{hse} implémenté par les BIOS des plate-formes x86 pour isoler
+  leur exécution de celles du reste de la pile logicielle.
+  %
+  Ce mécanisme \ac{hse} repose sur des fonctionnalités matérielles relativement
+  peu connues, en particulier un contexte d’exécution particulier des
+  processeurs d’Intel ---~au même titre que les \emph{rings}, par exemple~---
+  nommé le \emph{System Management Mode} (SMM).
+  %
+  Le SMM à ceci d’intéressant qu’il est le contexte d’exécution le plus
+  privilégiés de l’architecture x86, si bien qu’une escalade de privilège
+  permettant d’exécuter du code malveillant en SMM peut avoir des conséquences
+  désastreuses pour la sécurité de la plate-forme.
+  %
+  Malheureusement, il a été l’objet en dix ans de plusieurs vulnérabilités
+  profitant d’incohérence dans les différents composants matériels impliqués
+  dans son
+  isolation\,\cite{duflot2009smram,wojtczuk2009smram,domas2015sinkhole}.
+  %
+  Parce que le SMM et les autres mécanismes matériels impliqués dans le
+  mécanisme HSE qui nous intéresse n’est pas pris en compte dans les modèles x86
+  de notre connaissance, nous avons dû en définir un.
+  %
+  Cette démarche s’est révélée riche d’enseignement quant aux propriétés qu’un
+  modèle générique et complet d’une plate-forme matérielle devrait exhiber pour
+  que ce dernier demeure utilisable dans un processus de vérification.
+  %
+  La modularité tant de la modélisation que du travail de vérification est, de
+  notre point de vue, l’élément clef à privilégier pour pouvoir accompagner au
+  mieux un passage à l’échelle.
+
+  \paragraph{Raisonnement par composition pour Coq.}
+  %
+  Le raisonnement par composition permet de vérifier chaque composant d’un
+  système complexe en isolation, en spécifier des hypothèses sur le comportement
+  du reste du système d’une part et en s’assurant que le composant adoptera bien
+  un comportement attendu en retour.
+  %
+  Une fois cette première étape réalisée pour chaque composant, il devient
+  possible de raisonner sur la composition de chacun des éléments: si le
+  comportement garanti pour un composant \( C_1 \) satisfait les hypothèses de
+  raisonnement d’un second composant \( C_2 \), alors il est possible de
+  conclure que la composition de \( C_1 \) et de \( C_2 \) garanti le
+  comportement de \( C_2 \).
+
+  Notre seconde contribution est une approche permettant la conduite de
+  raisonnement par composition sur des composants modélisés grâce à un langage
+  purement fonctionnel\,\cite{letan2018freespec} ainsi qu’une implémentation
+  nommée FreeSpec de cette approche\,\cite{letan2018freespeccode} dans
+  l’assistant de preuve Coq\,\cite{coq}.
+  %
+  L’originalité de notre contribution est de mettre à profit des paradigmes
+  fonctionnels ---~les monades\,\cite{jones2005io}, les effets algébriques et
+  les \emph{handlers} d’effets\,\cite{bauer2015effects}~--- pour les appliquer
+  au domaine de la vérification de plate-formes matérielles.
+  %
+  Les modèles écrits dans notre formalisme sont lisibles et soulignent bien les
+  connexions entre les différents composants.
+  %
+  De plus, nous avons implémenter des tactiques dédiées permettant d’automatiser
+  en partie l’exploration de ces modèles, ce qui facilite grandement le travail
+  de vérification.
+
+  Rien ne cantonne cependant le résultat de travail à ce seul domaine
+  d’application; il peut ainsi tout à fait s’appliquer dans le cadre de la
+  vérification d’un système purement logiciel, tant qu’il est découpé en
+  plusieurs composants interagissant ensemble,
+  %
+  La principale limitation de notre approche tient dans les contraintes que nous
+  imposons au interconnexions des composants du système.
+  %
+  En l’état, FreeSpec ne permet par exemple pas de considérer des graphes qui
+  contiennent des cycles ou des \og{} arêtes en avant \fg{} (\emph{forward
+    edges} en anglais).
+  %
+  Cette contrainte est importante, mais dans la pratique, nous avons constaté
+  qu’il est possible d’étudier une architecture matérielle à un niveau de détail
+  où les composants s’organisent en arbre, selon une hiérarchie par couches
+  successives.
 
   \subsection*{Travaux futures}
+
+  En l’état, nos deux contributions restent deux travaux de recherche clairement
+  identifiés et séparés.
+  %
+  La suite logique de nos travaux seraient d’appliquer le formalisme de FreeSpec
+  dans le cadre de la vérification d’un mécanisme HSE par le biais de notre
+  théorie.
+  %
+  Par exemple, nous pourrions remplacer le modèle matériel que nous avons
+  développé pour spécifier et vérifier le mécanisme HSE implémenté par le BIOS
+  et juger l’impact que cela aurait sur le travail de vérification.
+  %
+  Nous ne doutons par ailleurs pas que les limitations actuelles de notre
+  approche pour un raisonnement par composition en Coq se heurtera à la
+  complexité inhérente aux architectures matérielles.
+  %
+  Les résoudre nous permettrait d’envisager le passage à l’échelle et donc la
+  définition d’un modèle x86 générique, pouvant servir de support à une large
+  collection de mécanismes HSE couramment implémentés par les couches basses de
+  la pile logicielle.
+  %
+  Cela poserait très vite la question de la confiance que l’on peut placer dans
+  un tel modèle et notamment son adéquation avec ce qui est réellement
+  implémenter par le matériel.
+  %
+  La validation de modèle est un problème de recherche à part entière.
+  %
+  Dans notre cas, elle est rendue plus complexe par l’importante intégration des
+  composants matériels au sein de l’architecture.
+  %
+  Quelle est la meilleure stratégie pour valider le modèle du \emph{Platform
+    Controller Hub} (PCH), le composant matériel qui fait l’intermédiaire entre
+  le processeur et les périphériques les moins demandant en vitesse d’accès, par
+  exemple ?
+  %
+  Ce dernier est paquagé directement dans la fabrique du processeur d’Intel.
 \end{otherlanguage}
