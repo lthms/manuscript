@@ -1,3 +1,4 @@
+%!TEX root = ../main.tex
 \chapter{Conclusion and Perspectives}
 \label{chapter:conclusion}
 
@@ -32,10 +33,7 @@ We steer a middle course between two domains: hardware verification and system
 software verification.
 %
 Generally, hardware verification focuses on properties which are transparent to
-the executed software (\emph{e.g.} cache
-coherency\,\cite{stern1995cachecoherence}, linearizability of SGX
-instructions\,\cite{leslie2015linsgx}, or hardware-based memory
-isolation\,\cite{lie2003xom}), and system software verification relies on
+the executed software and system software verification relies on
 hardware models which abstract the architecture complexity as much as possible .
 %
 On the contrary, when it comes to \ac{hse} mechanisms it is important to
@@ -51,13 +49,7 @@ consider that
   % hence the role played by trusted software components to configure them.
 \end{inparaenum}
 
-The rest of this final Chapter proceeds as follows.
-%
-We first give a brief summary of our two contributions
-(Section~\ref{sec:conclusion:summary}).
-%
-Then, we conclude this thesis by suggesting some possible directions for future
-work.
+In the following, we first give a brief summary of our two contributions and then suggest some possible directions for future work.
 
 \section{Summary of the Contributions}
 \label{sec:conclusion:summary}
@@ -86,11 +78,8 @@ software stack at runtime.
 We have written machine-checked proofs in Coq to increase our confidence in our
 result.
 %
-One the one hand, proofs related to the Chapter~\ref{chapter:speccert} have been
-commented in Appendix~\ref{appendix:speccert}.
-%
-On the other hand, proofs related to the Chapter~\ref{chapter:speccert2} have
-been released as a free software\,\cite{letan2016speccertcode}.
+Proofs related to the Chapter~\ref{chapter:speccert} have been
+commented in Appendix~\ref{appendix:speccert} and those related to the Chapter~\ref{chapter:speccert2} have been released as a free software\,\cite{letan2016speccertcode}.
 
 \paragraph{Compositional Reasoning for Coq.}
 %
@@ -99,7 +88,7 @@ enables modular verification of complex systems made of interconnected
 components.
 %
 This approach is the result of various lessons learned during the development of
-our proof of concept, and we believe it represents a first step towards
+our first proof of concept, and we believe it represents a first step towards
 addressing the challenge posed by the scale of the x86 hardware architecture.
 %
 Components of a system are primarily identified by the interface they expose,
