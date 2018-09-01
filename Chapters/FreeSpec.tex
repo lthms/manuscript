@@ -1377,11 +1377,11 @@ composition of operational semantics.
 %   \]
 % \end{theorem}
 
-With the Compliance Preservation, we know that as long as we follow the abstract
+With the compliance preservation, we know that as long as we follow the abstract
 specification precondition related to the effects we use, compliant operational
 semantics keep enforcing the postcondition.
 %
-With the Compliance Preservation and Congruent Composition, we know we can
+With the compliance preservation and congruent composition, we know we can
 reason locally, that is component by component.
 
 \subsection{Proofs Techniques to Show Compliance For Components}
@@ -1389,7 +1389,7 @@ reason locally, that is component by component.
 
 We have dived into the mechanisms which allow for composing together compliant
 operational semantics, but little has been said about how to prove the
-compliance property to begin with.
+compliance property.
 %
 In a typical FreeSpec use case, operational semantics are not built as-is, but
 rather derived from a component model
@@ -1408,12 +1408,12 @@ edge cannot be easily modelled and verified in FreeSpec.
 %
 In its current state, FreeSpec provides some theorems to verify the properties
 of a component model in terms of an abstract specification, depending on the
-composition pattern.
+composition pattern. \GH{Cette phrase est un peu vague. Soit plus précis sur ce qui est couvert actuelement. Quel théorème (lien vers le code) couvre quels pattern? Inutile de faire une longue descritption juste préciser le périmètre.}
 
 \paragraph{Predicate of Synchronization.}
 %
 The most favorable scenario consists of one component which uses many
-components, and is only used by one other component.
+components, and is only used by one other component. \GH{fait une figure pour illustrer ce cas}
 %
 Let $\I$ and $\J$ be two interfaces and let $C$, a component with a set of
 possible states $\mathcal{S}$, which exhibits $\I$ and uses $\J$.
@@ -1516,13 +1516,14 @@ invariant for the induction, and a sufficient condition to enforce compliance.
   %
   We prove $\func{sync}_{\mathrm{MCH}}$ satisfies the three premises of the
   Theorem~\ref{theorem:der-compliance}. We conclude we can derive an operational
-  semantics from $C_{\mathrm{MCH}}$ which complies with $A_{\mathrm{MCH}}$.
+  semantics from $C_{\mathrm{MCH}}$ which complies with $A_{\mathrm{MCH}}$. \GH{lien vers le code Coq}
 \end{example}
 
 \paragraph{Predicate of Non-Interference.}
 %
+\GH{je trouve le terme non-interference casse gueule... Il faudrait a minima dire que c'est différent de la propriété de non-interference classiquemen utilisée en IFC... Le mieux est de trouver un autre nom}
 Another common composition pattern consists of a component which is used by more
-than one other component.
+than one other component. \GH{petite figure}
 %
 FreeSpec provides a theorem which allows for extending the result obtained with
 the Theorem~\ref{theorem:der-compliance}, in the specific case where concurrent
@@ -1606,21 +1607,21 @@ correct with respect to \( A \).
 
   As a consequence, \( A_{\mathrm{MCH}} \| \func{pnf}_{\mathrm{IOMMU}} \), that
   is \( \func{pnf}_{\mathrm{IOMMU}} \) is a predicate of non-interference of \(
-  A_{\mathrm{MCH}} \).
+  A_{\mathrm{MCH}} \). \GH{de ce que je comprends, dans ce cas, tu donne juste le prédicat mais tu ne fais pas de preuve car tu es à la limite de ce que tu as modélisé. Il faudrait le préciser. Sinon, comme d'habitude, lien vers le code Coq}
 \end{example}
 
 \section{Conclusion}
 % =============================================================================
 \label{sec:freespec:scale}
 
-For two sections, we have introduced the FreeSpec key definitions and theorems
+In this Chapter, we have introduced the FreeSpec key definitions and theorems
 so that we could model a minimal memory controller component and verify its
 properties in the presence of a well-behaving DRAM controller.
 %
 This example has been driven by a real mechanism commonly found inside x86-based
 computing platforms.
 %
-We now discuss how FreeSpec can be leveraged to model and verify larger systems.
+We now discuss how FreeSpec can be leveraged to model and verify larger systems. \GH{Arg, çà n'a rien à faire dans une conclusion. Une conclusion résume ce qui a été présenté. Cela devrait faire l'objet d'une section ou sous-section à part.}
 % and limitations we anticipate.
 
 The typical workflow of FreeSpec can be summarized as follows: specifying the
@@ -1634,7 +1635,7 @@ system, as long as they agree on the interfaces and abstract specifications.
 %
 If, during the verification process, one group finds out a given interface or
 abstract specification needs to be updated, the required modifications may
-impact its neighbors.
+impact its neighbors. \GH{cette phrase n'est pas très claire. On pourrait comprendre que cela va à l'encontre de la modularité}
 %
 For instance, modeling a x86-based computing system, as pictured in
 Figure~\ref{fig:freespec:interfacedriven}, using FreeSpec requires to take into
