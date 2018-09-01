@@ -20,7 +20,7 @@ These attacks have in common to leverage inconsistencies in the hardware
 specifications to defeat security policies supposedly enforced by the hardware
 architecture.
 
-In this thesis, we have identified a class of security enforcement mechanisms we
+In this thesis, we have identified a class of security enforcement mechanisms
 called Hardwase-based Security Enforcement (HSE) mechanisms, which consist in
 the configuration by a trusted software component of the underlying hardware
 architecture in order to constrain the execution of untrusted software
@@ -109,8 +109,14 @@ components as well.
 \section{Perspectives}
 \label{sec:conclusion:perspectives}
 
-As they stand, our theory of \ac{hse} mechanisms and our compositional reasoning
-framework for Coq remain two separated projects.
+This thesis introduces a theory for specifying and verifying \ac{hse} mechanism as
+restrictions on hardware models, and a formalism to define and reason about
+these models in terms of interconnected components.
+
+\subsection*{Using FreeSpec to Specify and Verifying HSE Mechanisms}
+%
+Our theory of \ac{hse} mechanisms and our compositional reasoning framework for
+Coq remain two separated projects.
 %
 The most natural continuation of our work would be to connect them, \emph{e.g.}
 by substituting {\scshape Minx86} with a model developed thanks to FreeSpec.
@@ -118,8 +124,18 @@ by substituting {\scshape Minx86} with a model developed thanks to FreeSpec.
 Going further, we are convinced a general-purpose model for the x86 architecture
 would worth the time and effort spent to its construction.
 %
-For the latter to be trustworthy, the validation of this model is of key
-importance.
+However, we have no doubt that the limitations of FreeSpec ---in terms of
+components interaction patterns--- still reduce its applicability for the most
+complex parts of the x86 hardware architecture.
+
+\subsection*{Extending FreeSpec With a Model Validation Framework}
+%
+As a complement, the trustworthiness of a general-purpose hardware model is of
+key importance, as emphasized by Reid \emph{et al.} for their formal
+specification of ARM\,\cite{reid2016armv8}.
+%
+Extending FreeSpec with a validation model framework would be an important step
+in that direction.
 %
 We have taken great care for FreeSpec to be compatible with the code extraction
 feature of Coq, which means we can turn components model into executable
@@ -128,8 +144,9 @@ programs.
 This feature opens interesting opportunities, but remains only a first step
 towards a practical model validation framework.
 %
-Validating a model of a \ac{pch}, for instance, promises to be challenging
-because of its tight integration inside Intel chips.
+In addition to traditional challenges, validating a model of a \ac{pch}, for
+instance, promises to be challenging because of its tight integration inside
+Intel chips.
 %
 Focusing our efforts on open source processors, such as
 Leon4\,\cite{gaisler2007leon}, could allow us to investigate further this avenue
