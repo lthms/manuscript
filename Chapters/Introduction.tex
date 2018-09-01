@@ -51,8 +51,8 @@ system software components, the common approach is to rely on features provided
 by the hardware architecture to reduce the hardware capabilities that can be
 used by upper layers.
 %
-For instance, system software components often leverage among other mechanisms a
-\ac{mmu} to partition the system memory.
+For instance, system software components often leverage, among other mechanisms,
+a \ac{mmu} to partition the system memory.
 %
 Thus, when an application is executed, it can only access a subset of the system
 memory.
@@ -207,15 +207,15 @@ verification.
 %
 Generally, hardware verification focuses on properties that are transparent to
 the executed software, and require no configuration from its part, while
-software verification abstract as much as possible of the hardware architecture
+software verification abstracts as much as possible the hardware architecture
 complexity.
 %
 However, compositional attacks can come from unsuspected places, with no
 apparent link with the considered security mechanism.
 %
-For instance, the SENTER Sandman attack\,\cite{kovah2015senter} leveraged a
-dedicated execution mode of x86 processor to disable the protection of the flash
-memory wherein the \ac{bios} code is stored.
+For instance, the \texttt{SENTER} Sandman attack\,\cite{kovah2015senter}
+leveraged a dedicated execution mode of x86 processor to disable the protection
+of the flash memory wherein the \ac{bios} code is stored.
 %
 Hence, the composition of the numerous configurable hardware features is less
 subject to formal verification.

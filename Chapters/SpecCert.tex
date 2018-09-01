@@ -35,7 +35,7 @@ mechanisms implemented at the same time (Section~\ref{sec:speccert:casestudy}).
 This case study is used as the basis of a more in-depth experiment in the next
 Chapter.
 
-For the reader familiar with Coq, we present an implementation of our theory in
+For readers familiar with Coq, we present an implementation of our theory in
 Appendix~\ref{appendix:speccert}.
 %
 This development comprises machine-checked proofs of the theorems and lemmas
@@ -193,15 +193,16 @@ security perspective.
 \subsection{HSE Mechanisms}
 \label{subsec:speccert:hse}
 
-In our theory, a \ac{hse} mechanism is primarily
-characterized by a set of trusted software components, a set of requirements
-over states and a set of requirements over software transitions.
+In our theory, a \ac{hse} mechanism is primarily characterized by a set of
+trusted software components, a set of requirements over states and a set of
+requirements over software transitions.
 %
 Trusted software components are responsible for implementing the \ac{hse}
 mechanism.
 %
-To that end, they have to correctly configure the underlying hardware mechanism in
-accordance with the two requirements over states and over software transitions.
+To that end, they have to correctly configure the underlying hardware mechanism
+in accordance with the two requirements over states and over software
+transitions.
 
 On the one hand, the purpose of the requirements over states is to identify the
 hardware configurations which constrain the execution of untrusted software
@@ -485,9 +486,8 @@ This could mean that constraints over trusted software components execution are
 incomplete, or that requirements over hardware states are too restrictive.
 %
 If the requirements over hardware states cannot be loosen without threatening
-the security policy enforcement or finding restrictions over trusted
-software execution, then the \ac{hse} mechanism probably does not serve its
-purpose.
+the security policy enforcement or finding restrictions over trusted software
+execution, then the \ac{hse} mechanism probably does not serve its purpose.
 
 \begin{example}[Flash Memory Lockdown Inconsistency]
   We can convince ourselves that the informal definition description we have
@@ -799,11 +799,11 @@ If attackers are able to modify the instructions of the trusted software
 components programs, they can defeat the security enforcement by modifying the
 instructions responsible to implement it.
 %
-%\GH{ce n'est pas le seul risque (même si c'est le plus important). De manière
-%  générale, si un composant non trusté peu influencer le comportement d'un code
-%  trusté (par exemple, en perturbant son flot d'exécution), il peut l'amener à
-%  ne plus respecter les software req. Mais c'est le problème du software
-%  trusté. Il doit être correct ET robuste aux attaques.}
+% \GH{ce n'est pas le seul risque (même si c'est le plus important). De manière
+% générale, si un composant non trusté peu influencer le comportement d'un code
+% trusté (par exemple, en perturbant son flot d'exécution), il peut l'amener à
+% ne plus respecter les software req. Mais c'est le problème du software
+% trusté. Il doit être correct ET robuste aux attaques.}
 %
 % Thomas : en fait, j’ai l’impression que sans rien ajouter, c’est finalement
 % assez clair.
@@ -1031,8 +1031,8 @@ location in which these data are stored.
   A transition-software mapping
   $\func{fetched}_{\Sigma}: H \times L \rightarrow \powerset(S)$ is a function
   which takes an initial hardware state, a transition label and returns the set
-  of owners of the instructions read during this transition by the core in
-  order to execute them afterwards.
+  of owners of the instructions read during this transition by the core in order
+  to execute them afterwards.
   %
   The word ``fetch'' is used in the hardware industry to describe this subset of
   read accesses targeting instructions.
