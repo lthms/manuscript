@@ -1,5 +1,4 @@
-\documentclass[oneside,a4paper]{memoir}
-\setsecnumdepth{subsubsection}
+\documentclass[oneside,a4paper]{book}
 
 \usepackage[chapter]{minted}
 \usemintedstyle{bw}
@@ -97,10 +96,8 @@ backgroundcolor=PineGreen!2}
 \usepackage{bookmark}
 % not in template (customization)
 \usepackage[explicit]{titlesec}
-\maxtocdepth{subsection}
 
-\usepackage[american,french]{babel}
-\selectlanguage{american}
+\usepackage[french,english]{babel}
 \usepackage[babel=true,kerning=true,spacing=true,auto=true]{microtype}
 \usepackage[babel=true]{csquotes}
 
@@ -118,7 +115,7 @@ backgroundcolor=PineGreen!2}
 
 \title{Specifying and Verifying Hardware-based Security Enforcement Mechanisms}
 \author{Thomas Letan}
-\date{2015 -- 2018}
+\date{September \( 1^{\text{st}} \), 2018}
 
 \makeindex
 
@@ -129,9 +126,13 @@ backgroundcolor=PineGreen!2}
 
   \cleardoublepage
 
-  \begin{abstract}
-    \input{abstract}
-  \end{abstract}
+  \begin{center}
+    \large \textbf{Abstract}
+    \thispagestyle{empty}
+  \end{center}
+
+  \noindent
+  \input{abstract}
 
   \cleardoublepage
 
@@ -139,8 +140,6 @@ backgroundcolor=PineGreen!2}
 
   \cleardoublepage
 
-  \listoffigures
-  \listoftables
   \input{notation}
 
   \input{resume}
@@ -172,8 +171,13 @@ backgroundcolor=PineGreen!2}
   \input{Appendices/SpecCert}
   %\input{Appendices/FreeSpecTutorial}
 
-  \printacronyms[include-classes={abbrev},heading={chapter},name=Acronyms]
+
+  \printacronyms[include-classes={abbrev},heading={chapter*},name=Acronyms]
   \printindex
+
+  \chapter*{Listings}
+  \listoffigures
+  \listoftables
   \bibliographystyle{unsrt}
   \bibliography{manuscript}
 \end{document}
