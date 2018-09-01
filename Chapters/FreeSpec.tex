@@ -32,7 +32,7 @@ approach\,\cite{letan2018freespeccode}.
 
 The rest of the Chapter proceeds as follows.
 %
-We justify our contribution with the experience implementing the proofs of
+We motivate our contribution in accordance with our experience implementing the proofs of
 Chapter~\ref{chapter:speccert2} (Section~\ref{sec:freespec:why}).
 %
 Then, we describe how we model components in terms of programs with effects and
@@ -136,7 +136,7 @@ limitation: it is potentially subject to the so-called \emph{temporary violation
 \emph{before} and \emph{after} a given transition, yet is temporary violated
 \emph{during} the transition.
 %
-A well known illustration of this threat is ---once again--- the airlock system.
+A well-known illustration of this threat is ---once again--- the airlock system.
 
 \begin{example}[Temporary Violation Problem in an Airlock System]
   In Example~\ref{example:sota:airlocklts}, we have carefully defined the
@@ -185,7 +185,7 @@ A well known illustration of this threat is ---once again--- the airlock system.
   We can imagine several scenarios:
   %
   \begin{inparaenum}[(1)]
-  \item Doors states updates are simultaneous and instantaneous, in other words
+  \item Doors states updates are simultaneous and instantaneous; in other words,
     the transitions \emph{are} atomic.
     %
   \item The airlock system first closes one door before opening the
@@ -225,11 +225,11 @@ direct consequence to complicate the model.
 \paragraph{Abstract Model.}
 %
 Our decision to embed the memory location ownership directly inside {\scshape
-  Minx86}, along side with the concrete content of each memory location,
+  Minx86}, alongside with the concrete content of each memory location,
 contradicts our objective to rely on general-purpose models to specify and
 verify \ac{hse} mechanisms.
 %
-Continuing with a similar logic would mean modifying the model each time we want
+Continuing with a similar logic would mean modifying the model every time we want
 to reason about a security policy which requires to maintain additional
 information.
 %
@@ -300,7 +300,7 @@ Firstly, we want to propose a general-purpose formalism that allows for never
 considering the hardware architecture as a whole, but rather focus on
 interactions between neighboring components.
 %
-To that end, we take the principle of our theory of \ac{hse} mechanism a step
+To that end, we take the principle of our theory of \ac{hse} mechanisms a step
 further.
 %
 Our approach is based onto a clear separation between hardware components from
@@ -325,7 +325,7 @@ and verify large programs with side effects.
 Reasoning about side effects in purely functional languages such as {\textsc
   Gallina}, the Coq specification language, is difficult, firstly because they
 imply to somehow take into account an outer \emph{stateful} environment and
-secondly, because the composition of stateful computations is not well-handled
+secondly, because the composition of stateful computations is not well handled
 by traditional (monadic) approaches.
 %
 Algebraic effects and handlers\,\cite{bauer2015effects} overcome this double
@@ -418,7 +418,7 @@ of the system, and secondarily by its current state and the interfaces it uses
 in order to operate.
 %
 A component receives requests to compute results of operations through its
-interface, and sends operations requests to other components it is connected to
+interface, and sends computational  requests to other components it is connected to
 \emph{via} their interfaces and waits for their results.
 
 \begin{example}[{\scshape Minx86} as a component-based system]
@@ -515,7 +515,7 @@ results.
   \item We forbid unprivileged \IO targeting the SMRAM when the \texttt{SMRAMC}
     register is not correctly configured.
   \item We guarantee that a processor which read the content of the SMRAM while
-    in \ac{smm} will get what is has previously written to \ac{smm} while in
+    in \ac{smm} will get what it has previously written to \ac{smm} while in
     \ac{smm}.
   \end{itemize}
   %
@@ -544,11 +544,11 @@ results.
   We want to prove that
   %
   \begin{inparaenum}
-  \item the cache makes a correct use of the memory controller interface, that
-    is that each uses of the memory controller interface satisfy the appropriate
-    requirements, and
+  \item the cache makes a correct use of the memory controller interface,
+    \emph{i.e.} each use of the memory controller interface satisfy the
+    appropriate requirements, and
   %
-  \item it provides similar guarantee to the core.
+  \item it provides similar guarantees to the core.
   \end{inparaenum}
 
   We proceed by defining a second abstract specification, this time against the
@@ -641,7 +641,7 @@ A component which exhibits an interface receives computational requests from
 other components; it handles these requests by computing their results and
 sending the latter back to the client component.
 %
-In FreeSpec, a computational request is modelled with an effect, that is a
+In FreeSpec, a computational request is modeled with an effect, that is a
 symbolic value which describes the request and its potential result.
 
 For $\I$ an interface, we denote by $\Interface{\I}{\mathcal{A}} \subseteq \I$
@@ -789,7 +789,7 @@ Because constructors images are mutually exclusive\,\footnote{See
 This is necessary if we want to be able to reason about a component connected to
 two other components which both exhibit the same interface.
 %
-Besides, \( \oplus \) preserves the effects results, \emph{e.g.} given any
+Besides, \( \oplus \) preserves the effect result, \emph{e.g.} given any
 effect \( e \in \I|_{\mathcal{A}} \), then
 \( \func{InL(e)} \in \Interface{(\I \oplus \J)}{\mathcal{A}} \).
 %
@@ -851,7 +851,7 @@ in FreeSpec.
 Handling an effect of $\I$ (respectively $\J$) does not update $\sigma_j$
 (respectively $\sigma_i$).
 %
-As a consequence, \emph{we cannot specify as-is a graph of components which
+As a consequence, \emph{we cannot specify as is a graph of components which
   contains a cycle or a diamond}.
 %
 This is the main limitation of FreeSpec, but its incidence is abated because
@@ -910,7 +910,7 @@ without the action of \( C_2 \).
   \label{fig:freespec:diamondpattern}
 \end{figure}
 
-Using interfaces, we model how components interact with each others, and we aim
+Using interfaces, we model how components interact with each other, and we aim
 to model a component which exposes an interface as an operational semantics for
 this interface.
 %
@@ -931,7 +931,7 @@ Operational semantics play the role of \texttt{operational}\,\cite{operational}
 interpreters.
 %
 We write $P_{\I}(\mathcal{A})$ for the set of programs with effects which
-belongs to $\I$, modelled thanks to the Program monad, and whose result belongs
+belongs to $\I$, modeled thanks to the Program monad, and whose result belongs
 to a set $\mathcal{A}$.
 
 \begin{definition}[Program Monad]
@@ -1087,7 +1087,7 @@ terms of computation results and state updates.
   In such a case, it reroutes access to the VGA controller.
 \end{example}
 
-A component $C$ defined in terms of programs with effects cannot be used as-is
+A component $C$ defined in terms of programs with effects cannot be used as is
 to compute the result of a given effect.
 %
 To do that, we need to derive an operational semantics for~$\I$ from $C$.
@@ -1165,7 +1165,7 @@ Verifying a component is done against abstract specifications of the interfaces
 it directly uses, even if it relies on a security property enforced by a deeper
 component in the components graph.
 %
-In this case, we have to verify that every single component which separate them
+In this case, we have to verify that every single component which separates them
 preserve this property.
 %
 This procedure can help to prevent or uncover architectural attacks.
@@ -1209,7 +1209,7 @@ function to update this state after each effect realization.
     predicate on
     $\bigcup_{\mathcal{A}} (\Interface{\I}{\mathcal{A}} \times \mathcal{A}
     \times \Omega)$ such that $\func{post}(e, x, \omega)$ is true if and only if
-    the results $x$ computed for the effects $e$ satisfies the postcondition
+    the results $x$ computed for the effects $e$ satisfy the postcondition
     parameterized with the abstract state $\omega$.
   \end{itemize}
 \end{definition}
@@ -1250,7 +1250,7 @@ semantics realizes a program with effects.
     \mathpzc{Val}$, such that $\omega \in \Omega_{\mathrm{MCH}}$ models a view
     of the SMRAM as exposed by the MCH for privileged reads.
   \item We define $\func{step}_{\mathrm{MCH}}$ which updates the view of the MCH
-    (modelled as a function) after each privileged write access targeting any
+    (modeled as a function) after each privileged write access targeting any
     SMRAM location $l$, that is
     \[ \func{step}_{\mathrm{MCH}}(e, x, \omega) \triangleq \left\{
         \begin{array}{l}
@@ -1382,7 +1382,7 @@ have also defined an abstract specification composition operator $\odot$.
 We do not detail its definition in this Chapter\,\footnote{Interesting readers
   can refer to the file \texttt{theories/Compose.v} of
   \cite{letan2018freespeccode} to find its definition, but the latter is not
-  require to understand the rest of this Chapter.}, but it has the significant
+  required to understand the rest of this Chapter.}, but it has the significant
 property to allow for reasoning about the composition of interfaces and
 composition of operational semantics.
 
@@ -1418,14 +1418,14 @@ semantics keep enforcing the postcondition.
 With the compliance preservation and congruent composition, we know we can
 reason locally, that is component by component.
 
-\subsection{Proofs Techniques to Show Compliance For Components}
+\subsection{Proofs Techniques to Show Compliance for Components}
 % -----------------------------------------------------------------------------
 
 We have dived into the mechanisms which allow for composing together compliant
 operational semantics, but little has been said about how to prove the
 compliance property.
 %
-In a typical FreeSpec use case, operational semantics are not built as-is, but
+In a typical FreeSpec use case, operational semantics are not built as is, but
 rather derived from a component model
 (Definition~\ref{def:freespec:derivation}).
 %
@@ -1438,12 +1438,12 @@ composition operator $\otimes$
 (Definition~\ref{def:freespec:semantics-composition}).
 %
 Notably, a graph of components which contains a cycle, a diamond or a forward
-edge cannot be easily modelled and verified in FreeSpec.
+edge cannot be easily modeled and verified in FreeSpec.
 %
 In its current state, FreeSpec provides two theorems to verify the properties
 of a component model in terms of an abstract specification, dedicated to two
 composition patterns: when a component is being used by one component, and
-when a component is being used by more than one components
+when a component is being used by more than one component.
 
 \paragraph{Predicate of Synchronization.}
 %
@@ -1451,8 +1451,8 @@ The most favorable scenario consists of one component which uses many
 components, and is only used by one other component, \emph{e.g.} in
 Figure~\ref{fig:freespec:memc}.
 %
-Let $\I$ and $\J$ be two interfaces and let $C$, a component with a set of
-possible states $\mathcal{S}$, which exhibits $\I$ and uses $\J$.
+Let $\I$ and $\J$ be two interfaces and let $C$ be a component with a set of
+states $\mathcal{S}$, which exhibits $\I$ and uses $\J$.
 %
 Let $A_{\I}$ be an abstract specification dedicated to $\I$.
 %
@@ -1526,12 +1526,12 @@ invariant for the induction, and a sufficient condition to enforce compliance.
   \func{step}_{\mathrm{DRAM}}, \func{pre}_{\mathrm{DRAM}},
   \func{post}_{\mathrm{DRAM}} \rangle$ an abstract specification dedicated to
   $\I_{\mathrm{DRAM}}$ to express the following property: ``\emph{a read access
-    to a memory location which belongs to the SMRAM return the value which have
+    to a memory location which belongs to the SMRAM return the value which has
     been previously written at this memory location}.'' In particular,
   $\Omega_{\mathrm{DRAM}} = \Omega_{\mathrm{MCH}}$, i.e. they are two views of
   the SMRAM, as exposed by the DRAM controller or by the memory controller.
   %
-  In this context, the behaviour of VGA is not relevant. Let $\top$ be the
+  In this context, the behavior of VGA is not relevant. Let $\top$ be the
   abstract specification which has no state and such that its precondition and
   postcondition are always satisfied (meaning every operational semantics always
   complies with it).
@@ -1679,7 +1679,7 @@ If, during the verification process, one group finds out a given interface or
 abstract specification needs to be updated, the required modifications may
 impact its neighbors.
 %
-In other word, this verification process can help uncover inconsistencies in
+In other words, this verification process can help uncover inconsistencies in
 hardware specifications which pave the road towards compositional attacks.
 %
 For instance, modeling a x86-based computing system, as pictured in
@@ -1699,7 +1699,7 @@ independently from components.
 %
 It has two advantages.
 %
-First, for a given verification problem modelled with a set of abstract
+First, for a given verification problem modeled with a set of abstract
 specifications, two components which exhibit the same interface can be proven to
 comply with the same abstract specification.
 %
