@@ -119,6 +119,11 @@
   Il est donc important de se poser, en amont, les bonnes
   questions quant à l’approche utilisée pour le définir, afin que les efforts
   nécessaires pour sa conception ne soient pas dépensés en vain.
+  %
+  Plusieurs travaux ont plaidé en faveur d’une approche basée sur le
+  \emph{compositional reasoning}, où le système est divisé en un sous-ensemble
+  de composants et la vérification axée autour de leurs interactions, pour faire
+  face à ces défis\,\cite{garg2010compositional,heyman2012securemodel}.
 
   \subsection*{Contributions}
 
@@ -132,6 +137,40 @@
   Notre première contribution est une théorie des mécanismes HSE, dont
   l’objectif premier est de servir de support à la spécification et à la
   vérification de ces derniers.
+  %
+  Elle s’articule autour d’une méthodologie divisée en plusieurs étapes.
+  %
+  L’architecture matérielle est dans un premier temps modélisé sous la forme
+  d’un système de transitions étiquetées (\emph{labeled transition system}, en
+  anglais, désigné par la suite par l’acronyme LTS).
+  %
+  Un LTS est traditionnellement caractérisé par un ensemble d’états, un ensemble
+  d’étiquettes et une relation de transition.
+  %
+  Une étiquette est attachée à chaque transition pour permettre de leur attacher
+  un sens particulier.
+  %
+  Le plus souvent, l’étiquette permet de décrire ce qui a causé la transition.
+
+  Dans notre théorie, un modèle matériel dans notre théorie se présente sous la
+  forme d’un quadruplet \( \langle H, L_S, L_H, \rightarrow \rangle \), où
+  %
+  \begin{itemize}
+  \item \( H \) est l’ensemble des états que peut prendre le LTS, par exemple la
+    valeur des registres des différents composants matériels de la plate-forme
+    et le contenu de la DRAM;
+  \item \( L_S \) est l’ensemble des étiquettes attachées aux transitions dites
+    logicielles;
+  \item \( L_H \) est l’ensemble des étiquettes attachées aux transitions dites
+    matérielles;
+  \item \( \rightarrow \) est la relation de transition du système.
+  \end{itemize}
+
+  Une transition logicielle est une conséquence directe et prévisible de
+  l’exécution, par la plate-forme matérielle, d’une instruction faisant parti du
+  programme d’un logiciel.
+  %
+  Au contraire, une transition matérielle Les autres transitions, qui échappentn
 
   \subsection*{Travaux futures}
 \end{otherlanguage}
