@@ -1557,7 +1557,7 @@ invariant for the induction, and a sufficient condition to enforce compliance.
   semantics from $C_{\mathrm{MCH}}$ which complies with $A_{\mathrm{MCH}}$.
 \end{example}
 
-\paragraph{Predicate of Non-Interference.}
+\paragraph{Predicate of Neutrality.}
 %
 Another common composition pattern consists of a component which is used by more
 than one other component, \emph{e.g.} the memory controller in
@@ -1575,17 +1575,17 @@ In particular, when hardware components interfaces are very large, two
 components are likely to use different classes of effects that do not interfere
 with each others.
 
-\begin{definition}[Predicate of Non-Interference]
+\begin{definition}[Predicate of Neutrality]
   Let $\I$ be an interface and
   $A \triangleq \langle \Omega, \func{step}, \mathbb{P}, \mathbb{Q} \rangle$ be
   an abstract specification dedicated to $\I$. Let
-  $\func{pnf} : \I \rightarrow \ac{prop}$ be a subset of effects. $\func{pnf}$
-  is said to be a predicate of non-interference of $A$ (denoted
-  $A \| \func{pnf}$) if and only if \[
+  $\func{pn} : \I \rightarrow \ac{prop}$ be a subset of effects. $\func{pn}$
+  is said to be a predicate of neutrality of $A$ (denoted
+  $A \| \func{pn}$) if and only if \[
     \begin{array}{l}
       \forall \mathcal{A}\text{, } \omega \in \Omega\text{, } i \in
       \Interface{\I}{\mathcal{A}}\text{, }x \in \mathcal{A}\text{, } \\ \qquad
-      (\func{pnf}(i) \Rightarrow \mathbb{P}(i, \omega)) \wedge (\func{pnf}(i)
+      (\func{pn}(i) \Rightarrow \mathbb{P}(i, \omega)) \wedge (\func{pn}(i)
       \wedge \mathbb{Q}(i, x, \omega) \Rightarrow \omega = \func{step}(i, x,
       \omega))
     \end{array}
@@ -1595,24 +1595,24 @@ with each others.
 In a similar manner to the predicate of synchronization, FreeSpec provides a
 theorem to help and guide the verification work of its users.
 
-\begin{theorem}[Non-Interference and Concurrency]
+\begin{theorem}[Neutrality and Concurrency]
   Let $\sigma \in \Sigma_{\I}$ be an operational semantics dedicated to
   \( \mathcal{I}\).
   %
-  Let \( \func{pnf} : \I \rightarrow \ac{prop} \) be a subset of effects. Let
-  \( \sigma\!\!\downarrow\!\!\func{pnf} \) be the operational semantics built
+  Let \( \func{pn} : \I \rightarrow \ac{prop} \) be a subset of effects. Let
+  \( \sigma\!\!\downarrow\!\!\func{pn} \) be the operational semantics built
   upon \( \sigma \) which executes arbitrary sequences of effects satisfying
-  \func{pnf} between two effects.
+  \func{pn} between two effects.
   %
   We prove that
   \[
-    A \| \func{pnf} \wedge \sigma \models A[\omega] \Rightarrow
-    \sigma\!\!\downarrow\!\!\func{pnf} \models A[\omega]
+    A \| \func{pn} \wedge \sigma \models A[\omega] \Rightarrow
+    \sigma\!\!\downarrow\!\!\func{pn} \models A[\omega]
   \]
 \end{theorem}
 
 In other words, a second component which only uses the effects that satisfies
-$\func{pnf}$ can use the interface concurrently to a component proved to be
+$\func{pn}$ can use the interface concurrently to a component proved to be
 correct with respect to \( A \).
 
 \begin{example}[Memory Controller and IOMMU]
@@ -1620,12 +1620,12 @@ correct with respect to \( A \).
   controller not only arbitrates the memory accesses of the CPU, but also to
   other hardware components (mostly PCI and PCIe devices).
   %
-  One possible predicate of non-interference for $A_{\mathrm{MCH}}$ is to deny
+  One possible predicate of neutrality for $A_{\mathrm{MCH}}$ is to deny
   the IOMMU the possibility to perform privileged write, so that only the main
   CPU could do it, that is
   %
   \[
-    \func{pnf}_{\mathrm{IOMMU}}(e) \triangleq \forall l \in \mathpzc{Loc}, v \in
+    \func{pn}_{\mathrm{IOMMU}}(e) \triangleq \forall l \in \mathpzc{Loc}, v \in
     \times \mathpzc{Val}, e \neq \func{Write}_{\mathrm{MCH}}(l, v,
     \texttt{privileged})
   \]
@@ -1638,18 +1638,18 @@ correct with respect to \( A \).
   \[
     \forall \mathcal{A}, \omega \in \Omega_{\mathrm{MCH}}, e \in
     \I|_{\mathrm{\mathcal{A}}}, x \in \mathcal{A},
-    \func{pnf}_{\mathrm{IOMMU}}(e) \Rightarrow
+    \func{pn}_{\mathrm{IOMMU}}(e) \Rightarrow
     \func{step}_{\mathrm{MCH}}(\omega, e, x, \omega) = \omega
   \]
   %
   Besides, the precondition \( \func{pre}_{\mathrm{MCH}} \) always holds true.
 
-  As a consequence, \( A_{\mathrm{MCH}} \| \func{pnf}_{\mathrm{IOMMU}} \), that
-  is \( \func{pnf}_{\mathrm{IOMMU}} \) is a predicate of non-interference of
+  As a consequence, \( A_{\mathrm{MCH}} \| \func{pn}_{\mathrm{IOMMU}} \), that
+  is \( \func{pn}_{\mathrm{IOMMU}} \) is a predicate of neutrality of
   \( A_{\mathrm{MCH}} \).
   %
   This means if we can prove that the effects used by the IOMMU always satisfy
-  \( \func{pnf}_{\mathrm{IOMMU}} \) predicate, then we can safely compose it
+  \( \func{pn}_{\mathrm{IOMMU}} \) predicate, then we can safely compose it
   with a cache knowing that, from the security perspective of the cache, it is
   like the IOMMU ``is not here'' (it does not interfere).
 \end{example}
