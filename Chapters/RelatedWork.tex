@@ -21,7 +21,7 @@
 \vspace{1cm}%
 \noindent
 %
-The formal verification of a system consists in proving its correctness with
+The formal verification of a system consists of proving its correctness with
 respect to a \emph{specification}\,\cite{gupta1992formal}, that is a description
 of properties targeted by the system.
 %
@@ -50,8 +50,8 @@ hardware models which abstract as much as possible of the architecture
 complexity.
 %
 To the extent of our knowledge, the closest related research project is the work
-of Jomaa \emph{et al.}\,\cite{jomaa2016mmu}, who specified what are the
-requirement a microkernel must satisfy in order for a \ac{mmu} to enforce memory
+of Jomaa \emph{et al.}\,\cite{jomaa2016mmu}, who specified what
+requirements a microkernel must satisfy in order for a \ac{mmu} to enforce memory
 isolation at all times.
 %
 This approach remains an isolated initiative, hence the interactions of the
@@ -64,8 +64,8 @@ to model and verify hardware and software systems, and where our approach stands
 with respect to previous work (Section~\ref{sec:sota:formalisms}).
 %
 Then, we introduce and justify our interest in compositional verification
-approaches, which enable the ``divide and conquer'' strategy to reduce the
-burden of verifying large systems (Section~\ref{section:sota:compsec}).
+approaches that enable the ``divide and conquer'' strategy to reduce the burden
+of verifying large systems (Section~\ref{section:sota:compsec}).
 
 \section{Towards the Formal Verification of HSE Mechanisms}
 \label{sec:sota:formalisms}
@@ -92,7 +92,7 @@ Regarding our objective, we need to use hardware models which take into account
 the composition of the many hardware components involved in \ac{hse} mechanisms
 implementation.
 %
-Many x86 models have been proposed over years, but to the extent of our
+Many x86 models have been proposed over the years, but to the extent of our
 knowledge, none of them cover the hardware features we are primarily interested
 in (\ref{subsec:sota:ltsrelated}).
 %
@@ -144,7 +144,7 @@ actions\,\cite{barthe2011virtcert1}.
 Although the name changes, the motivation remains to characterize the nature of
 the transition.
 %
-LTS are well-suited to reason about the interactions of a system with its
+LTS are well suited to reason about the interactions of a system with its
 environment, \emph{e.g.} hypercalls handled by a
 hypervisor\,\cite{barthe2011virtcert1} or \IOs provoked by the execution of
 machine instructions\,\cite{lie2003xom}.
@@ -270,8 +270,7 @@ To that end, it is important to consider that
   mechanisms, and
   %
 \item \label{needreduce}%
-  hardware features involved in \ac{hse} mechanisms are not safe by default,
-  hence the role played by trusted software components to configure them.
+  hardware features involved in \ac{hse} mechanisms are not safe by default.
 \end{inparaenum}
 %
 By defining \ac{hse} mechanisms of a given hardware architecture against a
@@ -523,7 +522,7 @@ traces of a general-purpose x86 model will not be part of the ``secure'' traces.
 %
 Our formal theory of \ac{hse} mechanisms allows for identifying the subset of
 traces wherein the mechanism is correctly implemented by the trusted software
-components. Verifying a \ac{hse} mechanism consists of proving this set of
+components. Verifying a \ac{hse} mechanism consists of proving that this set of
 traces satisfies the predicate which characterizes the targeted security policy.
 %
 Because of the complexity of a typical x86 architecture, this work cannot be
@@ -544,14 +543,14 @@ achieved manually and we need the support of an appropriate tooling.
 Formal verification leverages two classes of approaches with their dedicated
 tools.
 %
-On the one hand, the most generic approach is the construction a proof, that is
-a succession of inference rules to derive the statement to be proven from
+On the one hand, the most generic approach is the construction of a proof, that
+is a succession of inference rules to derive the statement to be proven from
 formulas known to be true.
 %
 Theorem provers provide facilities to construct proofs and a checker to
 automatically verify these proofs.
 %
-On the other hand, it is possible to rely on algorithms whose correctness have
+On the other hand, it is possible to rely on algorithms whose correctness has
 been formally established to handle a well-defined class of problems.
 %
 Model checking\,\cite{clarke2018modelc} and satisfiability
@@ -563,14 +562,14 @@ compromise constrained by requirements in terms of expressiveness, automation
 and applicability.
 %
 More expressiveness for formal language increase the scope of verification
-problem it can cover, but it also reduces the level of automation of the tools
+problems it can cover, but it also reduces the level of automation of the tools
 used to verify its statements.
 %
 Fully automated procedures rely on algorithms whose computational complexity
-impair their applicability for more complex problems, \emph{e.g.}  model
+impairs their applicability for more complex problems, \emph{e.g.}  model
 checking and the \emph{state explosion problem}\,\cite{clarke2012model}.
 
-We now give an overview of state of the art tools which are commonly leveraged
+We now give an overview of state-of-the-art tools which are commonly leveraged
 for formal verification of hardware and software components.
 %
 We have organized it according to the formal language they rely on.
@@ -596,11 +595,11 @@ similar purpose, but they target first-order logic formula ---without
 quantifiers--- and are not limited to boolean variables (SMT stands for
 satisfiability modulo theories).
 %
-Hence, in the theory of natural numbers, a SMT solver will find that the formula
+Hence, in the theory of natural numbers, an SMT solver will find that the formula
 \( x > y \wedge x + y = 5 \) is satisfiable with \( \{ x = 3, y = 2 \} \), but
 the formula \( x - y = 0 \wedge x \neq y \) is not.
 %
-The lack of quantifiers has a significant impact on formulas expressiveness
+The lack of quantifiers has a significant impact on formula expressiveness
 which reduces its applicability when it comes to formal verification,
 \emph{e.g.} we cannot express a specification of the form ``at any point in a
 trace, a predicate \( P \) is satisfied'' if we consider a system can operate
@@ -623,7 +622,7 @@ Examples of LTL modular operators are \( \square P \) (\( P \) is always true),
 \( \Diamond P \) (\( P \) will eventually become true), and \( \bigcirc P \)
 (\( P \) will be true after the next transition of the system).
 %
-CTL considers trees of possible futures (by opposition to a \emph{linear}
+CTL considers trees of possible futures (in opposition to a \emph{linear}
 future).
 %
 CTL modal operator includes \( \mathbf{A} P \) (\( P \) is true for all possible
@@ -654,7 +653,7 @@ the result in the chosen number is too low\,\cite{biere2003bounded}.
 \paragraph{Higher-order Logic.}
 %
 First-order logic quantifiers can only be applied on sets of terms (\emph{e.g.}
-natural numbers, booleans, or more complexe structures such as the states of an
+natural numbers, booleans, or more complex structures such as the states of an
 airlock system).
 %
 Higher-order logic\,\cite{leivant1994hol} does not suffer the same limitation,
@@ -695,7 +694,7 @@ develop our own model.
 \paragraph{x86 Models by Intel.}
 %
 Intel has integrated formal verification in its processor design process for
-more than a decade now.
+more than a decade.
 %
 Intel engineers first verified arithmetic operations performed by the
 processors\,\cite{harrison2000x86}, then increased the verification scope to
@@ -749,7 +748,7 @@ with respect to functional specifications.
 %
 It is less suitable in the context of \ac{hse} mechanisms verification with
 respect to security policies, where multiple hardware components are involved,
-and the many features exposed by the latter may interfere with each others.
+and the many features exposed by the latter may interfere with each other.
 
 It has been shown in the past that it is possible to extend such approaches,
 when their abstraction is too strong.
@@ -764,7 +763,7 @@ components, not the underlying hardware architecture.
 
 \paragraph{Ad-hoc x86 Models}
 %
-Another category of x86 models is ad-hoc models, specially developed to verify a
+Another category of x86 models is ad-hoc models, especially developed to verify a
 dedicated system software component.
 %
 As such, they focus on hardware features used by the target of verification.
@@ -780,14 +779,14 @@ mature verified implementation of a microkernel.
 %
 A implementation in C of the kernel is proven correct with respect to a
 functional implementation modeled in the Isabelle/HOL theorem prover, and the
-authors have proven this model correctly enforces security policies including
+authors have proven this model correctly enforce security policies including
 integrity and confidentiality policies\,\cite{klein2009sel4}.
 %
 In practice, the hardware model focuses on \ac{mmu}, cache and interrupt
 handling.
 %
 In large parts the exact behavior of hardware devices is left non-deterministic,
-in order to reduce the assumptions made by the model about the hardware.
+in order to reduce the assumptions made by the model for the hardware.
 %
 Besides, we already mentioned the work of Jomaa \emph{et
   al.}\,\cite{jomaa2016mmu}.
@@ -859,7 +858,7 @@ architectures\footnote{There are three variants of the ARM Architecture, for as
   many use cases: the A-class architecture provides the necessary features to
   allow an operating system to manage applications, the R-class processors are
   dedicated to real-time systems, and the M-class are used in microcontrollers.}
-is the result of an important 5 year effort by ARM Ltd to integrate formal
+is the result of an important 5-year effort by ARM Ltd to integrate formal
 specification definition to their regular specification
 process\,\cite{reid2016armv8}.
 %
@@ -875,7 +874,7 @@ accepted by commercial Verilog model checkers\,\cite{reid2016end}.
 The result of these efforts is being made available on the ARM website, in
 addition to regular informal specifications\,\cite{arm2018aspec}.
 %
-This represent an exciting opportunity for research targeting ARM architectures,
+This represents an exciting opportunity for research targeting ARM architectures,
 and we can only hope that it eventually becomes a standard in the industry.
 
 ASL is used to \emph{describe} the architecture in an unambiguous fashion, but
@@ -980,7 +979,7 @@ Our theory is characterized by defining a model of the hardware architecture,
 specifying restrictions over the model, and verifying the resulting restricted
 model.
 %
-This methodology is easily expressed in a theorem prover higher-logic.
+This methodology is easily expressed in a theorem prover higher logic.
 %
 Hardware verification by means of theorem provers has proven to be a practical
 alternative to model checking\,\cite{vijayaraghavan2015modular,choi2017kami}.
@@ -989,7 +988,7 @@ For these reasons, we decided to implement our model and proofs using the Coq
 theorem prover, to challenge the applicability of our theory with a focused
 verification problem.
 %
-This experience convinced us of the interest of a general-purpose hardware model
+This experience convinced us of the interests of a general-purpose hardware model
 to verify different \ac{hse} mechanisms against the same reference, and we have
 identified several interesting properties for such a model to remain applicable
 in a theorem prover such as Coq.
@@ -1041,13 +1040,13 @@ This is especially true considering that we focus on security policies and
 compositional attacks ---each hardware feature which is absent from the model
 can potentially be part of an attack path.
 %
-Previous work have advocated for compositional reasoning approaches, such as
+Previous works have advocated for compositional reasoning approaches, such as
 assume-guarantee\,\cite{pnueli1985ag} or
 rely-guarantee\,\cite{jones1983tentative} paradigms, as an interesting solution
 to tackle these challenges\,\cite{garg2010compositional,heyman2012securemodel}.
 %
-In the context of computational reasoning, the system is break down into several
-component.
+In the context of computational reasoning, the system is broken down into
+several components.
 %
 A component \( C \) is proven to enforce a guarantee \( G \) as long as an
 assumption \( A \) is met.
@@ -1166,7 +1165,7 @@ simultaneously.
   %
   In this context, the most obvious component is the door.
   %
-  A door has two states: it can be either open or closed.
+  A door has two states: it can either be open or closed.
   %
   It takes two input actions: \( \mathtt{Open} \) (the action to open the door)
   and \( \mathtt{Close} \) (the action to close the door).
@@ -1279,22 +1278,22 @@ Input and output actions models two facets of a component: how it is being used
 (input), and how it uses other components (output).
 %
 However, it is a fairly low-level modeling structure, which complicates its
-usage for a large scale model --- for instance, our airlock system controller is
+usage for a large-scale model --- for instance, our airlock system controller is
 modeled with seven different states--- and impair the model readability.
 %
 In particular, it is hard to formally establish the causal relation between
-inputs and outputs actions.
+input and output actions.
 %
 Rather than defining an automaton manually, it is possible to leverage process
 algebra formal languages.
 %
-They allows for modeling, by means of formal languages, interacting components
-as concurrent processes which exchange message through channels.
+They allow for modeling, by means of formal languages, interacting components
+as concurrent processes which exchange messages through channels.
 
 \subsection{Process Algebra}
 \label{subsec:sota:palgebra}
 
-Process algebra and their proof systems have been developed to reason about
+Process algebras and their proof systems have been developed to reason about
 programs executed in parallel.
 %
 In process algebra such as Calculus of Communication
@@ -1328,7 +1327,7 @@ demonstrate in the following example.
   \item \( [x = \mathrm{OPEN}] P \) is a guard, that is \( P \) is executed if
     \( x \) is equal to the name \( \mathrm{OPEN} \).
   \item \( P + Q \) is the nondeterministic choice operator, we use it here in
-    conjunction with guards to implement a \texttt{if-then-else} construct. That
+    conjunction with guards to implement an \texttt{if-then-else} construct. That
     is, considering the process
     %
     \[
@@ -1398,7 +1397,7 @@ demonstrate in the following example.
   (resp. \( d_2 \)).
 \end{example}
 
-Process algebras such as \( \pi \)-calculus are well suited formalisms for
+Process algebras such as \( \pi \)-calculus are well-suited formalisms for
 describing component interactions.
 %
 In the context of the previous example, we implement a simple pattern: wait for
@@ -1448,8 +1447,8 @@ They proved the correctness of a realistic multiprocessor system with respect to
 a simple ISA semantics and Lamport's sequential
 consistency\,\cite{lamport1979sc} as the memory model.
 %
-Their proofs consist in a succession of refinement proofs from their
-implementation to high-level modules which model the instructions semantics and
+Their proofs consist of a succession of refinement proofs from their
+implementation to high-level modules which model instructions semantics and
 processor memory model.
 
 {\scshape Kami} relies on a very interesting approach to model interconnected
@@ -1478,8 +1477,8 @@ theorem provers.
 \subsection{Compositional Reasoning for Theorem Provers}
 \label{subsec:sota:peff}
 
-{\scshape Kami} demonstrates it is possible to model components in isolation,
-with an emphasis on how they interact together.
+{\scshape Kami} demonstrates that it is possible to model components in
+isolation, with an emphasis on how they interact together.
 %
 However, modeling the system is only a first step before the verification
 process.
@@ -1497,7 +1496,7 @@ B allows for the definition of functional specifications, called abstract
 machines, and the refinement of these specifications up to executable code.
 %
 An abstract machine is characterized by a set of variables, and several
-operations which update these variables. Preconditions in form of predicates on
+operations which update these variables. Preconditions in the form of predicates on
 the machine variables can be attached to a given operation to specify when the
 operation can be used.
 %
@@ -1525,7 +1524,7 @@ following reasoning:
 This approach implements the key concepts of compositional reasoning we are
 interested in.
 %
-However, the B-method proof environment is quit different from other theorem
+However, the B-method proof environment is quite different from other theorem
 provers, such as Coq.
 %
 In particular, B is similar to imperative languages, when {\scshape Gallina} is
@@ -1534,10 +1533,10 @@ a purely functional language.
 To the extend of our knowledge, the \texttt{Coq.io} framework, developed and
 released by Guillaume Claret \emph{et al.}\,\cite{claret2015coqiowww},
 represents the closest approach for Coq, but it addresses a different problem
----that is reasoning about functional program in presence of side-effects--- and
+---that is reasoning about functional programs in presence of side effects--- and
 its compositional reasoning approach is far more limited.
 %
-\texttt{Coq.io} only considers two components: a program with side-effects, and
+\texttt{Coq.io} only considers two components: a program with side effects, and
 an outer environment (typically the operating system) which carries out these
 effects.
 %
@@ -1589,8 +1588,8 @@ have already proposed for the B-method, in particular by Lanoix \emph{et
 This is because the separation between program with effects and effect handlers
 mimics the separation between one component which interacts with a second one.
 %
-We believe they allow for modeling component similarly to what {\scshape Kami}
-achieves, but constitute in the same time a more familiar formalism for the
+We believe they allow for modeling components similarly to what {\scshape Kami}
+achieves, but constitute at the same time a more familiar formalism for the
 functional programming community whom Coq developers belong to.
 
 \section{Conclusion}
@@ -1612,7 +1611,7 @@ scope of existing x86 models does not cover the hardware features that we are
 interested in, we developed our own in the experiments we detailed in
 Chapter~\ref{chapter:speccert2}.
 %
-We decided to use Coq, because its higher-logic allows us to easily express the
+We decided to use Coq, because its higher logic allows us to easily express the
 specificities of our approach.
 %
 
