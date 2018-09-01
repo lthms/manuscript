@@ -41,36 +41,41 @@ On the other hand, one layer may constrain the execution of its successors, with
 respect to a targeted security policy, \emph{e.g.}  an OS enforces availability
 ---fair share of processor time---, confidentiality and integrity ---exclusive
 partition of physical memories--- properties for the applications it manages.
-
-\section{Hardware-based Security Enforcement Mechanisms}
-
-Constraining an execution can be achieved in various ways.
 %
 Concerning the lowest layers of software stack, \emph{e.g.} the \ac{bios} and
 system software components, the common approach is to rely on features provided
 by the hardware architecture to reduce the hardware capabilities that can be
 used by upper layers.
 %
+This scenario characterizes a class of security mechanisms we call \ac{hse}
+mechanisms.
+
+In the following, we first detail in more detail how \ac{hse} mechanisms are
+implemented and which threats these implementations face.
+%
+In this thesis, we aim to specify and verify \ac{hse} mechanisms.
+%
+We motivate this choice, then give a brief overview of our contributions.
+%
+We conclude this first Chapter with a brief summary of the outline of this
+manuscript.
+
+\section{Hardware-based Security Enforcement Mechanisms}
+
+A \ac{hse} mechanism consists of the configuration by a trusted software
+component of the underlying hardware architecture in order to constrain the
+execution of untrusted software components with respect to a targeted security
+policy.
+%
 For instance, system software components often leverage, among other mechanisms,
-a \ac{mmu} to partition the system memory.
+a \ac{mmu} to partition the system memory, and therefore needs to setup
+so-called page tables.
 %
 Thus, when an application is executed, it can only access a subset of the system
 memory.
 %
 Besides, the processor can leverage a hardware timer to stop applications
 execution, without the need for these applications to cooperate.
-%
-This scenario characterizes a class of security mechanisms we call \ac{hse}
-mechanisms.
-
-\begin{definition}[Hardware-based Security Enforcement Mechanism]
-  \label{def:intro:hse}
-  %
-  A \ac{hse} mechanism consists of the configuration by a trusted software
-  component of the underlying hardware architecture in order to constrain the
-  execution of untrusted software components with respect to a targeted security
-  policy.
-\end{definition}
 
 A \ac{hse} mechanism enforces its targeted security property when
 %
@@ -82,7 +87,8 @@ A \ac{hse} mechanism enforces its targeted security property when
   execution as expected.
 \end{inparaenum}
 %
-Both requirements remain challenging.
+Both requirements remain challenging and have been violated at many occasions in
+the past, due to software and hardware errors alike.
 
 \paragraph{Software Errors.}
 %
@@ -142,13 +148,11 @@ hardware interrupt used to protect the flash memory\,\cite{kovah2015senter}.
 %
 Such inconsistencies in hardware specifications pave the road toward
 compositional attacks\,\cite{wing2003compositionalattack}.
-
-\begin{definition}[Compositional Attack]
-  Compositional attacks characterize scenarios where each component is working
-  as expected in isolation, yet their composition creates an attack path which
-  prevents end-to-end security enforcement.
-\end{definition}
-
+%
+Compositional attacks characterize scenarios where each component is working as
+expected in isolation, yet their composition creates an attack path which
+prevents end-to-end security enforcement.
+%
 In the context of \ac{hse} mechanisms, this means untrusted software components
 can leverage one hardware component to defeat a \ac{hse} mechanism implemented
 to constrain its execution.
@@ -317,9 +321,9 @@ Part~\ref{part:speccert} focuses on our first contribution.
 In Chapter~\ref{chapter:speccert}, we present our general-purpose theory to
 support the specification and verification of \ac{hse} mechanisms.
 %
-In Chapter~\ref{chapter:speccert2}, we leverage this theory to reason about
-the \ac{hse} mechanism implemented by the \ac{bios} to remain isolated from the
-rest of the software stack at runtime.
+In Chapter~\ref{chapter:speccert2}, we leverage this theory to reason about the
+\ac{hse} mechanism implemented by the \ac{bios} to remain isolated from the rest
+of the software stack at runtime.
 
 Part~\ref{part:freespec} focuses on our second contribution.
 %
