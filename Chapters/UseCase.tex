@@ -62,7 +62,8 @@ A typical computing platform is made of dozens of hardware components, including
 \emph{e.g.} hard drives, a keyboard, a trackpad, an audio controller, and a
 graphic card.
 %
-Several come with their own documentation, often in the form of large datasheet.
+Several come with their own documentation, often in the form of large
+datasheets.
 
 Figure~\ref{fig:usecase:x86arch} pictures how the most important hardware
 components are interconnected in a modern x86 computing platform (generation
@@ -324,8 +325,7 @@ instructions ---\texttt{in} and \texttt{out}--- to target the memories exposed
 by other hardware components.
 %
 \IOs issued by \texttt{in} and \texttt{out} instructions are referred to as
-Port-Mapped \IOs (PMIO), and the addresses of this address space are called
-\emph{ports}.
+\ac{pmio}, and the addresses of this address space are called \emph{ports}.
 
 Although they are historically used to target different memory regions, nowadays
 these two address spaces overlap, as peripheral memories and registers can be
@@ -354,7 +354,7 @@ configuration space per PCI device, which is a dedicated memory region with a
 specific semantics summarized in Figure~\ref{fig:usecase:pciconfig}.
 %
 Registers of the PCI configuration space, such as device and vendor IDs, can be
-accessed \emph{via} PMIO.
+accessed \emph{via} \ac{pmio}.
 %
 Indeed, the \ac{pch} exposes two ports to that end.
 %
@@ -481,7 +481,7 @@ particularity of being divided into a cache of instructions (used when the core
 read from memory instructions to execute) and a cache of data --- and L2, while
 they all share a so-called L3 cache divided into interconnected slices.
 %
-The Figure~\ref{fig:usecase:l1-l3caches} summarizes this organization.
+Figure~\ref{fig:usecase:l1-l3caches} summarizes this organization.
 
 Caches are divided into several \emph{cache blocks} addressed by an index.
 %
@@ -1132,7 +1132,7 @@ isolation from the rest of the software stack.
 % security
 % vulnerability\,\cite{duflot2009smram,wojtczuk2009smram,bulygin2014summary}.
 %
-From the information we gathered in the Intel manual\,\cite{intel2014manual},
+From the information in the Intel manual\,\cite{intel2014manual},
 datasheets\,\cite{intel2009mch,intel2012pch}, and in the academic
 literature\,\cite{bulygin2014summary}, the isolation required by the \ac{bios}
 can be divided into three complementary security policies.
@@ -1630,5 +1630,5 @@ the threats they pose.
 
 The rest of this manuscript will use the SMRAM Cache Poisoning Attack as a
 recurring application use case for our contributions, because it has motivated
-our will to formally specify and verify \ac{hse} mechanisms, and it is a good
+our desire to formally specify and verify \ac{hse} mechanisms, and it is a good
 illustration of compositional attacks.

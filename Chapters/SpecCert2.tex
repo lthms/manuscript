@@ -531,12 +531,12 @@ predicate on \( L \times H(S) \times H(S) \), then the transition relation of
       \( \func{Write} \)
       & \( \var{pa} \in \texttt{PhysAddr} \) \newline
         \( v \in \texttt{Val} \)
-      & A core \IO to write at physical address \( \var{pa} \) the value \(
+      & A core \IO to write to physical address \( \var{pa} \) the value \(
         v \) \\
       \hline
       \( \func{Read} \)
       & $\var{pa} \in \texttt{PhysAddr}$
-      & A core \IO to read at physical address \( \var{pa} \). \\
+      & A core \IO to read from physical address \( \var{pa} \). \\
       \hline
       \( \func{SetCacheStrat} \)
       & \( \var{pa} \in \texttt{PhysAddr} \) \newline
@@ -1482,7 +1482,7 @@ cases to consider:
     \setshortdef{h.\func{cache}(\func{index}(h.\func{core}.\func{pc})).\func{owner}}
   \]
   %
-  In this context, we can conclude thanks to the requirements 4.
+  In this context, we can conclude using the requirements 4.
 \item Otherwise, the instruction is read from the underlying memories.
   %
   More precisely, by the definition of \func{dispatch}
@@ -1517,7 +1517,7 @@ $I_{\mathtt{bios}}$.
 Indeed, we cannot discard the case where a cache line tagged with a physical
 address which belongs to the SMRAM is owned by an untrusted software component.
 %
-In this scenario, we could even exhibit a trace which complies the \ac{hse}
+In this scenario, we could even exhibit a trace which complies to the \ac{hse}
 mechanism, but does not satisfy the security policy.
 
 \subsection{On SpecCert Machine-Checked Proofs}
@@ -1588,7 +1588,7 @@ Figure~\ref{fig:freespec:entrypoint}.
   address \( \var{pa} \) may or may not be present in the cache
   (Figure~\ref{fig:freespec:remember}, line 14).
   %
-  We explore both alternatives thanks to the \texttt{destruct} tactic (see the
+  We explore both alternatives using the \texttt{destruct} tactic (see the
   two simplified goals in Figure~\ref{fig:freespec:destruct}, more particularly
   on the value of \texttt{a\_3}).
   %
@@ -1613,14 +1613,14 @@ Figure~\ref{fig:freespec:entrypoint}.
 
   \inputminted{coq}{Listings/DestructGoal2.v}
 
-  \caption{Exploring alternative paths thanks to the \texttt{destruct} tactics}
+  \caption{Exploring alternative paths using the \texttt{destruct} tactics}
   \label{fig:freespec:destruct}
 \end{figure}
 
 \begin{figure}
   \inputminted{coq}{Listings/InvGoals.v}
 
-  \caption{Intermediary statements, generated thanks to \texttt{assert} tactics}
+  \caption{Intermediary statements, generated using \texttt{assert} tactics}
   \label{fig:freespec:assert}
 \end{figure}
 
@@ -1744,14 +1744,14 @@ as free software\,\cite{letan2016speccertcode}.
 %
 The resulting project counts around 4\,500 lines of code, and we believe this
 represents a manageable size regarding the complexity of the model, but whether
-our approach remains applicable for a large-scale models remained to be proven
+our approach remains applicable for a large-scale models remains to be proven
 when we first released this work in 2016.
 %
 Subsequently, we have experimented increasing the scope of {\scshape Minx86}
 with pagination, and have been convinced that considering the whole architecture
 at once ---as it is done in {\scshape Minx86}--- would not scale properly.
 
-The next Part of this thesis focuses on this problematic.
+The next Part of this thesis focuses on this challenge.
 %
 We propose another approach to enable modular verification of complex systems
-composed of interconnected components, as hardware architectures definitely are.
+composed of interconnected components, such as hardware architectures.

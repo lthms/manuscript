@@ -16,7 +16,7 @@ of the development.
 \subsection{Definition}
 
 A hardware model in our formalism is a tuple
-$\langle S, L_S, L_H, \rightarrow \rangle$
+$\langle H, L_S, L_H, \rightarrow \rangle$
 (Definition~\ref{def:speccert:model}), with $\rightarrow$ being a predicate on
 $H \times (L_S \uplus L_H) \times H$.
 
@@ -33,7 +33,7 @@ called \texttt{label}.
 
 \inputminted[gobble=2,firstline=4,lastline=8]{coq}{Listings/SpecCert.v}
 
-Because $S$, $L_S$ and $L_H$ are \emph{implicit} arguments of our development, a
+Because $H$, $L_S$ and $L_H$ are \emph{implicit} arguments of our development, a
 hardware model can be reduced to its relation transition~$\rightarrow$.
 
 \inputminted[gobble=2,firstline=10,lastline=12]{coq}{Listings/SpecCert.v}
@@ -100,68 +100,96 @@ Finally, we use the \texttt{is\_trace} predicate to define \texttt{trace m}.
 
 \subsection{Security Policies}
 
+We have detailed how security policies can be modeled in transition systems, in
+Subsection~\ref{subsec:sota:security} for the general case and in
+Subsection~\ref{subsec:speccert:security} for the context of HSE mechanisms.
+%
+A security policies is either a predicate on sets of traces, a predicate on
+traces or a predicate on transitions.
+%
+In this development, we keep the former (predicate on sets of traces) as the
+generic definition.
+
 \inputminted[gobble=2,firstline=90,lastline=92]{coq}{Listings/SpecCert.v}
+
+We then express the two latter (predicate on traces, predicate on transitions)
+as particular sub-cases of this generic definition.
 
 \inputminted[gobble=2,firstline=94,lastline=99]{coq}{Listings/SpecCert.v}
 
-\inputminted[gobble=2,firstline=101,lastline=109]{coq}{Listings/SpecCert.v}
+\inputminted[gobble=2,firstline=101,lastline=110]{coq}{Listings/SpecCert.v}
 
 \section{HSE Mechanisms}
 
+We now give a formal definition of HSE mechanisms in the Coq theorem prover,
+as stated in Definition~\ref{def:speccert:hse}.
+
 \subsection{Definition and HSE Laws}
 
-\inputminted[gobble=2,firstline=111,lastline=120]{coq}{Listings/SpecCert.v}
+First, we introduce an helper definition to easily express predicates of the
+form \( l \in L_S \Rightarrow P(l) \).
 
-\inputminted[gobble=2,firstline=122,lastline=138]{coq}{Listings/SpecCert.v}
+\inputminted[gobble=2,firstline=112,lastline=121]{coq}{Listings/SpecCert.v}
+
+The \texttt{if\_software} allows for hiding the pattern matching that is
+necessary to express various definitions of our theory of HSE mechanisms.
+%
+Then, we define a type for HSE mechanisms using the Coq \texttt{Record} syntax,
+as follows.
+
+\inputminted[gobble=2,firstline=123,lastline=139]{coq}{Listings/SpecCert.v}
+
+By making the two laws part of the HSE mechanisms definition, we ensure that no
+inconsistent HSE mechanism can be defined in Coq.
 
 \subsection{Trace Compliance}
 
-\inputminted[gobble=2,firstline=146,lastline=155]{coq}{Listings/SpecCert.v}
+\inputminted[gobble=2,firstline=147,lastline=156]{coq}{Listings/SpecCert.v}
 
-\inputminted[gobble=2,firstline=157,lastline=181]{coq}{Listings/SpecCert.v}
+\inputminted[gobble=2,firstline=158,lastline=182]{coq}{Listings/SpecCert.v}
 
-\inputminted[gobble=2,firstline=183,lastline=228]{coq}{Listings/SpecCert.v}
+\inputminted[gobble=2,firstline=184,lastline=229]{coq}{Listings/SpecCert.v}
 
 \subsection{HSE Mechanism Correctness}
 
-\inputminted[gobble=2,firstline=230,lastline=235]{coq}{Listings/SpecCert.v}
+\inputminted[gobble=2,firstline=231,lastline=236]{coq}{Listings/SpecCert.v}
 
-\inputminted[gobble=2,firstline=237,lastline=259]{coq}{Listings/SpecCert.v}
+\inputminted[gobble=2,firstline=238,lastline=260]{coq}{Listings/SpecCert.v}
 
 \subsection{HSE Mechanism Composition}
 
-\inputminted[gobble=2,firstline=400,lastline=406]{coq}{Listings/SpecCert.v}
+\inputminted[gobble=2,firstline=401,lastline=407]{coq}{Listings/SpecCert.v}
 
-\inputminted[gobble=2,firstline=408,lastline=421]{coq}{Listings/SpecCert.v}
+\inputminted[gobble=2,firstline=409,lastline=422]{coq}{Listings/SpecCert.v}
 
-\inputminted[gobble=2,firstline=422,lastline=426]{coq}{Listings/SpecCert.v}
+\inputminted[gobble=2,firstline=423,lastline=427]{coq}{Listings/SpecCert.v}
 
-\inputminted[gobble=2,firstline=427,lastline=442]{coq}{Listings/SpecCert.v}
+\inputminted[gobble=2,firstline=428,lastline=443]{coq}{Listings/SpecCert.v}
 
-\inputminted[gobble=2,firstline=470,lastline=510]{coq}{Listings/SpecCert.v}
+\inputminted[gobble=2,firstline=471,lastline=511]{coq}{Listings/SpecCert.v}
 
-\inputminted[gobble=2,firstline=512,lastline=535]{coq}{Listings/SpecCert.v}
+\inputminted[gobble=2,firstline=513,lastline=536]{coq}{Listings/SpecCert.v}
 
 \section{Case Study: Code Injection Policies}
 
 \subsection{The Software Stack}
 
-\inputminted[gobble=2,firstline=261,lastline=268]{coq}{Listings/SpecCert.v}
+\inputminted[gobble=2,firstline=262,lastline=269]{coq}{Listings/SpecCert.v}
 
-\inputminted[gobble=2,firstline=270,lastline=271]{coq}{Listings/SpecCert.v}
+\inputminted[gobble=2,firstline=271,lastline=272]{coq}{Listings/SpecCert.v}
 
 \subsection{Code Injection}
 
-\inputminted[gobble=2,firstline=337,lastline=343]{coq}{Listings/SpecCert.v}
+\inputminted[gobble=2,firstline=338,lastline=344]{coq}{Listings/SpecCert.v}
 
 \subsection{Code Injection Policies}
 
-\inputminted[gobble=2,firstline=273,lastline=280]{coq}{Listings/SpecCert.v}
+\inputminted[gobble=2,firstline=274,lastline=281]{coq}{Listings/SpecCert.v}
 
-\inputminted[gobble=2,firstline=345,lastline=351]{coq}{Listings/SpecCert.v}
+\inputminted[gobble=2,firstline=346,lastline=352]{coq}{Listings/SpecCert.v}
 
-\inputminted[gobble=2,firstline=537,lastline=543]{coq}{Listings/SpecCert.v}
+\inputminted[gobble=2,firstline=538,lastline=544]{coq}{Listings/SpecCert.v}
 
-\inputminted[gobble=2,firstline=545,lastline=552]{coq}{Listings/SpecCert.v}
+\inputminted[gobble=2,firstline=546,lastline=553]{coq}{Listings/SpecCert.v}
 
-\inputminted[gobble=2,firstline=554,lastline=582]{coq}{Listings/SpecCert.v}
+\inputminted[gobble=2,firstline=555,lastline=583]{coq}{Listings/SpecCert.v}

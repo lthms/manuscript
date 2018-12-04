@@ -1,5 +1,5 @@
 Section SpecCert.
-  Variables (S Ls Lh:  Type).
+  Variables (H Ls Lh:  Type).
 
   Inductive label :=
   | Software
@@ -9,20 +9,20 @@ Section SpecCert.
 
   Definition model
     : Type :=
-    S -> label -> S -> Prop.
+    H -> label -> H -> Prop.
 
   Definition from
-             (tr:  S * label * S)
-    : S :=
+             (tr:  H * label * H)
+    : H :=
     fst (fst tr).
 
   Definition to
-             (tr:  S * label * S)
-    : S :=
+             (tr:  H * label * H)
+    : H :=
    snd tr.
 
   Definition labelled
-             (tr:  S * label * S)
+             (tr:  H * label * H)
     : label :=
     snd (fst tr).
 
@@ -51,7 +51,7 @@ Section SpecCert.
   Definition init
              {m:  model}
              (seq:  sequence (transition m))
-    : S :=
+    : H :=
     match seq with
     | Ssingleton tr
       => from #tr
@@ -100,7 +100,8 @@ Section SpecCert.
 
   Definition safety_property
              {m:     model}
-             (prop:  transition m -> Prop) :=
+             (prop:  transition m -> Prop)
+    : security_policy m :=
     fun (traces:  trace m -> Prop)
     => forall (rho:  trace m),
         traces rho
@@ -115,44 +116,44 @@ Section SpecCert.
     match l with
     | Software l
       => P l
-    | Hardware _
+    | _
       => True
     end.
 
   Record HSE
          (m:  model) :=
-    { software:   Type
-    ; tcb:        software -> Prop
-    ; context:    S -> software
-    ; inv:        S -> Prop
-    ; behaviour:  S -> Ls -> Prop
-    ; law_1:      forall (tr:  transition m),
-        inv (from #tr)
+    { software:      Type
+    ; tcb:           software -> Prop
+    ; context:       H -> software
+    ; hardware_req:  H -> Prop
+    ; software_req:  H -> Ls -> Prop
+    ; law_1:         forall (tr:  transition m),
+        hardware_req (from #tr)
         -> if_software (labelled #tr)
-                       (behaviour (from #tr))
-        -> inv (to #tr)
-    ; law_2:      forall (tr:  transition m),
+                       (software_req (from #tr))
+        -> hardware_req (to #tr)
+    ; law_2:         forall (tr:  transition m),
         ~ tcb (context (from #tr))
         -> if_software (labelled #tr)
-                       (behaviour (from #tr))
+                       (software_req (from #tr))
     }.
 
   Arguments software [m] (_).
   Arguments tcb [m] (_).
   Arguments context [m] (_ _).
-  Arguments inv [m] (_ _).
-  Arguments behaviour [m] (_ _ _).
+  Arguments hardware_req [m] (_ _).
+  Arguments software_req [m] (_ _ _).
 
   Definition compliant_trace
              {m:    model}
              (hse:  HSE m)
              (rho:   trace m)
     : Prop :=
-    inv hse (init #rho)
+    hardware_req hse (init #rho)
     /\ forall (tr:  transition m),
       trans #rho tr
       -> if_software (labelled #tr)
-                     (behaviour hse (from #tr)).
+                     (software_req hse (from #tr)).
 
   Lemma compliant_trace_rec
         {m:      model}
@@ -165,17 +166,17 @@ Section SpecCert.
       -> compliant_trace hse (exist rho Hrho).
   Proof.
     intros Hcomp.
-    inversion Hcomp as [Hinv Hbehaviour].
+    inversion Hcomp as [Hhard_req Hsoftware_req].
     constructor.
     + inversion Hcons; subst.
       cbn.
       rewrite <- Heq.
       apply law_1.
-      ++ apply Hinv.
-      ++ apply Hbehaviour.
+      ++ apply Hhard_req.
+      ++ apply Hsoftware_req.
          left; reflexivity.
     + intros tr Htrans.
-      apply Hbehaviour.
+      apply Hsoftware_req.
       right.
       exact Htrans.
   Qed.
@@ -187,38 +188,38 @@ Section SpecCert.
       compliant_trace hse rho
       -> forall (tr:  transition m),
         trans #rho tr
-        -> inv hse (from #tr)
-           /\ inv hse (to #tr).
+        -> hardware_req hse (from #tr)
+           /\ hardware_req hse (to #tr).
   Proof.
     induction rho as [rho Hrho].
     induction rho.
     + intros Hcomp.
-      inversion Hcomp as [Hinv Hbehaviour].
-      cbn in Hinv.
-      cbn in Hbehaviour.
+      inversion Hcomp as [Hhard_req Hsoftware_req].
+      cbn in Hhard_req.
+      cbn in Hsoftware_req.
       intros tr Htrans.
       split.
       ++ cbn in Htrans.
          rewrite Htrans.
-         exact Hinv.
+         exact Hhard_req.
       ++ apply law_1.
          +++ cbn in Htrans.
              rewrite Htrans.
-             exact Hinv.
-         +++ apply Hbehaviour.
+             exact Hhard_req.
+         +++ apply Hsoftware_req.
              exact Htrans.
     + intros Hcomp.
-      inversion Hcomp as [Hinv Hbehaviour].
-      cbn in Hinv.
-      cbn in Hbehaviour.
+      inversion Hcomp as [Hhard_req Hsoftware_req].
+      cbn in Hhard_req.
+      cbn in Hsoftware_req.
       intros tr Htrans.
       cbn in Htrans.
       destruct Htrans as [Htrans|Htrans].
       ++ rewrite Htrans.
-         split; [exact Hinv |].
+         split; [exact Hhard_req |].
          apply law_1.
-         exact Hinv.
-         apply Hbehaviour.
+         exact Hhard_req.
+         apply Hsoftware_req.
          left; reflexivity.
       ++ inversion Hrho; subst.
          apply (IHrho Hrec).
@@ -241,9 +242,9 @@ Section SpecCert.
     : (forall (rho:  trace m)
               (tr:   transition m),
           trans #rho tr
-          -> inv hse (from #tr)
+          -> hardware_req hse (from #tr)
           -> if_software (labelled #tr)
-                         (behaviour hse (from #tr))
+                         (software_req hse (from #tr))
           -> p tr)
       -> correct_hse hse (safety_property p).
   Proof.
@@ -267,8 +268,8 @@ Section SpecCert.
   | App (n:  nat)
     : software_stack.
 
-  Variables (ss_context:  S -> software_stack)
-            (ss_fetched:  S -> label -> (software_stack -> Prop)).
+  Variables (ss_context:  H -> software_stack)
+            (ss_fetched:  H -> label -> (software_stack -> Prop)).
 
   Inductive stack_ge
     : software_stack -> software_stack -> Prop :=
@@ -414,10 +415,11 @@ Section SpecCert.
              ; context  := context hse1
              ; tcb := fun x
                       => tcb hse1 x \/ tcb hse2 (eq_rect _ id x _ _)
-             ; inv := fun x
-                      => inv hse1 x /\ inv hse2 x
-             ; behaviour := fun x l
-                            => behaviour hse1 x l /\ behaviour hse2 x l
+             ; hardware_req := fun x
+                               => hardware_req hse1 x
+                                  /\ hardware_req hse2 x
+             ; software_req := fun x l
+                            => software_req hse1 x l /\ software_req hse2 x l
              |}).
     + intros tr [Hi1 Hi2] Hsoft.
       split; apply law_1; [exact Hi1 | idtac | exact Hi2 | idtac];
@@ -484,12 +486,12 @@ Section SpecCert.
     + constructor.
       ++ apply Hct.
       ++ intros tr Htr.
-         destruct Hct as [_H H].
+         destruct Hct as [_H Hct].
          assert (Hres:  if_software (labelled #tr)
                                     (fun l : Ls =>
-                                       behaviour hse_1 (from #tr) l
-                                       /\ behaviour hse_2 (from #tr) l))
-           by (apply H; exact Htr).
+                                       software_req hse_1 (from #tr) l
+                                       /\ software_req hse_2 (from #tr) l))
+           by (apply Hct; exact Htr).
          induction tr as [tr _H2]; induction tr as [[h l] h'].
          induction l; auto.
          cbn in *.
@@ -497,12 +499,12 @@ Section SpecCert.
     + constructor.
       ++ apply Hct.
       ++ intros tr Htr.
-         destruct Hct as [_H H].
+         destruct Hct as [_H Hct].
          assert (Hres:  if_software (labelled #tr)
                                     (fun l : Ls =>
-                                       behaviour hse_1 (from #tr) l
-                                       /\ behaviour hse_2 (from #tr) l))
-           by (apply H; exact Htr).
+                                       software_req hse_1 (from #tr) l
+                                       /\ software_req hse_2 (from #tr) l))
+           by (apply Hct; exact Htr).
          induction tr as [tr _H2]; induction tr as [[h l] h'].
          induction l; auto.
          cbn in *.
@@ -525,10 +527,10 @@ Section SpecCert.
       split; [apply H1|apply H2].
     + intros tr Htrans.
       assert (Hb1:  if_software (labelled #tr)
-                                (behaviour hse_1 (from #tr)))
+                                (software_req hse_1 (from #tr)))
         by (apply H1; exact Htrans).
       assert (Hb2:  if_software (labelled #tr)
-                                (behaviour hse_2 (from #tr)))
+                                (software_req hse_2 (from #tr)))
         by (apply H2; exact Htrans).
       induction tr as [tr _H3]; induction tr as [[h l] h'].
       induction l; cbn in *; auto.

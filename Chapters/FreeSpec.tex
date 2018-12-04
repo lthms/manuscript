@@ -92,7 +92,7 @@ The complexity of a transition postcondition has a direct impact on the proofs
 we have to construct in order to verify the correctness of a given system, as
 the number of case scenarios to consider increases quickly.
 %
-We have already given an insight of this in
+We have already given an indication of this in
 Subsection~\ref{subsec:speccert2:bioshsedef} when we explained the structure of
 the proof that \( \Delta_{\mathtt{bios}} \) complies with the second \ac{hse}
 law.
@@ -408,7 +408,7 @@ with respect to the temporary violation problem.
 We now give an overview of the formalism that we propose to overcome {\scshape
   Minx86} limitations, both to model and verify a hardware architecture.
 %
-Its key concept is to focus of components \emph{interfaces}, where an interface
+Its key concept is to focus on components \emph{interfaces}, where an interface
 is a set of interdependent operations which are expected to produce a value.
 
 \paragraph{Interface and Component.}
@@ -427,7 +427,7 @@ interface, and sends computational  requests to other components it is connected
   Figure~\ref{fig:freespec:interfacedriven} pictures an alternative model to
   {\scshape Minx86}.
   %
-  The software components interact with the core \emph{via} its instructions
+  The software components interact with the core \emph{via} its instruction
   set.
   %
   When the core needs to read from or write to memory, it leverages its cache.
@@ -515,12 +515,12 @@ results.
   \item We forbid unprivileged \IO targeting the SMRAM when the \texttt{SMRAMC}
     register is not correctly configured.
   \item We guarantee that a processor which read the content of the SMRAM while
-    in \ac{smm} will get what it has previously written to \ac{smm} while in
+    in \ac{smm} will get what it has previously written to SMRAM while in
     \ac{smm}.
   \end{itemize}
   %
   We can prove the memory controller is correct with respect to this abstract
-  specification, meaning if the processor satisfy the requirements over users,
+  specification, meaning if the processor satisfies the requirements over users,
   then the results computed by the memory controller satisfy the requirements
   over results.
 
@@ -963,7 +963,7 @@ of a syntax tree and model atomic computations; $\func{Pure}$ models local
 computations, whereas $\func{Request}$ models deferring a computational request
 to a handler and waiting for its result.
 %
-On the other hand, $\func{Bind}$ (usually written thanks to the infix operator
+On the other hand, $\func{Bind}$ (usually written with the infix operator
 $\bind$) models the control flow of a program with effects, like the abstract
 syntax tree nodes would.
 %
@@ -1071,7 +1071,7 @@ terms of computation results and state updates.
   means the SMRAM protection is either activated ($\val{on}$) or deactivated
   ($\val{off}$).
 
-  One the one hand, the \func{Lock} effect will activate the isolation mechanism
+  On the one hand, the \func{Lock} effect will activate the isolation mechanism
   of the memory controller, setting its state to $\val{on}$.
   %
   On the other hand, the effects constructed with $\func{Read}_{\mathrm{MCH}}$
@@ -1370,7 +1370,7 @@ compliance.
   operational semantics $\sigma'$ when it realizes a correct program $\rho$,
   that is
   \[
-    \sigma \models A[\omega] \wedge A[\omega] \modelssym \rho \Rightarrow
+    \sigma \models A[\omega]\,\wedge\,A[\omega] \modelssym \rho\,\Rightarrow\,
     \sigma' \models A[\omega'] \text{ where }\func{run}_{\func{step}}(\sigma,
     \rho, \omega) = (x, \sigma', \omega')
   \]
@@ -1447,8 +1447,8 @@ when a component is being used by more than one component.
 
 \paragraph{Predicate of Synchronization.}
 %
-The most favorable scenario consists of one component which uses many
-components, and is only used by one other component, \emph{e.g.} in
+The simplest scenario consists of one component which uses many components, and
+is only used by one other component, \emph{e.g.} in
 Figure~\ref{fig:freespec:memc}.
 %
 Let $\I$ and $\J$ be two interfaces and let $C$ be a component with a set of
@@ -1468,7 +1468,7 @@ extension one specific component.
 As a consequence, we define an abstract specification $A_{\J}$ to generalize our
 statement and abstracting away $\sigma_j$.
 %
-We now need to prove it exists $\omega_j \in \Omega_{\J}$ such that given an
+We now need to prove there exists $\omega_j \in \Omega_{\J}$ such that given an
 operational semantics $\sigma_j$ which complies with $A_{\J}$ in accordance with
 $\omega_j$, the operational semantics derived from $C$, $s$ and $\sigma_j$
 complies with $A_{\I}$ in accordance with $\omega_i$, that is
@@ -1573,7 +1573,7 @@ This represents an important constraint, but matches realistic use cases.
 %
 In particular, when hardware components interfaces are very large, two
 components are likely to use different classes of effects that do not interfere
-with each others.
+with each other.
 
 \begin{definition}[Predicate of Neutrality]
   Let $\I$ be an interface and

@@ -436,7 +436,7 @@ where \( \rho_{[..n]} \) is the subtrace made with the \( n \) first elements of
 
   \begin{proof}
     Again, the proof proceeds by case enumeration with respect to the definition
-    of \( R \), and after unfolding \( \eta \), we conclude thanks to the
+    of \( R \), and after unfolding \( \eta \), we conclude using the
     definition of \( \wedge \) and \( \vee \).
     %
     \hfill \( \square \)
@@ -582,7 +582,7 @@ and \emph{logical operators}, such as conjunction \( \wedge \), disjunction
 %
 First-order logic\,\cite{smullyan2012fol} extends propositional logic with
 \emph{predicates}, that is parameterized formulas that can be true or false with
-respect to the applied terms, and \emph{quantifier}, such as \( \forall \) (all
+respect to the applied terms, and \emph{quantifiers}, such as \( \forall \) (all
 values) or \( \exists \) (there exists a value).
 
 SAT solvers\,\cite{malik2009boolean} (\emph{e.g.}
@@ -597,7 +597,8 @@ satisfiability modulo theories).
 %
 Hence, in the theory of natural numbers, an SMT solver will find that the formula
 \( x > y \wedge x + y = 5 \) is satisfiable with \( \{ x = 3, y = 2 \} \), but
-the formula \( x - y = 0 \wedge x \neq y \) is not.
+the formula \( x - y = 0 \wedge x \neq y \) is not satisfiable by any
+assignment.
 %
 The lack of quantifiers has a significant impact on formula expressiveness
 which reduces its applicability when it comes to formal verification,
@@ -615,7 +616,7 @@ Modal logic\,\cite{chagrov1997modal} is a formal system which extends
 first-order logic with modal operators.
 %
 Temporal logic forms a family of modal logic systems, including \emph{e.g.}
-Linear Temporal Logic (LTL)\,\cite{sistla1985ltl} and Computation Logic Tree
+Linear Temporal Logic (LTL)\,\cite{sistla1985ltl} and Computation Tree Logic
 (CTL)\,\cite{clarke1981ctl}.
 %
 Examples of LTL modular operators are \( \square P \) (\( P \) is always true),
@@ -632,7 +633,7 @@ becomes true).
 Temporal logic operators allow for reasoning about propositions over time on
 infinite traces.
 %
-Temporal logic formulas are commonly verified thanks to model checkers,
+Temporal logic formulas are commonly verified using model checkers,
 \emph{e.g.}  NuSMV\,\cite{cimatti2002nusmv}, SPIN\,\cite{holzmann1997spin} or
 TLA+\,\cite{lamport2002tla}.
 
@@ -670,7 +671,7 @@ Interactive theorem provers (\emph{e.g.}  Coq\,\cite{coq},
 Isabelle/HOL\,\cite{nipkow2002isabelle}, Atelier B\,\cite{abrial2005b}, or more
 recently Lean\,\cite{de2015lean}) are based on higher-order logic.
 
-We leverage a higher-order logic to propose our formal theory of \ac{hse}
+We leverage a higher-order logic to define our formal theory of \ac{hse}
 mechanisms.
 %
 This allows us to reason about high-level properties implying \ac{hse}
@@ -743,7 +744,7 @@ of the model.
 For instance, memories are commonly limited to the \ac{dram}.
 
 This approach works well when software components use a limited amount of
-hardware features, as applications typically do, and to reason about correction
+hardware features, as applications typically do, and to reason about correctness
 with respect to functional specifications.
 %
 It is less suitable in the context of \ac{hse} mechanisms verification with
@@ -779,8 +780,8 @@ mature verified implementation of a microkernel.
 %
 A implementation in C of the kernel is proven correct with respect to a
 functional implementation modeled in the Isabelle/HOL theorem prover, and the
-authors have proven this model correctly enforce security policies including
-integrity and confidentiality policies\,\cite{klein2009sel4}.
+authors have proven this model correctly enforces that security policies
+including integrity and confidentiality policies\,\cite{klein2009sel4}.
 %
 In practice, the hardware model focuses on \ac{mmu}, cache and interrupt
 handling.
@@ -836,8 +837,9 @@ protection against cache-timing attacks, notoriously harder to reason with.
 %
 The use of labeled transitions to reason about the interactions of the guests
 with the underlying system ---made of the hardware architecture and the
-hypervisor--- constitutes an interesting approach that we could for modeling the
-interactions between the software components and the hardware model.
+hypervisor--- constitutes an interesting approach that we could leverage for
+modeling the interactions between the software components and the hardware
+model.
 %
 However, the focus of VirtCert remains very specific and does not cover the
 \ac{smm} and related mechanisms.
@@ -864,12 +866,12 @@ process\,\cite{reid2016armv8}.
 %
 The formal specification of ARMv8 architectures is written in a dedicated
 language called ARM Specification Language, and has been intensively validated
-against the ARM internal conformance testsuit.
+against the ARM internal conformance testsuite..
 %
-Once the level of trustworthiness of the ASL specifications have been asserted,
-they have been able to leverage them to formally verify properties of the
-hardware architectures, \emph{e.g.} by compiling them to a subset of Verilog
-accepted by commercial Verilog model checkers\,\cite{reid2016end}.
+Once the level of trustworthiness of the ASL specifications have been
+established, they have been able to leverage them to formally verify properties
+of the hardware architectures, \emph{e.g.} by compiling them to a subset of
+Verilog accepted by commercial Verilog model checkers\,\cite{reid2016end}.
 %
 The result of these efforts is being made available on the ARM website, in
 addition to regular informal specifications\,\cite{arm2018aspec}.
@@ -890,7 +892,7 @@ translation step.
 The \ac{xom} microprocessor architecture maintains separate so-called
 \emph{compartments} for applications\,\cite{lie2000architectural}.
 %
-A \ac{xom} \ac{cpu} keeps track of each memory location owner, thanks to a
+A \ac{xom} \ac{cpu} keeps track of each memory location owner, using a
 tagging mechanism, and supposedly prevents an application from accessing a
 memory location it does not own.
 %
@@ -979,7 +981,7 @@ Our theory is characterized by defining a model of the hardware architecture,
 specifying restrictions over the model, and verifying the resulting restricted
 model.
 %
-This methodology is easily expressed in a theorem prover higher logic.
+This methodology is easily expressed in a higher logic.
 %
 Hardware verification by means of theorem provers has proven to be a practical
 alternative to model checking\,\cite{vijayaraghavan2015modular,choi2017kami}.
@@ -1045,7 +1047,7 @@ assume-guarantee\,\cite{pnueli1985ag} or
 rely-guarantee\,\cite{jones1983tentative} paradigms, as an interesting solution
 to tackle these challenges\,\cite{garg2010compositional,heyman2012securemodel}.
 %
-In the context of computational reasoning, the system is broken down into
+In the context of compositional reasoning, the system is broken down into
 several components.
 %
 A component \( C \) is proven to enforce a guarantee \( G \) as long as an
@@ -1471,7 +1473,7 @@ objective.
 % Thomas: l'intro dit maintenant clairement qu'on veut faire du
 % assume-guarantee.
 %
-We now give an overview of computational reasoning framework implemented in
+We now give an overview of compositional reasoning framework implemented in
 theorem provers.
 
 \subsection{Compositional Reasoning for Theorem Provers}
@@ -1484,7 +1486,7 @@ However, modeling the system is only a first step before the verification
 process.
 %
 To our surprise, compositional reasoning in presence of interconnected
-components has been less regarding in the theorem proving community, with the
+components has been less studied in the theorem proving community, with the
 notable exception of the B-method\,\cite{abrial2005b}.
 
 Several
@@ -1530,7 +1532,7 @@ provers, such as Coq.
 In particular, B is similar to imperative languages, when {\scshape Gallina} is
 a purely functional language.
 
-To the extend of our knowledge, the \texttt{Coq.io} framework, developed and
+To the extent of our knowledge, the \texttt{Coq.io} framework, developed and
 released by Guillaume Claret \emph{et al.}\,\cite{claret2015coqiowww},
 represents the closest approach for Coq, but it addresses a different problem
 ---that is reasoning about functional programs in presence of side effects--- and
@@ -1545,7 +1547,7 @@ system to access the file stored in a hard drive and makes this content
 available in its address space.
 
 Modeling side effects in pure programming language, such as Haskell or {\scshape
-  Gallina}, is usually achieved thanks to
+  Gallina}, is usually achieved with
 monads\,\cite{wadler1990comprehending,jones2005io}, and \texttt{Coq.io} is no
 exception.
 %

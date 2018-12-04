@@ -36,12 +36,12 @@ tuples, that is tuples where each component is a field identified by a name.
 \]
 
 For $x \in T$, we write $x.\func{field_1}$ for selecting the value of the
-\func{field_1} field. We write $x \{ \func{field_1} \leftarrow a \}$ for
-updating the value of the field \func{field_1}. As a consequence,
+\func{field_1} field. We write $x \{ \func{field_i} \leftarrow a \}$ for
+updating the value of the field \func{field_i}. As a consequence,
 %
 \[
-  x \{ \func{field_1} \leftarrow a \}.\func{field}_k = \begin{cases}
-    a & \text{if } k = 1 \\
+  x \{ \func{field_i} \leftarrow a \}.\func{field}_k = \begin{cases}
+    a & \text{if } k = i \\
     x.\func{field}_k & \text{otherwise}
   \end{cases}
 \]

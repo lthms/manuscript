@@ -634,7 +634,7 @@ security policy.
 The SMRAM cache poisoning attack disclosed in 2009 is a good illustration of
 that eventuality\,\cite{duflot2009smram,wojtczuk2009smram}.
 %
-Back then, the isolation of the \ac{bios} at runtime is enforced by only two
+Back then, the isolation of the \ac{bios} at runtime was enforced by only two
 hardware mechanisms: the \ac{smm} of the \ac{cpu} and the \texttt{SMRAMC}
 register of the memory controller.
 %
@@ -654,7 +654,7 @@ However, between the core and the memory controller lies the cache, as pictured
 in Figure~\ref{fig:speccert:smram}.
 %
 If the cache does not implement an access control mechanism to protect its
-copies of the SMRAM content ---as it was the case in 2009--- it can be used to
+copies of the SMRAM content ---as was the case in 2009--- it can be used to
 circumvent the protection enforced by the memory controller.
 %
 As we have already explained in Subsection~\ref{subsec:usecase:hse:smram}, the
@@ -965,7 +965,7 @@ compliant traces \( \mathcal{C}(\Delta_1 \sqcap \Delta_2) \) contains only
 traces where the execution of trusted software components are secure, but is not
 able to serve its purpose.
 %
-We advocate that a similar situation can occur for a single \ac{hse} mechanism.
+We argue that a similar situation can occur for a single \ac{hse} mechanism.
 %
 Because we aimed to focus on hardware architecture verification in the context
 of this thesis, we therefore did not investigate further the compatibility of
@@ -1224,7 +1224,7 @@ Definition~\ref{definition:speccert:isolation} is not enforced by one but
 several HSE mechanisms.
 %
 Therefore, we break it down to more specific security sub-policies, with each
-one being enforced thanks to a dedicated \ac{hse} mechanism.
+one being enforced by a dedicated \ac{hse} mechanism.
 
 \begin{definition}[BIOS Code Injection Sub-policy]
   \label{def:speccert:biospol}
