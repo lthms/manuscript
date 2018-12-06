@@ -144,11 +144,60 @@ inconsistent HSE mechanism can be defined in Coq.
 
 \subsection{Trace Compliance}
 
+Whether trusted software components are correctly implementing a given HSE
+mechanism is a safety property.
+%
+This means we shall be able to derive a subset of ``compliant'' traces from the
+set of traces of the hardware model.
+
 \inputminted[gobble=2,firstline=147,lastline=156]{coq}{Listings/SpecCert.v}
 
-\inputminted[gobble=2,firstline=158,lastline=182]{coq}{Listings/SpecCert.v}
+This definition is straightforward: for a trace to be compliant with a HSE
+mechanism, its initial state has to comply with the hardware requirements of
+this HSE mechanism, while its software transitions (that is, transitions whose
+label belongs to \texttt{Ls}) satisfy its software requirements.
 
-\inputminted[gobble=2,firstline=184,lastline=229]{coq}{Listings/SpecCert.v}
+In order to prove Lemma~\ref{lemma:speccert:hseinv}, we first prove an
+intermediary result: if a trace complies with a given HSE mechanism, then the
+subtrace obtained by removing its first transition also complies with the HSE
+mechanism.
+
+\inputminted[gobble=2,firstline=158,lastline=180]{coq}{Listings/SpecCert.v}
+
+We use this result in the proof by induction of
+Lemma~\ref{lemma:speccert:hseinv}.
+%
+This lemma states that hardware requirements of a consistent HSE mechanism are
+invariant of compliant traces.
+
+\inputminted[gobble=2,firstline=184,lastline=196]{coq}{Listings/SpecCert.v}
+
+The first case to consider is the singleton sequence, with only one transition.
+%
+By definition of the compliant traces, the initial state of the only transition
+of \texttt{rho} satisfies \texttt{hardware\_req}.
+%
+In order to prove that the resulting state of this transition also satisfies the
+requirement, we use the second law of the HSE mechanism definition.
+
+\inputminted[gobble=2,firstline=197,lastline=202]{coq}{Listings/SpecCert.v}
+
+The second case to consider is a trace made of an initial transition and a
+subtrace.
+%
+If we consider the associated set of transitions, we again have to cover two
+cases.
+%
+Firstly, we can focus on the initial transition: the proof is here very similar to
+the singleton trace case.
+%
+Secondly, we can consider the transitions of the subtrace.
+%
+We know this subtrace is compliant using \texttt{compliant\_trace\_rec}.
+%
+This allows us to use the induction hypothesis, and conclude the proof.
+
+\inputminted[gobble=2,firstline=203,lastline=215]{coq}{Listings/SpecCert.v}
 
 \subsection{HSE Mechanism Correctness}
 
@@ -156,40 +205,134 @@ inconsistent HSE mechanism can be defined in Coq.
 
 \inputminted[gobble=2,firstline=238,lastline=260]{coq}{Listings/SpecCert.v}
 
-\subsection{HSE Mechanism Composition}
+\subsection{HSE Mechanisms Composition}
+
+HSE mechanisms are commonly implemented simultaneously by modern software stack,
+\emph{e.g.} an operating system configures the MMU, while firmware relies on the
+processor \ac{smm}.
+%
+In Chapter~\ref{chapter:speccert}, we have proposed a first definition of a
+composition operator to reason about such scenario.
+%
+This operator is not total, and cannot compose together two arbitrary HSE
+mechanisms.
+%
+Therefore, we first define a predicate to determine whether two HSE mechanisms
+are compatible or not.
+%
+The main characteristic of two compatible HSE mechanisms is that they use the
+same hardware-software mapping.
+%
+Maybe surprisingly for the reader unfamiliar with Coq, this property is not
+straightforward to express and requires to use the \texttt{eq\_rect} function
+which allows to cast a value from one type to another, assuming we can provide
+the proof both types are actually the same.
 
 \inputminted[gobble=2,firstline=401,lastline=407]{coq}{Listings/SpecCert.v}
 
-\inputminted[gobble=2,firstline=409,lastline=422]{coq}{Listings/SpecCert.v}
+We then define the \texttt{HSE\_cap} function (\texttt{cap} being the name of
+the latex command of \( \cap\)) which computes the composition of two compatible
+HSE mechanisms. We rely on the \texttt{refine} tactic in order to write the
+proofs of consistency of the resulting HSE mechanisms in interactive mode (using
+tactics) rather than providing them directly.
 
-\inputminted[gobble=2,firstline=423,lastline=427]{coq}{Listings/SpecCert.v}
+\inputminted[gobble=2,firstline=409,lastline=423]{coq}{Listings/SpecCert.v}
 
-\inputminted[gobble=2,firstline=428,lastline=443]{coq}{Listings/SpecCert.v}
+As stated in Definition~\ref{def:speccert:laws}, we prove the first law...
 
-\inputminted[gobble=2,firstline=471,lastline=511]{coq}{Listings/SpecCert.v}
+\inputminted[gobble=2,firstline=429,lastline=445]{coq}{Listings/SpecCert.v}
 
-\inputminted[gobble=2,firstline=513,lastline=536]{coq}{Listings/SpecCert.v}
+... and the second law (\texttt{hardware\_req} is an invariant).
+
+\inputminted[gobble=2,firstline=424,lastline=428]{coq}{Listings/SpecCert.v}
+
+We discussed in Chapter~\ref{chapter:speccert} several expected properties of
+the HSE mechanisms composition.
+%
+For instance, Lemma~\ref{lemma:speccert:compinter} states that the set of
+compliant traces of the compositions of two HSE mechanisms is the intersection
+of the sets of compliant traces of each HSE mechanism.
+%
+In the context of this development, sets are defined as predicates (this is a
+common approach in Coq).
+%
+To reason about sets equality, we prove two complementary implications.
+%
+Firstly, a compliant trace of the composition of two HSE mechanisms necessarily
+complies with one of these HSE mechanisms.
+%
+The associated proof covers both possible cases whose are very
+similar\,\footnote{We can probably reduce the size of the proof by half with
+  some refactoring.}.
+
+\inputminted[gobble=2,firstline=472,lastline=512]{coq}{Listings/SpecCert.v}
+
+Secondly, a trace which complies with one of two HSE mechanisms also complies
+with their composition.
+
+\inputminted[gobble=2,firstline=514,lastline=537]{coq}{Listings/SpecCert.v}
 
 \section{Case Study: Code Injection Policies}
 
 \subsection{The Software Stack}
 
+We consider the execution of a software stack made of a firmware component, an
+operating system and an infinite number of applications, identified by a natural
+number.
+
 \inputminted[gobble=2,firstline=262,lastline=269]{coq}{Listings/SpecCert.v}
+
+Because our hardware model is left as a parameter of this Coq development, so
+are the hardware-software mapping and transition-software mapping that we will
+use to reason about the software stack execution.
 
 \inputminted[gobble=2,firstline=271,lastline=272]{coq}{Listings/SpecCert.v}
 
 \subsection{Code Injection}
 
+Implementing the code injection definition
+(Definition~\ref{def:speccert:tempering}) in Gallina is straightforward.
+
 \inputminted[gobble=2,firstline=338,lastline=344]{coq}{Listings/SpecCert.v}
 
 \subsection{Code Injection Policies}
 
+The code injection policy is defined against a relation between software
+components to tell whether one software component is authorized to perform a
+code injection against another.
+%
+In our case, we implement this relation as an inductive predicate.
+
 \inputminted[gobble=2,firstline=274,lastline=281]{coq}{Listings/SpecCert.v}
+
+The proof that the relation \texttt{stack\_ge} is anti-symmetric relies on a
+case analysis.
+
+\inputminted[gobble=2,firstline=586,lastline=592]{coq}{Listings/SpecCert.v}
+
+Using these components, the definition of the code injection policy is simple.
 
 \inputminted[gobble=2,firstline=346,lastline=352]{coq}{Listings/SpecCert.v}
 
-\inputminted[gobble=2,firstline=538,lastline=544]{coq}{Listings/SpecCert.v}
+As explained in Chapter~\ref{chapter:speccert}, the enforcement of such security
+policy is done thanks to several HSE mechanisms.
+%
+A first HSE mechanism will be devoted to enforce that the \ac{bios} remains
+isolated from the rest of the software stack, that is it will enforce the
+following policy:
 
-\inputminted[gobble=2,firstline=546,lastline=553]{coq}{Listings/SpecCert.v}
+\inputminted[gobble=2,firstline=539,lastline=545]{coq}{Listings/SpecCert.v}
 
-\inputminted[gobble=2,firstline=555,lastline=583]{coq}{Listings/SpecCert.v}
+A second HSE mechanism will be devoted to enforce that the applications cannot
+perform illegitimate code injection against the rest of the software stack, that
+is:
+
+\inputminted[gobble=2,firstline=547,lastline=554]{coq}{Listings/SpecCert.v}
+
+Our theory of HSE mechanisms allows us to prove that the concurrent
+implementation of two HSE mechanisms ---correct with respect to their respective
+security policy--- is a sufficient condition for the enforcement ``global'' code
+injection policies, by demonstrating that the composition of these HSE
+mechanisms is correct with respect to the code injection policy.
+
+\inputminted[gobble=2,firstline=556,lastline=583]{coq}{Listings/SpecCert.v}

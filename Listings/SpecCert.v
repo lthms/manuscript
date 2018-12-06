@@ -127,12 +127,12 @@ Section SpecCert.
     ; context:       H -> software
     ; hardware_req:  H -> Prop
     ; software_req:  H -> Ls -> Prop
-    ; law_1:         forall (tr:  transition m),
+    ; law_2:         forall (tr:  transition m),
         hardware_req (from #tr)
         -> if_software (labelled #tr)
                        (software_req (from #tr))
         -> hardware_req (to #tr)
-    ; law_2:         forall (tr:  transition m),
+    ; law_1:         forall (tr:  transition m),
         ~ tcb (context (from #tr))
         -> if_software (labelled #tr)
                        (software_req (from #tr))
@@ -155,31 +155,31 @@ Section SpecCert.
       -> if_software (labelled #tr)
                      (software_req hse (from #tr)).
 
-  Lemma compliant_trace_rec
-        {m:      model}
-        (hse:    HSE m)
-        (x:      transition m)
-        (rho:    sequence (transition m))
-        (Hcons:  is_trace (Scons x rho))
-        (Hrho:   is_trace rho)
+  Fact compliant_trace_rec
+       {m:      model}
+       (hse:    HSE m)
+       (x:      transition m)
+       (rho:    sequence (transition m))
+       (Hcons:  is_trace (Scons x rho))
+       (Hrho:   is_trace rho)
     : compliant_trace hse (exist (Scons x rho) Hcons)
       -> compliant_trace hse (exist rho Hrho).
   Proof.
-    intros Hcomp.
-    inversion Hcomp as [Hhard_req Hsoftware_req].
+    intros [Hhard_req Hsoftware_req].
     constructor.
     + inversion Hcons; subst.
       cbn.
       rewrite <- Heq.
-      apply law_1.
+      apply law_2.
       ++ apply Hhard_req.
       ++ apply Hsoftware_req.
          left; reflexivity.
     + intros tr Htrans.
       apply Hsoftware_req.
-      right.
-      exact Htrans.
+      right; exact Htrans.
   Qed.
+
+
 
   Lemma hse_inv_enforcement
         {m:    model}
@@ -191,42 +191,42 @@ Section SpecCert.
         -> hardware_req hse (from #tr)
            /\ hardware_req hse (to #tr).
   Proof.
-    induction rho as [rho Hrho].
+    intros [rho Hrho] Hcomp tr Htrans.
+    cbn in *.
     induction rho.
-    + intros Hcomp.
-      inversion Hcomp as [Hhard_req Hsoftware_req].
-      cbn in Hhard_req.
-      cbn in Hsoftware_req.
-      intros tr Htrans.
+    + inversion Hcomp as [Hhard_req Hsoftware_req].
       split.
-      ++ cbn in Htrans.
-         rewrite Htrans.
-         exact Hhard_req.
-      ++ apply law_1.
-         +++ cbn in Htrans.
-             rewrite Htrans.
-             exact Hhard_req.
-         +++ apply Hsoftware_req.
-             exact Htrans.
-    + intros Hcomp.
-      inversion Hcomp as [Hhard_req Hsoftware_req].
-      cbn in Hhard_req.
-      cbn in Hsoftware_req.
-      intros tr Htrans.
-      cbn in Htrans.
-      destruct Htrans as [Htrans|Htrans].
+      ++ now rewrite Htrans.
+      ++ apply law_2.
+         +++ now rewrite Htrans.
+         +++ now apply Hsoftware_req.
+    + destruct Htrans as [Htrans|Htrans].
       ++ rewrite Htrans.
-         split; [exact Hhard_req |].
-         apply law_1.
-         exact Hhard_req.
-         apply Hsoftware_req.
-         left; reflexivity.
+         split; [apply Hcomp |].
+         apply law_2.
+         +++ apply Hcomp.
+         +++ apply Hcomp.
+             left; reflexivity.
       ++ inversion Hrho; subst.
          apply (IHrho Hrec).
          +++ eapply compliant_trace_rec.
              apply Hcomp.
          +++ apply Htrans.
   Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   Definition correct_hse
              {m:    model}
@@ -422,7 +422,7 @@ Section SpecCert.
                             => software_req hse1 x l /\ software_req hse2 x l
              |}).
     + intros tr [Hi1 Hi2] Hsoft.
-      split; apply law_1; [exact Hi1 | idtac | exact Hi2 | idtac];
+      split; apply law_2; [exact Hi1 | idtac | exact Hi2 | idtac];
          induction tr as [tr Htr]; induction tr as [[h l] h'];
          induction l; auto;
          apply Hsoft.
@@ -431,8 +431,8 @@ Section SpecCert.
       destruct Htcb as [Ht1 Ht2].
       inversion Hcompatible as [Hsoftware Hcontext].
       rewrite <- Hcontext in Ht2.
-      apply law_2 in Ht1.
-      apply law_2 in Ht2.
+      apply law_1 in Ht1.
+      apply law_1 in Ht2.
       induction tr as [tr Htr];
         induction tr as [[h l] h'];
         induction l; auto.
@@ -581,5 +581,13 @@ Section SpecCert.
     + apply (Hos rho Hro tr Htrans) in Htamper.
       rewrite Htamper.
       constructor.
+  Qed.
+
+  Lemma stack_ge_anti_sym
+        (x y:  software_stack)
+    : stack_ge x y -> stack_ge y x -> x = y.
+  Proof.
+    intros H1 H2.
+    inversion H1; subst; inversion H2; subst; try reflexivity.
   Qed.
 End SpecCert.
