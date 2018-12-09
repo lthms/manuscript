@@ -28,7 +28,7 @@ them.
 
 \inputminted[gobble=2,firstline=2,lastline=2]{coq}{Listings/SpecCert.v}
 
-The disjoint union $\uplus$ is modelled through a dedicated inductive type
+The disjoint union $\uplus$ is modeled through a dedicated inductive type
 called \texttt{label}.
 
 \inputminted[gobble=2,firstline=4,lastline=8]{coq}{Listings/SpecCert.v}
@@ -41,7 +41,7 @@ hardware model can be reduced to its relation transition~$\rightarrow$.
 A transition in our formalism is a tuple $(h, l, h')$ which satisfies the
 transition relation of the model.
 %
-Subsets in Coq are usually modelled using so-called sigma-type:
+Subsets in Coq are usually modeled using so-called sigma-type:
 %
 \texttt{\{ x: A | P x \}} is the subset of elements of type \texttt{A} which
 satisfy the predicate \texttt{P}.
@@ -51,7 +51,7 @@ using a sigma-type.
 
 \inputminted[gobble=2,firstline=29,lastline=32]{coq}{Listings/SpecCert.v}
 
-Because {\textsc Gallina} is a strongly-typed language, manipulating a sigma-type
+Because {\textsc Gallina} is a strongly typed language, manipulating a sigma-type
 can be cumbersome.
 %
 In particular, there is no implicit coercion from \texttt{\{ x: A | P x \}} to
@@ -87,7 +87,7 @@ sigma-type.
 To define the predicate to distinguish between valid and invalid trace, we first
 define \texttt{init} and \texttt{trace} as functions on \texttt{sequence
   (transition~m)}, with the set of transitions returned by \texttt{trace} is
-modelled as a predicate on \texttt{transition m}.
+modeled as a predicate on \texttt{transition m}.
 %
 Then, we define \texttt{is\_trace}, an inductive predicate on \texttt{sequence
   (transition~m)}.
@@ -104,7 +104,7 @@ We have detailed how security policies can be modeled in transition systems, in
 Subsection~\ref{subsec:sota:security} for the general case and in
 Subsection~\ref{subsec:speccert:security} for the context of HSE mechanisms.
 %
-A security policies is either a predicate on sets of traces, a predicate on
+A security policy is either a predicate on sets of traces, a predicate on
 traces or a predicate on transitions.
 %
 In this development, we keep the former (predicate on sets of traces) as the
@@ -112,7 +112,7 @@ generic definition.
 
 \inputminted[gobble=2,firstline=90,lastline=92]{coq}{Listings/SpecCert.v}
 
-We then express the two latter (predicate on traces, predicate on transitions)
+We then express the two latter (predicate on traces, and predicate on transitions)
 as particular sub-cases of this generic definition.
 
 \inputminted[gobble=2,firstline=94,lastline=99]{coq}{Listings/SpecCert.v}
@@ -134,7 +134,7 @@ form \( l \in L_S \Rightarrow P(l) \).
 The \texttt{if\_software} allows for hiding the pattern matching that is
 necessary to express various definitions of our theory of HSE mechanisms.
 %
-Then, we define a type for HSE mechanisms using the Coq \texttt{Record} syntax,
+Then, we define a type of HSE mechanisms using the Coq \texttt{Record} syntax,
 as follows.
 
 \inputminted[gobble=2,firstline=123,lastline=139]{coq}{Listings/SpecCert.v}
@@ -256,7 +256,7 @@ of the sets of compliant traces of each HSE mechanism.
 In the context of this development, sets are defined as predicates (this is a
 common approach in Coq).
 %
-To reason about sets equality, we prove two complementary implications.
+To reason about set equality, we prove two complementary implications.
 %
 Firstly, a compliant trace of the composition of two HSE mechanisms necessarily
 complies with one of these HSE mechanisms.
@@ -305,7 +305,7 @@ In our case, we implement this relation as an inductive predicate.
 
 \inputminted[gobble=2,firstline=274,lastline=281]{coq}{Listings/SpecCert.v}
 
-The proof that the relation \texttt{stack\_ge} is anti-symmetric relies on a
+The proof that the relation \texttt{stack\_ge} is antisymmetric relies on a
 case analysis.
 
 \inputminted[gobble=2,firstline=586,lastline=592]{coq}{Listings/SpecCert.v}
