@@ -18,6 +18,17 @@ fast:
 
 latexmk:
 	latexmk main.tex -shell-escape -pdf -quiet
+	gs -dCompatibilityLevel=1.4 \
+	   -dPDFSETTINGS="/screen" \
+	   -dCompressFonts=true \
+	   -dSubsetFonts=true \
+	   -dNOPAUSE \
+	   -dBATCH \
+	   -sDEVICE=pdfwrite \
+	   -sOutputFile=final.pdf \
+	   -c ".setpdfwrite <</NeverEmbed [ ]>> setdistillerparams" \
+	   -f main.pdf
+
 
 chap-%.tex: Chapters/%.tex chapter.tex.template
 	@m4 -D __TEX_INPUT_FILE__=$< chapter.tex.template > $@
