@@ -88,6 +88,12 @@ backgroundcolor=PineGreen!2}
 \usepackage{tikz}
 \usetikzlibrary{positioning, arrows, intersections, fit, matrix, shapes}
 
+\usepackage{expl3}
+\ExplSyntaxOn
+\tex_let:D \c_minus_one \scan_stop:
+\int_const:Nn \c_minus_one {-1}
+\ExplSyntaxOff
+
 \usepackage[index=true]{acro}
 
 \input{abbrev}
